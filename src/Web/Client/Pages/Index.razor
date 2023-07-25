@@ -1,3 +1,22 @@
 ﻿@page "/"
+@attribute [Authorize]
+
+@inject HttpClient _httpClient
 
 <h1>Hello, world!</h1>
+
+@foreach(var item in _items)
+{
+    <MudText>
+        @item
+    </MudText>
+}
+
+@code {
+    private List<int> _items = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _items = await _httpClient.GetFromJsonAsync<List<int>>("test");
+    }
+}
