@@ -5,8 +5,10 @@
 
 @inject NavigationManager _navigationManager
 @inject IConfiguration _configuration
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject HttpClient _httpClient
 
-<RemoteAuthenticatorView Action="@Action">
+<RemoteAuthenticatorView Action="@Action" OnLogInSucceeded="OnLogIn">
     <LogOut>
         @{
             var authority = (string)_configuration["Auth0:Authority"];
@@ -20,4 +22,11 @@
 @code {
     [Parameter]
     public required string Action { get; set; }
+
+    private async Task OnLogIn(RemoteAuthenticationState _)
+    {
+        var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var userId = state.User.Claims.First(x => x.Type == "sub").Value;
+        await _httpClient.PostAsync($"users/try-register/{userId}", null);
+    }
 }
