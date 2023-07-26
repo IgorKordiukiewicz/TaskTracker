@@ -15,12 +15,12 @@ public static class Endpoints
         {
             var result = await mediator.Send(new IsUserRegisteredQuery(userAuthenticationId));
             return result.ToHttpResult();
-        });
+        }).RequireAuthorization();
 
         app.MapPost("users/register", async (IMediator mediator, [FromBody] UserRegistrationDto model) =>
         {
             var result = await mediator.Send(new RegisterUserCommand(model));
-            return result.ToHttpResult();
+            return result.ToHttpResult(201);
         }).RequireAuthorization();
     }
 
