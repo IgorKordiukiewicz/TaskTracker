@@ -1,10 +1,19 @@
 ﻿using Application.Data;
 using Domain;
+using FluentValidation;
 using MediatR;
 
 namespace Application.Features.Users;
 
-public record RegisterUserCommand(string AuthenticationId) : IRequest; // TODO: Add FluentValidation
+public record RegisterUserCommand(string AuthenticationId) : IRequest;
+
+internal class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
+{
+    public RegisterUserCommandValidator()
+    {
+        RuleFor(x => x.AuthenticationId).NotEmpty();
+    }
+}
 
 internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand>
 {
