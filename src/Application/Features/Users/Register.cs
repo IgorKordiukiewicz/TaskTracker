@@ -3,10 +3,12 @@ using Shared.Dtos;
 using Domain;
 using FluentValidation;
 using MediatR;
+using FluentResults;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Users;
 
-public record RegisterUserCommand(UserRegistrationDto Model) : IRequest;
+public record RegisterUserCommand(UserRegistrationDto Model) : IRequest<Result>;
 
 internal class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
 {
@@ -17,7 +19,7 @@ internal class RegisterUserCommandValidator : AbstractValidator<RegisterUserComm
     }
 }
 
-internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand>
+internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result>
 {
     private readonly AppDbContext _dbContext; // TODO: Use repositories for write-side
 
@@ -26,11 +28,18 @@ internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand>
         _dbContext = dbContext;
     }
 
-    public async Task Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
+        if(await _dbContext.Users.AnyAsync(x => x.AuthenticationId == request.Model.AuthenticationId))
+        {
+            return Result.Fail(new Error("User is already registered in the database."));
+        }
+
         var user = User.Create(request.Model.AuthenticationId, request.Model.Name);
 
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync();
+
+        return Result.Ok();
     }
 }

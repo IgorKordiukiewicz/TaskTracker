@@ -30,11 +30,16 @@
     {
         var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var userId = state.User.Claims.First(x => x.Type == "sub").Value;
-        var userName = state.User.Identity?.Name ?? string.Empty;
+        var isRegistered = await (await _httpClient.GetAsync($"users/is-registered/{userId}")).Content.ReadFromJsonAsync<bool>();
+        if(isRegistered)
+        {
+            return;
+        }
 
+        var userName = state.User.Identity?.Name ?? string.Empty;
         var model = new UserRegistrationDto(userId, userName);
         var json = JsonSerializer.Serialize(model);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        await _httpClient.PostAsync($"users/try-register", content);
+        await _httpClient.PostAsync($"users/register", content);
     }
 }

@@ -1,11 +1,12 @@
 ﻿using Application.Data;
+using FluentResults;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Users;
 
-public record IsUserRegisteredQuery(string AuthenticationId) : IRequest<bool>;
+public record IsUserRegisteredQuery(string AuthenticationId) : IRequest<Result<bool>>;
 
 internal class IsUserRegisteredQueryValidator : AbstractValidator<IsUserRegisteredQuery>
 {
@@ -15,7 +16,7 @@ internal class IsUserRegisteredQueryValidator : AbstractValidator<IsUserRegister
     }
 }
 
-internal class IsUserRegisteredHandler : IRequestHandler<IsUserRegisteredQuery, bool>
+internal class IsUserRegisteredHandler : IRequestHandler<IsUserRegisteredQuery, Result<bool>>
 {
     private readonly AppDbContext _dbContext;
 
@@ -24,7 +25,7 @@ internal class IsUserRegisteredHandler : IRequestHandler<IsUserRegisteredQuery, 
         _dbContext = dbContext;
     }
 
-    public async Task<bool> Handle(IsUserRegisteredQuery request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(IsUserRegisteredQuery request, CancellationToken cancellationToken)
     {
         return await _dbContext.Users.AnyAsync(x => x.AuthenticationId == request.AuthenticationId);
     }
