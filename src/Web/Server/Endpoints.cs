@@ -1,4 +1,5 @@
-﻿using Application.Features.Users;
+﻿using Application.Errors;
+using Application.Features.Users;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
