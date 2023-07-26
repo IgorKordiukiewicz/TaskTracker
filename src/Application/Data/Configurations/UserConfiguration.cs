@@ -14,6 +14,10 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(100);
 
+        builder.Property(x => x.Name)
+            .IsRequired()
+            .HasMaxLength(100);
+
         builder.HasIndex(x => x.AuthenticationId)
             .IsUnique();
     }
