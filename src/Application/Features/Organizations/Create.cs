@@ -15,7 +15,7 @@ internal class CreateOrganizationCommandValidator : AbstractValidator<CreateOrga
     public CreateOrganizationCommandValidator()
     {
         RuleFor(x => x.Model.OwnerId).NotEmpty();
-        RuleFor(x => x.Model.Name).NotEmpty();
+        RuleFor(x => x.Model.Name).NotEmpty().MaximumLength(100);
     }
 }
 

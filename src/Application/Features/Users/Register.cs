@@ -15,7 +15,7 @@ internal class RegisterUserCommandValidator : AbstractValidator<RegisterUserComm
     public RegisterUserCommandValidator()
     {
         RuleFor(x => x.Model.AuthenticationId).NotEmpty();
-        RuleFor(x => x.Model.Name).NotEmpty();
+        RuleFor(x => x.Model.Name).NotEmpty().MaximumLength(100);
     }
 }
 
