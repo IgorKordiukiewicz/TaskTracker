@@ -1,4 +1,5 @@
 ﻿using Application.Errors;
+using Application.Features.Organizations;
 using Application.Features.Users;
 using FluentResults;
 using MediatR;
@@ -21,6 +22,12 @@ public static class Endpoints
         {
             var result = await mediator.Send(new RegisterUserCommand(model));
             return result.ToHttpResult(201);
+        }).RequireAuthorization();
+
+        app.MapPost("organizations", async (IMediator mediator, [FromBody] CreateOrganizationDto model) =>
+        {
+            var result = await mediator.Send(new CreateOrganizationCommand(model));
+            return result.ToHttpResult(); // TODO: Return 201 with ID
         }).RequireAuthorization();
     }
 

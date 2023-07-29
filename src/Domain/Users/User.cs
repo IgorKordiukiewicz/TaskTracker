@@ -1,6 +1,6 @@
 ﻿using Domain.Common;
 
-namespace Domain;
+namespace Domain.Users;
 
 public class User : Entity<Guid>
 {
