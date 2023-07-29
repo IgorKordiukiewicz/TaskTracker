@@ -5,6 +5,7 @@ using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Dtos;
+using System.Security.Claims;
 
 namespace Web.Server;
 
@@ -28,6 +29,13 @@ public static class Endpoints
         {
             var result = await mediator.Send(new CreateOrganizationCommand(model));
             return result.ToHttpResult(); // TODO: Return 201 with ID
+        }).RequireAuthorization();
+
+        app.MapGet("organizations", async ([FromServices] IMediator mediator, [FromServices] IHttpContextAccessor contextAccessor) =>
+        {
+            var userAuthenticationId = contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var result = await mediator.Send(new GetOrganizationsForUserQuery(userAuthenticationId));
+            return result.ToHttpResult();
         }).RequireAuthorization();
     }
 
