@@ -5,7 +5,7 @@ namespace Domain.Organizations;
 // TODO:
 // Organization has many projects, project has one organization
 // Project has many project members (created from organization member)?
-public class Organization : Entity<Guid>
+public class Organization : Entity<Guid>, IAggregateRoot
 {
     public string Name { get; private set; } = string.Empty;
 
