@@ -1,10 +1,4 @@
-﻿using Application.Data;
-using FluentResults;
-using FluentValidation;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-
-namespace Application.Features.Users;
+﻿namespace Application.Features.Users;
 
 public record IsUserRegisteredQuery(string AuthenticationId) : IRequest<Result<bool>>;
 

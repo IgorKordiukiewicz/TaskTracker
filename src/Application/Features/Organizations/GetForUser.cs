@@ -1,11 +1,4 @@
-﻿using Application.Data;
-using FluentResults;
-using FluentValidation;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Shared.ViewModels;
-
-namespace Application.Features.Organizations;
+﻿namespace Application.Features.Organizations;
 
 // TODO: Add GlobalUsings
 public record GetOrganizationsForUserQuery(string UserAuthenticationId) : IRequest<Result<OrganizationsForUserVM>>;
