@@ -1,0 +1,10 @@
+﻿@page "/org/{organizationId:guid}"
+
+<h2>
+    @OrganizationId
+</h2>
+
+@code {
+    [Parameter]
+    public Guid OrganizationId { get; init; }
+}

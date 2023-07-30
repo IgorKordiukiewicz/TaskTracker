@@ -2,15 +2,18 @@
 @attribute [Authorize]
 
 @inject HttpClient _httpClient
+@inject NavigationManager _navManager
 
 @if(_organizations is not null)
 {
-    @foreach (var organization in _organizations.Organizations)
-    {
-        <h5>
-            @organization.Name
-        </h5>
-    }
+    <MudPaper>
+        <MudList Clickable="true">
+            @foreach (var organization in _organizations.Organizations)
+            {
+                <MudListItem Text="@organization.Name" OnClick="() => SelectOrganization(organization.Id)" />
+            }
+        </MudList>
+    </MudPaper>
 }
 
 @code {
@@ -20,5 +23,10 @@
     {
         var response = await _httpClient.GetAsync($"organizations");
         _organizations = await response.Content.ReadFromJsonAsync<OrganizationsForUserVM>();
+    }
+
+    private void SelectOrganization(Guid organizationId)
+    {
+        _navManager.NavigateTo($"/org/{organizationId}");
     }
 }
