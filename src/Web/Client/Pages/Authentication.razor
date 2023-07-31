@@ -26,11 +26,18 @@
     [Parameter]
     public required string Action { get; set; }
 
+    private RequestHandler _requestHandler = null!; // TODO: Inject request handler?
+
+    protected override async Task OnInitializedAsync()
+    {
+        _requestHandler = new(_httpClient);
+    }
+
     private async Task OnLogIn(RemoteAuthenticationState _)
     {
         var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var userId = state.User.Claims.First(x => x.Type == "sub").Value;
-        var isRegistered = await (await _httpClient.GetAsync($"users/is-registered/{userId}")).Content.ReadFromJsonAsync<bool>();
+        var isRegistered = await _requestHandler.GetAsync<bool>($"users/is-registered/{userId}");
         if(isRegistered)
         {
             return;
@@ -38,8 +45,6 @@
 
         var userName = state.User.Identity?.Name ?? string.Empty;
         var model = new UserRegistrationDto(userId, userName);
-        var json = JsonSerializer.Serialize(model);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        await _httpClient.PostAsync($"users/register", content);
+        await _requestHandler.PostAsync("users/register", model);
     }
 }

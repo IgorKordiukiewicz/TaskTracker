@@ -17,12 +17,14 @@
 }
 
 @code {
+    private RequestHandler _requestHandler = null!;
+
     private OrganizationsForUserVM? _organizations;
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await _httpClient.GetAsync($"organizations");
-        _organizations = await response.Content.ReadFromJsonAsync<OrganizationsForUserVM>();
+        _requestHandler = new(_httpClient);
+        _organizations = await _requestHandler.GetAsync<OrganizationsForUserVM>("organizations");
     }
 
     private void SelectOrganization(Guid organizationId)
