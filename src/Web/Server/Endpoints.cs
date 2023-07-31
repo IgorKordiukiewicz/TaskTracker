@@ -52,6 +52,12 @@ public static class Endpoints
             var result = await mediator.Send(new GetOrganizationsForUserQuery(userAuthenticationId));
             return result.ToHttpResult();
         }).RequireAuthorization();
+
+        builder.MapPost("invitations/create", async (IMediator mediator, [FromBody] CreateOrganizationInvitationDto model) =>
+        {
+            var result = await mediator.Send(new CreateOrganizationInvitationCommand(model));
+            return result.ToHttpResult();
+        }).RequireAuthorization();
     }
 
     private static IResult ToHttpResult<T>(this Result<T> requestResult)

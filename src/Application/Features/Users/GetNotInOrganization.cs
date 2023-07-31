@@ -25,6 +25,7 @@ internal class GetUsersNotInOrganizationHandler : IRequestHandler<GetUsersNotInO
         // TODO: Possible performance bottleneck?
         // Create a view which has a list of (UserId, UserName, OrganizationId) ?
         var unavailableUserIds = _dbContext.Organizations
+            .Include(x => x.Members)
             .Where(x => x.Id == request.OrganizationId)
             .SelectMany(x => x.Members)
             .Select(x => x.UserId);

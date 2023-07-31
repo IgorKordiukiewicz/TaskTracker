@@ -20,14 +20,13 @@ internal class OrganizationConfiguration : IEntityTypeConfiguration<Organization
             .HasForeignKey(x => x.OwnerId)
             .IsRequired();
 
-        builder.OwnsMany(x => x.Members, ownedBuilder =>
-        {
-            ownedBuilder.HasKey(xx => xx.Id);
+        builder.HasMany(x => x.Members)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Restrict);
 
-            ownedBuilder.HasOne<User>()
-                .WithMany()
-                .HasForeignKey(xx => xx.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
+        builder.HasMany(x => x.Invitations)
+            .WithOne()
+            .HasForeignKey(x => x.OrganizationId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

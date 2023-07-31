@@ -46,12 +46,13 @@
             return;
         }
 
+        // TODO: Create UrlBuilder
         _usersSearchVM = await _requestHandler.GetAsync<UsersSearchVM>($"users/not-in-org?organizationId={OrganizationId}&searchValue={_inviteUserSearch}");
     }
 
     private async Task InviteUser(Guid userId)
     {
-        var model = new CreateOrganizationInvitationDto(OrganizationId, Guid.Empty);
-        await _requestHandler.PostAsync("organizations/create-invitation", model);
+        var model = new CreateOrganizationInvitationDto(OrganizationId, userId);
+        await _requestHandler.PostAsync("organizations/invitations/create", model);
     }
 }

@@ -25,7 +25,9 @@ internal class GetOrganizationsForUserHandler : IRequestHandler<GetOrganizations
         var userId = (await _dbContext.Users.FirstOrDefaultAsync(x => x.AuthenticationId == request.UserAuthenticationId))?.Id 
             ?? Guid.Empty;
 
-        var organizations = await _dbContext.Organizations.Where(x => x.Members.Any(xx => xx.UserId == userId))
+        var organizations = await _dbContext.Organizations
+            .Include(x => x.Members)
+            .Where(x => x.Members.Any(xx => xx.UserId == userId))
             .Select(x => new OrganizationForUserVM()
             {
                 Id = x.Id,
