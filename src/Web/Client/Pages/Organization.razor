@@ -1,10 +1,57 @@
 ﻿@page "/org/{organizationId:guid}"
 
+@inject HttpClient _httpClient
+
 <h2>
     @OrganizationId
 </h2>
 
+<MudPaper>
+    <div class="d-flex">
+        <MudTextField Label="Invite user" HelperText="Enter name" @bind-Value="_inviteUserSearch" />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SearchUser()">Search</MudButton>
+    </div>
+    @if(_usersSearchVM is not null)
+    {
+        <MudList Clickable="true">
+            @foreach (var user in _usersSearchVM.Users)
+            {
+                <MudListItem Text="@user.Name" OnClick="() => InviteUser(user.Id)" />
+            }
+        </MudList>
+    }
+    
+</MudPaper>
+
+
 @code {
     [Parameter]
     public Guid OrganizationId { get; init; }
+
+    private RequestHandler _requestHandler = null!;
+
+    private string _inviteUserSearch = string.Empty;
+    private UsersSearchVM? _usersSearchVM;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _requestHandler = new(_httpClient);
+    }
+
+    private async Task SearchUser()
+    {
+        if (string.IsNullOrWhiteSpace(_inviteUserSearch))
+        {
+            return;
+        }
+
+        _usersSearchVM = await _requestHandler.GetAsync<UsersSearchVM>($"users/not-in-org?organizationId={OrganizationId}&searchValue={_inviteUserSearch}");
+    }
+
+    private async Task InviteUser(Guid userId)
+    {
+        var model = new CreateOrganizationInvitationDto(OrganizationId, Guid.Empty);
+        await _requestHandler.PostAsync("organizations/create-invitation", model);
+    }
 }

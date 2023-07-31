@@ -25,6 +25,12 @@ public static class Endpoints
             return result.ToHttpResult(201);
         }).RequireAuthorization();
 
+        app.MapGet("users/not-in-org", async (IMediator mediator, Guid organizationId, string searchValue) =>
+        {
+            var result = await mediator.Send(new GetUsersNotInOrganizationQuery(organizationId, searchValue));
+            return result.ToHttpResult();
+        });
+
         app.MapPost("organizations", async (IMediator mediator, [FromBody] CreateOrganizationDto model) =>
         {
             var result = await mediator.Send(new CreateOrganizationCommand(model));
