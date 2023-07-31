@@ -13,31 +13,40 @@ public static class Endpoints
 {
     public static void AddEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("users/is-registered/{userAuthenticationId}", async (IMediator mediator, string userAuthenticationId) =>
+        app.MapGroup("users").AddUsersEndpoints();
+        app.MapGroup("organizations").AddOrganizationsEndpoints();
+    }
+
+    private static void AddUsersEndpoints(this RouteGroupBuilder builder)
+    {
+        builder.MapGet("is-registered/{userAuthenticationId}", async (IMediator mediator, string userAuthenticationId) =>
         {
             var result = await mediator.Send(new IsUserRegisteredQuery(userAuthenticationId));
             return result.ToHttpResult();
         }).RequireAuthorization();
 
-        app.MapPost("users/register", async (IMediator mediator, [FromBody] UserRegistrationDto model) =>
+        builder.MapPost("register", async (IMediator mediator, [FromBody] UserRegistrationDto model) =>
         {
             var result = await mediator.Send(new RegisterUserCommand(model));
             return result.ToHttpResult(201);
         }).RequireAuthorization();
 
-        app.MapGet("users/not-in-org", async (IMediator mediator, Guid organizationId, string searchValue) =>
+        builder.MapGet("not-in-org", async (IMediator mediator, Guid organizationId, string searchValue) =>
         {
             var result = await mediator.Send(new GetUsersNotInOrganizationQuery(organizationId, searchValue));
             return result.ToHttpResult();
-        });
+        }).RequireAuthorization();
+    }
 
-        app.MapPost("organizations", async (IMediator mediator, [FromBody] CreateOrganizationDto model) =>
+    private static void AddOrganizationsEndpoints(this RouteGroupBuilder builder)
+    {
+        builder.MapPost("/", async (IMediator mediator, [FromBody] CreateOrganizationDto model) =>
         {
             var result = await mediator.Send(new CreateOrganizationCommand(model));
             return result.ToHttpResult(); // TODO: Return 201 with ID
         }).RequireAuthorization();
 
-        app.MapGet("organizations", async ([FromServices] IMediator mediator, [FromServices] IHttpContextAccessor contextAccessor) =>
+        builder.MapGet("/", async ([FromServices] IMediator mediator, [FromServices] IHttpContextAccessor contextAccessor) =>
         {
             var userAuthenticationId = contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await mediator.Send(new GetOrganizationsForUserQuery(userAuthenticationId));
