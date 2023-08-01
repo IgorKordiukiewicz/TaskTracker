@@ -57,12 +57,13 @@
 
     private async Task AcceptInvitation(Guid invitationId)
     {
-        Console.WriteLine("Invitation accepted");
+        var model = new UpdateOrganizationInvitationDto(invitationId);
+        await _requestHandler.PostAsync("organizations/invitations/accept", model);
     }
 
     private async Task DeclineInvitation(Guid invitationId)
     {
-        var model = new DeclineOrganizationInvitationDto(invitationId);
+        var model = new UpdateOrganizationInvitationDto(invitationId);
         await _requestHandler.PostAsync("organizations/invitations/decline", model);
     }
 }

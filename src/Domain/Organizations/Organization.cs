@@ -33,8 +33,7 @@ public class Organization : Entity<Guid>, IAggregateRoot
             OwnerId = ownerId,
         };
 
-        var member = OrganizationMember.Create(ownerId);
-        result._members.Add(member);
+        _ = result.AddMember(ownerId);
 
         return result;
     }
@@ -59,19 +58,49 @@ public class Organization : Entity<Guid>, IAggregateRoot
 
     public Result DeclineInvitation(Guid invitationId)
     {
+        var invitationResult = GetInvitation(invitationId);
+        if (invitationResult.IsFailed)
+        {
+            return Result.Fail(invitationResult.Errors);
+        }
+
+        invitationResult.Value.Decline();
+        return Result.Ok();
+    }
+
+    public Result<OrganizationMember> AcceptInvitation(Guid invitationId)
+    {
+        var invitationResult = GetInvitation(invitationId);
+        if(invitationResult.IsFailed)
+        {
+            return Result.Fail<OrganizationMember>(invitationResult.Errors);
+        }
+
+        var invitation = invitationResult.Value;
+        invitation.Accept();
+        return AddMember(invitation.UserId);
+    }
+
+    private Result<OrganizationInvitation> GetInvitation(Guid invitationId)
+    {
         var invitation = _invitations.FirstOrDefault(x => x.Id == invitationId);
-        if(invitation is null)
+        if (invitation is null)
         {
             return Result.Fail(new Error("Invitation with this ID does not exist."));
         }
 
-        if(invitation.State != OrganizationInvitationState.Pending)
+        if (invitation.State != OrganizationInvitationState.Pending)
         {
             return Result.Fail(new Error("Invitation is not in the correct state."));
         }
 
-        invitation.Decline();
+        return invitation;
+    }
 
-        return Result.Ok();
+    private OrganizationMember AddMember(Guid userId)
+    {
+        var member = OrganizationMember.Create(userId);
+        _members.Add(member);
+        return member;
     }
 }

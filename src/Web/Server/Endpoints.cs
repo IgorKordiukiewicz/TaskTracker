@@ -68,9 +68,15 @@ public static class Endpoints
             return result.ToHttpResult();
         }).RequireAuthorization();
 
-        builder.MapPost("invitations/decline", async (IMediator mediator, [FromBody] DeclineOrganizationInvitationDto model) =>
+        builder.MapPost("invitations/decline", async (IMediator mediator, [FromBody] UpdateOrganizationInvitationDto model) =>
         {
             var result = await mediator.Send(new DeclineOrganizationInvitationCommand(model));
+            return result.ToHttpResult();
+        }).RequireAuthorization();
+
+        builder.MapPost("invitations/accept", async (IMediator mediator, [FromBody] UpdateOrganizationInvitationDto model) =>
+        {
+            var result = await mediator.Send(new AcceptOrganizationInvitationCommand(model));
             return result.ToHttpResult();
         }).RequireAuthorization();
     }

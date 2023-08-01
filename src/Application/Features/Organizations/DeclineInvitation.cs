@@ -1,7 +1,7 @@
 ﻿namespace Application.Features.Organizations;
 
 // TODO: Create Invitations folder: Features/Organizations/Invitations
-public record DeclineOrganizationInvitationCommand(DeclineOrganizationInvitationDto Model) : IRequest<Result>;
+public record DeclineOrganizationInvitationCommand(UpdateOrganizationInvitationDto Model) : IRequest<Result>;
 
 internal class DeclineOrganizationInvitationCommandValidator : AbstractValidator<DeclineOrganizationInvitationCommand>
 {
