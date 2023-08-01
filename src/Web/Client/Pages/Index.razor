@@ -15,20 +15,53 @@
         </MudList>
     </MudPaper>
 }
+@if(_invitations is not null)
+{
+    <MudPaper Class="mt-2">
+        <MudList>
+            @foreach(var invitation in _invitations.Invitations)
+            {
+                <MudListItem Class="d-flex">
+                    <MudText>
+                        @invitation.OrganizationName
+                    </MudText>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="() => AcceptInvitation(invitation.Id)">
+                        Accept
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => RejectInvitation(invitation.Id)">
+                        Reject
+                    </MudButton>
+                </MudListItem>
+            }
+        </MudList>
+    </MudPaper>
+}
 
 @code {
     private RequestHandler _requestHandler = null!;
 
     private OrganizationsForUserVM? _organizations;
+    private OrganizationInvitationsVM? _invitations;
 
     protected override async Task OnInitializedAsync()
     {
         _requestHandler = new(_httpClient);
         _organizations = await _requestHandler.GetAsync<OrganizationsForUserVM>("organizations");
+        _invitations = await _requestHandler.GetAsync<OrganizationInvitationsVM>("organizations/invitations/user");
     }
 
     private void SelectOrganization(Guid organizationId)
     {
         _navManager.NavigateTo($"/org/{organizationId}");
+    }
+
+    private async Task AcceptInvitation(Guid invitationId)
+    {
+        Console.WriteLine("Invitation accepted");
+    }
+
+    private async Task RejectInvitation(Guid invitationId)
+    {
+        Console.WriteLine("Invitation rejected");
     }
 }

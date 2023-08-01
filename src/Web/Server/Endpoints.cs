@@ -58,6 +58,15 @@ public static class Endpoints
             var result = await mediator.Send(new CreateOrganizationInvitationCommand(model));
             return result.ToHttpResult();
         }).RequireAuthorization();
+
+        builder.MapGet("invitations/user", async (IMediator mediator, IHttpContextAccessor contextAccessor) =>
+        {
+            // TODO: Add helper class for accessing claims
+            // TODO: Store userId in claims?
+            var userAuthenticationId = contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            var result = await mediator.Send(new GetOrganizationInvitationsForUserQuery(userAuthenticationId));
+            return result.ToHttpResult();
+        }).RequireAuthorization();
     }
 
     private static IResult ToHttpResult<T>(this Result<T> requestResult)
