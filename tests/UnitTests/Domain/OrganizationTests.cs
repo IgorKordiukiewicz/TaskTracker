@@ -4,8 +4,6 @@ namespace UnitTests.Domain;
 
 public class OrganizationTests
 {
-    private readonly Fixture _fixture = new();
-
     [Fact]
     public void Create_ShouldCreateOrganizationWithGivenParameters()
     {
