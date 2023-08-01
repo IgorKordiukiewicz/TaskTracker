@@ -28,8 +28,8 @@
                     <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="() => AcceptInvitation(invitation.Id)">
                         Accept
                     </MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => RejectInvitation(invitation.Id)">
-                        Reject
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => DeclineInvitation(invitation.Id)">
+                        Decline
                     </MudButton>
                 </MudListItem>
             }
@@ -60,8 +60,9 @@
         Console.WriteLine("Invitation accepted");
     }
 
-    private async Task RejectInvitation(Guid invitationId)
+    private async Task DeclineInvitation(Guid invitationId)
     {
-        Console.WriteLine("Invitation rejected");
+        var model = new DeclineOrganizationInvitationDto(invitationId);
+        await _requestHandler.PostAsync("organizations/invitations/decline", model);
     }
 }

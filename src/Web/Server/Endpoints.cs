@@ -46,7 +46,7 @@ public static class Endpoints
             return result.ToHttpResult(); // TODO: Return 201 with ID
         }).RequireAuthorization();
 
-        builder.MapGet("/", async ([FromServices] IMediator mediator, [FromServices] IHttpContextAccessor contextAccessor) =>
+        builder.MapGet("/", async ([FromServices] IMediator mediator, [FromServices] IHttpContextAccessor contextAccessor) => // TODO: Remove [FromServices] attributes
         {
             var userAuthenticationId = contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await mediator.Send(new GetOrganizationsForUserQuery(userAuthenticationId));
@@ -65,6 +65,12 @@ public static class Endpoints
             // TODO: Store userId in claims?
             var userAuthenticationId = contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
             var result = await mediator.Send(new GetOrganizationInvitationsForUserQuery(userAuthenticationId));
+            return result.ToHttpResult();
+        }).RequireAuthorization();
+
+        builder.MapPost("invitations/decline", async (IMediator mediator, [FromBody] DeclineOrganizationInvitationDto model) =>
+        {
+            var result = await mediator.Send(new DeclineOrganizationInvitationCommand(model));
             return result.ToHttpResult();
         }).RequireAuthorization();
     }

@@ -30,4 +30,9 @@ public class OrganizationInvitation : Entity<Guid>
             OrganizationId = organizationId
         };
     }
+
+    public void Decline()
+    {
+        State = OrganizationInvitationState.Declined;
+    }
 }

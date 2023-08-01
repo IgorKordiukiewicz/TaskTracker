@@ -56,4 +56,22 @@ public class Organization : Entity<Guid>, IAggregateRoot
 
         return invitation;
     }
+
+    public Result DeclineInvitation(Guid invitationId)
+    {
+        var invitation = _invitations.FirstOrDefault(x => x.Id == invitationId);
+        if(invitation is null)
+        {
+            return Result.Fail(new Error("Invitation with this ID does not exist."));
+        }
+
+        if(invitation.State != OrganizationInvitationState.Pending)
+        {
+            return Result.Fail(new Error("Invitation is not in the correct state."));
+        }
+
+        invitation.Decline();
+
+        return Result.Ok();
+    }
 }
