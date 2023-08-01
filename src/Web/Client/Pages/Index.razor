@@ -2,6 +2,7 @@
 @attribute [Authorize]
 
 @inject HttpClient _httpClient
+@inject IDialogService _dialogService
 @inject NavigationManager _navManager
 
 @if(_organizations is not null)
@@ -45,7 +46,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _requestHandler = new(_httpClient);
+        _requestHandler = new(_httpClient, _dialogService);
         _organizations = await _requestHandler.GetAsync<OrganizationsForUserVM>("organizations");
         _invitations = await _requestHandler.GetAsync<OrganizationInvitationsVM>("organizations/invitations/user");
     }

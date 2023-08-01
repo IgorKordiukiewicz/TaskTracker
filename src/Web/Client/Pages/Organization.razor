@@ -1,6 +1,7 @@
 ﻿@page "/org/{organizationId:guid}"
 
 @inject HttpClient _httpClient
+@inject IDialogService _dialogService
 
 <h2>
     @OrganizationId
@@ -36,7 +37,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _requestHandler = new(_httpClient);
+        _requestHandler = new(_httpClient, _dialogService);
     }
 
     private async Task SearchUser()

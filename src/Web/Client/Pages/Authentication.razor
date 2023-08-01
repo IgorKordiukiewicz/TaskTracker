@@ -10,6 +10,7 @@
 @inject IConfiguration _configuration
 @inject AuthenticationStateProvider _authenticationStateProvider
 @inject HttpClient _httpClient
+@inject IDialogService _dialogService
 
 <RemoteAuthenticatorView Action="@Action" OnLogInSucceeded="OnLogIn">
     <LogOut>
@@ -30,7 +31,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _requestHandler = new(_httpClient);
+        _requestHandler = new(_httpClient, _dialogService);
     }
 
     private async Task OnLogIn(RemoteAuthenticationState _)

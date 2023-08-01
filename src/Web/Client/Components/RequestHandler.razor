@@ -1,13 +1,17 @@
 ﻿@using System.Text.Json;
 @using System.Text;
+@using System.Net;
 
 
 @code {
+    // Dependencies have to be manually passed from parent component, because [Inject]/@Inject injects them after parent initialization
     private readonly HttpClient _httpClient;
+    private readonly IDialogService _dialogService;
 
-    public RequestHandler(HttpClient httpClient)
+    public RequestHandler(HttpClient httpClient, IDialogService dialogService)
     {
         _httpClient = httpClient;
+        _dialogService = dialogService;
     }
 
     public async Task<TResponse?> GetAsync<TResponse>(string url)
@@ -40,8 +44,14 @@
         }
         else
         {
-            // TODO: Display error dialog
+            await DisplayErrorMessageBox(response);
             return default;
         }
+    }
+
+    private async Task DisplayErrorMessageBox(HttpResponseMessage response)
+    {
+        var message = response.StatusCode != HttpStatusCode.InternalServerError ? await response.Content.ReadAsStringAsync() : string.Empty;
+        await _dialogService.ShowMessageBox($"{(int)response.StatusCode} {response.ReasonPhrase}", message);
     }
 }
