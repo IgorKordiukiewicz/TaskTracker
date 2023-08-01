@@ -46,10 +46,9 @@ public static class Endpoints
             return result.ToHttpResult(); // TODO: Return 201 with ID
         }).RequireAuthorization();
 
-        builder.MapGet("/", async ([FromServices] IMediator mediator, [FromServices] IHttpContextAccessor contextAccessor) => // TODO: Remove [FromServices] attributes
+        builder.MapGet("/", async (IMediator mediator, IHttpContextAccessor contextAccessor) =>
         {
-            var userAuthenticationId = contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            var result = await mediator.Send(new GetOrganizationsForUserQuery(userAuthenticationId));
+            var result = await mediator.Send(new GetOrganizationsForUserQuery(contextAccessor.GetUserAuthenticationId()));
             return result.ToHttpResult();
         }).RequireAuthorization();
 
@@ -61,10 +60,8 @@ public static class Endpoints
 
         builder.MapGet("invitations/user", async (IMediator mediator, IHttpContextAccessor contextAccessor) =>
         {
-            // TODO: Add helper class for accessing claims
             // TODO: Store userId in claims?
-            var userAuthenticationId = contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-            var result = await mediator.Send(new GetOrganizationInvitationsForUserQuery(userAuthenticationId));
+            var result = await mediator.Send(new GetOrganizationInvitationsForUserQuery(contextAccessor.GetUserAuthenticationId()));
             return result.ToHttpResult();
         }).RequireAuthorization();
 
