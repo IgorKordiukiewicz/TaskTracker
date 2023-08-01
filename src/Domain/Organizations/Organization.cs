@@ -56,6 +56,19 @@ public class Organization : Entity<Guid>, IAggregateRoot
         return invitation;
     }
 
+    public Result<OrganizationMember> AcceptInvitation(Guid invitationId)
+    {
+        var invitationResult = GetInvitation(invitationId);
+        if (invitationResult.IsFailed)
+        {
+            return Result.Fail<OrganizationMember>(invitationResult.Errors);
+        }
+
+        var invitation = invitationResult.Value;
+        invitation.Accept();
+        return AddMember(invitation.UserId);
+    }
+
     public Result DeclineInvitation(Guid invitationId)
     {
         var invitationResult = GetInvitation(invitationId);
@@ -66,19 +79,6 @@ public class Organization : Entity<Guid>, IAggregateRoot
 
         invitationResult.Value.Decline();
         return Result.Ok();
-    }
-
-    public Result<OrganizationMember> AcceptInvitation(Guid invitationId)
-    {
-        var invitationResult = GetInvitation(invitationId);
-        if(invitationResult.IsFailed)
-        {
-            return Result.Fail<OrganizationMember>(invitationResult.Errors);
-        }
-
-        var invitation = invitationResult.Value;
-        invitation.Accept();
-        return AddMember(invitation.UserId);
     }
 
     private Result<OrganizationInvitation> GetInvitation(Guid invitationId)
