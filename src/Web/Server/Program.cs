@@ -1,8 +1,14 @@
 using Web.Server;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Application;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, services, configuration) =>
+{
+    configuration.WriteTo.File("log.txt", rollingInterval: RollingInterval.Month, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning);
+});
 
 builder.Services.AddApplicationServices(builder.Configuration);
 

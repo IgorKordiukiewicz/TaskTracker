@@ -35,3 +35,5 @@ msbuild.wrn
 
 # Visual Studio
 .vs/
+
+log*.txt

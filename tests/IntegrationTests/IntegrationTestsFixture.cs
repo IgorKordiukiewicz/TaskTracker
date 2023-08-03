@@ -2,6 +2,7 @@
 using Domain.Common;
 using FluentAssertions.Common;
 using MediatR;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +28,8 @@ public class IntegrationTestsFixture : IDisposable
                 services.Remove(dbContextDescriptor);
                 services.AddDbContext<AppDbContext>(options => options.UseSqlServer(_connectionString));
             });
+
+            builder.UseEnvironment("Development");
         });
 
         _httpClient = appFactory.CreateClient();
