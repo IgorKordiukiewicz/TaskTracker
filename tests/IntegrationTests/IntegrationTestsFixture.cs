@@ -1,9 +1,11 @@
 ﻿using Application.Data;
 using Domain.Common;
 using FluentAssertions.Common;
+using MediatR;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq.Expressions;
 
 namespace IntegrationTests;
 
@@ -29,26 +31,57 @@ public class IntegrationTestsFixture : IDisposable
 
         _httpClient = appFactory.CreateClient();
         _services = appFactory.Services;
+    }
 
+    public void ResetDb()
+    {
         using var scope = _services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
         db.Database.EnsureDeleted();
         db.Database.EnsureCreated();
     }
 
-    public void Dispose()
+    public async Task SeedDb(Action<AppDbContext> action)
     {
         using var scope = _services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        db.Database.EnsureDeleted();
-        // TODO: Don't delete it, instead remove all data?
+        action(db);
+        await db.SaveChangesAsync();
     }
 
-    public IReadOnlyList<TEntity> GetAsync<TEntity>() where TEntity : class
+    public void Dispose()
+    {
+        ResetDb();
+    }
+
+    public async Task<TResponse> SendRequest<TResponse>(IRequest<TResponse> request)
+    {
+        using var scope = _services.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        return await mediator.Send(request);
+    }
+
+    public async Task<List<TEntity>> GetAsync<TEntity>() 
+        where TEntity : class
+    {
+        return await GetAsync<TEntity>(x => true);
+    }
+
+    public async Task<List<TEntity>> GetAsync<TEntity>(Expression<Func<TEntity, bool>> predicate) 
+        where TEntity : class
     {
         using var scope = _services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        return db.Set<TEntity>().ToList();
+        return await db.Set<TEntity>().Where(predicate).ToListAsync();
+    }
+
+    public async Task<TEntity?> FirstOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> predicate)
+        where TEntity : class
+    {
+        using var scope = _services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        return await db.Set<TEntity>().Where(predicate).FirstOrDefaultAsync();
     }
 }
 
