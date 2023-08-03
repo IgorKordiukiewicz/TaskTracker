@@ -47,8 +47,11 @@
             return;
         }
 
-        // TODO: Create UrlBuilder
-        _usersSearchVM = await _requestHandler.GetAsync<UsersSearchVM>($"users/not-in-org?organizationId={OrganizationId}&searchValue={_inviteUserSearch}");
+        var url = "users/not-in-org"
+            .SetQueryParam("organizationId", OrganizationId)
+            .SetQueryParam("searchValue", _inviteUserSearch)
+            .ToString();
+        _usersSearchVM = await _requestHandler.GetAsync<UsersSearchVM>(url);
     }
 
     private async Task InviteUser(Guid userId)
