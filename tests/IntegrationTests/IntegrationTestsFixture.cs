@@ -79,12 +79,32 @@ public class IntegrationTestsFixture : IDisposable
         return await db.Set<TEntity>().Where(predicate).ToListAsync();
     }
 
-    public async Task<TEntity?> FirstOrDefaultAsync<TEntity>(Expression<Func<TEntity, bool>> predicate)
+    public async Task<TEntity> FirstAsync<TEntity>()
+        where TEntity : class
+    {
+        return await FirstAsync<TEntity>(x => true);
+    }
+
+    public async Task<TEntity> FirstAsync<TEntity>(Expression<Func<TEntity, bool>> predicate)
         where TEntity : class
     {
         using var scope = _services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        return await db.Set<TEntity>().Where(predicate).FirstOrDefaultAsync();
+        return await db.Set<TEntity>().Where(predicate).FirstAsync();
+    }
+
+    public async Task<int> CountAsync<TEntity>()
+        where TEntity : class
+    {
+        return await CountAsync<TEntity>(x => true);
+    }
+
+    public async Task<int> CountAsync<TEntity>(Expression<Func<TEntity, bool>> predicate)
+        where TEntity : class
+    {
+        using var scope = _services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        return await db.Set<TEntity>().CountAsync(predicate);
     }
 }
 
