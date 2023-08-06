@@ -31,7 +31,10 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
             return Result.Fail<Guid>(new Error("Organization with this ID does not exist."));
         }
 
-        // TODO: Disallow creating projects with same name in organization
+        if(await _dbContext.Projects.AnyAsync(x => x.OrganizationId == request.Model.OrganizationId && x.Name == request.Model.Name))
+        {
+            return Result.Fail<Guid>(new Error("Project with the same name already exists in this organization."));
+        }
 
         var project = Project.Create(request.Model.Name, request.Model.OrganizationId);
 

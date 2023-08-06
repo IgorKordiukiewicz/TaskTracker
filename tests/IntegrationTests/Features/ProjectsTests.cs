@@ -25,8 +25,27 @@ public class ProjectsTests
         result.IsFailed.Should().BeTrue();
     }
 
+
     [Fact]
-    public async Task Create_ShouldCreateNewProject_WhenOrganizationExists()
+    public async Task Create_ShouldFail_WhenProjectWithSameNameAlreadyExistsWithinOrganization()
+    {
+        var user = User.Create("authId", "user");
+        var organization = Organization.Create("org", user.Id);
+        var project = Project.Create("project", organization.Id);
+        await _fixture.SeedDb(async db =>
+        {
+            await db.Users.AddAsync(user);
+            await db.Organizations.AddAsync(organization);
+            await db.Projects.AddAsync(project);
+        });
+
+        var result = await _fixture.SendRequest(new CreateProjectCommand(new("project", organization.Id)));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Create_ShouldCreateNewProject_WhenValidationPassed()
     {
         var user = User.Create("authId", "user");
         var organization = Organization.Create("org", user.Id);
