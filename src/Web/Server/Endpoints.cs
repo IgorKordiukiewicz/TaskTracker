@@ -1,5 +1,6 @@
 ﻿using Application.Errors;
 using Application.Features.Organizations;
+using Application.Features.Projects;
 using Application.Features.Users;
 using FluentResults;
 using MediatR;
@@ -15,6 +16,7 @@ public static class Endpoints
     {
         app.MapGroup("users").AddUsersEndpoints();
         app.MapGroup("organizations").AddOrganizationsEndpoints();
+        app.MapGroup("projects").AddProjectsEndpoints();
     }
 
     private static void AddUsersEndpoints(this RouteGroupBuilder builder)
@@ -52,6 +54,7 @@ public static class Endpoints
             return result.ToHttpResult();
         }).RequireAuthorization();
 
+        // TODO: just "invitations"
         builder.MapPost("invitations/create", async (IMediator mediator, [FromBody] CreateOrganizationInvitationDto model) =>
         {
             var result = await mediator.Send(new CreateOrganizationInvitationCommand(model));
@@ -74,6 +77,15 @@ public static class Endpoints
         builder.MapPost("invitations/accept", async (IMediator mediator, [FromBody] UpdateOrganizationInvitationDto model) =>
         {
             var result = await mediator.Send(new AcceptOrganizationInvitationCommand(model));
+            return result.ToHttpResult();
+        }).RequireAuthorization();
+    }
+
+    private static void AddProjectsEndpoints(this RouteGroupBuilder builder)
+    {
+        builder.MapPost("/", async (IMediator mediator, [FromBody] CreateProjectDto model) =>
+        {
+            var result = await mediator.Send(new CreateProjectCommand(model));
             return result.ToHttpResult();
         }).RequireAuthorization();
     }
