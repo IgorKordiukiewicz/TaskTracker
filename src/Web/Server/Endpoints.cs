@@ -54,12 +54,11 @@ public static class Endpoints
             return result.ToHttpResult();
         }).RequireAuthorization();
 
-        // TODO: just "invitations"
-        builder.MapPost("invitations/create", async (IMediator mediator, [FromBody] CreateOrganizationInvitationDto model) =>
+        builder.MapPost("invitations", async (IMediator mediator, [FromBody] CreateOrganizationInvitationDto model) =>
         {
             var result = await mediator.Send(new CreateOrganizationInvitationCommand(model));
             return result.ToHttpResult();
-        }).RequireAuthorization();
+        }).RequireAuthorization("OrganizationMember");
 
         builder.MapGet("invitations/user", async (IMediator mediator, ClaimsPrincipal claimsPrincipal) =>
         {
@@ -87,13 +86,13 @@ public static class Endpoints
         {
             var result = await mediator.Send(new CreateProjectCommand(model));
             return result.ToHttpResult();
-        }).RequireAuthorization();
+        }).RequireAuthorization("OrganizationMember");
 
-        builder.MapGet("/", async (IMediator mediator, Guid organizationId) =>
+        builder.MapGet("/", async (IMediator mediator, [FromHeader] Guid organizationId) =>
         {
             var result = await mediator.Send(new GetProjectsQuery(organizationId));
             return result.ToHttpResult();
-        });
+        }).RequireAuthorization("OrganizationMember");
     }
 
     private static IResult ToHttpResult<T>(this Result<T> requestResult)

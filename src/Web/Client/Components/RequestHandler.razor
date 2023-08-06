@@ -1,7 +1,7 @@
 ﻿@using System.Text.Json;
 @using System.Text;
 @using System.Net;
-
+@using Headers = IEnumerable<(string Name, string Value)>;
 
 @code {
     // Dependencies have to be manually passed from parent component, because [Inject]/@Inject injects them after parent initialization
@@ -14,26 +14,50 @@
         _dialogService = dialogService;
     }
 
-    public async Task<TResponse?> GetAsync<TResponse>(string url)
+    public async Task<TResponse?> GetAsync<TResponse>(string url, Headers? headers = null)
     {
-        return await GetResponseContent<TResponse>(await _httpClient.GetAsync(url));    
+        var requestMessage = new HttpRequestMessage
+        {
+            Method = HttpMethod.Get,
+            RequestUri = new Uri(_httpClient.BaseAddress + url),
+        };
+        AddHeaders(requestMessage, headers);
+
+        return await GetResponseContent<TResponse>(await _httpClient.SendAsync(requestMessage));    
     }
 
-    public async Task<TResponse?> PostAsync<TResponse, TBody>(string url, TBody body)
+    public async Task<TResponse?> PostAsync<TResponse, TBody>(string url, TBody body, Headers? headers = null)
         where TBody : class
     {
         var json = JsonSerializer.Serialize(body);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        return await GetResponseContent<TResponse>(await _httpClient.PostAsync(url, content));
+        var requestMessage = new HttpRequestMessage
+        {
+            Method = HttpMethod.Post,
+            RequestUri = new Uri(_httpClient.BaseAddress + url),
+            Content = content,
+        };
+        AddHeaders(requestMessage, headers);
+
+        return await GetResponseContent<TResponse>(await _httpClient.SendAsync(requestMessage));
     }
 
-    public async Task PostAsync<TBody>(string url, TBody body)
+    public async Task PostAsync<TBody>(string url, TBody body, Headers? headers = null)
     {
         var json = JsonSerializer.Serialize(body);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync(url, content);
+        var requestMessage = new HttpRequestMessage
+        {
+            Method = HttpMethod.Post,
+            RequestUri = new Uri(_httpClient.BaseAddress + url),
+            Content = content,
+        };
+        AddHeaders(requestMessage, headers);
+
+        var response = await _httpClient.SendAsync(requestMessage);
+
         if(!response.IsSuccessStatusCode)
         {
             await DisplayErrorMessageBox(response);
@@ -50,6 +74,19 @@
         {
             await DisplayErrorMessageBox(response);
             return default;
+        }
+    }
+
+    private void AddHeaders(HttpRequestMessage requestMessage, IEnumerable<(string Name, string Value)>? headers = null)
+    {
+        if(headers is null)
+        {
+            return;
+        }
+
+        foreach (var (name, value) in headers)
+        {
+            requestMessage.Headers.Add(name, value);
         }
     }
 

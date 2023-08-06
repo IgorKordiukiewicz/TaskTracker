@@ -68,8 +68,8 @@
 
     private async Task UpdateProjectsList()
     {
-        var url = "projects".SetQueryParam("organizationId", OrganizationId).ToString();
-        _projectsVM = await _requestHandler.GetAsync<ProjectsVM>(url);
+        _projectsVM = await _requestHandler.GetAsync<ProjectsVM>("projects", 
+            new[] { ("OrganizationId", OrganizationId.ToString() )});
     }
 
     private async Task SearchUser()
@@ -89,13 +89,15 @@
     private async Task InviteUser(Guid userId)
     {
         var model = new CreateOrganizationInvitationDto(OrganizationId, userId);
-        await _requestHandler.PostAsync("organizations/invitations/create", model);
+        await _requestHandler.PostAsync("organizations/invitations", model, 
+            new[] { ("OrganizationId", OrganizationId.ToString()) });
     }
 
     private async Task CreateProject()
     {
         var model = new CreateProjectDto(_createProjectFormName, OrganizationId);
-        await _requestHandler.PostAsync("projects", model);
+        await _requestHandler.PostAsync("projects", model, 
+            new[] { ("OrganizationId", OrganizationId.ToString()) });
         await UpdateProjectsList();
     }
 
