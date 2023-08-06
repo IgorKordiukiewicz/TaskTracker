@@ -1,6 +1,7 @@
 ﻿using Application.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Web.Server.Extensions;
 
 namespace Web.Server.Requirements;
 
@@ -19,7 +20,7 @@ public class OrganizationMemberHandler : AuthorizationHandler<OrganizationMember
         _contextAccessor = contextAccessor;
     }
 
-    // TODO: Add caching to improve performance? 
+    // TODO: Add caching to improve performance? (currently 10-15ms)
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, OrganizationMemberRequirement requirement)
     {
         if (!Guid.TryParse(_contextAccessor.HttpContext?.Request.Headers["OrganizationId"].ToString(), out var organizationId))

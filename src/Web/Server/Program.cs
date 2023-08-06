@@ -50,7 +50,7 @@ else
     app.UseHsts();
 }
 
-app.AddEndpoints();
+app.MapControllers();
 
 app.UseHttpsRedirection();
 
