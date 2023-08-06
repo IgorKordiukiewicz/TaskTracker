@@ -1,7 +1,9 @@
 ﻿@page "/org/{organizationId:guid}"
+@attribute [Authorize]
 
 @inject HttpClient _httpClient
 @inject IDialogService _dialogService
+@inject NavigationManager _navManager
 
 <h2>
     @OrganizationId
@@ -30,7 +32,7 @@
         <MudList Clickable="true">
             @foreach(var project in _projectsVM.Projects)
             {
-                <MudListItem Text="@project.Name" />
+                <MudListItem Text="@project.Name" OnClick="() => SelectProject(project.Id)"/>
             }
         </MudList>
         <MudPaper>
@@ -95,5 +97,10 @@
         var model = new CreateProjectDto(_createProjectFormName, OrganizationId);
         await _requestHandler.PostAsync("projects", model);
         await UpdateProjectsList();
+    }
+
+    private void SelectProject(Guid projectId)
+    {
+        _navManager.NavigateTo($"/projects/{projectId}");
     }
 }
