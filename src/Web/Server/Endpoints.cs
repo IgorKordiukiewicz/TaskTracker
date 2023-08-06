@@ -88,6 +88,12 @@ public static class Endpoints
             var result = await mediator.Send(new CreateProjectCommand(model));
             return result.ToHttpResult();
         }).RequireAuthorization();
+
+        builder.MapGet("/", async (IMediator mediator, Guid organizationId) =>
+        {
+            var result = await mediator.Send(new GetProjectsQuery(organizationId));
+            return result.ToHttpResult();
+        });
     }
 
     private static IResult ToHttpResult<T>(this Result<T> requestResult)
