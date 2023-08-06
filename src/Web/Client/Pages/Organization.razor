@@ -22,6 +22,18 @@
         </MudList>
     }
     
+    @if(_projectsVM is not null)
+    {
+        <MudText Typo="Typo.h5">
+            Projects
+        </MudText>
+        <MudList Clickable="true">
+            @foreach(var project in _projectsVM.Projects)
+            {
+                <MudListItem Text="@project.Name" />
+            }
+        </MudList>
+    }
 </MudPaper>
 
 
@@ -33,11 +45,14 @@
 
     private string _inviteUserSearch = string.Empty;
     private UsersSearchVM? _usersSearchVM;
-
+    private ProjectsVM? _projectsVM;
 
     protected override async Task OnInitializedAsync()
     {
         _requestHandler = new(_httpClient, _dialogService);
+
+        var url = "projects".SetQueryParam("organizationId", OrganizationId).ToString();
+        _projectsVM = await _requestHandler.GetAsync<ProjectsVM>(url);
     }
 
     private async Task SearchUser()
