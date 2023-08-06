@@ -33,6 +33,12 @@
                 <MudListItem Text="@project.Name" />
             }
         </MudList>
+        <MudPaper>
+            <MudForm @ref="_createProjectForm" @bind-IsValid="_createProjectFormValid">
+                <MudTextField @bind-Value="_createProjectFormName" Required="true" Label="Name" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_createProjectFormValid)" OnClick="CreateProject">Create</MudButton>
+            </MudForm>
+        </MudPaper>
     }
 </MudPaper>
 
@@ -47,10 +53,19 @@
     private UsersSearchVM? _usersSearchVM;
     private ProjectsVM? _projectsVM;
 
+    private MudForm? _createProjectForm;
+    private bool _createProjectFormValid;
+    private string _createProjectFormName = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
         _requestHandler = new(_httpClient, _dialogService);
 
+        await UpdateProjectsList();
+    }
+
+    private async Task UpdateProjectsList()
+    {
         var url = "projects".SetQueryParam("organizationId", OrganizationId).ToString();
         _projectsVM = await _requestHandler.GetAsync<ProjectsVM>(url);
     }
@@ -73,5 +88,12 @@
     {
         var model = new CreateOrganizationInvitationDto(OrganizationId, userId);
         await _requestHandler.PostAsync("organizations/invitations/create", model);
+    }
+
+    private async Task CreateProject()
+    {
+        var model = new CreateProjectDto(_createProjectFormName, OrganizationId);
+        await _requestHandler.PostAsync("projects", model);
+        await UpdateProjectsList();
     }
 }

@@ -33,7 +33,11 @@
         var json = JsonSerializer.Serialize(body);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        await _httpClient.PostAsync(url, content);
+        var response = await _httpClient.PostAsync(url, content);
+        if(!response.IsSuccessStatusCode)
+        {
+            await DisplayErrorMessageBox(response);
+        }
     }
 
     private async Task<TResponse?> GetResponseContent<TResponse>(HttpResponseMessage response) 
