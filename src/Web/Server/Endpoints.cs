@@ -48,9 +48,9 @@ public static class Endpoints
             return result.ToHttpResult(); // TODO: Return 201 with ID
         }).RequireAuthorization();
 
-        builder.MapGet("/", async (IMediator mediator, IHttpContextAccessor contextAccessor) =>
+        builder.MapGet("/", async (IMediator mediator, ClaimsPrincipal claimsPrincipal) =>
         {
-            var result = await mediator.Send(new GetOrganizationsForUserQuery(contextAccessor.GetUserAuthenticationId()));
+            var result = await mediator.Send(new GetOrganizationsForUserQuery(claimsPrincipal.GetUserAuthenticationId()));
             return result.ToHttpResult();
         }).RequireAuthorization();
 
@@ -61,10 +61,10 @@ public static class Endpoints
             return result.ToHttpResult();
         }).RequireAuthorization();
 
-        builder.MapGet("invitations/user", async (IMediator mediator, IHttpContextAccessor contextAccessor) =>
+        builder.MapGet("invitations/user", async (IMediator mediator, ClaimsPrincipal claimsPrincipal) =>
         {
             // TODO: Store userId in claims?
-            var result = await mediator.Send(new GetOrganizationInvitationsForUserQuery(contextAccessor.GetUserAuthenticationId()));
+            var result = await mediator.Send(new GetOrganizationInvitationsForUserQuery(claimsPrincipal.GetUserAuthenticationId()));
             return result.ToHttpResult();
         }).RequireAuthorization();
 

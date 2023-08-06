@@ -4,6 +4,6 @@ namespace Web.Server;
 
 public static class ClaimsExtensions
 {
-    public static string GetUserAuthenticationId(this IHttpContextAccessor? contextAccessor)
-        => contextAccessor?.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+    public static string GetUserAuthenticationId(this ClaimsPrincipal claimsPrincipal)
+        => claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 }
