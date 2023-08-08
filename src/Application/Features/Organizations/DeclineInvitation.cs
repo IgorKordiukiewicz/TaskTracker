@@ -1,13 +1,13 @@
 ﻿namespace Application.Features.Organizations;
 
 // TODO: Create Invitations folder: Features/Organizations/Invitations
-public record DeclineOrganizationInvitationCommand(UpdateOrganizationInvitationDto Model) : IRequest<Result>;
+public record DeclineOrganizationInvitationCommand(Guid InvitationId) : IRequest<Result>;
 
 internal class DeclineOrganizationInvitationCommandValidator : AbstractValidator<DeclineOrganizationInvitationCommand>
 {
     public DeclineOrganizationInvitationCommandValidator()
     {
-        RuleFor(x => x.Model.InvitationId).NotEmpty();
+        RuleFor(x => x.InvitationId).NotEmpty();
     }
 }
 
@@ -24,7 +24,7 @@ internal class DeclineOrganizationInvitationHandler : IRequestHandler<DeclineOrg
     {
         var organization = await _dbContext.Organizations
             .Include(x => x.Invitations)
-            .Where(x => x.Invitations.Any(xx => xx.Id == request.Model.InvitationId))
+            .Where(x => x.Invitations.Any(xx => xx.Id == request.InvitationId))
             .FirstOrDefaultAsync();
 
         if(organization is null)
@@ -32,7 +32,7 @@ internal class DeclineOrganizationInvitationHandler : IRequestHandler<DeclineOrg
             return Result.Fail(new Error("Organization with this invitation does not exist."));
         }
 
-        var result = organization.DeclineInvitation(request.Model.InvitationId);
+        var result = organization.DeclineInvitation(request.InvitationId);
 
         if(result.IsFailed)
         {

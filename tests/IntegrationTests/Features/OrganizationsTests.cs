@@ -54,7 +54,7 @@ public class OrganizationsTests
     [Fact]
     public async Task CreateInvitation_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new CreateOrganizationInvitationCommand(new(Guid.NewGuid(), Guid.NewGuid())));
+        var result = await _fixture.SendRequest(new CreateOrganizationInvitationCommand(Guid.NewGuid(), new(Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -70,7 +70,7 @@ public class OrganizationsTests
         });
         var organizationId = (await _fixture.FirstAsync<Organization>()).Id;
 
-        var result = await _fixture.SendRequest(new CreateOrganizationInvitationCommand(new(organizationId, Guid.NewGuid())));
+        var result = await _fixture.SendRequest(new CreateOrganizationInvitationCommand(organizationId, new(Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -86,7 +86,7 @@ public class OrganizationsTests
         });
         var organizationId = (await _fixture.FirstAsync<Organization>()).Id;
 
-        var result = await _fixture.SendRequest(new CreateOrganizationInvitationCommand(new(organizationId, user.Id)));
+        var result = await _fixture.SendRequest(new CreateOrganizationInvitationCommand(organizationId, new(user.Id)));
 
         using(new AssertionScope())
         {
@@ -98,7 +98,7 @@ public class OrganizationsTests
     [Fact]
     public async Task AcceptInvitation_ShouldFail_WhenOrganizationWithInvitationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new AcceptOrganizationInvitationCommand(new(Guid.NewGuid())));
+        var result = await _fixture.SendRequest(new AcceptOrganizationInvitationCommand(Guid.NewGuid()));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -120,7 +120,7 @@ public class OrganizationsTests
 
         var membersBefore = await _fixture.CountAsync<OrganizationMember>();
 
-        var result = await _fixture.SendRequest(new AcceptOrganizationInvitationCommand(new(invitation.Id)));
+        var result = await _fixture.SendRequest(new AcceptOrganizationInvitationCommand(invitation.Id));
 
         using(new AssertionScope())
         {
@@ -135,7 +135,7 @@ public class OrganizationsTests
     [Fact]
     public async Task DeclineInvitation_ShouldFail_WhenOrganizationWithInvitationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new DeclineOrganizationInvitationCommand(new(Guid.NewGuid())));
+        var result = await _fixture.SendRequest(new DeclineOrganizationInvitationCommand(Guid.NewGuid()));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -157,7 +157,7 @@ public class OrganizationsTests
 
         var membersBefore = await _fixture.CountAsync<OrganizationMember>();
 
-        var result = await _fixture.SendRequest(new DeclineOrganizationInvitationCommand(new(invitation.Id)));
+        var result = await _fixture.SendRequest(new DeclineOrganizationInvitationCommand(invitation.Id));
 
         using (new AssertionScope())
         {

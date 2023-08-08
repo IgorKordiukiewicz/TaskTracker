@@ -47,7 +47,7 @@
     protected override async Task OnInitializedAsync()
     {
         _requestHandler = new(_httpClient, _dialogService);
-        _organizations = await _requestHandler.GetAsync<OrganizationsForUserVM>("organizations");
+        _organizations = await _requestHandler.GetAsync<OrganizationsForUserVM>("organizations/user");
         _invitations = await _requestHandler.GetAsync<OrganizationInvitationsVM>("organizations/invitations/user");
     }
 
@@ -58,13 +58,11 @@
 
     private async Task AcceptInvitation(Guid invitationId)
     {
-        var model = new UpdateOrganizationInvitationDto(invitationId);
-        await _requestHandler.PostAsync("organizations/invitations/accept", model);
+        await _requestHandler.PostAsync($"organizations/invitations/{invitationId}/accept", (object?)null); // TODO: Improve handling post requests without bodies
     }
 
     private async Task DeclineInvitation(Guid invitationId)
     {
-        var model = new UpdateOrganizationInvitationDto(invitationId);
-        await _requestHandler.PostAsync("organizations/invitations/decline", model);
+        await _requestHandler.PostAsync($"organizations/invitations/{invitationId}/decline", (object?)null);
     }
 }

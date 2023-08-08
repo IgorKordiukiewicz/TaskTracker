@@ -2,7 +2,6 @@
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Users;
-using MediatR;
 using Shared.ViewModels;
 
 namespace IntegrationTests.Features;
@@ -22,7 +21,7 @@ public class ProjectsTests
     [Fact]
     public async Task Create_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new CreateProjectCommand(new("project", Guid.NewGuid())));
+        var result = await _fixture.SendRequest(new CreateProjectCommand(Guid.NewGuid(), new("project")));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -41,7 +40,7 @@ public class ProjectsTests
             await db.Projects.AddAsync(project);
         });
 
-        var result = await _fixture.SendRequest(new CreateProjectCommand(new("project", organization.Id)));
+        var result = await _fixture.SendRequest(new CreateProjectCommand(organization.Id, new("project")));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -57,7 +56,7 @@ public class ProjectsTests
             await db.Organizations.AddAsync(organization);
         });
 
-        var result = await _fixture.SendRequest(new CreateProjectCommand(new("project", organization.Id)));
+        var result = await _fixture.SendRequest(new CreateProjectCommand(organization.Id, new("project")));
 
         using(new AssertionScope())
         {

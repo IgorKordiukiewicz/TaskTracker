@@ -1,12 +1,12 @@
 ﻿namespace Application.Features.Organizations;
 
-public record AcceptOrganizationInvitationCommand(UpdateOrganizationInvitationDto Model) : IRequest<Result>;
+public record AcceptOrganizationInvitationCommand(Guid InvitationId) : IRequest<Result>;
 
 internal class AcceptOrganizationInvitationCommandValidator : AbstractValidator<AcceptOrganizationInvitationCommand>
 {
     public AcceptOrganizationInvitationCommandValidator()
     {
-        RuleFor(x => x.Model.InvitationId).NotEmpty();
+        RuleFor(x => x.InvitationId).NotEmpty();
     }
 }
 
@@ -23,7 +23,7 @@ internal class AcceptOrganizationInvitationHandler : IRequestHandler<AcceptOrgan
     {
         var organization = await _dbContext.Organizations
             .Include(x => x.Invitations)
-            .Where(x => x.Invitations.Any(xx => xx.Id == request.Model.InvitationId))
+            .Where(x => x.Invitations.Any(xx => xx.Id == request.InvitationId))
             .FirstOrDefaultAsync();
 
         if (organization is null)
@@ -31,7 +31,7 @@ internal class AcceptOrganizationInvitationHandler : IRequestHandler<AcceptOrgan
             return Result.Fail(new Error("Organization with this invitation does not exist."));
         }
 
-        var result = organization.AcceptInvitation(request.Model.InvitationId);
+        var result = organization.AcceptInvitation(request.InvitationId);
 
         if (result.IsFailed)
         {

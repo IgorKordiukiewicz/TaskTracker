@@ -19,7 +19,7 @@ public class UsersController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet("is-registered/{userAuthenticationId}")]
+    [HttpGet("{userAuthenticationId}/is-registered")]
     public async Task<IActionResult> IsUserRegistered(string userAuthenticationId)
     {
         var result = await _mediator.Send(new IsUserRegisteredQuery(userAuthenticationId));
@@ -33,8 +33,9 @@ public class UsersController : ControllerBase
         return result.ToHttpResult(201);
     }
 
-    [HttpGet("not-in-org")]
-    public async Task<IActionResult> GetUsersNotInOrganization(Guid organizationId, string searchValue)
+    [HttpGet("not-in-org/{organizationId:guid}")]
+    [Authorize("OrganizationMember")]
+    public async Task<IActionResult> GetUsersNotInOrganization([FromRoute] Guid organizationId, [FromQuery] string searchValue)
     {
         var result = await _mediator.Send(new GetUsersNotInOrganizationQuery(organizationId, searchValue));
         return result.ToHttpResult();

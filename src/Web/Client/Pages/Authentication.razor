@@ -37,15 +37,15 @@
     private async Task OnLogIn(RemoteAuthenticationState _)
     {
         var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
-        var userId = state.User.Claims.First(x => x.Type == "sub").Value;
-        var isRegistered = await _requestHandler.GetAsync<bool>($"users/is-registered/{userId}");
+        var userAuthid = state.User.Claims.First(x => x.Type == "sub").Value;
+        var isRegistered = await _requestHandler.GetAsync<bool>($"users/{userAuthid}/is-registered");
         if(isRegistered)
         {
             return;
         }
 
         var userName = state.User.Identity?.Name ?? string.Empty;
-        var model = new UserRegistrationDto(userId, userName);
+        var model = new UserRegistrationDto(userAuthid, userName);
         await _requestHandler.PostAsync("users/register", model);
     }
 }

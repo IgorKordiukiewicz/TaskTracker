@@ -2,13 +2,13 @@
 
 namespace Application.Features.Organizations;
 
-public record CreateOrganizationInvitationCommand(CreateOrganizationInvitationDto Model) : IRequest<Result>;
+public record CreateOrganizationInvitationCommand(Guid OrganizationId, CreateOrganizationInvitationDto Model) : IRequest<Result>;
 
 internal class CreateOrganizationInvitationCommandValidator : AbstractValidator<CreateOrganizationInvitationCommand>
 {
     public CreateOrganizationInvitationCommandValidator()
     {
-        RuleFor(x => x.Model.OrganizationId).NotEmpty();
+        RuleFor(x => x.OrganizationId).NotEmpty();
         RuleFor(x => x.Model.UserId).NotEmpty();
     }
 }
@@ -24,22 +24,20 @@ internal class CreateOrganizationInvitationHandler : IRequestHandler<CreateOrgan
 
     public async Task<Result> Handle(CreateOrganizationInvitationCommand request, CancellationToken cancellationToken)
     {
-        var (organizationId, userId) = request.Model;
-
         var organization = await _dbContext.Organizations
             .Include(x => x.Invitations)
-            .FirstOrDefaultAsync(x => x.Id == organizationId);
+            .FirstOrDefaultAsync(x => x.Id == request.OrganizationId);
         if (organization is null)
         {
             return Result.Fail(new Error("Organization with this ID does not exist."));
         }
 
-        if (!await _dbContext.Users.AnyAsync(x => x.Id == userId))
+        if (!await _dbContext.Users.AnyAsync(x => x.Id == request.Model.UserId))
         {
             return Result.Fail(new Error("User with this ID does not exist."));
         }
 
-        var invitationResult = organization.CreateInvitation(userId);
+        var invitationResult = organization.CreateInvitation(request.Model.UserId);
         if (invitationResult.IsFailed)
         {
             return Result.Fail(invitationResult.Errors);

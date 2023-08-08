@@ -23,7 +23,9 @@ public class OrganizationMemberHandler : AuthorizationHandler<OrganizationMember
     // TODO: Add caching to improve performance? (currently 10-15ms)
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, OrganizationMemberRequirement requirement)
     {
-        if (!Guid.TryParse(_contextAccessor.HttpContext?.Request.Headers["OrganizationId"].ToString(), out var organizationId))
+        var vals = _contextAccessor.HttpContext?.Request.RouteValues;
+        var organizationIdRouteValue = vals?["organizationID"]?.ToString() ?? string.Empty;
+        if (!Guid.TryParse(organizationIdRouteValue, out var organizationId))
         {
             context.Fail();
             return;

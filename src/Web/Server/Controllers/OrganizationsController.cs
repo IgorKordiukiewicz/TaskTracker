@@ -27,18 +27,18 @@ public class OrganizationsController : ControllerBase
         return result.ToHttpResult(); // TODO: Return 201 with ID
     }
 
-    [HttpGet]
+    [HttpGet("user")]
     public async Task<IActionResult> GetOrganizations()
     {
         var result = await _mediator.Send(new GetOrganizationsForUserQuery(User.GetUserAuthenticationId()));
         return result.ToHttpResult();
     }
 
-    [HttpPost("invitations")]
+    [HttpPost("{organizationId:guid}/invitations")]
     [Authorize("OrganizationMember")]
-    public async Task<IActionResult> CreateOrganizationInvitation([FromBody] CreateOrganizationInvitationDto model)
+    public async Task<IActionResult> CreateOrganizationInvitation([FromRoute] Guid organizationId, [FromBody] CreateOrganizationInvitationDto model)
     {
-        var result = await _mediator.Send(new CreateOrganizationInvitationCommand(model));
+        var result = await _mediator.Send(new CreateOrganizationInvitationCommand(organizationId, model));
         return result.ToHttpResult();
     }
 
@@ -49,17 +49,17 @@ public class OrganizationsController : ControllerBase
         return result.ToHttpResult();
     }
 
-    [HttpPost("invitations/decline")]
-    public async Task<IActionResult> DeclineOrganizationInvitation([FromBody] UpdateOrganizationInvitationDto model)
+    [HttpPost("invitations/{invitationId:guid}/decline")]
+    public async Task<IActionResult> DeclineOrganizationInvitation([FromRoute] Guid invitationId)
     {
-        var result = await _mediator.Send(new DeclineOrganizationInvitationCommand(model));
+        var result = await _mediator.Send(new DeclineOrganizationInvitationCommand(invitationId));
         return result.ToHttpResult();
     }
 
-    [HttpPost("invitations/accept")]
-    public async Task<IActionResult> AcceptOrganizationInvitation([FromBody] UpdateOrganizationInvitationDto model)
+    [HttpPost("invitations/{invitationId:guid}/accept")]
+    public async Task<IActionResult> AcceptOrganizationInvitation([FromRoute] Guid invitationId)
     {
-        var result = await _mediator.Send(new AcceptOrganizationInvitationCommand(model));
+        var result = await _mediator.Send(new AcceptOrganizationInvitationCommand(invitationId));
         return result.ToHttpResult();
     }
 }

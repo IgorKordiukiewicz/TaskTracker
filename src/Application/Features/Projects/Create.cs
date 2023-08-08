@@ -3,14 +3,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Projects;
 
-public record CreateProjectCommand(CreateProjectDto Model) : IRequest<Result<Guid>>;
+public record CreateProjectCommand(Guid OrganizationId, CreateProjectDto Model) : IRequest<Result<Guid>>;
 
 internal class CreateProjectCommandValidator : AbstractValidator<CreateProjectCommand>
 {
     public CreateProjectCommandValidator()
     {
         RuleFor(x => x.Model.Name).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.Model.OrganizationId).NotEmpty();
+        RuleFor(x => x.OrganizationId).NotEmpty();
     }
 }
 
@@ -25,18 +25,18 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
 
     public async Task<Result<Guid>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _dbContext.Organizations.FirstOrDefaultAsync(x => x.Id == request.Model.OrganizationId);
+        var organization = await _dbContext.Organizations.FirstOrDefaultAsync(x => x.Id == request.OrganizationId);
         if(organization is null)
         {
             return Result.Fail<Guid>(new Error("Organization with this ID does not exist."));
         }
 
-        if(await _dbContext.Projects.AnyAsync(x => x.OrganizationId == request.Model.OrganizationId && x.Name == request.Model.Name))
+        if(await _dbContext.Projects.AnyAsync(x => x.OrganizationId == request.OrganizationId && x.Name == request.Model.Name))
         {
             return Result.Fail<Guid>(new Error("Project with the same name already exists in this organization."));
         }
 
-        var project = Project.Create(request.Model.Name, request.Model.OrganizationId);
+        var project = Project.Create(request.Model.Name, request.OrganizationId);
 
         await _dbContext.Projects.AddAsync(project);
         await _dbContext.SaveChangesAsync();

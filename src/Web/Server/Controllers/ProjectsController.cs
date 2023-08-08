@@ -9,7 +9,7 @@ namespace Web.Server.Controllers;
 
 [ApiController]
 [Route("projects")]
-[Authorize("OrganizationMember")]
+[Authorize]
 public class ProjectsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -19,17 +19,19 @@ public class ProjectsController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> CreateProject([FromBody] CreateProjectDto model)
+    [HttpPost("organization/{organizationId:guid}")]
+    [Authorize("OrganizationMember")]
+    public async Task<IActionResult> CreateProject([FromRoute] Guid organizationId, [FromBody] CreateProjectDto model)
     {
-        var result = await _mediator.Send(new CreateProjectCommand(model));
+        var result = await _mediator.Send(new CreateProjectCommand(organizationId, model));
         return result.ToHttpResult();
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetProjects([FromHeader] Guid organizationId)
+    [HttpGet("organization/{organizationId:guid}")]
+    [Authorize("OrganizationMember")]
+    public async Task<IActionResult> GetProjects(Guid organizationId)
     {
-        var result = await _mediator.Send(new GetProjectsQuery(organizationId));
+        var result = await _mediator.Send(new GetProjectsQuery(organizationId)); // TODO: Rename file from Get to GetForOrg or sth?
         return result.ToHttpResult();
     }
 }
