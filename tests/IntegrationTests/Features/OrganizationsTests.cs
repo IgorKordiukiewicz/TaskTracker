@@ -78,15 +78,16 @@ public class OrganizationsTests
     [Fact]
     public async Task CreateInvitation_ShouldCreateNewInvitation_WhenOrganizationAndUserBothExist()
     {
-        var user = User.Create("123", "user");
+        var user1 = User.Create("123", "user1");
+        var user2 = User.Create("1234", "user2");
         await _fixture.SeedDb(async db =>
         {
-            await db.Users.AddAsync(user);
-            await db.Organizations.AddAsync(Organization.Create("org", user.Id));
+            await db.Users.AddRangeAsync(new[] { user1, user2 });
+            await db.Organizations.AddAsync(Organization.Create("org", user1.Id));
         });
         var organizationId = (await _fixture.FirstAsync<Organization>()).Id;
 
-        var result = await _fixture.SendRequest(new CreateOrganizationInvitationCommand(organizationId, new(user.Id)));
+        var result = await _fixture.SendRequest(new CreateOrganizationInvitationCommand(organizationId, new(user2.Id)));
 
         using(new AssertionScope())
         {

@@ -1,4 +1,5 @@
-﻿using Domain.Users;
+﻿using Application.Data.Repositories;
+using Domain.Users;
 
 namespace Application.Features.Users;
 
@@ -15,24 +16,23 @@ internal class RegisterUserCommandValidator : AbstractValidator<RegisterUserComm
 
 internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result>
 {
-    private readonly AppDbContext _dbContext; // TODO: Use repositories for write-side
+    private readonly IRepository<User> _userRepository;
 
-    public RegisterUserHandler(AppDbContext dbContext)
+    public RegisterUserHandler(IRepository<User> userRepository)
     {
-        _dbContext = dbContext;
+        _userRepository = userRepository;
     }
 
     public async Task<Result> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
-        if(await _dbContext.Users.AnyAsync(x => x.AuthenticationId == request.Model.AuthenticationId))
+        if(await _userRepository.Exists(x => x.AuthenticationId == request.Model.AuthenticationId))
         {
             return Result.Fail(new Error("User is already registered in the database."));
         }
 
         var user = User.Create(request.Model.AuthenticationId, request.Model.Name);
 
-        _dbContext.Users.Add(user);
-        await _dbContext.SaveChangesAsync();
+        await _userRepository.Add(user);
 
         return Result.Ok();
     }

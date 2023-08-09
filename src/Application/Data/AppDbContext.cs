@@ -1,6 +1,8 @@
-﻿using Domain.Organizations;
+﻿using Domain.Common;
+using Domain.Organizations;
 using Domain.Projects;
 using Domain.Users;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Data;
 
@@ -22,5 +24,17 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+    }
+
+    public async Task AddRemoveDependents<TDependent>(IEnumerable<TDependent> actualEntities)
+        where TDependent : Entity<Guid>
+    {
+        var dbEntities = await Set<TDependent>().AsNoTracking().Select(x => x.Id).ToListAsync();
+
+        var addedEntities = actualEntities.Where(x => !dbEntities.Any(y => y == x.Id));
+        Set<TDependent>().AddRange(addedEntities);
+
+        var removedEntitiesIds = dbEntities.Where(x => !actualEntities.Any(y => y.Id == x));
+        Set<TDependent>().RemoveRange(Set<TDependent>().Where(x => removedEntitiesIds.Contains(x.Id)));
     }
 }

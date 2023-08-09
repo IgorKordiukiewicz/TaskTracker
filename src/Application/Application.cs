@@ -1,8 +1,8 @@
 ﻿using Application.Behaviors;
-using Application.Data;
-using FluentValidation;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
+using Application.Data.Repositories;
+using Domain.Organizations;
+using Domain.Projects;
+using Domain.Users;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -25,6 +25,10 @@ public static class Application
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
         services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+        services.AddScoped<IRepository<User>, UserRepository>();
+        services.AddScoped<IRepository<Organization>, OrganizationRepository>();
+        services.AddScoped<IRepository<Project>, ProjectRepository>();
 
         return services;
     }

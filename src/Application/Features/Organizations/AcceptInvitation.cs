@@ -1,4 +1,7 @@
-﻿namespace Application.Features.Organizations;
+﻿using Application.Data.Repositories;
+using Domain.Organizations;
+
+namespace Application.Features.Organizations;
 
 public record AcceptOrganizationInvitationCommand(Guid InvitationId) : IRequest<Result>;
 
@@ -12,20 +15,17 @@ internal class AcceptOrganizationInvitationCommandValidator : AbstractValidator<
 
 internal class AcceptOrganizationInvitationHandler : IRequestHandler<AcceptOrganizationInvitationCommand, Result>
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IRepository<Organization> _organizationRepository;
 
-    public AcceptOrganizationInvitationHandler(AppDbContext dbContext)
+    public AcceptOrganizationInvitationHandler(IRepository<Organization> organizationRepository)
     {
-        _dbContext = dbContext;
+        _organizationRepository = organizationRepository;
     }
+
 
     public async Task<Result> Handle(AcceptOrganizationInvitationCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _dbContext.Organizations
-            .Include(x => x.Invitations)
-            .Where(x => x.Invitations.Any(xx => xx.Id == request.InvitationId))
-            .FirstOrDefaultAsync();
-
+        var organization = await _organizationRepository.GetBy(x => x.Invitations.Any(xx => xx.Id == request.InvitationId));
         if (organization is null)
         {
             return Result.Fail(new Error("Organization with this invitation does not exist."));
@@ -38,8 +38,7 @@ internal class AcceptOrganizationInvitationHandler : IRequestHandler<AcceptOrgan
             return Result.Fail(result.Errors);
         }
 
-        await _dbContext.OrganizationMembers.AddAsync(result.Value); // TODO: has to be manually added because Members are not included, so Include members and this line can be removed
-        await _dbContext.SaveChangesAsync();
+        await _organizationRepository.Update(organization);
 
         return Result.Ok();
     }

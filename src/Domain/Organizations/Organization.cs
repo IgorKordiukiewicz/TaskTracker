@@ -78,9 +78,6 @@ public class Organization : Entity<Guid>, IAggregateRoot
         return Result.Ok();
     }
 
-    public bool IsUserAMember(Guid userId)
-        => _members.Any(x => x.UserId == userId);
-
     private Result<OrganizationInvitation> GetInvitation(Guid invitationId)
     {
         var invitation = _invitations.FirstOrDefault(x => x.Id == invitationId);

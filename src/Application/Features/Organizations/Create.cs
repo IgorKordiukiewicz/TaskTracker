@@ -1,4 +1,5 @@
-﻿using Domain.Organizations;
+﻿using Application.Data.Repositories;
+using Domain.Organizations;
 
 namespace Application.Features.Organizations;
 
@@ -16,10 +17,12 @@ internal class CreateOrganizationCommandValidator : AbstractValidator<CreateOrga
 internal class CreateOrganizationHandler : IRequestHandler<CreateOrganizationCommand, Result<Guid>>
 {
     private readonly AppDbContext _context;
+    private readonly IRepository<Organization> _organizationRepository;
 
-    public CreateOrganizationHandler(AppDbContext context)
+    public CreateOrganizationHandler(AppDbContext context, IRepository<Organization> organizationRepository)
     {
         _context = context;
+        _organizationRepository = organizationRepository;
     }
 
     public async Task<Result<Guid>> Handle(CreateOrganizationCommand request, CancellationToken cancellationToken)
@@ -31,8 +34,7 @@ internal class CreateOrganizationHandler : IRequestHandler<CreateOrganizationCom
 
         var organization = Organization.Create(request.Model.Name, request.Model.OwnerId);
 
-        _context.Organizations.Add(organization);
-        await _context.SaveChangesAsync();
+        await _organizationRepository.Add(organization);
 
         return organization.Id;
     }

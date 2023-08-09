@@ -1,4 +1,7 @@
-﻿namespace Application.Features.Projects;
+﻿using Application.Data.Repositories;
+using Domain.Projects;
+
+namespace Application.Features.Projects;
 
 public record RemoveProjectMemberCommand(Guid ProjectId, Guid MemberId) : IRequest<Result>;
 
@@ -13,18 +16,16 @@ internal class RemoveProjectMemberCommandValidator : AbstractValidator<RemovePro
 
 internal class RemoveProjectMemberHandler : IRequestHandler<RemoveProjectMemberCommand, Result>
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IRepository<Project> _projectRepository;
 
-    public RemoveProjectMemberHandler(AppDbContext dbContext)
+    public RemoveProjectMemberHandler(IRepository<Project> projectRepository)
     {
-        _dbContext = dbContext;
+        _projectRepository = projectRepository;
     }
 
     public async Task<Result> Handle(RemoveProjectMemberCommand request, CancellationToken cancellationToken)
     {
-        var project = await _dbContext.Projects
-            .Include(x => x.Members)
-            .FirstOrDefaultAsync(x => x.Id == request.ProjectId);
+        var project = await _projectRepository.GetById(request.ProjectId);
         if (project is null)
         {
             return Result.Fail(new Error("Project with this ID does not exist."));
@@ -36,8 +37,7 @@ internal class RemoveProjectMemberHandler : IRequestHandler<RemoveProjectMemberC
             return Result.Fail(result.Errors);
         }
 
-        _dbContext.ProjectMembers.Remove(result.Value);
-        await _dbContext.SaveChangesAsync();
+        await _projectRepository.Update(project);
 
         return Result.Ok();
     }

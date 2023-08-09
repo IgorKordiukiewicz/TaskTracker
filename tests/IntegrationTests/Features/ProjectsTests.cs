@@ -140,20 +140,21 @@ public class ProjectsTests
     [Fact]
     public async Task AddMember_ShouldAddNewMember()
     {
-        var user = User.Create("123", "user");
-        var organization = Organization.Create("org", user.Id);
-        var project = Project.Create("project", organization.Id, user.Id);
+        var user1 = User.Create("123", "user1");
+        var user2 = User.Create("1234", "user2");
+        var organization = Organization.Create("org", user1.Id);
+        var project = Project.Create("project", organization.Id, user2.Id);
 
         await _fixture.SeedDb(async db =>
         {
-            await db.Users.AddAsync(user);
+            await db.Users.AddRangeAsync(new[] { user1, user2 });
             await db.Organizations.AddAsync(organization);
             await db.Projects.AddAsync(project);
         });
 
         var membersBefore = await _fixture.CountAsync<ProjectMember>();
 
-        var result = await _fixture.SendRequest(new AddProjectMemberCommand(project.Id, new(user.Id)));
+        var result = await _fixture.SendRequest(new AddProjectMemberCommand(project.Id, new(user1.Id)));
 
         using(new AssertionScope())
         {

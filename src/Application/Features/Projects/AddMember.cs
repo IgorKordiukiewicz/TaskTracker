@@ -1,4 +1,7 @@
-﻿namespace Application.Features.Projects;
+﻿using Application.Data.Repositories;
+using Domain.Projects;
+
+namespace Application.Features.Projects;
 
 public record AddProjectMemberCommand(Guid ProjectId, AddProjectMemberDto Model) : IRequest<Result>;
 
@@ -14,26 +17,26 @@ internal class AddProjectMemberCommandValidator : AbstractValidator<AddProjectMe
 internal class AddProjectMemberHandler : IRequestHandler<AddProjectMemberCommand, Result>
 {
     private readonly AppDbContext _dbContext;
+    private readonly IRepository<Project> _projectRepository;
 
-    public AddProjectMemberHandler(AppDbContext dbContext)
+    public AddProjectMemberHandler(AppDbContext dbContext, IRepository<Project> projectRepository)
     {
         _dbContext = dbContext;
+        _projectRepository = projectRepository;
     }
 
     public async Task<Result> Handle(AddProjectMemberCommand request, CancellationToken cancellationToken)
     {
-        var project = await _dbContext.Projects.FirstOrDefaultAsync(x => x.Id == request.ProjectId);
+        var project = await _projectRepository.GetById(request.ProjectId);
         if(project is null)
         {
             return Result.Fail(new Error("Project with this ID does not exist."));
         }
 
-        var organization = await _dbContext.Organizations
+        var isUserAMember = await _dbContext.Organizations // TODO: Should repositories or dbContext be used when querying from other aggregates in  commands?
             .Include(x => x.Members)
-            .FirstAsync(x => x.Id == project.OrganizationId);
-
-        var isUserAMember = organization.IsUserAMember(request.Model.UserId);
-        if(!isUserAMember)
+            .AnyAsync(x => x.Id == project.OrganizationId && x.Members.Any(xx => xx.UserId == request.Model.UserId));
+        if (!isUserAMember)
         {
             return Result.Fail(new Error("User is not a member of the project's organization."));
         }
@@ -44,8 +47,7 @@ internal class AddProjectMemberHandler : IRequestHandler<AddProjectMemberCommand
             return Result.Fail(result.Errors);
         }
 
-        await _dbContext.ProjectMembers.AddAsync(result.Value);
-        await _dbContext.SaveChangesAsync();
+        await _projectRepository.Update(project);
 
         return Result.Ok();
     }

@@ -1,4 +1,7 @@
-﻿namespace Application.Features.Organizations;
+﻿using Application.Data.Repositories;
+using Domain.Organizations;
+
+namespace Application.Features.Organizations;
 
 // TODO: Create Invitations folder: Features/Organizations/Invitations
 public record DeclineOrganizationInvitationCommand(Guid InvitationId) : IRequest<Result>;
@@ -13,20 +16,16 @@ internal class DeclineOrganizationInvitationCommandValidator : AbstractValidator
 
 internal class DeclineOrganizationInvitationHandler : IRequestHandler<DeclineOrganizationInvitationCommand, Result>
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IRepository<Organization> _organizationRepository;
 
-    public DeclineOrganizationInvitationHandler(AppDbContext dbContext)
+    public DeclineOrganizationInvitationHandler(IRepository<Organization> organizationRepository)
     {
-        _dbContext = dbContext;
+        _organizationRepository = organizationRepository;
     }
 
     public async Task<Result> Handle(DeclineOrganizationInvitationCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _dbContext.Organizations
-            .Include(x => x.Invitations)
-            .Where(x => x.Invitations.Any(xx => xx.Id == request.InvitationId))
-            .FirstOrDefaultAsync();
-
+        var organization = await _organizationRepository.GetBy(x => x.Invitations.Any(xx => xx.Id == request.InvitationId));
         if(organization is null)
         {
             return Result.Fail(new Error("Organization with this invitation does not exist."));
@@ -39,7 +38,8 @@ internal class DeclineOrganizationInvitationHandler : IRequestHandler<DeclineOrg
             return Result.Fail(result.Errors);
         }
 
-        await _dbContext.SaveChangesAsync();
+        await _organizationRepository.Update(organization);
+
         return Result.Ok();
     }
 }
