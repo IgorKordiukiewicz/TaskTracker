@@ -35,7 +35,7 @@ public class ProjectsController : ControllerBase
         return result.ToHttpResult();
     }
 
-    [HttpPost("{projectId}/members")]
+    [HttpPost("{projectId:guid}/members")]
     [Authorize("ProjectMember")]
     public async Task<IActionResult> AddProjectMember([FromRoute] Guid projectId, [FromBody] AddProjectMemberDto model)
     {
