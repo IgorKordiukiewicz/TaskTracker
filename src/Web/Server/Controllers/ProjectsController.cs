@@ -23,7 +23,7 @@ public class ProjectsController : ControllerBase
     [Authorize("OrganizationMember")]
     public async Task<IActionResult> CreateProject([FromRoute] Guid organizationId, [FromBody] CreateProjectDto model)
     {
-        var result = await _mediator.Send(new CreateProjectCommand(organizationId, model));
+        var result = await _mediator.Send(new CreateProjectCommand(organizationId, User.GetUserAuthenticationId(), model));
         return result.ToHttpResult();
     }
 

@@ -21,7 +21,7 @@ public class ProjectsTests
     [Fact]
     public async Task Create_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new CreateProjectCommand(Guid.NewGuid(), new("project")));
+        var result = await _fixture.SendRequest(new CreateProjectCommand(Guid.NewGuid(), "123", new("project")));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -32,7 +32,7 @@ public class ProjectsTests
     {
         var user = User.Create("authId", "user");
         var organization = Organization.Create("org", user.Id);
-        var project = Project.Create("project", organization.Id);
+        var project = Project.Create("project", organization.Id, user.Id);
         await _fixture.SeedDb(async db =>
         {
             await db.Users.AddAsync(user);
@@ -40,7 +40,7 @@ public class ProjectsTests
             await db.Projects.AddAsync(project);
         });
 
-        var result = await _fixture.SendRequest(new CreateProjectCommand(organization.Id, new("project")));
+        var result = await _fixture.SendRequest(new CreateProjectCommand(organization.Id, "123", new("project")));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -48,7 +48,8 @@ public class ProjectsTests
     [Fact]
     public async Task Create_ShouldCreateNewProject_WhenValidationPassed()
     {
-        var user = User.Create("authId", "user");
+        var userAuthId = "123";
+        var user = User.Create(userAuthId, "user");
         var organization = Organization.Create("org", user.Id);
         await _fixture.SeedDb(async db =>
         {
@@ -56,7 +57,7 @@ public class ProjectsTests
             await db.Organizations.AddAsync(organization);
         });
 
-        var result = await _fixture.SendRequest(new CreateProjectCommand(organization.Id, new("project")));
+        var result = await _fixture.SendRequest(new CreateProjectCommand(organization.Id, userAuthId, new("project")));
 
         using(new AssertionScope())
         {
@@ -79,8 +80,8 @@ public class ProjectsTests
     {
         var user = User.Create("authId", "user");
         var organization = Organization.Create("org", user.Id);
-        var project1 = Project.Create("project1", organization.Id);
-        var project2 = Project.Create("project2", organization.Id);
+        var project1 = Project.Create("project1", organization.Id, user.Id);
+        var project2 = Project.Create("project2", organization.Id, user.Id);
         await _fixture.SeedDb(async db =>
         {
             await db.Users.AddAsync(user);
@@ -122,7 +123,7 @@ public class ProjectsTests
     {
         var user = User.Create("123", "user");
         var organization = Organization.Create("org", user.Id);
-        var project = Project.Create("project", organization.Id);
+        var project = Project.Create("project", organization.Id, user.Id);
 
         await _fixture.SeedDb(async db =>
         {
@@ -141,7 +142,7 @@ public class ProjectsTests
     {
         var user = User.Create("123", "user");
         var organization = Organization.Create("org", user.Id);
-        var project = Project.Create("project", organization.Id);
+        var project = Project.Create("project", organization.Id, user.Id);
 
         await _fixture.SeedDb(async db =>
         {

@@ -10,28 +10,15 @@ public class OrganizationTests
         var name = "OrgName";
         var ownerId = Guid.NewGuid();
 
-        var organization = Organization.Create(name, ownerId);
+        var result = Organization.Create(name, ownerId);
 
         using (new AssertionScope())
         {
-            organization.Name.Should().Be(name);
-            organization.OwnerId.Should().Be(ownerId);
-            organization.Id.Should().NotBeEmpty();
-        }
-    }
-
-    [Fact]
-    public void Create_ShouldCreateOrganizationWithOwnerAsMember()
-    {
-        var ownerId = Guid.NewGuid();
-        var organization = Organization.Create("Name", ownerId);
-
-        using (new AssertionScope())
-        {
-            organization.Members.Count.Should().Be(1);
-            var member = organization.Members[0];
-            member.Id.Should().NotBeEmpty();
-            member.UserId.Should().Be(ownerId);
+            result.Name.Should().Be(name);
+            result.OwnerId.Should().Be(ownerId);
+            result.Id.Should().NotBeEmpty();
+            result.Members.Count.Should().Be(1);
+            result.Members[0].UserId.Should().Be(ownerId);
         }
     }
 

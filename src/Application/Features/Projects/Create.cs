@@ -3,14 +3,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Projects;
 
-public record CreateProjectCommand(Guid OrganizationId, CreateProjectDto Model) : IRequest<Result<Guid>>;
+public record CreateProjectCommand(Guid OrganizationId, string UserAuthId, CreateProjectDto Model) : IRequest<Result<Guid>>;
 
 internal class CreateProjectCommandValidator : AbstractValidator<CreateProjectCommand>
 {
     public CreateProjectCommandValidator()
     {
-        RuleFor(x => x.Model.Name).NotEmpty().MaximumLength(100);
         RuleFor(x => x.OrganizationId).NotEmpty();
+        RuleFor(x => x.UserAuthId).NotEmpty();
+        RuleFor(x => x.Model.Name).NotEmpty().MaximumLength(100);
     }
 }
 
@@ -36,7 +37,11 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
             return Result.Fail<Guid>(new Error("Project with the same name already exists in this organization."));
         }
 
-        var project = Project.Create(request.Model.Name, request.OrganizationId);
+        var user = await _dbContext.Users
+            .AsNoTracking()
+            .FirstAsync(x => x.AuthenticationId == request.UserAuthId);
+
+        var project = Project.Create(request.Model.Name, request.OrganizationId, user.Id); // TODO: Should UserId be validated or not since it is coming from internal sources so it should always be valid
 
         await _dbContext.Projects.AddAsync(project);
         await _dbContext.SaveChangesAsync();

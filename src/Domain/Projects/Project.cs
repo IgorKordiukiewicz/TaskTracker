@@ -5,22 +5,29 @@ namespace Domain.Projects;
 
 public class Project : Entity<Guid>
 {
-    public string Name { get; private set; }
+    public string Name { get; private set; } = string.Empty;
     public Guid OrganizationId { get; private set; }
 
     private readonly List<ProjectMember> _members = new();
     public IReadOnlyList<ProjectMember> Members => _members.AsReadOnly();
 
-    private Project(Guid id, string name, Guid organizationId)
+    private Project(Guid id)
         : base(id)
     {
-        Name = name;
-        OrganizationId = organizationId;
     }
 
-    public static Project Create(string name, Guid organizationId) // TODO: Add user who created it as member by default
+    public static Project Create(string name, Guid organizationId, Guid createdByUserId)
     {
-        return new(Guid.NewGuid(), name, organizationId);
+        var result = new Project(Guid.NewGuid())
+        {
+            Name = name,
+            OrganizationId = organizationId,
+        };
+
+        var member = ProjectMember.Create(createdByUserId);
+        result._members.Add(member);
+
+        return result;
     }
 
     public Result<ProjectMember> AddMember(Guid userId) // only allow to add members from org
