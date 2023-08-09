@@ -5,6 +5,7 @@ using Serilog;
 using System.Security.Claims;
 using Web.Server.Requirements;
 using Microsoft.AspNetCore.Authorization;
+using Web.Server.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,25 +15,7 @@ builder.Host.UseSerilog((context, services, configuration) =>
 });
 
 builder.Services.AddApplicationServices(builder.Configuration);
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, c =>
-    {
-        c.Authority = builder.Configuration["Auth0:Domain"];
-        c.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
-        {
-            ValidAudience = builder.Configuration["Auth0:Audience"],
-            ValidIssuer = builder.Configuration["Auth0:Domain"]
-        };
-    });
-
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("OrganizationMember", policy => policy.Requirements.Add(new OrganizationMemberRequirement())); // TODO: Check if policy.RequireAuthenticatedUser() should be added?
-    options.AddPolicy("ProjectMember", policy => policy.Requirements.Add(new ProjectMemberRequirement()));
-});
-builder.Services.AddScoped<IAuthorizationHandler, OrganizationMemberRequirementHandler>();
-builder.Services.AddScoped<IAuthorizationHandler, ProjectMemberRequirementHandler>();
+builder.Services.AddAuth(builder.Configuration);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
