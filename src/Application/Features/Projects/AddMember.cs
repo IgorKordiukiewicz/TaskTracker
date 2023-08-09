@@ -2,6 +2,15 @@
 
 public record AddProjectMemberCommand(Guid ProjectId, AddProjectMemberDto Model) : IRequest<Result>;
 
+internal class AddProjectMemberCommandValidator : AbstractValidator<AddProjectMemberCommand>
+{
+    public AddProjectMemberCommandValidator()
+    {
+        RuleFor(x => x.ProjectId).NotEmpty();
+        RuleFor(x => x.Model.UserId).NotEmpty();
+    }
+}
+
 internal class AddProjectMemberHandler : IRequestHandler<AddProjectMemberCommand, Result>
 {
     private readonly AppDbContext _dbContext;
