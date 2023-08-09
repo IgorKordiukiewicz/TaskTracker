@@ -34,4 +34,12 @@ public class ProjectsController : ControllerBase
         var result = await _mediator.Send(new GetProjectsQuery(organizationId)); // TODO: Rename file from Get to GetForOrg or sth?
         return result.ToHttpResult();
     }
+
+    [HttpPost("{projectId}/members")]
+    [Authorize] // TODO: add new policy - 'ProjectMember' (later Project Administrator/Manager?)
+    public async Task<IActionResult> AddProjectMember([FromRoute] Guid projectId, [FromBody] AddProjectMemberDto model)
+    {
+        var result = await _mediator.Send(new AddProjectMemberCommand(projectId, model));
+        return result.ToHttpResult();
+    }
 }

@@ -108,4 +108,56 @@ public class ProjectsTests
             });
         }
     }
+
+    [Fact]
+    public async Task AddMember_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new AddProjectMemberCommand(Guid.NewGuid(), new(Guid.NewGuid())));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task AddMember_ShouldFail_WhenUserIsNotAMemberOfProjectsOrganization()
+    {
+        var user = User.Create("123", "user");
+        var organization = Organization.Create("org", user.Id);
+        var project = Project.Create("project", organization.Id);
+
+        await _fixture.SeedDb(async db =>
+        {
+            await db.Users.AddAsync(user);
+            await db.Organizations.AddAsync(organization);
+            await db.Projects.AddAsync(project);
+        });
+
+        var result = await _fixture.SendRequest(new AddProjectMemberCommand(project.Id, new(Guid.NewGuid())));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task AddMember_ShouldAddNewMember()
+    {
+        var user = User.Create("123", "user");
+        var organization = Organization.Create("org", user.Id);
+        var project = Project.Create("project", organization.Id);
+
+        await _fixture.SeedDb(async db =>
+        {
+            await db.Users.AddAsync(user);
+            await db.Organizations.AddAsync(organization);
+            await db.Projects.AddAsync(project);
+        });
+
+        var membersBefore = await _fixture.CountAsync<ProjectMember>();
+
+        var result = await _fixture.SendRequest(new AddProjectMemberCommand(project.Id, new(user.Id)));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<ProjectMember>()).Should().Be(membersBefore + 1);
+        }
+    }
 }

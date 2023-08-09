@@ -3,9 +3,6 @@ using FluentResults;
 
 namespace Domain.Organizations;
 
-// TODO:
-// Organization has many projects, project has one organization
-// Project has many project members (created from organization member)?
 public class Organization : Entity<Guid>, IAggregateRoot
 {
     public string Name { get; private set; } = string.Empty;
@@ -80,6 +77,9 @@ public class Organization : Entity<Guid>, IAggregateRoot
         invitationResult.Value.Decline();
         return Result.Ok();
     }
+
+    public bool IsUserAMember(Guid userId)
+        => _members.Any(x => x.UserId == userId);
 
     private Result<OrganizationInvitation> GetInvitation(Guid invitationId)
     {

@@ -180,4 +180,25 @@ public class OrganizationTests
 
         result.IsFailed.Should().BeTrue();
     }
+
+    [Fact]
+    public void IsUserAMember_ShouldReturnTrue_WhenUserIsAMemberOfOrganization()
+    {
+        var memberId = Guid.NewGuid();
+        var organization = Organization.Create("Name", memberId);
+
+        var result = organization.IsUserAMember(memberId);
+
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsUserAMember_ShouldReturnFalse_WhenUserIsNotAMemberOfOrganization()
+    {
+        var organization = Organization.Create("Name", Guid.NewGuid());
+
+        var result = organization.IsUserAMember(Guid.NewGuid());
+
+        result.Should().BeFalse();
+    }
 }

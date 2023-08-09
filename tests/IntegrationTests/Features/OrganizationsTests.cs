@@ -127,8 +127,8 @@ public class OrganizationsTests
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<OrganizationMember>()).Should().Be(membersBefore + 1);
 
-            var orgMember = await _fixture.FirstAsync<OrganizationInvitation>(x => x.Id == invitation.Id);
-            orgMember.State.Should().Be(OrganizationInvitationState.Accepted);
+            var orgInvitation = await _fixture.FirstAsync<OrganizationInvitation>(x => x.Id == invitation.Id);
+            orgInvitation.State.Should().Be(OrganizationInvitationState.Accepted);
         }
     }
 

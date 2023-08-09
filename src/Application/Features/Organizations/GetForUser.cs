@@ -1,6 +1,5 @@
 ﻿namespace Application.Features.Organizations;
 
-// TODO: Move GetForUser to Users/GetOrganizations and move Users/GetNotInOrganization to Organizations/GetAvailableUsers ?
 public record GetOrganizationsForUserQuery(string UserAuthenticationId) : IRequest<Result<OrganizationsForUserVM>>;
 
 internal class GetOrganizationsForUserQueryValidator : AbstractValidator<GetOrganizationsForUserQuery>
