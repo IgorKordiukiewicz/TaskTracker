@@ -36,7 +36,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("{projectId}/members")]
-    [Authorize] // TODO: add new policy - 'ProjectMember' (later Project Administrator/Manager?)
+    [Authorize("ProjectMember")]
     public async Task<IActionResult> AddProjectMember([FromRoute] Guid projectId, [FromBody] AddProjectMemberDto model)
     {
         var result = await _mediator.Send(new AddProjectMemberCommand(projectId, model));

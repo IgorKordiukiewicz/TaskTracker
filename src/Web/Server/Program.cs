@@ -29,8 +29,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("OrganizationMember", policy => policy.Requirements.Add(new OrganizationMemberRequirement())); // TODO: Check if policy.RequireAuthenticatedUser() should be added?
+    options.AddPolicy("ProjectMember", policy => policy.Requirements.Add(new ProjectMemberRequirement()));
 });
-builder.Services.AddScoped<IAuthorizationHandler, OrganizationMemberHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, OrganizationMemberRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, ProjectMemberRequirementHandler>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();

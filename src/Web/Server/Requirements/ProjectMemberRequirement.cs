@@ -5,48 +5,48 @@ using Web.Server.Extensions;
 
 namespace Web.Server.Requirements;
 
-public class OrganizationMemberRequirement : IAuthorizationRequirement
+public class ProjectMemberRequirement : IAuthorizationRequirement
 {
 }
 
-public class OrganizationMemberRequirementHandler : AuthorizationHandler<OrganizationMemberRequirement>
+// TODO: Add base class/common component for ProjectMemberRequirement & OrganizationMemberRequirement
+public class ProjectMemberRequirementHandler : AuthorizationHandler<ProjectMemberRequirement>
 {
     private readonly AppDbContext _dbContext;
     private readonly IHttpContextAccessor _contextAccessor;
 
-    public OrganizationMemberRequirementHandler(AppDbContext dbContext, IHttpContextAccessor contextAccessor)
+    public ProjectMemberRequirementHandler(AppDbContext dbContext, IHttpContextAccessor contextAccessor)
     {
         _dbContext = dbContext;
         _contextAccessor = contextAccessor;
     }
 
-    // TODO: Add caching to improve performance? (currently 10-15ms)
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, OrganizationMemberRequirement requirement)
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, ProjectMemberRequirement requirement)
     {
         var routeValues = _contextAccessor.HttpContext?.Request.RouteValues;
-        var organizationIdRouteValue = routeValues?["organizationId"]?.ToString() ?? string.Empty;
-        if (!Guid.TryParse(organizationIdRouteValue, out var organizationId))
+        var projectIdRouteValue = routeValues?["projectId"]?.ToString() ?? string.Empty;
+        if (!Guid.TryParse(projectIdRouteValue, out var projectId))
         {
             context.Fail();
             return;
         }
 
         var userAuthId = context.User.GetUserAuthenticationId();
-        if(string.IsNullOrWhiteSpace(userAuthId))
+        if (string.IsNullOrWhiteSpace(userAuthId))
         {
             context.Fail();
             return;
         }
 
         var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.AuthenticationId == userAuthId);
-        if(user is null)
+        if (user is null)
         {
             context.Fail();
             return;
         }
 
-        if(!await _dbContext.Organizations.Include(x => x.Members)
-            .AnyAsync(x => x.Id == organizationId && x.Members.Any(xx => xx.UserId == user.Id)))
+        if(!await _dbContext.Projects.Include(x => x.Members)
+            .AnyAsync(x => x.Id == projectId && x.Members.Any(xx => xx.UserId == user.Id)))
         {
             context.Fail();
             return;
