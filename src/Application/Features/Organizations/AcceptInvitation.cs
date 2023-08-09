@@ -38,7 +38,7 @@ internal class AcceptOrganizationInvitationHandler : IRequestHandler<AcceptOrgan
             return Result.Fail(result.Errors);
         }
 
-        await _dbContext.OrganizationMembers.AddAsync(result.Value);
+        await _dbContext.OrganizationMembers.AddAsync(result.Value); // TODO: has to be manually added because Members are not included, so Include members and this line can be removed
         await _dbContext.SaveChangesAsync();
 
         return Result.Ok();

@@ -42,4 +42,16 @@ public class Project : Entity<Guid>
 
         return member;
     }
+
+    public Result<ProjectMember> RemoveMember(Guid memberId) // TODO: Automatically remove the member's row (override savechanges in dbContext/repository)
+    {
+        var member = _members.FirstOrDefault(x => x.Id == memberId);
+        if (member is null)
+        {
+            return Result.Fail(new Error("Member with this ID does not exist."));
+        }
+
+        _members.Remove(member);
+        return member;
+    }
 }

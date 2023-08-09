@@ -42,4 +42,12 @@ public class ProjectsController : ControllerBase
         var result = await _mediator.Send(new AddProjectMemberCommand(projectId, model));
         return result.ToHttpResult();
     }
+
+    [HttpPost("{projectId:guid}/members/{memberId:guid}/remove")] // TODO: Use HttpDelete?
+    [Authorize("ProjectMember")]
+    public async Task<IActionResult> RemoveProjectMember([FromRoute] Guid projectId, [FromRoute] Guid memberId)
+    {
+        var result = await _mediator.Send(new RemoveProjectMemberCommand(projectId, memberId));
+        return result.ToHttpResult();
+    }
 }

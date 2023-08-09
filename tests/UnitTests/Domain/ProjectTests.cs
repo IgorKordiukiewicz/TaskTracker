@@ -51,4 +51,28 @@ public class ProjectTests
 
         result.IsFailed.Should().BeTrue();
     }
+
+    [Fact]
+    public void RemoveMember_ShouldFail_WhenMemberDoesNotExist()
+    {
+        var project = Project.Create("name", Guid.NewGuid(), Guid.NewGuid());
+
+        var result = project.RemoveMember(Guid.NewGuid());
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RemoveMember_ShouldRemoveMember_WhenMemberExists()
+    {
+        var project = Project.Create("name", Guid.NewGuid(), Guid.NewGuid());
+
+        var result = project.RemoveMember(project.Members[0].Id);
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            project.Members.Count.Should().Be(0);
+        }
+    }
 }
