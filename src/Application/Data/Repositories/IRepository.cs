@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 namespace Application.Data.Repositories;
 
 public interface IRepository<TEntity> 
-    where TEntity : Entity<Guid> // TODO: Make all entities ids guids?
+    where TEntity : Entity 
 {
     Task<TEntity?> GetById(Guid id); // TODO: Remove?
     Task<TEntity?> GetBy(Expression<Func<TEntity, bool>> predicate);

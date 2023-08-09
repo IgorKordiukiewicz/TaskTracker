@@ -27,7 +27,7 @@ public class AppDbContext : DbContext
     }
 
     public async Task AddRemoveDependents<TDependent>(IEnumerable<TDependent> actualEntities)
-        where TDependent : Entity<Guid>
+        where TDependent : Entity
     {
         var dbEntities = await Set<TDependent>().AsNoTracking().Select(x => x.Id).ToListAsync();
 

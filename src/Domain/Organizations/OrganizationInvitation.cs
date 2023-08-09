@@ -10,7 +10,7 @@ public enum OrganizationInvitationState
     // TODO: Expired, Canceled?
 }
 
-public class OrganizationInvitation : Entity<Guid>
+public class OrganizationInvitation : Entity
 {
     public Guid UserId { get; private init; }
     public Guid OrganizationId { get; private init; }

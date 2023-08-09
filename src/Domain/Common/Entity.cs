@@ -1,10 +1,10 @@
 ﻿namespace Domain.Common;
 
-public abstract class Entity<TId>
+public abstract class Entity
 {
-    public TId Id { get; private init; }
+    public Guid Id { get; private init; }
 
-    protected Entity(TId id)
+    protected Entity(Guid id)
     {
         Id = id;
     }

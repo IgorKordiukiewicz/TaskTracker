@@ -2,7 +2,7 @@
 
 namespace Domain.Users;
 
-public class User : Entity<Guid>, IAggregateRoot
+public class User : Entity, IAggregateRoot
 {
     public string AuthenticationId { get; private set; } = string.Empty;
 

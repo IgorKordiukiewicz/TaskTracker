@@ -2,7 +2,7 @@
 
 namespace Domain.Projects;
 
-public class ProjectMember : Entity<Guid>
+public class ProjectMember : Entity
 {
     public Guid UserId { get; private init; }
 

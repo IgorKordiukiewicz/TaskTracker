@@ -3,7 +3,7 @@ using FluentResults;
 
 namespace Domain.Organizations;
 
-public class Organization : Entity<Guid>, IAggregateRoot
+public class Organization : Entity, IAggregateRoot
 {
     public string Name { get; private set; } = string.Empty;
 

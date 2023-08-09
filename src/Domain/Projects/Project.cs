@@ -3,7 +3,7 @@ using FluentResults;
 
 namespace Domain.Projects;
 
-public class Project : Entity<Guid>
+public class Project : Entity
 {
     public string Name { get; private set; } = string.Empty;
     public Guid OrganizationId { get; private set; }
