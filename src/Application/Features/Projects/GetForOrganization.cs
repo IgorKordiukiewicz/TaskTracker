@@ -1,25 +1,25 @@
 ﻿namespace Application.Features.Projects;
 
-public record GetProjectsQuery(Guid OrganizationId) : IRequest<Result<ProjectsVM>>; // Rename file to GetForOrg
+public record GetProjectsForOrganizationQuery(Guid OrganizationId) : IRequest<Result<ProjectsVM>>;
 
-internal class GetProjectsQueryValidator : AbstractValidator<GetProjectsQuery>
+internal class GetProjectsForOrganizationQueryValidator : AbstractValidator<GetProjectsForOrganizationQuery>
 {
-    public GetProjectsQueryValidator()
+    public GetProjectsForOrganizationQueryValidator()
     {
         RuleFor(x => x.OrganizationId).NotEmpty();
     }
 }
 
-internal class GetProjectsHandler : IRequestHandler<GetProjectsQuery, Result<ProjectsVM>>
+internal class GetProjectsForOrganizationHandler : IRequestHandler<GetProjectsForOrganizationQuery, Result<ProjectsVM>>
 {
     private readonly AppDbContext _dbContext;
 
-    public GetProjectsHandler(AppDbContext dbContext)
+    public GetProjectsForOrganizationHandler(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public async Task<Result<ProjectsVM>> Handle(GetProjectsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<ProjectsVM>> Handle(GetProjectsForOrganizationQuery request, CancellationToken cancellationToken)
     {
         if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
         {

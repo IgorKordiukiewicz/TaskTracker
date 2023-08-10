@@ -31,7 +31,7 @@ public class ProjectsController : ControllerBase
     [Authorize("OrganizationMember")]
     public async Task<IActionResult> GetProjects(Guid organizationId)
     {
-        var result = await _mediator.Send(new GetProjectsQuery(organizationId)); // TODO: Rename file from Get to GetForOrg or sth?
+        var result = await _mediator.Send(new GetProjectsForOrganizationQuery(organizationId));
         return result.ToHttpResult();
     }
 

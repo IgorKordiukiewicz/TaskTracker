@@ -68,15 +68,15 @@ public class ProjectsTests
     }
 
     [Fact]
-    public async Task Get_ShouldFail_WhenOrganizationDoesNotExist()
+    public async Task GetForOrganization_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new GetProjectsQuery(Guid.NewGuid()));
+        var result = await _fixture.SendRequest(new GetProjectsForOrganizationQuery(Guid.NewGuid()));
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public async Task Get_ShouldReturnAListOfProjectsBelongingToOrganization()
+    public async Task GetForOrganization_ShouldReturnAListOfProjectsBelongingToOrganization()
     {
         var user = User.Create("authId", "user");
         var organization = Organization.Create("org", user.Id);
@@ -89,7 +89,7 @@ public class ProjectsTests
             await db.Projects.AddRangeAsync(new[] { project1, project2 });
         });
 
-        var result = await _fixture.SendRequest(new GetProjectsQuery(organization.Id));
+        var result = await _fixture.SendRequest(new GetProjectsForOrganizationQuery(organization.Id));
 
         using(new AssertionScope())
         {
