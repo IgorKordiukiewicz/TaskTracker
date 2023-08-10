@@ -4,6 +4,13 @@
 @inject HttpClient _httpClient
 @inject IDialogService _dialogService
 
+<MudDrawer ClipMode="DrawerClipMode.Always" Elevation="2" Open="true">
+    <MudNavMenu>
+        <MudNavLink Href="/" Match="NavLinkMatch.All">Test</MudNavLink>
+    </MudNavMenu>
+</MudDrawer>
+
+
 <h2>
     @ProjectId
 </h2>
