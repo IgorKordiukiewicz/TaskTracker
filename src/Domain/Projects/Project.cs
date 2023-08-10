@@ -30,7 +30,7 @@ public class Project : Entity
         return result;
     }
 
-    public Result<ProjectMember> AddMember(Guid userId) // only allow to add members from org
+    public Result<ProjectMember> AddMember(Guid userId)
     {
         if(_members.Any(x => x.UserId == userId))
         {
@@ -43,7 +43,7 @@ public class Project : Entity
         return member;
     }
 
-    public Result<ProjectMember> RemoveMember(Guid memberId) // TODO: Automatically remove the member's row (override savechanges in dbContext/repository)
+    public Result RemoveMember(Guid memberId)
     {
         var member = _members.FirstOrDefault(x => x.Id == memberId);
         if (member is null)
@@ -52,6 +52,6 @@ public class Project : Entity
         }
 
         _members.Remove(member);
-        return member;
+        return Result.Ok();
     }
 }
