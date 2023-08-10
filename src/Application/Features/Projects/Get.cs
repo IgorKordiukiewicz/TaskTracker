@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Projects;
 
-public record GetProjectsQuery(Guid OrganizationId) : IRequest<Result<ProjectsVM>>;
+public record GetProjectsQuery(Guid OrganizationId) : IRequest<Result<ProjectsVM>>; // Rename file to GetForOrg
 
 internal class GetProjectsQueryValidator : AbstractValidator<GetProjectsQuery>
 {

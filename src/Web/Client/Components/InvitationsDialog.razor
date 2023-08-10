@@ -1,0 +1,58 @@
+﻿<MudDialog>
+    <DialogContent>
+        @for(int i = 0; i < Invitations.Count; ++i)
+        {
+            var invitation = Invitations[i];
+            <div class="d-flex align-center" style="width: 100%;">
+                <MudText>
+                    @invitation.OrganizationName
+                </MudText>
+                <span style="width: 100px;" />
+                <div class="d-flex gap-2">
+                    <MudIconButton Variant="Variant.Outlined" Color="Color.Success" OnClick="() => AcceptInvitation(invitation.Id)" Icon="@Icons.Material.Filled.Check" />
+                    <MudIconButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeclineInvitation(invitation.Id)" Icon="@Icons.Material.Filled.Clear" />
+                </div>
+            </div>
+            @if(i < Invitations.Count - 1)
+            {
+                <MudDivider Class="my-2" />
+            }
+            
+        }
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter]
+    public List<OrganizationInvitationVM> Invitations { get; set; } = null!;
+
+    [Parameter]
+    public RequestHandler RequestHandler { get; set; } = null!;
+
+    public bool AnyInvitationHandled { get; private set; } = false;
+
+    private async Task AcceptInvitation(Guid invitationId)
+    {
+        await RequestHandler.PostAsync($"organizations/invitations/{invitationId}/accept", (object?)null); // TODO: Improve handling post requests without bodies
+        HandleInvitation(invitationId);
+    }
+
+    private async Task DeclineInvitation(Guid invitationId)
+    {
+        await RequestHandler.PostAsync($"organizations/invitations/{invitationId}/decline", (object?)null);
+        HandleInvitation(invitationId);
+    }
+
+    private void HandleInvitation(Guid invitationId)
+    {
+        AnyInvitationHandled = true;
+        Invitations.RemoveAll(x => x.Id == invitationId);
+        if(!Invitations.Any())
+        {
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+}

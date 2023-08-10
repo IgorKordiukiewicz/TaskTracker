@@ -7,48 +7,40 @@
 
 @if(_organizations is not null)
 {
-    <MudPaper>
-        <MudList Clickable="true">
-            @foreach (var organization in _organizations.Organizations)
-            {
-                <MudListItem Text="@organization.Name" OnClick="() => SelectOrganization(organization.Id)" />
-            }
-        </MudList>
-    </MudPaper>
-}
-@if(_invitations is not null)
-{
-    <MudPaper Class="mt-2">
-        <MudList>
-            @foreach(var invitation in _invitations.Invitations)
-            {
-                <MudListItem Class="d-flex">
-                    <MudText>
-                        @invitation.OrganizationName
-                    </MudText>
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="() => AcceptInvitation(invitation.Id)">
-                        Accept
-                    </MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => DeclineInvitation(invitation.Id)">
-                        Decline
-                    </MudButton>
-                </MudListItem>
-            }
-        </MudList>
-    </MudPaper>
+    <div class="d-flex align-center">
+        <MudText Typo="Typo.h5">
+            Organizations
+        </MudText>
+        <MudIconButton Icon="@GetOrganizationInvitationsIcon()" Disabled="@(!HasOrganizationInvitations())" OnClick="OpenInvitationsDialog"></MudIconButton>
+    </div>
+    <MudDivider Class="mb-4 mt-1" />
+    <MudGrid>
+        @foreach (var organization in _organizations.Organizations)
+        {
+            <MudItem lg="3" sm="6">
+                <MudCard Style="height: 200px; cursor: pointer;" onclick="@(() => SelectOrganization(organization.Id))">
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">
+                            @organization.Name
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
 }
 
 @code {
     private RequestHandler _requestHandler = null!;
 
-    private OrganizationsForUserVM? _organizations;
     private OrganizationInvitationsVM? _invitations;
+    private OrganizationsForUserVM? _organizations;
 
     protected override async Task OnInitializedAsync()
     {
         _requestHandler = new(_httpClient, _dialogService);
-        _organizations = await _requestHandler.GetAsync<OrganizationsForUserVM>("organizations/user");
-        _invitations = await _requestHandler.GetAsync<OrganizationInvitationsVM>("organizations/invitations/user");
+
+        await UpdateViewModels();
     }
 
     private void SelectOrganization(Guid organizationId)
@@ -56,13 +48,42 @@
         _navManager.NavigateTo($"/org/{organizationId}");
     }
 
-    private async Task AcceptInvitation(Guid invitationId)
+    private async Task OpenInvitationsDialog()
     {
-        await _requestHandler.PostAsync($"organizations/invitations/{invitationId}/accept", (object?)null); // TODO: Improve handling post requests without bodies
+        if(_invitations is null)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters();
+        parameters.Add("Invitations", _invitations.Invitations.ToList());
+        parameters.Add("RequestHandler", _requestHandler);
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            MaxWidth = MaxWidth.Small,
+        };
+
+        var dialogRef = await _dialogService.ShowAsync<InvitationsDialog>("Invitations", parameters, options);
+        var dialog = (dialogRef.Dialog as InvitationsDialog)!;
+        var result = await dialogRef.Result;
+
+        if(dialog.AnyInvitationHandled)
+        {
+            await UpdateViewModels();
+        }
     }
 
-    private async Task DeclineInvitation(Guid invitationId)
+    private async Task UpdateViewModels()
     {
-        await _requestHandler.PostAsync($"organizations/invitations/{invitationId}/decline", (object?)null);
+        _organizations = await _requestHandler.GetAsync<OrganizationsForUserVM>("organizations/user");
+        _invitations = await _requestHandler.GetAsync<OrganizationInvitationsVM>("organizations/invitations/user");
     }
+
+    private bool HasOrganizationInvitations() 
+        => _invitations is not null && _invitations.Invitations.Any();
+
+    private string GetOrganizationInvitationsIcon() 
+        => HasOrganizationInvitations() ? @Icons.Material.Filled.NotificationsActive : Icons.Material.Filled.NotificationsNone;
 }
