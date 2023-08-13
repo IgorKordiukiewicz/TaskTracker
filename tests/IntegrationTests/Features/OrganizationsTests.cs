@@ -245,4 +245,29 @@ public class OrganizationsTests
             });
         }
     }
+
+    [Fact]
+    public async Task GetMembers_ShouldReturnOrganizationMembers()
+    {
+        var user1 = User.Create("123", "user1");
+        var user2 = User.Create("1234", "user2");
+        var organization = Organization.Create("org", user1.Id);
+
+        await _fixture.SeedDb(async db =>
+        {
+            await db.Users.AddRangeAsync(new[] { user1, user2 });
+            await db.Organizations.AddAsync(organization);
+        });
+
+        var result = await _fixture.SendRequest(new GetOrganizationMembersQuery(organization.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Members.Should().BeEquivalentTo(new[]
+            {
+                new OrganizationMemberVM(organization.Members[0].Id, user1.Name)
+            });
+        }
+    }
 }
