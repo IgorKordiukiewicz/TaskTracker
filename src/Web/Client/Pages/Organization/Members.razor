@@ -1,0 +1,37 @@
+﻿@page "/org/{organizationId:guid}/members"
+@layout OrganizationLayout
+
+@inject HttpClient _httpClient
+@inject IDialogService _dialogService
+
+@if(_membersVM is not null)
+{
+    <MudPaper>
+        <MudList>
+            @foreach (var member in _membersVM.Members)
+            {
+                <MudListItem Icon="@Icons.Material.Filled.Person">
+                    @member.Name
+                </MudListItem>
+            }
+        </MudList>
+    </MudPaper>
+}
+
+@code {
+    [Parameter]
+    public Guid OrganizationId { get; init; }
+
+    // TODO: Assign Layout.OrganizationId here too?
+
+    private RequestHandler _requestHandler = null!;
+
+    private OrganizationMembersVM? _membersVM;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _requestHandler = new(_httpClient, _dialogService);
+
+        _membersVM = await _requestHandler.GetAsync<OrganizationMembersVM>($"organizations/{OrganizationId}/members");
+    }
+}

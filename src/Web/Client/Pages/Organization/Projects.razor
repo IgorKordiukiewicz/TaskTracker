@@ -1,0 +1,58 @@
+﻿@page "/org/{organizationId:guid}/projects"
+@page "/org/{organizationId:guid}/"
+@layout OrganizationLayout 
+@attribute [Authorize]
+
+@inject HttpClient _httpClient
+@inject IDialogService _dialogService
+@inject NavigationManager _navManager
+
+
+@if (_projectsVM is not null)
+{
+    <MudGrid>
+    @foreach (var project in _projectsVM.Projects)
+    {
+            <MudItem lg="3" sm="6">
+                <MudCard Style="height: 200px; cursor: pointer;" onclick="@(() => SelectProject(project.Id))">
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">
+                            @project.Name
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+    }
+    </MudGrid>
+}
+
+@code {
+    [Parameter]
+    public Guid OrganizationId { get; init; }
+
+    [CascadingParameter]
+    public OrganizationLayout Layout { get; set; } = null!;
+
+    private RequestHandler _requestHandler = null!;
+
+    private ProjectsVM? _projectsVM;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Layout.OrganizationId = OrganizationId;
+
+        _requestHandler = new(_httpClient, _dialogService);
+
+        await UpdateProjectsList();
+    }
+
+    private async Task UpdateProjectsList()
+    {
+        _projectsVM = await _requestHandler.GetAsync<ProjectsVM>($"projects/organization/{OrganizationId}");
+    }
+
+    private void SelectProject(Guid projectId)
+    {
+        _navManager.NavigateTo($"/projects/{projectId}");
+    }
+}

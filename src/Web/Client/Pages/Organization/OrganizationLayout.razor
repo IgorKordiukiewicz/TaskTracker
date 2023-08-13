@@ -1,0 +1,21 @@
+﻿@inherits LayoutComponentBase
+@layout MainLayout
+
+<CascadingValue Value="this">
+    <MudDrawer ClipMode="DrawerClipMode.Always" Elevation="2" Open="true">
+        <MudNavMenu>
+            <MudNavLink Href="@GetPageRoute("projects")">Projects</MudNavLink>
+            <MudNavLink Href="@GetPageRoute("members")">Members</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    @Body
+</CascadingValue>
+
+
+@code {
+    public Guid OrganizationId { get; set; }
+
+    private string GetPageRoute(string page)
+        => $"org/{OrganizationId}/{page}";
+}
