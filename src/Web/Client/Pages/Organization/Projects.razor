@@ -11,8 +11,16 @@
 @if (_projectsVM is not null)
 {
     <MudGrid>
-    @foreach (var project in _projectsVM.Projects)
-    {
+        <MudItem lg="3" sm="6">
+            <MudPaper Class="d-flex flex-column align-center justify-center" Style="height: 200px; cursor: pointer;" onclick="@(() => OpenCreateProjectDialog())">
+                <MudText Align="Align.Center">
+                    Create a new project
+                </MudText>
+                <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Large" />
+            </MudPaper>
+        </MudItem>
+        @foreach (var project in _projectsVM.Projects)
+        {
             <MudItem lg="3" sm="6">
                 <MudCard Style="height: 200px; cursor: pointer;" onclick="@(() => SelectProject(project.Id))">
                     <MudCardContent>
@@ -22,9 +30,24 @@
                     </MudCardContent>
                 </MudCard>
             </MudItem>
-    }
+        }
     </MudGrid>
 }
+
+<MudDialog IsVisible="@_createProjectForm.Visible" >
+    <TitleContent>
+        <MudText>
+            Create a new project
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@_createProjectForm.Name" Label="Name" Required="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" OnClick="CloseCreateProjectDialog">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_createProjectForm.IsValid())" OnClick="CreateProject">Create</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     [Parameter]
@@ -36,6 +59,15 @@
     private RequestHandler _requestHandler = null!;
 
     private ProjectsVM? _projectsVM;
+
+    private record CreateProjectFormData
+    {
+        public bool Visible { get; set; } = false;
+        public string Name { get; set; } = string.Empty;
+
+        public bool IsValid() => !string.IsNullOrWhiteSpace(Name);
+    }
+    private CreateProjectFormData _createProjectForm = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -54,5 +86,28 @@
     private void SelectProject(Guid projectId)
     {
         _navManager.NavigateTo($"/projects/{projectId}");
+    }
+
+    private void OpenCreateProjectDialog()
+    {
+        _createProjectForm.Visible = true;
+    }
+
+    private void CloseCreateProjectDialog()
+    {
+        _createProjectForm.Visible = false;
+    }
+
+    private async Task CreateProject()
+    {
+        if(!_createProjectForm.IsValid())
+        {
+            return;
+        }
+
+        var model = new CreateProjectDto(_createProjectForm.Name);
+        await _requestHandler.PostAsync($"projects/organization/{OrganizationId}", model);
+        await UpdateProjectsList();
+        _createProjectForm.Visible = false;
     }
 }

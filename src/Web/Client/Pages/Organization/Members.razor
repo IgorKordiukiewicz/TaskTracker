@@ -1,5 +1,6 @@
 ﻿@page "/org/{organizationId:guid}/members"
 @layout OrganizationLayout
+@attribute [Authorize]
 
 @inject HttpClient _httpClient
 @inject IDialogService _dialogService
