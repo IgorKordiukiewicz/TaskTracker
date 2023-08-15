@@ -51,7 +51,7 @@
             return Enumerable.Empty<UserSearchVM>();
         }
 
-        var url = $"users/not-in-org/{OrganizationId}"
+        var url = $"users/available-for-invitation/organization/{OrganizationId}"
             .SetQueryParam("searchValue", value)
             .ToString();
         var users = await _requestHandler.GetAsync<UsersSearchVM>(url);

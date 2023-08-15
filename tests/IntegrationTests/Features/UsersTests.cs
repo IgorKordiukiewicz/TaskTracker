@@ -73,20 +73,30 @@ public class UsersTests
     }
 
     [Fact]
-    public async Task GetUsersNotInOrganization_ShouldReturnUsersNotInOrganization_WhenNameMatchesSearchQuery()
+    public async Task GetUsersAvailableForOrganizationInvitation_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetUsersAvailableForOrganizationInvitationQuery(Guid.NewGuid(), "user"));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetUsersAvailableForOrganizationInvitation_ShouldReturnUsersNotInOrganizationAndWithoutPendingInvitations_WhenNameMatchesSearchQuery()
     {
         var user1 = User.Create("111", "user1");
         var user2 = User.Create("222", "user2");
-        var user3 = User.Create("333", "abc");
+        var user3 = User.Create("333", "user3");
+        var user4 = User.Create("444", "abc");
         var org = Organization.Create("org", user1.Id);
+        _ = org.CreateInvitation(user3.Id);
 
         await _fixture.SeedDb(async db =>
         {
-            await db.Users.AddRangeAsync(new[] { user1, user2, user3 });
+            await db.Users.AddRangeAsync(new[] { user1, user2, user3, user4 });
             await db.Organizations.AddAsync(org);
         });
 
-        var result = await _fixture.SendRequest(new GetUsersNotInOrganizationQuery(org.Id, "user"));
+        var result = await _fixture.SendRequest(new GetUsersAvailableForOrganizationInvitationQuery(org.Id, "user"));
 
         using(new AssertionScope())
         {

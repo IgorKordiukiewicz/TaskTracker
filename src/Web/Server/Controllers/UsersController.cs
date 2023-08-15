@@ -33,11 +33,11 @@ public class UsersController : ControllerBase
         return result.ToHttpResult(201);
     }
 
-    [HttpGet("not-in-org/{organizationId:guid}")]
+    [HttpGet("available-for-invitation/organization/{organizationId:guid}")]
     [Authorize("OrganizationMember")]
     public async Task<IActionResult> GetUsersNotInOrganization([FromRoute] Guid organizationId, [FromQuery] string searchValue)
     {
-        var result = await _mediator.Send(new GetUsersNotInOrganizationQuery(organizationId, searchValue));
+        var result = await _mediator.Send(new GetUsersAvailableForOrganizationInvitationQuery(organizationId, searchValue));
         return result.ToHttpResult();
     }
 }
