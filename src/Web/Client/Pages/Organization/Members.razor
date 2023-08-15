@@ -4,6 +4,12 @@
 @inject HttpClient _httpClient
 @inject IDialogService _dialogService
 
+<div class="d-flex gap-2 align-center">
+    <MudAutocomplete T="UserSearchVM" Label="Invite Users" @bind-Value="_selectedUserForInvitation" SearchFunc="SearchUsers"
+    ResetValueOnEmptyText="true" Class="mb-4" AdornmentIcon="@Icons.Material.Filled.Search" ToStringFunc="(user => user.Name)" />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserForInvitation is null)" OnClick="SendInvitation">Invite</MudButton>
+</div>
+
 @if(_membersVM is not null)
 {
     <MudPaper>
@@ -22,16 +28,46 @@
     [Parameter]
     public Guid OrganizationId { get; init; }
 
+    // TODO: Display a list of pending invitations (and ability to expand to whole history of invitations)
+
     // TODO: Assign Layout.OrganizationId here too?
 
     private RequestHandler _requestHandler = null!;
 
     private OrganizationMembersVM? _membersVM;
+    private UserSearchVM? _selectedUserForInvitation;
 
     protected override async Task OnInitializedAsync()
     {
         _requestHandler = new(_httpClient, _dialogService);
 
         _membersVM = await _requestHandler.GetAsync<OrganizationMembersVM>($"organizations/{OrganizationId}/members");
+    }
+
+    private async Task<IEnumerable<UserSearchVM>> SearchUsers(string value)
+    {
+        if(string.IsNullOrWhiteSpace(value))
+        {
+            return Enumerable.Empty<UserSearchVM>();
+        }
+
+        var url = $"users/not-in-org/{OrganizationId}"
+            .SetQueryParam("searchValue", value)
+            .ToString();
+        var users = await _requestHandler.GetAsync<UsersSearchVM>(url);
+        return users?.Users ?? Enumerable.Empty<UserSearchVM>();
+    }
+
+    private async Task SendInvitation()
+    {
+        if(_selectedUserForInvitation is null)
+        {
+            return;
+        }
+
+        var model = new CreateOrganizationInvitationDto(_selectedUserForInvitation.Id);
+        await _requestHandler.PostAsync($"organizations/{OrganizationId}/invitations", model);
+
+        _selectedUserForInvitation = null;
     }
 }
