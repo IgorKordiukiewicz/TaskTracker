@@ -17,8 +17,11 @@
         <MudList>
             @foreach (var member in _membersVM.Members)
             {
-                <MudListItem Icon="@Icons.Material.Filled.Person">
-                    @member.Name
+                <MudListItem Icon="@Icons.Material.Filled.Person"> <!--TODO: Add effect on hover, and show the delete button only on hover-->
+                    <div class="d-flex justify-space-between align-center">
+                        @member.Name
+                        <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)"></MudIconButton>
+                    </div>
                 </MudListItem>
             }
         </MudList>
@@ -42,6 +45,11 @@
     {
         _requestHandler = new(_httpClient, _dialogService);
 
+        await UpdateMembersVM();
+    }
+
+    private async Task UpdateMembersVM()
+    {
         _membersVM = await _requestHandler.GetAsync<OrganizationMembersVM>($"organizations/{OrganizationId}/members");
     }
 
@@ -70,5 +78,11 @@
         await _requestHandler.PostAsync($"organizations/{OrganizationId}/invitations", model);
 
         _selectedUserForInvitation = null;
+    }
+
+    private async Task RemoveMember(Guid memberId)
+    {
+        await _requestHandler.PostAsync($"organizations/{OrganizationId}/members/{memberId}/remove", (object?)null);
+        await UpdateMembersVM();
     }
 }
