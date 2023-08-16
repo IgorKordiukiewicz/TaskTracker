@@ -1,12 +1,13 @@
 ﻿namespace Application.Features.Projects;
 
-public record GetProjectsForOrganizationQuery(Guid OrganizationId) : IRequest<Result<ProjectsVM>>;
+public record GetProjectsForOrganizationQuery(Guid OrganizationId, string UserAuthId) : IRequest<Result<ProjectsVM>>;
 
 internal class GetProjectsForOrganizationQueryValidator : AbstractValidator<GetProjectsForOrganizationQuery>
 {
     public GetProjectsForOrganizationQueryValidator()
     {
         RuleFor(x => x.OrganizationId).NotEmpty();
+        RuleFor(x => x.UserAuthId).NotEmpty();
     }
 }
 
@@ -26,8 +27,13 @@ internal class GetProjectsForOrganizationHandler : IRequestHandler<GetProjectsFo
             return Result.Fail<ProjectsVM>(new Error("Organization with this ID does not exist."));
         }
 
+        var userId = (await _dbContext.Users
+            .AsNoTracking()
+            .FirstAsync(x => x.AuthenticationId == request.UserAuthId)).Id;
+
         var projects = await _dbContext.Projects
-            .Where(x => x.OrganizationId == request.OrganizationId)
+            .Include(x => x.Members)
+            .Where(x => x.OrganizationId == request.OrganizationId && x.Members.Any(xx => xx.UserId == userId))
             .Select(x => new ProjectVM
             {
                 Id = x.Id,

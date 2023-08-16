@@ -27,11 +27,11 @@ public class ProjectsController : ControllerBase
         return result.ToHttpResult();
     }
 
-    [HttpGet("organization/{organizationId:guid}")]
+    [HttpGet("organization/{organizationId:guid}/user")]
     [Authorize("OrganizationMember")]
     public async Task<IActionResult> GetProjects(Guid organizationId)
     {
-        var result = await _mediator.Send(new GetProjectsForOrganizationQuery(organizationId));
+        var result = await _mediator.Send(new GetProjectsForOrganizationQuery(organizationId, User.GetUserAuthenticationId()));
         return result.ToHttpResult();
     }
 

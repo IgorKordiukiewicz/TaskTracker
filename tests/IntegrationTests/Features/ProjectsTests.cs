@@ -70,26 +70,30 @@ public class ProjectsTests
     [Fact]
     public async Task GetForOrganization_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new GetProjectsForOrganizationQuery(Guid.NewGuid()));
+        var result = await _fixture.SendRequest(new GetProjectsForOrganizationQuery(Guid.NewGuid(), "123"));
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public async Task GetForOrganization_ShouldReturnAListOfProjectsBelongingToOrganization()
+    public async Task GetForOrganization_ShouldReturnAListOfProjectsUserIsAMemberOfInGivenOrganization()
     {
-        var user = User.Create("authId", "user");
-        var organization = Organization.Create("org", user.Id);
-        var project1 = Project.Create("project1", organization.Id, user.Id);
-        var project2 = Project.Create("project2", organization.Id, user.Id);
+        var user1 = User.Create("123", "user1");
+        var user2 = User.Create("456", "user2");
+        var organization = Organization.Create("org", user1.Id);
+        var invitation = organization.CreateInvitation(user2.Id).Value;
+        _ = organization.AcceptInvitation(invitation.Id);
+        var project1 = Project.Create("project1", organization.Id, user1.Id);
+        var project2 = Project.Create("project2", organization.Id, user1.Id);
+        var project3 = Project.Create("project3", organization.Id, user2.Id);
         await _fixture.SeedDb(async db =>
         {
-            await db.Users.AddAsync(user);
+            await db.Users.AddRangeAsync(new[] { user1, user2 });
             await db.Organizations.AddAsync(organization);
-            await db.Projects.AddRangeAsync(new[] { project1, project2 });
+            await db.Projects.AddRangeAsync(new[] { project1, project2, project3 });
         });
 
-        var result = await _fixture.SendRequest(new GetProjectsForOrganizationQuery(organization.Id));
+        var result = await _fixture.SendRequest(new GetProjectsForOrganizationQuery(organization.Id, "123"));
 
         using(new AssertionScope())
         {

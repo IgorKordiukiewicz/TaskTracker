@@ -80,7 +80,7 @@
 
     private async Task UpdateProjectsList()
     {
-        _projectsVM = await _requestHandler.GetAsync<ProjectsVM>($"projects/organization/{OrganizationId}");
+        _projectsVM = await _requestHandler.GetAsync<ProjectsVM>($"projects/organization/{OrganizationId}/user");
     }
 
     private void SelectProject(Guid projectId)
