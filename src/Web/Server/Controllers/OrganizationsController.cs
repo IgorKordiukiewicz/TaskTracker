@@ -70,4 +70,12 @@ public class OrganizationsController : ControllerBase
         var result = await _mediator.Send(new GetOrganizationMembersQuery(organizationId));
         return result.ToHttpResult();
     }
+
+    [HttpPost("{organizationId:guid}/members/{memberId:guid}/remove")]
+    [Authorize("OrganizationMember")]
+    public async Task<IActionResult> RemoveOrganizationMember([FromRoute] Guid organizationId, [FromRoute] Guid memberId)
+    {
+        var result = await _mediator.Send(new RemoveOrganizationMemberCommand(organizationId, memberId));
+        return result.ToHttpResult();
+    }
 }

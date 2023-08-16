@@ -270,4 +270,39 @@ public class OrganizationsTests
             });
         }
     }
+
+    [Fact]
+    public async Task RemoveMember_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new RemoveOrganizationMemberCommand(Guid.NewGuid(), Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task RemoveMember_ShouldRemoveMember_WhenOrganizationExists()
+    {
+        var user1 = User.Create("123", "user1");
+        var user2 = User.Create("456", "user2");
+        var organization = Organization.Create("org", user1.Id);
+        var invitation = organization.CreateInvitation(user2.Id).Value;
+        organization.AcceptInvitation(invitation.Id);
+
+        await _fixture.SeedDb(async db =>
+        {
+            await db.Users.AddRangeAsync(new[] { user1, user2 });
+            await db.Organizations.AddAsync(organization);
+        });
+
+        var membersBefore = await _fixture.CountAsync<OrganizationMember>();
+
+        var result = await _fixture.SendRequest(new RemoveOrganizationMemberCommand(organization.Id, 
+            organization.Members.First(x => x.UserId == user2.Id).Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<OrganizationMember>()).Should().Be(membersBefore - 1);
+        }
+    }
 }

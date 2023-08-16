@@ -78,6 +78,18 @@ public class Organization : Entity, IAggregateRoot
         return Result.Ok();
     }
 
+    public Result RemoveMember(Guid memberId) // TODO: Don't allow removing owner
+    {
+        var member = _members.FirstOrDefault(x => x.Id == memberId);
+        if (member is null)
+        {
+            return Result.Fail(new Error("Member with this ID does not exist."));
+        }
+
+        _members.Remove(member);
+        return Result.Ok();
+    }
+
     private Result<OrganizationInvitation> GetInvitation(Guid invitationId)
     {
         var invitation = _invitations.FirstOrDefault(x => x.Id == invitationId);

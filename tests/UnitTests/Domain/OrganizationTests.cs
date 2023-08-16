@@ -167,4 +167,32 @@ public class OrganizationTests
 
         result.IsFailed.Should().BeTrue();
     }
+
+    [Fact]
+    public void RemoveMember_ShouldFail_WhenMemberDoesNotExist()
+    {
+        var organization = Organization.Create("Name", Guid.NewGuid());
+
+        var result = organization.RemoveMember(Guid.NewGuid());
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RemoveMember_ShouldRemoveMember_WhenMemberExists()
+    {
+        var organization = Organization.Create("Name", Guid.NewGuid());
+        var userId = Guid.NewGuid();
+        var invitation = organization.CreateInvitation(userId).Value;
+        organization.AcceptInvitation(invitation.Id);
+        var memberId = organization.Members.First(x => x.UserId == userId).Id;
+
+        var result = organization.RemoveMember(memberId);
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            organization.Members.Count.Should().Be(1);
+        }
+    }
 }
