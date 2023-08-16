@@ -82,7 +82,7 @@
 
     private async Task RemoveMember(Guid memberId)
     {
-        await _requestHandler.PostAsync($"organizations/{OrganizationId}/members/{memberId}/remove", (object?)null);
+        await _requestHandler.PostAsync($"organizations/{OrganizationId}/members/{memberId}/remove");
         await UpdateMembersVM();
     }
 }

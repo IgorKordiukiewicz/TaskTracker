@@ -36,13 +36,13 @@
 
     private async Task AcceptInvitation(Guid invitationId)
     {
-        await RequestHandler.PostAsync($"organizations/invitations/{invitationId}/accept", (object?)null); // TODO: Improve handling post requests without bodies
+        await RequestHandler.PostAsync($"organizations/invitations/{invitationId}/accept");
         HandleInvitation(invitationId);
     }
 
     private async Task DeclineInvitation(Guid invitationId)
     {
-        await RequestHandler.PostAsync($"organizations/invitations/{invitationId}/decline", (object?)null);
+        await RequestHandler.PostAsync($"organizations/invitations/{invitationId}/decline");
         HandleInvitation(invitationId);
     }
 

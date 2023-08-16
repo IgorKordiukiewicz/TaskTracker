@@ -14,47 +14,33 @@
         _dialogService = dialogService;
     }
 
-    public async Task<TResponse?> GetAsync<TResponse>(string url, Headers? headers = null)
+    public async Task<TResponse?> GetAsync<TResponse>(string url)
     {
-        var requestMessage = new HttpRequestMessage
-        {
-            Method = HttpMethod.Get,
-            RequestUri = new Uri(_httpClient.BaseAddress + url),
-        };
-        AddHeaders(requestMessage, headers);
+        var requestMessage = CreateRequestMessage(HttpMethod.Get, url);
 
         return await GetResponseContent<TResponse>(await _httpClient.SendAsync(requestMessage));    
     }
 
-    public async Task<TResponse?> PostAsync<TResponse, TBody>(string url, TBody body, Headers? headers = null)
+    public async Task<TResponse?> PostAsync<TResponse>(string url)
+        => await PostAsync<TResponse, object>(url, (object?)null);
+
+    public async Task<TResponse?> PostAsync<TResponse, TBody>(string url, TBody? body)
         where TBody : class
     {
-        var json = JsonSerializer.Serialize(body);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var requestMessage = new HttpRequestMessage
-        {
-            Method = HttpMethod.Post,
-            RequestUri = new Uri(_httpClient.BaseAddress + url),
-            Content = content,
-        };
-        AddHeaders(requestMessage, headers);
+        var requestMessage = CreateRequestMessage(HttpMethod.Post, url);
+        SetRequestMessageContent(requestMessage, body);
 
         return await GetResponseContent<TResponse>(await _httpClient.SendAsync(requestMessage));
     }
 
-    public async Task PostAsync<TBody>(string url, TBody body, Headers? headers = null)
-    {
-        var json = JsonSerializer.Serialize(body);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+    public async Task PostAsync(string url)
+        => await PostAsync(url, (object?)null);
 
-        var requestMessage = new HttpRequestMessage
-        {
-            Method = HttpMethod.Post,
-            RequestUri = new Uri(_httpClient.BaseAddress + url),
-            Content = content,
-        };
-        AddHeaders(requestMessage, headers);
+    public async Task PostAsync<TBody>(string url, TBody? body)
+        where TBody : class
+    {
+        var requestMessage = CreateRequestMessage(HttpMethod.Post, url);
+        SetRequestMessageContent(requestMessage, body);
 
         var response = await _httpClient.SendAsync(requestMessage);
 
@@ -77,17 +63,24 @@
         }
     }
 
-    private void AddHeaders(HttpRequestMessage requestMessage, IEnumerable<(string Name, string Value)>? headers = null)
+    private HttpRequestMessage CreateRequestMessage(HttpMethod method, string url)
+        => new HttpRequestMessage()
+        {
+            Method = method,
+            RequestUri = new Uri(_httpClient.BaseAddress + url)
+        };
+
+    private void SetRequestMessageContent<TBody>(HttpRequestMessage message, TBody? body)
+        where TBody : class
     {
-        if(headers is null)
+        if(body is null)
         {
             return;
         }
 
-        foreach (var (name, value) in headers)
-        {
-            requestMessage.Headers.Add(name, value);
-        }
+        var json = JsonSerializer.Serialize(body);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        message.Content = content;
     }
 
     private async Task DisplayErrorMessageBox(HttpResponseMessage response)
