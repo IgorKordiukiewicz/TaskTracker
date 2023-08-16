@@ -5,6 +5,16 @@
 @inject HttpClient _httpClient
 @inject IDialogService _dialogService
 
+<style>
+    .show-on-hover {
+        visibility: hidden;
+    }
+
+    .show-on-hover-parent:hover .show-on-hover {
+        visibility: visible;
+    }
+</style>
+
 <div class="d-flex gap-2 align-center">
     <MudAutocomplete T="UserSearchVM" Label="Invite Users" @bind-Value="_selectedUserForInvitation" SearchFunc="SearchUsers"
     ResetValueOnEmptyText="true" Class="mb-4" AdornmentIcon="@Icons.Material.Filled.Search" ToStringFunc="(user => user.Name)" />
@@ -17,10 +27,10 @@
         <MudList>
             @foreach (var member in _membersVM.Members)
             {
-                <MudListItem Icon="@Icons.Material.Filled.Person"> <!--TODO: Add effect on hover, and show the delete button only on hover-->
-                    <div class="d-flex justify-space-between align-center">
+                <MudListItem Icon="@Icons.Material.Filled.Person">
+                    <div class="d-flex justify-space-between align-center show-on-hover-parent">
                         @member.Name
-                        <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)"></MudIconButton>
+                        <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)" Class="show-on-hover"></MudIconButton>
                     </div>
                 </MudListItem>
             }
