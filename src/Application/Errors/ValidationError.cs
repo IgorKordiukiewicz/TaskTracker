@@ -3,7 +3,7 @@ using FluentValidation.Results;
 
 namespace Application.Errors;
 
-public class ValidationError : Error
+public class ValidationError : ApplicationError
 {
     public ValidationError(IEnumerable<ValidationFailure> validationFailures)
         : base(CreateMessage(validationFailures)) { }

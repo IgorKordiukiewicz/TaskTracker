@@ -1,4 +1,5 @@
 ﻿using Application.Data.Repositories;
+using Application.Errors;
 using Domain.Users;
 
 namespace Application.Features.Users;
@@ -27,7 +28,7 @@ internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result
     {
         if(await _userRepository.Exists(x => x.AuthenticationId == request.Model.AuthenticationId))
         {
-            return Result.Fail(new Error("User is already registered in the database."));
+            return Result.Fail(new ApplicationError("User is already registered in the database."));
         }
 
         var user = User.Create(request.Model.AuthenticationId, request.Model.Name);

@@ -1,4 +1,6 @@
-﻿namespace Application.Features.Users;
+﻿using Application.Errors;
+
+namespace Application.Features.Users;
 
 public record GetUsersAvailableForOrganizationInvitationQuery(Guid OrganizationId, string SearchValue) : IRequest<Result<UsersSearchVM>>;
 
@@ -30,7 +32,7 @@ internal class GetUsersAvailableForOrganizationInvitationHandler : IRequestHandl
             .FirstOrDefaultAsync(x => x.Id == request.OrganizationId);
         if(organization is null)
         {
-            return Result.Fail<UsersSearchVM>(new Error("Organization with this ID does not exist."));
+            return Result.Fail<UsersSearchVM>(new ApplicationError("Organization with this ID does not exist."));
         }
 
         var membersUsers = organization.Members.Select(x => x.UserId);

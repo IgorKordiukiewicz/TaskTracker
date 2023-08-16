@@ -1,4 +1,5 @@
 ﻿using Domain.Common;
+using Domain.Errors;
 using FluentResults;
 
 namespace Domain.Organizations;
@@ -39,12 +40,12 @@ public class Organization : Entity, IAggregateRoot
     {
         if(_members.Any(x => x.UserId == userId))
         {
-            return Result.Fail<OrganizationInvitation>(new Error("User is already a member of this organization."));
+            return Result.Fail<OrganizationInvitation>(new DomainError("User is already a member of this organization."));
         }
 
         if(_invitations.Any(x => x.UserId == userId && x.State == OrganizationInvitationState.Pending))
         {
-            return Result.Fail<OrganizationInvitation>(new Error("There already exists a pending invitation for this user."));
+            return Result.Fail<OrganizationInvitation>(new DomainError("There already exists a pending invitation for this user."));
         }
         
         var invitation = OrganizationInvitation.Create(userId, Id);
@@ -83,7 +84,7 @@ public class Organization : Entity, IAggregateRoot
         var member = _members.FirstOrDefault(x => x.Id == memberId);
         if (member is null)
         {
-            return Result.Fail(new Error("Member with this ID does not exist."));
+            return Result.Fail(new DomainError("Member with this ID does not exist."));
         }
 
         _members.Remove(member);
@@ -95,12 +96,12 @@ public class Organization : Entity, IAggregateRoot
         var invitation = _invitations.FirstOrDefault(x => x.Id == invitationId);
         if (invitation is null)
         {
-            return Result.Fail(new Error("Invitation with this ID does not exist."));
+            return Result.Fail(new DomainError("Invitation with this ID does not exist."));
         }
 
         if (invitation.State != OrganizationInvitationState.Pending)
         {
-            return Result.Fail(new Error("Invitation is not in the correct state."));
+            return Result.Fail(new DomainError("Invitation is not in the correct state."));
         }
 
         return invitation;

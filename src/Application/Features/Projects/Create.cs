@@ -1,4 +1,5 @@
 ﻿using Application.Data.Repositories;
+using Application.Errors;
 using Domain.Projects;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,12 +32,12 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
     {
         if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
         {
-            return Result.Fail<Guid>(new Error("Organization with this ID does not exist."));
+            return Result.Fail<Guid>(new ApplicationError("Organization with this ID does not exist."));
         }
 
         if(await _projectRepository.Exists(x => x.OrganizationId == request.OrganizationId && x.Name == request.Model.Name))
         {
-            return Result.Fail<Guid>(new Error("Project with the same name already exists in this organization."));
+            return Result.Fail<Guid>(new ApplicationError("Project with the same name already exists in this organization."));
         }
 
         var userId = (await _dbContext.Users

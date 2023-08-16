@@ -1,4 +1,5 @@
 ﻿using Application.Data.Repositories;
+using Application.Errors;
 using Domain.Projects;
 
 namespace Application.Features.Projects;
@@ -30,7 +31,7 @@ internal class AddProjectMemberHandler : IRequestHandler<AddProjectMemberCommand
         var project = await _projectRepository.GetById(request.ProjectId);
         if(project is null)
         {
-            return Result.Fail(new Error("Project with this ID does not exist."));
+            return Result.Fail(new ApplicationError("Project with this ID does not exist."));
         }
 
         var isUserAMember = await _dbContext.Organizations // TODO: Should repositories or dbContext be used when querying from other aggregates in  commands?
@@ -38,7 +39,7 @@ internal class AddProjectMemberHandler : IRequestHandler<AddProjectMemberCommand
             .AnyAsync(x => x.Id == project.OrganizationId && x.Members.Any(xx => xx.UserId == request.Model.UserId));
         if (!isUserAMember)
         {
-            return Result.Fail(new Error("User is not a member of the project's organization."));
+            return Result.Fail(new ApplicationError("User is not a member of the project's organization."));
         }
 
         var result = project.AddMember(request.Model.UserId);

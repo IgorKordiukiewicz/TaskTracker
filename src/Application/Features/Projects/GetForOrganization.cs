@@ -1,4 +1,6 @@
-﻿namespace Application.Features.Projects;
+﻿using Application.Errors;
+
+namespace Application.Features.Projects;
 
 public record GetProjectsForOrganizationQuery(Guid OrganizationId, string UserAuthId) : IRequest<Result<ProjectsVM>>;
 
@@ -24,7 +26,7 @@ internal class GetProjectsForOrganizationHandler : IRequestHandler<GetProjectsFo
     {
         if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
         {
-            return Result.Fail<ProjectsVM>(new Error("Organization with this ID does not exist."));
+            return Result.Fail<ProjectsVM>(new ApplicationError("Organization with this ID does not exist."));
         }
 
         var userId = (await _dbContext.Users

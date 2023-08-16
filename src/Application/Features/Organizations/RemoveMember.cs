@@ -1,4 +1,5 @@
 ﻿using Application.Data.Repositories;
+using Application.Errors;
 using Domain.Organizations;
 
 namespace Application.Features.Organizations;
@@ -28,7 +29,7 @@ internal class RemoveOrganizationMemberHandler : IRequestHandler<RemoveOrganizat
         var organization = await _organizationRepository.GetById(request.OrganizationId);
         if (organization is null)
         {
-            return Result.Fail(new Error("Organization with this ID does not exist."));
+            return Result.Fail(new ApplicationError("Organization with this ID does not exist."));
         }
 
         var result = organization.RemoveMember(request.MemberId);

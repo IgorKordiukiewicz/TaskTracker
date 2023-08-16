@@ -1,4 +1,5 @@
 ﻿using Domain.Common;
+using Domain.Errors;
 using FluentResults;
 
 namespace Domain.Projects;
@@ -34,7 +35,7 @@ public class Project : Entity
     {
         if(_members.Any(x => x.UserId == userId))
         {
-            return Result.Fail<ProjectMember>(new Error("User is already a member of this project."));
+            return Result.Fail<ProjectMember>(new DomainError("User is already a member of this project."));
         }
 
         var member = ProjectMember.Create(userId);
@@ -48,7 +49,7 @@ public class Project : Entity
         var member = _members.FirstOrDefault(x => x.Id == memberId);
         if (member is null)
         {
-            return Result.Fail(new Error("Member with this ID does not exist."));
+            return Result.Fail(new DomainError("Member with this ID does not exist."));
         }
 
         _members.Remove(member);

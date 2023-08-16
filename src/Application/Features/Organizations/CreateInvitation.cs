@@ -1,4 +1,5 @@
 ﻿using Application.Data.Repositories;
+using Application.Errors;
 using Domain.Organizations;
 
 namespace Application.Features.Organizations;
@@ -30,12 +31,12 @@ internal class CreateOrganizationInvitationHandler : IRequestHandler<CreateOrgan
         var organization = await _organizationRepository.GetById(request.OrganizationId);
         if (organization is null)
         {
-            return Result.Fail(new Error("Organization with this ID does not exist."));
+            return Result.Fail(new ApplicationError("Organization with this ID does not exist."));
         }
 
         if (!await _dbContext.Users.AnyAsync(x => x.Id == request.Model.UserId))
         {
-            return Result.Fail(new Error("User with this ID does not exist."));
+            return Result.Fail(new ApplicationError("User with this ID does not exist."));
         }
 
         var invitationResult = organization.CreateInvitation(request.Model.UserId);

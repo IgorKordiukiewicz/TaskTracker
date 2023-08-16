@@ -1,4 +1,5 @@
-﻿using Domain.Organizations;
+﻿using Application.Errors;
+using Domain.Organizations;
 
 namespace Application.Features.Organizations;
 
@@ -26,7 +27,7 @@ internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrg
         var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.AuthenticationId == request.UserAuthenticationId);
         if(user is null)
         {
-            return Result.Fail<OrganizationInvitationsVM>(new Error("User with this authentication ID does not exist."));
+            return Result.Fail<OrganizationInvitationsVM>(new ApplicationError("User with this authentication ID does not exist."));
         }
 
         var invitations = await _dbContext.OrganizationInvitations

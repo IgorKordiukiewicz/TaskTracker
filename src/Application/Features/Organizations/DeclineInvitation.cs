@@ -1,4 +1,5 @@
 ﻿using Application.Data.Repositories;
+using Application.Errors;
 using Domain.Organizations;
 
 namespace Application.Features.Organizations;
@@ -28,7 +29,7 @@ internal class DeclineOrganizationInvitationHandler : IRequestHandler<DeclineOrg
         var organization = await _organizationRepository.GetBy(x => x.Invitations.Any(xx => xx.Id == request.InvitationId));
         if(organization is null)
         {
-            return Result.Fail(new Error("Organization with this invitation does not exist."));
+            return Result.Fail(new ApplicationError("Organization with this invitation does not exist."));
         }
 
         var result = organization.DeclineInvitation(request.InvitationId);
