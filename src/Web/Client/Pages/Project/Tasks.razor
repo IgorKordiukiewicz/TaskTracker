@@ -1,0 +1,19 @@
+﻿@page "/project/{projectId:guid}/tasks"
+@page "/project/{projectId:guid}/"
+@layout ProjectLayout
+@attribute [Authorize]
+
+Tasks
+
+@code {
+    [Parameter]
+    public Guid ProjectId { get; init; }
+
+    [CascadingParameter]
+    public ProjectLayout Layout { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Layout.ProjectId = ProjectId;
+    }
+}

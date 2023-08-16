@@ -1,0 +1,10 @@
+﻿@page "/project/{projectId:guid}/members"
+@layout ProjectLayout
+@attribute [Authorize]
+
+Members
+
+@code {
+    [Parameter]
+    public Guid ProjectId { get; init; }
+}
