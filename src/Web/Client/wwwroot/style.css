@@ -1,0 +1,7 @@
+﻿.show-on-hover {
+    visibility: hidden;
+}
+
+.show-on-hover-parent:hover .show-on-hover {
+    visibility: visible;
+}

@@ -5,16 +5,6 @@
 @inject HttpClient _httpClient
 @inject IDialogService _dialogService
 
-<style>
-    .show-on-hover {
-        visibility: hidden;
-    }
-
-    .show-on-hover-parent:hover .show-on-hover {
-        visibility: visible;
-    }
-</style>
-
 <div class="d-flex gap-2 align-center">
     <MudAutocomplete T="UserSearchVM" Label="Invite Users" @bind-Value="_selectedUserForInvitation" SearchFunc="SearchUsers"
     ResetValueOnEmptyText="true" Class="mb-4" AdornmentIcon="@Icons.Material.Filled.Search" ToStringFunc="(user => user.Name)" />
