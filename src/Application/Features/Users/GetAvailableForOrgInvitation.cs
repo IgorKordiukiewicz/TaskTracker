@@ -1,4 +1,5 @@
 ﻿using Application.Errors;
+using Domain.Organizations;
 
 namespace Application.Features.Users;
 
@@ -36,7 +37,10 @@ internal class GetUsersAvailableForOrganizationInvitationHandler : IRequestHandl
         }
 
         var membersUsers = organization.Members.Select(x => x.UserId);
-        var usersWithPendingInvitations = organization.Invitations.Select(x => x.UserId);
+        var usersWithPendingInvitations = organization.Invitations
+            .Where(x => x.State == OrganizationInvitationState.Pending)
+            .Select(x => x.UserId)
+            .Distinct();
         var unavailableUsers = membersUsers.Concat(usersWithPendingInvitations);
 
         var searchValue = request.SearchValue.ToLower();

@@ -89,6 +89,8 @@ public class UsersTests
         var user4 = User.Create("444", "abc");
         var org = Organization.Create("org", user1.Id);
         _ = org.CreateInvitation(user3.Id);
+        var invitation = org.CreateInvitation(user2.Id).Value;
+        org.DeclineInvitation(invitation.Id);
 
         await _fixture.SeedDb(async db =>
         {
