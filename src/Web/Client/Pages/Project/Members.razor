@@ -2,9 +2,43 @@
 @layout ProjectLayout
 @attribute [Authorize]
 
-Members
+@inject HttpClient _httpClient
+@inject IDialogService _dialogService
+
+@if(_membersVM is not null)
+{
+    <MudPaper>
+        <MudList>
+            @foreach(var member in _membersVM.Members)
+            {
+                <MudListItem Icon="@Icons.Material.Filled.Person">
+                    <div class="d-flex justify-space-between align-center show-on-hover-parent">
+                        @member.Name
+                        <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" Class="show-on-hover"></MudIconButton> <!--TODO-->
+                    </div>
+                </MudListItem>
+            }
+        </MudList>
+    </MudPaper>
+}
 
 @code {
     [Parameter]
     public Guid ProjectId { get; init; }
+
+    private RequestHandler _requestHandler = null!;
+
+    private ProjectMembersVM? _membersVM;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _requestHandler = new(_httpClient, _dialogService);
+
+        await UpdateMembersVM();
+    }
+
+    private async Task UpdateMembersVM()
+    {
+        _membersVM = await _requestHandler.GetAsync<ProjectMembersVM>($"projects/{ProjectId}/members");
+    }
 }
