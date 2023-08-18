@@ -21,7 +21,7 @@ public class ProjectsController : ControllerBase
 
     [HttpPost("organization/{organizationId:guid}")]
     [Authorize("OrganizationMember")]
-    public async Task<IActionResult> CreateProject([FromRoute] Guid organizationId, [FromBody] CreateProjectDto model)
+    public async Task<IActionResult> CreateProject(Guid organizationId, [FromBody] CreateProjectDto model)
     {
         var result = await _mediator.Send(new CreateProjectCommand(organizationId, User.GetUserAuthenticationId(), model));
         return result.ToHttpResult();
@@ -37,7 +37,7 @@ public class ProjectsController : ControllerBase
 
     [HttpPost("{projectId:guid}/members")]
     [Authorize("ProjectMember")]
-    public async Task<IActionResult> AddProjectMember([FromRoute] Guid projectId, [FromBody] AddProjectMemberDto model)
+    public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberDto model)
     {
         var result = await _mediator.Send(new AddProjectMemberCommand(projectId, model));
         return result.ToHttpResult();
@@ -45,7 +45,7 @@ public class ProjectsController : ControllerBase
 
     [HttpGet("{projectId:guid}/members")]
     [Authorize("ProjectMember")]
-    public async Task<IActionResult> GetProjectMembers([FromRoute] Guid projectId) // TODO: Unify the usage of From.. attributes across the api
+    public async Task<IActionResult> GetProjectMembers(Guid projectId)
     {
         var result = await _mediator.Send(new GetProjectMembersQuery(projectId));
         return result.ToHttpResult();
@@ -53,7 +53,7 @@ public class ProjectsController : ControllerBase
 
     [HttpPost("{projectId:guid}/members/{memberId:guid}/remove")] // TODO: Use HttpDelete?
     [Authorize("ProjectMember")]
-    public async Task<IActionResult> RemoveProjectMember([FromRoute] Guid projectId, [FromRoute] Guid memberId)
+    public async Task<IActionResult> RemoveProjectMember(Guid projectId, Guid memberId)
     {
         var result = await _mediator.Send(new RemoveProjectMemberCommand(projectId, memberId));
         return result.ToHttpResult();

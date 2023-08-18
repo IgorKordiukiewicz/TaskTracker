@@ -35,7 +35,7 @@ public class UsersController : ControllerBase
 
     [HttpGet("available-for-invitation/organization/{organizationId:guid}")]
     [Authorize("OrganizationMember")]
-    public async Task<IActionResult> GetUsersNotInOrganization([FromRoute] Guid organizationId, [FromQuery] string searchValue)
+    public async Task<IActionResult> GetUsersNotInOrganization(Guid organizationId, [FromQuery] string searchValue)
     {
         var result = await _mediator.Send(new GetUsersAvailableForOrganizationInvitationQuery(organizationId, searchValue));
         return result.ToHttpResult();

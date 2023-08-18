@@ -36,7 +36,7 @@ public class OrganizationsController : ControllerBase
 
     [HttpPost("{organizationId:guid}/invitations")]
     [Authorize("OrganizationMember")]
-    public async Task<IActionResult> CreateOrganizationInvitation([FromRoute] Guid organizationId, [FromBody] CreateOrganizationInvitationDto model)
+    public async Task<IActionResult> CreateOrganizationInvitation(Guid organizationId, [FromBody] CreateOrganizationInvitationDto model)
     {
         var result = await _mediator.Send(new CreateOrganizationInvitationCommand(organizationId, model));
         return result.ToHttpResult();
@@ -50,14 +50,14 @@ public class OrganizationsController : ControllerBase
     }
 
     [HttpPost("invitations/{invitationId:guid}/decline")]
-    public async Task<IActionResult> DeclineOrganizationInvitation([FromRoute] Guid invitationId)
+    public async Task<IActionResult> DeclineOrganizationInvitation(Guid invitationId)
     {
         var result = await _mediator.Send(new DeclineOrganizationInvitationCommand(invitationId));
         return result.ToHttpResult();
     }
 
     [HttpPost("invitations/{invitationId:guid}/accept")]
-    public async Task<IActionResult> AcceptOrganizationInvitation([FromRoute] Guid invitationId)
+    public async Task<IActionResult> AcceptOrganizationInvitation(Guid invitationId)
     {
         var result = await _mediator.Send(new AcceptOrganizationInvitationCommand(invitationId));
         return result.ToHttpResult();
@@ -65,7 +65,7 @@ public class OrganizationsController : ControllerBase
 
     [HttpGet("{organizationId:guid}/members")]
     [Authorize("OrganizationMember")]
-    public async Task<IActionResult> GetOrganizationMembers([FromRoute] Guid organizationId)
+    public async Task<IActionResult> GetOrganizationMembers(Guid organizationId)
     {
         var result = await _mediator.Send(new GetOrganizationMembersQuery(organizationId));
         return result.ToHttpResult();
@@ -73,7 +73,7 @@ public class OrganizationsController : ControllerBase
 
     [HttpPost("{organizationId:guid}/members/{memberId:guid}/remove")]
     [Authorize("OrganizationMember")]
-    public async Task<IActionResult> RemoveOrganizationMember([FromRoute] Guid organizationId, [FromRoute] Guid memberId)
+    public async Task<IActionResult> RemoveOrganizationMember(Guid organizationId, Guid memberId)
     {
         var result = await _mediator.Send(new RemoveOrganizationMemberCommand(organizationId, memberId));
         return result.ToHttpResult();
