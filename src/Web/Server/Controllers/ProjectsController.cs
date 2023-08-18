@@ -43,6 +43,13 @@ public class ProjectsController : ControllerBase
         return result.ToHttpResult();
     }
 
+    [HttpGet("{projectId:guid}/members")]
+    public async Task<IActionResult> GetProjectMembers([FromRoute] Guid projectId) // TODO: Unify the usage of From.. attributes across the api
+    {
+        var result = await _mediator.Send(new GetProjectMembersQuery(projectId));
+        return result.ToHttpResult();
+    }
+
     [HttpPost("{projectId:guid}/members/{memberId:guid}/remove")] // TODO: Use HttpDelete?
     [Authorize("ProjectMember")]
     public async Task<IActionResult> RemoveProjectMember([FromRoute] Guid projectId, [FromRoute] Guid memberId)

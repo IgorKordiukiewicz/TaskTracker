@@ -168,6 +168,32 @@ public class ProjectsTests
     }
 
     [Fact]
+    public async Task GetMembers_ShouldReturnProjectMembers()
+    {
+        var user = User.Create("123", "user");
+        var organization = Organization.Create("org", user.Id);
+        var project = Project.Create("project", organization.Id, user.Id);
+
+        await _fixture.SeedDb(async db =>
+        {
+            await db.Users.AddAsync(user);
+            await db.Organizations.AddAsync(organization);
+            await db.Projects.AddAsync(project);
+        });
+
+        var result = await _fixture.SendRequest(new GetProjectMembersQuery(project.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Members.Should().BeEquivalentTo(new[]
+            {
+                new ProjectMemberVM(project.Members[0].Id, user.Name)
+            });
+        }
+    }
+
+    [Fact]
     public async Task RemoveMember_ShouldFail_WhenProjectDoesNotExist()
     {
         var result = await _fixture.SendRequest(new RemoveProjectMemberCommand(Guid.NewGuid(), Guid.NewGuid()));
