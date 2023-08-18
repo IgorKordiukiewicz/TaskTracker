@@ -2,6 +2,14 @@
 
 public record GetOrganizationMembersQuery(Guid OrganizationId) : IRequest<Result<OrganizationMembersVM>>;
 
+internal class GetOrganizationMembersQueryValidator : AbstractValidator<GetOrganizationMembersQuery>
+{
+    public GetOrganizationMembersQueryValidator()
+    {
+        RuleFor(x => x.OrganizationId).NotEmpty();
+    }
+}
+
 internal class GetOrganizationMembersHandler : IRequestHandler<GetOrganizationMembersQuery, Result<OrganizationMembersVM>>
 {
     private readonly AppDbContext _dbContext;
