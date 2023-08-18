@@ -44,6 +44,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpGet("{projectId:guid}/members")]
+    [Authorize("ProjectMember")]
     public async Task<IActionResult> GetProjectMembers([FromRoute] Guid projectId) // TODO: Unify the usage of From.. attributes across the api
     {
         var result = await _mediator.Send(new GetProjectMembersQuery(projectId));
