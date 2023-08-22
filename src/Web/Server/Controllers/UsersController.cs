@@ -35,9 +35,17 @@ public class UsersController : ControllerBase
 
     [HttpGet("available-for-invitation/organization/{organizationId:guid}")]
     [Authorize("OrganizationMember")]
-    public async Task<IActionResult> GetUsersNotInOrganization(Guid organizationId, [FromQuery] string searchValue)
+    public async Task<IActionResult> GetUsersNotInOrganization(Guid organizationId, [FromQuery] string searchValue) // TODO: OrganizationId from query?
     {
         var result = await _mediator.Send(new GetUsersAvailableForOrganizationInvitationQuery(organizationId, searchValue));
+        return result.ToHttpResult();
+    }
+
+    [HttpGet("available-for-project")]
+    [Authorize("ProjectMember")]
+    public async Task<IActionResult> GetUsersAvailableForProject(Guid organizationId, Guid projectId)
+    {
+        var result = await _mediator.Send(new GetUsersAvailableForProjectQuery(organizationId, projectId));
         return result.ToHttpResult();
     }
 }

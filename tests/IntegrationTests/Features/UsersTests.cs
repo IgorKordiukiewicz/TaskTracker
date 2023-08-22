@@ -1,6 +1,8 @@
 ﻿using Application.Features.Users;
 using Domain.Organizations;
+using Domain.Projects;
 using Domain.Users;
+using Shared.ViewModels;
 
 namespace IntegrationTests.Features;
 
@@ -106,6 +108,76 @@ public class UsersTests
             var users = result.Value.Users;
             users.Count.Should().Be(1);
             users[0].Id.Should().Be(user2.Id);
+        }
+    }
+
+    [Fact]
+    public async Task GetUsersAvailableForProject_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var (orgId, _) = await SeedFor_GetUsersAvailableForProject_ShouldFail();
+
+        var result = await _fixture.SendRequest(new GetUsersAvailableForProjectQuery(orgId, Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetUsersAvailableForProject_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var (_, projectId) = await SeedFor_GetUsersAvailableForProject_ShouldFail();
+
+        var result = await _fixture.SendRequest(new GetUsersAvailableForProjectQuery(Guid.NewGuid(), projectId));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    private async Task<(Guid OrgId, Guid ProjectId)> SeedFor_GetUsersAvailableForProject_ShouldFail()
+    {
+        var user1 = User.Create("111", "user1");
+        var org = Organization.Create("org", user1.Id);
+        var project = Project.Create("project", org.Id, user1.Id);
+
+        await _fixture.SeedDb(async db =>
+        {
+            await db.Users.AddAsync(user1);
+            await db.Organizations.AddAsync(org);
+            await db.Projects.AddAsync(project);
+        });
+
+        return (org.Id, project.Id);
+    }
+
+    [Fact]
+    public async Task GetUsersAvailableForProject_ShouldReturnUsersFromOrganizationButNotInProject()
+    {
+        var user1 = User.Create("111", "user1");
+        var user2 = User.Create("222", "user2");
+        var user3 = User.Create("333", "user3");
+        var org = Organization.Create("org", user1.Id);
+        var invitation = org.CreateInvitation(user2.Id).Value;
+        _ = org.AcceptInvitation(invitation.Id);
+        var project = Project.Create("project", org.Id, user1.Id);
+
+        await _fixture.SeedDb(async db =>
+        {
+            await db.Users.AddRangeAsync(new[] { user1, user2, user3 });
+            await db.Organizations.AddAsync(org);
+            await db.Projects.AddAsync(project);
+        });
+
+        var result = await _fixture.SendRequest(new GetUsersAvailableForProjectQuery(org.Id, project.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Users.Should().BeEquivalentTo(new[] 
+            {
+                new UserSearchVM()
+                {
+                    Id = user2.Id,
+                    Name = "user2"
+                }
+            });
         }
     }
 
