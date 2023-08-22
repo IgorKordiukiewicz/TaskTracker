@@ -5,6 +5,19 @@
 @inject HttpClient _httpClient
 @inject IDialogService _dialogService
 
+@if(_usersVM is not null)
+{
+    <div class="d-flex gap-2 align-center mb-4">
+        <MudSelect Label="Users" @bind-Value="_selectedUserVM" Variant="Variant.Filled">
+            @foreach (var user in _usersVM.Users)
+            {
+                <MudSelectItem Value="@user">@user.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserVM is null)">Add</MudButton>
+    </div>
+}
+
 @if(_membersVM is not null)
 {
     <MudPaper>
@@ -29,6 +42,8 @@
     private RequestHandler _requestHandler = null!;
 
     private ProjectMembersVM? _membersVM;
+    private UsersSearchVM? _usersVM;
+    private UserSearchVM? _selectedUserVM;
 
     protected override async Task OnInitializedAsync()
     {
@@ -40,5 +55,12 @@
     private async Task UpdateMembersVM()
     {
         _membersVM = await _requestHandler.GetAsync<ProjectMembersVM>($"projects/{ProjectId}/members");
+
+        var organizationId = (await _requestHandler.GetAsync<ProjectOrganizationVM>($"projects/{ProjectId}/organization"))?.OrganizationId ?? default;
+
+        var url = $"users/available-for-project/project/{ProjectId}"
+            .SetQueryParam("organizationId", organizationId)
+            .ToString();
+        _usersVM = await _requestHandler.GetAsync<UsersSearchVM>(url);
     }
 }
