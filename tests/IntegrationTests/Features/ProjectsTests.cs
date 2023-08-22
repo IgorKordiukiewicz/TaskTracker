@@ -225,4 +225,35 @@ public class ProjectsTests
             (await _fixture.CountAsync<ProjectMember>()).Should().Be(membersBefore - 1);
         }
     }
+
+    [Fact]
+    public async Task GetProjectOrganization_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetProjectOrganizationQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetProjectOrganization_ShouldReturnProjectsOrganizationData_WhenProjectExists()
+    {
+        var user = User.Create("123", "user");
+        var organization = Organization.Create("org", user.Id);
+        var project = Project.Create("project", organization.Id, user.Id);
+
+        await _fixture.SeedDb(async db =>
+        {
+            await db.Users.AddAsync(user);
+            await db.Organizations.AddAsync(organization);
+            await db.Projects.AddAsync(project);
+        });
+
+        var result = await _fixture.SendRequest(new GetProjectOrganizationQuery(project.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.OrganizationId.Should().Be(organization.Id);
+        }
+    }
 }

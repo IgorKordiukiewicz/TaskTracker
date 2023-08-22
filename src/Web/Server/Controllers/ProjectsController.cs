@@ -58,4 +58,12 @@ public class ProjectsController : ControllerBase
         var result = await _mediator.Send(new RemoveProjectMemberCommand(projectId, memberId));
         return result.ToHttpResult();
     }
+
+    [HttpGet("{projectId:guid}/organization")]
+    [Authorize("ProjectMember")]
+    public async Task<IActionResult> GetProjectOrganization(Guid projectId)
+    {
+        var result = await _mediator.Send(new GetProjectOrganizationQuery(projectId));
+        return result.ToHttpResult();
+    }
 }
