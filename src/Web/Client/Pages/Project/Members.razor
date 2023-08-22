@@ -8,13 +8,13 @@
 @if(_usersVM is not null)
 {
     <div class="d-flex gap-2 align-center mb-4">
-        <MudSelect Label="Users" @bind-Value="_selectedUserVM" Variant="Variant.Filled">
+        <MudSelect Label="Users" @bind-Value="_selectedUserVM" Variant="Variant.Filled" Disabled="@(!_usersVM.Users.Any())">
             @foreach (var user in _usersVM.Users)
             {
                 <MudSelectItem Value="@user">@user.Name</MudSelectItem>
             }
         </MudSelect>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserVM is null)">Add</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserVM is null)" OnClick="() => AddMember(_selectedUserVM.Id)">Add</MudButton>
     </div>
 }
 
@@ -27,7 +27,7 @@
                 <MudListItem Icon="@Icons.Material.Filled.Person">
                     <div class="d-flex justify-space-between align-center show-on-hover-parent">
                         @member.Name
-                        <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" Class="show-on-hover"></MudIconButton> <!--TODO-->
+                        <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" Class="show-on-hover" OnClick="() => RemoveMember(member.Id)"></MudIconButton>
                     </div>
                 </MudListItem>
             }
@@ -62,5 +62,21 @@
             .SetQueryParam("organizationId", organizationId)
             .ToString();
         _usersVM = await _requestHandler.GetAsync<UsersSearchVM>(url);
+    }
+
+    private async Task AddMember(Guid userId)
+    {
+        var model = new AddProjectMemberDto(userId);
+        await _requestHandler.PostAsync($"projects/{ProjectId}/members", model);
+
+        _selectedUserVM = null;
+        await UpdateMembersVM();
+    }
+
+    private async Task RemoveMember(Guid memberId)
+    {
+        await _requestHandler.PostAsync($"projects/{ProjectId}/members/{memberId}/remove");
+
+        await UpdateMembersVM();
     }
 }
