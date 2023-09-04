@@ -4,6 +4,12 @@ using Web.Server.Requirements;
 
 namespace Web.Server.Extensions;
 
+public static class Policy
+{
+    public const string OrganizationMember = "OrganizationMember";
+    public const string ProjectMember = "ProjectMember";
+}
+
 public static class AuthExtensions
 {
     public static IServiceCollection AddAuth(this IServiceCollection services, IConfiguration configuration)
@@ -21,8 +27,8 @@ public static class AuthExtensions
 
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("OrganizationMember", policy => policy.Requirements.Add(new OrganizationMemberRequirement())); // TODO: Check if policy.RequireAuthenticatedUser() should be added?
-            options.AddPolicy("ProjectMember", policy => policy.Requirements.Add(new ProjectMemberRequirement()));
+            options.AddPolicy(Policy.OrganizationMember, policy => policy.Requirements.Add(new OrganizationMemberRequirement())); // TODO: Check if policy.RequireAuthenticatedUser() should be added?
+            options.AddPolicy(Policy.ProjectMember, policy => policy.Requirements.Add(new ProjectMemberRequirement()));
         });
         services.AddScoped<IAuthorizationHandler, OrganizationMemberRequirementHandler>();
         services.AddScoped<IAuthorizationHandler, ProjectMemberRequirementHandler>();

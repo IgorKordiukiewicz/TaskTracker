@@ -20,7 +20,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("organization/{organizationId:guid}")]
-    [Authorize("OrganizationMember")]
+    [Authorize(Policy.OrganizationMember)]
     public async Task<IActionResult> CreateProject(Guid organizationId, [FromBody] CreateProjectDto model)
     {
         var result = await _mediator.Send(new CreateProjectCommand(organizationId, User.GetUserAuthenticationId(), model));
@@ -28,7 +28,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpGet("organization/{organizationId:guid}/user")]
-    [Authorize("OrganizationMember")]
+    [Authorize(Policy.OrganizationMember)]
     public async Task<IActionResult> GetProjects(Guid organizationId)
     {
         var result = await _mediator.Send(new GetProjectsForOrganizationQuery(organizationId, User.GetUserAuthenticationId()));
@@ -36,7 +36,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("{projectId:guid}/members")]
-    [Authorize("ProjectMember")]
+    [Authorize(Policy.ProjectMember)]
     public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberDto model)
     {
         var result = await _mediator.Send(new AddProjectMemberCommand(projectId, model));
@@ -44,7 +44,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpGet("{projectId:guid}/members")]
-    [Authorize("ProjectMember")]
+    [Authorize(Policy.ProjectMember)]
     public async Task<IActionResult> GetProjectMembers(Guid projectId)
     {
         var result = await _mediator.Send(new GetProjectMembersQuery(projectId));
@@ -52,7 +52,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("{projectId:guid}/members/{memberId:guid}/remove")] // TODO: Use HttpDelete?
-    [Authorize("ProjectMember")]
+    [Authorize(Policy.ProjectMember)]
     public async Task<IActionResult> RemoveProjectMember(Guid projectId, Guid memberId)
     {
         var result = await _mediator.Send(new RemoveProjectMemberCommand(projectId, memberId));
@@ -60,7 +60,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpGet("{projectId:guid}/organization")]
-    [Authorize("ProjectMember")]
+    [Authorize(Policy.ProjectMember)]
     public async Task<IActionResult> GetProjectOrganization(Guid projectId)
     {
         var result = await _mediator.Send(new GetProjectOrganizationQuery(projectId));

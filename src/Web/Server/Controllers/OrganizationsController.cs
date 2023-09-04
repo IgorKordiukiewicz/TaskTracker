@@ -35,7 +35,7 @@ public class OrganizationsController : ControllerBase
     }
 
     [HttpPost("{organizationId:guid}/invitations")]
-    [Authorize("OrganizationMember")]
+    [Authorize(Policy.OrganizationMember)]
     public async Task<IActionResult> CreateOrganizationInvitation(Guid organizationId, [FromBody] CreateOrganizationInvitationDto model)
     {
         var result = await _mediator.Send(new CreateOrganizationInvitationCommand(organizationId, model));
@@ -64,7 +64,7 @@ public class OrganizationsController : ControllerBase
     }
 
     [HttpGet("{organizationId:guid}/members")]
-    [Authorize("OrganizationMember")]
+    [Authorize(Policy.OrganizationMember)]
     public async Task<IActionResult> GetOrganizationMembers(Guid organizationId)
     {
         var result = await _mediator.Send(new GetOrganizationMembersQuery(organizationId));
@@ -72,7 +72,7 @@ public class OrganizationsController : ControllerBase
     }
 
     [HttpPost("{organizationId:guid}/members/{memberId:guid}/remove")]
-    [Authorize("OrganizationMember")]
+    [Authorize(Policy.OrganizationMember)]
     public async Task<IActionResult> RemoveOrganizationMember(Guid organizationId, Guid memberId)
     {
         var result = await _mediator.Send(new RemoveOrganizationMemberCommand(organizationId, memberId));

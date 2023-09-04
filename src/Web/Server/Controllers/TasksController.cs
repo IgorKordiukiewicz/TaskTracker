@@ -20,7 +20,7 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize("ProjectMember")]
+    [Authorize(Policy.ProjectMember)]
     public async Task<IActionResult> CreateTask([FromHeader] Guid projectId, [FromBody] CreateTaskDto model)
     {
         var result = await _mediator.Send(new CreateTaskCommand(projectId, model));
