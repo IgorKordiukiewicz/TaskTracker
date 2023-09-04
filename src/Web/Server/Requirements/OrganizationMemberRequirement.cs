@@ -1,7 +1,6 @@
 ﻿using Application.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Web.Server.Extensions;
 
 namespace Web.Server.Requirements;
 
@@ -9,50 +8,14 @@ public class OrganizationMemberRequirement : IAuthorizationRequirement
 {
 }
 
-public class OrganizationMemberRequirementHandler : AuthorizationHandler<OrganizationMemberRequirement>
+public class OrganizationMemberRequirementHandler : MemberRequirementHandler<OrganizationMemberRequirement>
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IHttpContextAccessor _contextAccessor;
-
     public OrganizationMemberRequirementHandler(AppDbContext dbContext, IHttpContextAccessor contextAccessor)
+        : base(dbContext, contextAccessor, "organizationId")
     {
-        _dbContext = dbContext;
-        _contextAccessor = contextAccessor;
     }
 
-    // TODO: Add caching to improve performance? (currently 10-15ms)
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, OrganizationMemberRequirement requirement)
-    {
-        var routeValues = _contextAccessor.HttpContext?.Request.RouteValues;
-        var organizationIdRouteValue = routeValues?["organizationId"]?.ToString() ?? string.Empty;
-        if (!Guid.TryParse(organizationIdRouteValue, out var organizationId))
-        {
-            context.Fail();
-            return;
-        }
-
-        var userAuthId = context.User.GetUserAuthenticationId();
-        if(string.IsNullOrWhiteSpace(userAuthId))
-        {
-            context.Fail();
-            return;
-        }
-
-        var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.AuthenticationId == userAuthId);
-        if(user is null)
-        {
-            context.Fail();
-            return;
-        }
-
-        if(!await _dbContext.Organizations.Include(x => x.Members)
-            .AnyAsync(x => x.Id == organizationId && x.Members.Any(xx => xx.UserId == user.Id)))
-        {
-            context.Fail();
-            return;
-        }
-
-        context.Succeed(requirement);
-        return;
-    }
+    protected override async Task<bool> CheckRequirement(AppDbContext dbContext, Guid userId, Guid entityId)
+        => await dbContext.Organizations.Include(x => x.Members)
+        .AnyAsync(x => x.Id == entityId && x.Members.Any(xx => xx.UserId == userId));
 }
