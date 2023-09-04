@@ -29,6 +29,7 @@ public static class Application
         services.AddScoped<IRepository<User>, UserRepository>();
         services.AddScoped<IRepository<Organization>, OrganizationRepository>();
         services.AddScoped<IRepository<Project>, ProjectRepository>();
+        services.AddScoped<IRepository<Domain.Tasks.Task>, TaskRepository>();
 
         return services;
     }

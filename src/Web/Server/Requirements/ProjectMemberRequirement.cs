@@ -23,9 +23,8 @@ public class ProjectMemberRequirementHandler : AuthorizationHandler<ProjectMembe
 
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, ProjectMemberRequirement requirement)
     {
-        var routeValues = _contextAccessor.HttpContext?.Request.RouteValues;
-        var projectIdRouteValue = routeValues?["projectId"]?.ToString() ?? string.Empty;
-        if (!Guid.TryParse(projectIdRouteValue, out var projectId))
+        var projectId = GetProjectId(_contextAccessor.HttpContext);
+        if(projectId == default)
         {
             context.Fail();
             return;
@@ -54,5 +53,27 @@ public class ProjectMemberRequirementHandler : AuthorizationHandler<ProjectMembe
 
         context.Succeed(requirement);
         return;
+    }
+
+    private static Guid GetProjectId(HttpContext? httpContext)
+    {
+        if(httpContext is null)
+        {
+            return default;
+        }
+
+        var routeValue = httpContext.Request.RouteValues["projectId"]?.ToString() ?? string.Empty;
+        if(Guid.TryParse(routeValue, out var routeId))
+        {
+            return routeId;
+        }
+
+        var headerValue = httpContext.Request.Headers["ProjectId"].ToString() ?? string.Empty;
+        if(Guid.TryParse(headerValue, out var headerId))
+        {
+            return headerId;
+        }
+
+        return default;
     }
 }
