@@ -26,4 +26,12 @@ public class TasksController : ControllerBase
         var result = await _mediator.Send(new CreateTaskCommand(projectId, model));
         return result.ToHttpResult();
     }
+
+    [HttpGet]
+    [Authorize(Policy.ProjectMember)]
+    public async Task<IActionResult> GetTasks([FromHeader] Guid projectId)
+    {
+        var result = await _mediator.Send(new GetAllTasksQuery(projectId));
+        return result.ToHttpResult();
+    }
 }
