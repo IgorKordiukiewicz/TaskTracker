@@ -14,32 +14,32 @@
         _dialogService = dialogService;
     }
 
-    public async Task<TResponse?> GetAsync<TResponse>(string url)
+    public async Task<TResponse?> GetAsync<TResponse>(string url, Headers? headers = null)
     {
-        var requestMessage = CreateRequestMessage(HttpMethod.Get, url);
+        var requestMessage = CreateRequestMessage(HttpMethod.Get, url, headers);
 
         return await GetResponseContent<TResponse>(await _httpClient.SendAsync(requestMessage));    
     }
 
-    public async Task<TResponse?> PostAsync<TResponse>(string url)
-        => await PostAsync<TResponse, object>(url, (object?)null);
+    public async Task<TResponse?> PostAsync<TResponse>(string url, Headers? headers = null)
+        => await PostAsync<TResponse, object>(url, (object?)null, headers);
 
-    public async Task<TResponse?> PostAsync<TResponse, TBody>(string url, TBody? body)
+    public async Task<TResponse?> PostAsync<TResponse, TBody>(string url, TBody? body, Headers? headers = null)
         where TBody : class
     {
-        var requestMessage = CreateRequestMessage(HttpMethod.Post, url);
+        var requestMessage = CreateRequestMessage(HttpMethod.Post, url, headers);
         SetRequestMessageContent(requestMessage, body);
 
         return await GetResponseContent<TResponse>(await _httpClient.SendAsync(requestMessage));
     }
 
-    public async Task PostAsync(string url)
-        => await PostAsync(url, (object?)null);
+    public async Task PostAsync(string url, Headers? headers = null)
+        => await PostAsync(url, (object?)null, headers);
 
-    public async Task PostAsync<TBody>(string url, TBody? body)
+    public async Task PostAsync<TBody>(string url, TBody? body, Headers? headers = null)
         where TBody : class
     {
-        var requestMessage = CreateRequestMessage(HttpMethod.Post, url);
+        var requestMessage = CreateRequestMessage(HttpMethod.Post, url, headers);
         SetRequestMessageContent(requestMessage, body);
 
         var response = await _httpClient.SendAsync(requestMessage);
@@ -63,12 +63,24 @@
         }
     }
 
-    private HttpRequestMessage CreateRequestMessage(HttpMethod method, string url)
-        => new HttpRequestMessage()
+    private HttpRequestMessage CreateRequestMessage(HttpMethod method, string url, Headers? headers)
+    {
+        var message = new HttpRequestMessage()
         {
             Method = method,
             RequestUri = new Uri(_httpClient.BaseAddress + url)
         };
+
+        if(headers is not null)
+        {
+            foreach(var (name, value) in headers)
+            {
+                message.Headers.Add(name, value);
+            }
+        }
+
+        return message;
+    }
 
     private void SetRequestMessageContent<TBody>(HttpRequestMessage message, TBody? body)
         where TBody : class

@@ -3,7 +3,24 @@
 @layout ProjectLayout
 @attribute [Authorize]
 
-Tasks
+@inject HttpClient _httpClient
+@inject IDialogService _dialogService
+
+@if(_tasksVM is not null)
+{
+    <MudTable Items="@_tasksVM.Tasks" Hover="true">
+        <HeaderContent>
+            <MudTh>ID</MudTh>
+            <MudTh>Title</MudTh>
+            <MudTh>Description</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="ID">@context.ShortId</MudTd>
+            <MudTd DataLabel="Title">@context.Title</MudTd>
+            <MudTd DataLabel="Description">@context.Description</MudTd>
+        </RowTemplate>
+    </MudTable>
+}
 
 @code {
     [Parameter]
@@ -12,8 +29,20 @@ Tasks
     [CascadingParameter]
     public ProjectLayout Layout { get; set; } = null!;
 
+    private RequestHandler _requestHandler = null!;
+
+    private TasksVM? _tasksVM;
+
     protected override async Task OnInitializedAsync()
     {
         Layout.ProjectId = ProjectId;
+        _requestHandler = new(_httpClient, _dialogService);
+
+        await UpdateTasksVM();
+    }
+
+    private async Task UpdateTasksVM()
+    {
+        _tasksVM = await _requestHandler.GetAsync<TasksVM>("tasks", new[] { ("ProjectId", ProjectId.ToString() )});
     }
 }
