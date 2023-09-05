@@ -6,6 +6,16 @@ namespace Application.Features.Tasks;
 
 public record CreateTaskCommand(Guid ProjectId, CreateTaskDto Model) : IRequest<Result<Guid>>;
 
+public class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
+{
+    public CreateTaskCommandValidator()
+    {
+        RuleFor(x => x.ProjectId).NotEmpty();
+        RuleFor(x => x.Model.Title).NotEmpty();
+        RuleFor(x => x.Model.Description).NotEmpty();
+    }
+}
+
 internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Guid>>
 {
     private readonly AppDbContext _dbContext;
