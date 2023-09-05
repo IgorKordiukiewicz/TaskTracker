@@ -9,8 +9,7 @@ internal class TaskConfiguration : IEntityTypeConfiguration<Domain.Tasks.Task>
     {
         builder.HasKey(x => x.Id);
 
-        builder.HasIndex(x => x.ShortId)
-            .IsUnique();
+        builder.HasIndex(x => x.ShortId);
 
         builder.HasOne<Project>()
             .WithMany()
