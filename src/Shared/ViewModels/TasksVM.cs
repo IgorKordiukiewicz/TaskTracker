@@ -8,4 +8,7 @@ public record TaskVM
     public required int ShortId { get; init; }
     public required string Title { get; init; }
     public required string Description { get; init; }
+    public required TaskStateVM State { get; init; }
 }
+
+public record TaskStateVM(string Name);

@@ -23,14 +23,18 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
     {
         var tasks = await _context.Tasks
             .Where(x => x.ProjectId == request.ProjectId)
-            .Select(x => new TaskVM
+            .Join(_context.TaskStates, 
+            x => x.StateId,
+            x => x.Id, 
+            (task, state) => new TaskVM
             {
-                Id = x.Id,
-                ShortId = x.ShortId,
-                Title = x.Title,
-                Description = x.Description
-            })
-            .ToListAsync();
+                Id = task.Id,
+                ShortId = task.ShortId,
+                Title = task.Title,
+                Description = task.Description,
+                State = new(state.Name.Value)
+            }).ToListAsync();
+
         return new TasksVM(tasks);
     }
 }

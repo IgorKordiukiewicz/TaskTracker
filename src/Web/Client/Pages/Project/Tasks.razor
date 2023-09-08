@@ -13,11 +13,13 @@
             <MudTh>ID</MudTh>
             <MudTh>Title</MudTh>
             <MudTh>Description</MudTh>
+            <MudTh>State</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="ID">@context.ShortId</MudTd>
             <MudTd DataLabel="Title">@context.Title</MudTd>
             <MudTd DataLabel="Description">@context.Description</MudTd>
+            <MudTd DataLabel="State">@context.State.Name</MudTd>
         </RowTemplate>
     </MudTable>
 }
