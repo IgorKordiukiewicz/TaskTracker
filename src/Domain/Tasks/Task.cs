@@ -1,4 +1,6 @@
 ﻿using Domain.Common;
+using Domain.Errors;
+using FluentResults;
 
 namespace Domain.Tasks;
 
@@ -8,6 +10,7 @@ public class Task : Entity, IAggregateRoot
     public Guid ProjectId { get; private set; }
     public string Title { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
+    public Guid StateId { get; private set; } = default!;
 
     private Task(Guid id)
         : base(id)
@@ -15,14 +18,34 @@ public class Task : Entity, IAggregateRoot
 
     }
 
-    public static Task Create(int shortId, Guid projectId, string title, string description)
+    // TODO: Remove unnecessary factory methods
+    public static Task Create(int shortId, Guid projectId, string title, string description, Guid stateId)
     {
         return new(Guid.NewGuid())
         {
             ShortId = shortId,
             ProjectId = projectId,
             Title = title,
-            Description = description
+            Description = description,
+            StateId = stateId
         };
+    }
+
+    public Result UpdateState(Guid newStateId, TaskStatesManager statesManager)
+    {
+        var state = statesManager.AllStates.Single(x => x.Id == StateId);
+
+        if(!statesManager.AllStates.Any(x => x.Id == newStateId))
+        {
+            return Result.Fail(new DomainError("Invalid state key."));
+        }
+
+        if(!state.CanTransitionTo(newStateId))
+        {
+            return Result.Fail(new DomainError($"Invalid state transition"));
+        }
+
+        StateId = newStateId;
+        return Result.Ok();
     }
 }

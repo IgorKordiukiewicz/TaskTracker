@@ -1,6 +1,7 @@
 ﻿using Application.Data.Repositories;
 using Application.Errors;
 using Domain.Projects;
+using Domain.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Projects;
@@ -21,11 +22,13 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
 {
     private readonly AppDbContext _dbContext;
     private readonly IRepository<Project> _projectRepository;
+    private readonly IRepository<TaskStatesManager> _taskStatesManagerRepository;
 
-    public CreateProjectHandler(AppDbContext dbContext, IRepository<Project> projectRepository)
+    public CreateProjectHandler(AppDbContext dbContext, IRepository<Project> projectRepository, IRepository<TaskStatesManager> taskStatesManagerRepository)
     {
         _dbContext = dbContext;
         _projectRepository = projectRepository;
+        _taskStatesManagerRepository = taskStatesManagerRepository;
     }
 
     public async Task<Result<Guid>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
@@ -45,9 +48,10 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
             .FirstAsync(x => x.AuthenticationId == request.UserAuthId)).Id;
 
         var project = Project.Create(request.Model.Name, request.OrganizationId, userId); // TODO: Should UserId be validated or not since it is coming from internal sources so it should always be valid
-
         await _projectRepository.Add(project);
-        await _dbContext.SaveChangesAsync();
+
+        var taskStatesManager = new TaskStatesManager(project.Id);
+        await _taskStatesManagerRepository.Add(taskStatesManager);
 
         return project.Id;
     }

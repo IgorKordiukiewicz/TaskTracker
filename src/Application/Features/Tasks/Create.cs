@@ -39,7 +39,14 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
             .Where(x => x.ProjectId == request.ProjectId)
             .CountAsync()) + 1;
 
-        var task = Task.Create(shortId, request.ProjectId, request.Model.Title, request.Model.Description);
+        var initialTaskState = await _dbContext.TaskStatesManagers
+            .AsNoTracking()
+            .Include(x => x.AllStates)
+            .Where(x => x.ProjectId == request.ProjectId)
+            .SelectMany(x => x.AllStates)
+            .FirstAsync(x => x.IsInitial);
+
+        var task = Task.Create(shortId, request.ProjectId, request.Model.Title, request.Model.Description, initialTaskState.Id);
 
         await _taskRepository.Add(task);
         await _dbContext.SaveChangesAsync();

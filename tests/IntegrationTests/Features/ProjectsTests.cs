@@ -46,7 +46,7 @@ public class ProjectsTests
     }
 
     [Fact]
-    public async Task Create_ShouldCreateNewProject_WhenValidationPassed()
+    public async Task Create_ShouldCreateNewProjectAndTaskStatesManager_WhenValidationPassed()
     {
         var userAuthId = "123";
         var user = User.Create(userAuthId, "user");
@@ -64,6 +64,8 @@ public class ProjectsTests
             result.IsSuccess.Should().BeTrue();
             var project = await _fixture.FirstAsync<Project>(x => x.Id == result.Value);
             project.Should().NotBeNull();
+            var taskStatesManager = await _fixture.FirstAsync<Domain.Tasks.TaskStatesManager>(x => x.ProjectId == result.Value);
+            taskStatesManager.Should().NotBeNull();
         }
     }
 

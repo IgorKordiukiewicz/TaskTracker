@@ -1,6 +1,7 @@
 ﻿using Domain.Common;
 using Domain.Organizations;
 using Domain.Projects;
+using Domain.Tasks;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,8 @@ public class AppDbContext : DbContext
     public DbSet<ProjectMember> ProjectMembers { get; set; }
 
     public DbSet<Domain.Tasks.Task> Tasks { get; set; }
+    public DbSet<TaskState> TaskStates { get; set; }
+    public DbSet<TaskStatesManager> TaskStatesManagers { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) 
         : base(options)
@@ -28,7 +31,7 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 
-    public async Task AddRemoveDependents<TDependent>(IEnumerable<TDependent> actualEntities)
+    public async System.Threading.Tasks.Task AddRemoveDependents<TDependent>(IEnumerable<TDependent> actualEntities)
         where TDependent : Entity
     {
         var dbEntities = await Set<TDependent>().AsNoTracking().Select(x => x.Id).ToListAsync();

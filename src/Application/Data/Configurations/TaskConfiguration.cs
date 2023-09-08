@@ -1,4 +1,5 @@
 ﻿using Domain.Projects;
+using Domain.Tasks;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Application.Data.Configurations;
@@ -14,5 +15,9 @@ internal class TaskConfiguration : IEntityTypeConfiguration<Domain.Tasks.Task>
         builder.HasOne<Project>()
             .WithMany()
             .HasForeignKey(x => x.ProjectId);
+
+        builder.HasOne<TaskState>()
+            .WithMany()
+            .HasForeignKey(x => x.StateId);
     }
 }

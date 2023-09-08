@@ -1,6 +1,7 @@
 ﻿using Application.Features.Tasks;
 using Domain.Organizations;
 using Domain.Projects;
+using Domain.Tasks;
 using Domain.Users;
 using Shared.Dtos;
 using Task = Domain.Tasks.Task;
@@ -29,18 +30,21 @@ public class TasksTests
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task Create_ShouldCreateTask_WithCorrectShortId_WhenProjectExists()
+    public async System.Threading.Tasks.Task Create_ShouldCreateTask_WithCorrectShortIdAndInitialTaskState_WhenProjectExists()
     {
         var user = User.Create("authId", "user");
         var organization = Organization.Create("org", user.Id);
         var project = Project.Create("project", organization.Id, user.Id);
-        var task1 = Task.Create(1, project.Id, "title1", "desc1");
-        var task2 = Task.Create(2, project.Id, "title2", "desc2");
+        var taskStatesManager = new TaskStatesManager(project.Id);
+        var initialStateId = taskStatesManager.AllStates.First(x => x.IsInitial).Id;
+        var task1 = Task.Create(1, project.Id, "title1", "desc1", initialStateId);
+        var task2 = Task.Create(2, project.Id, "title2", "desc2", initialStateId);
         await _fixture.SeedDb(async db =>
         {
             await db.Users.AddAsync(user);
             await db.Organizations.AddAsync(organization);
             await db.Projects.AddAsync(project);
+            await db.TaskStatesManagers.AddAsync(taskStatesManager);
             await db.Tasks.AddRangeAsync(new[] { task1, task2 });
         });
 
@@ -53,6 +57,9 @@ public class TasksTests
             result.Value.Should().NotBeEmpty();
             var task = await _fixture.FirstAsync<Task>(x => x.Id == result.Value);
             task.ShortId.Should().Be(3);
+
+            var initialTaskState = await _fixture.FirstAsync<TaskState>(x => x.IsInitial);
+            task.StateId.Should().Be(initialTaskState.Id);
         }
     }
 
@@ -63,14 +70,19 @@ public class TasksTests
         var organization = Organization.Create("org", user.Id);
         var project1 = Project.Create("project", organization.Id, user.Id);
         var project2 = Project.Create("project2", organization.Id, user.Id);
-        var task1 = Task.Create(1, project1.Id, "title1", "desc1");
-        var task2 = Task.Create(2, project1.Id, "title2", "desc2");
-        var task3 = Task.Create(1, project2.Id, "title3", "desc3");
+        var taskStatesManager1 = new TaskStatesManager(project1.Id);
+        var initialStateId1 = taskStatesManager1.AllStates.First(x => x.IsInitial).Id;
+        var taskStatesManager2 = new TaskStatesManager(project2.Id);
+        var initialStateId2 = taskStatesManager1.AllStates.First(x => x.IsInitial).Id;
+        var task1 = Task.Create(1, project1.Id, "title1", "desc1", initialStateId1);
+        var task2 = Task.Create(2, project1.Id, "title2", "desc2", initialStateId1);
+        var task3 = Task.Create(1, project2.Id, "title3", "desc3", initialStateId2);
         await _fixture.SeedDb(async db =>
         {
             await db.Users.AddAsync(user);
             await db.Organizations.AddAsync(organization);
             await db.Projects.AddRangeAsync(new[] { project1, project2 });
+            await db.TaskStatesManagers.AddRangeAsync(new[] { taskStatesManager1, taskStatesManager2 });
             await db.Tasks.AddRangeAsync(new[] { task1, task2, task3 });
         });
 

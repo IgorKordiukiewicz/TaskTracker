@@ -2,6 +2,7 @@
 using Application.Data.Repositories;
 using Domain.Organizations;
 using Domain.Projects;
+using Domain.Tasks;
 using Domain.Users;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +31,7 @@ public static class Application
         services.AddScoped<IRepository<Organization>, OrganizationRepository>();
         services.AddScoped<IRepository<Project>, ProjectRepository>();
         services.AddScoped<IRepository<Domain.Tasks.Task>, TaskRepository>();
+        services.AddScoped<IRepository<TaskStatesManager>, TaskStatesManagerRepository>();
 
         return services;
     }
