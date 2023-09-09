@@ -64,6 +64,14 @@ public class TasksTests
     }
 
     [Fact]
+    public async System.Threading.Tasks.Task GetAll_ShouldFail_WhenTaskStatesManagerDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetAllTasksQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
     public async System.Threading.Tasks.Task GetAll_ShouldReturnProjectTasks()
     {
         var user = User.Create("authId", "user");

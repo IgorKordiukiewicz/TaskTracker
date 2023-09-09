@@ -9,6 +9,7 @@ public record TaskVM
     public required string Title { get; init; }
     public required string Description { get; init; }
     public required TaskStateVM State { get; init; }
+    public required IReadOnlyList<TaskStateVM> AvailableStates { get; init; }
 }
 
-public record TaskStateVM(string Name);
+public record TaskStateVM(Guid Id, string Name);

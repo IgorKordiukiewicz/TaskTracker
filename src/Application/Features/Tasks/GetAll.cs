@@ -1,4 +1,6 @@
-﻿namespace Application.Features.Tasks;
+﻿using Application.Errors;
+
+namespace Application.Features.Tasks;
 
 public record GetAllTasksQuery(Guid ProjectId) : IRequest<Result<TasksVM>>;
 
@@ -21,20 +23,41 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
 
     public async Task<Result<TasksVM>> Handle(GetAllTasksQuery request, CancellationToken cancellationToken)
     {
+        var taskStatesManager = await _context.TaskStatesManagers
+            .Include(x => x.AllStates)
+            .Where(x => x.ProjectId == request.ProjectId)
+            .SingleOrDefaultAsync();
+
+        if(taskStatesManager is null)
+        {
+            return Result.Fail<TasksVM>(new ApplicationError("Task states manager with this ID does not exist."));
+        }
+
+        var statesById = taskStatesManager.AllStates.ToDictionary(x => x.Id, x => x);
+
         var tasks = await _context.Tasks
             .Where(x => x.ProjectId == request.ProjectId)
             .Join(_context.TaskStates, 
             x => x.StateId,
             x => x.Id, 
-            (task, state) => new TaskVM
+            (task, state) => new
             {
                 Id = task.Id,
                 ShortId = task.ShortId,
                 Title = task.Title,
                 Description = task.Description,
-                State = new(state.Name.Value)
+                State = state.Id,
+                AvailableStates = state.PossibleNextStates
             }).ToListAsync();
 
-        return new TasksVM(tasks);
+        return new TasksVM(tasks.Select(x => new TaskVM
+        {
+            Id = x.Id,
+            ShortId = x.ShortId,
+            Title = x.Title,
+            Description = x.Description,
+            State = new(x.State, statesById[x.State].Name.Value),
+            AvailableStates = x.AvailableStates.Select(xx => new TaskStateVM(xx, statesById[xx].Name.Value)).ToList()
+        }).ToList());
     }
 }
