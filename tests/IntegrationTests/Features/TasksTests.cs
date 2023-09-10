@@ -35,7 +35,7 @@ public class TasksTests
         var user = User.Create("authId", "user");
         var organization = Organization.Create("org", user.Id);
         var project = Project.Create("project", organization.Id, user.Id);
-        var taskStatesManager = new TaskStatesManager(project.Id);
+        var taskStatesManager = TaskStatesManager.Create(project.Id);
         var initialStateId = taskStatesManager.AllStates.First(x => x.IsInitial).Id;
         var task1 = Task.Create(1, project.Id, "title1", "desc1", initialStateId);
         var task2 = Task.Create(2, project.Id, "title2", "desc2", initialStateId);
@@ -78,9 +78,9 @@ public class TasksTests
         var organization = Organization.Create("org", user.Id);
         var project1 = Project.Create("project", organization.Id, user.Id);
         var project2 = Project.Create("project2", organization.Id, user.Id);
-        var taskStatesManager1 = new TaskStatesManager(project1.Id);
+        var taskStatesManager1 = TaskStatesManager.Create(project1.Id);
         var initialStateId1 = taskStatesManager1.AllStates.First(x => x.IsInitial).Id;
-        var taskStatesManager2 = new TaskStatesManager(project2.Id);
+        var taskStatesManager2 = TaskStatesManager.Create(project2.Id);
         var initialStateId2 = taskStatesManager1.AllStates.First(x => x.IsInitial).Id;
         var task1 = Task.Create(1, project1.Id, "title1", "desc1", initialStateId1);
         var task2 = Task.Create(2, project1.Id, "title2", "desc2", initialStateId1);
@@ -100,6 +100,45 @@ public class TasksTests
         {
             result.IsSuccess.Should().BeTrue();
             result.Value.Tasks.Should().HaveCount(2);
+        }
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateState_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateTaskStateCommand(Guid.NewGuid(), Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateState_ShouldUpdateTaskState_WhenValid()
+    {
+        var user = User.Create("authId", "user");
+        var organization = Organization.Create("org", user.Id);
+        var project = Project.Create("project", organization.Id, user.Id);
+        var taskStatesManager = TaskStatesManager.Create(project.Id);
+        var initialState = taskStatesManager.AllStates.First(x => x.IsInitial);
+        var task = Task.Create(1, project.Id, "title", "desc", initialState.Id);
+        await _fixture.SeedDb(async db =>
+        {
+            await db.Users.AddAsync(user);
+            await db.Organizations.AddAsync(organization);
+            await db.Projects.AddAsync(project);
+            await db.TaskStatesManagers.AddAsync(taskStatesManager);
+            await db.Tasks.AddAsync(task);
+        });
+
+        var newStateId = initialState.PossibleNextStates.First();
+
+        var result = await _fixture.SendRequest(new UpdateTaskStateCommand(task.Id, newStateId));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+
+            var updatedTask = await _fixture.FirstAsync<Task>(x => x.Id == task.Id);
+            updatedTask.StateId.Should().Be(newStateId);
         }
     }
 }

@@ -7,7 +7,7 @@ public class TaskStatesManagerTests
     [Fact]
     public void Create_ShouldCreateTaskStatesManager_WithDefaultStates()
     {
-        var result = new TaskStatesManager(Guid.NewGuid());
+        var result = TaskStatesManager.Create(Guid.NewGuid());
 
         using(new AssertionScope())
         {

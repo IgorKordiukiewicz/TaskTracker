@@ -8,23 +8,26 @@ public class TaskStatesManager : Entity, IAggregateRoot
 {
     public Guid ProjectId { get; set; }
 
-    private readonly List<TaskState> _allStates;
+    private readonly List<TaskState> _allStates = new();
     public IReadOnlyList<TaskState> AllStates => _allStates.AsReadOnly();
 
-    public TaskStatesManager(Guid projectId)
+    private TaskStatesManager(Guid projectId)
         : base(Guid.NewGuid())
     {
         ProjectId = projectId;
+    }
 
+    public static TaskStatesManager Create(Guid projectId)
+    {
         var toDoId = Guid.NewGuid();
         var inProgressId = Guid.NewGuid();
         var doneId = Guid.NewGuid();
 
-        _allStates = new List<TaskState>()
-        {
-            TaskState.Create(toDoId, new("ToDo"), new[] { inProgressId }, true),
-            TaskState.Create(inProgressId, new("InProgress"), new[] { toDoId, doneId }),
-            TaskState.Create(doneId, new("Done"), new[] { inProgressId })
-        };
-    } 
+        var taskStatesManager = new TaskStatesManager(projectId);
+        taskStatesManager._allStates.Add(TaskState.Create(toDoId, new("ToDo"), new[] { inProgressId }, true));
+        taskStatesManager._allStates.Add(TaskState.Create(inProgressId, new("InProgress"), new[] { toDoId, doneId }));
+        taskStatesManager._allStates.Add(TaskState.Create(doneId, new("Done"), new[] { inProgressId }));
+
+        return taskStatesManager;
+    }
 }

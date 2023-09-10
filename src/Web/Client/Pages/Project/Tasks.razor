@@ -19,7 +19,14 @@
             <MudTd DataLabel="ID">@context.ShortId</MudTd>
             <MudTd DataLabel="Title">@context.Title</MudTd>
             <MudTd DataLabel="Description">@context.Description</MudTd>
-            <MudTd DataLabel="State">@context.State.Name</MudTd>
+            <MudTd DataLabel="State">
+                <MudSelect T="TaskStateVM" Value="@context.State" ValueChanged="e => UpdateTaskState(context.Id, e.Id)" ToStringFunc="@(x => x.Name)" Margin="Margin.Dense" Variant="Variant.Outlined">
+                    @foreach(var availableState in context.AvailableStates)
+                    {
+                        <MudSelectItem Value="@availableState"></MudSelectItem>
+                    }
+                </MudSelect>
+            </MudTd>
         </RowTemplate>
     </MudTable>
 }
@@ -46,5 +53,11 @@
     private async Task UpdateTasksVM()
     {
         _tasksVM = await _requestHandler.GetAsync<TasksVM>("tasks", new[] { ("ProjectId", ProjectId.ToString() )});
+    }
+
+    private async Task UpdateTaskState(Guid taskId, Guid newStateId)
+    {
+        await _requestHandler.PostAsync($"tasks/{taskId}/update-state/{newStateId}", headers: new[] { ("ProjectId", ProjectId.ToString()) });
+        await UpdateTasksVM(); // TODO: Optimize it, don't fetch all tasks again
     }
 }

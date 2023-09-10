@@ -31,6 +31,7 @@ public class TaskStatesManagerRepository : IRepository<TaskStatesManager>
 
     public async Task<TaskStatesManager?> GetBy(Expression<Func<TaskStatesManager, bool>> predicate)
         => await _dbContext.TaskStatesManagers
+        .Include(x => x.AllStates)
         .FirstOrDefaultAsync(predicate);
 
     public async Task<TaskStatesManager?> GetById(Guid id)

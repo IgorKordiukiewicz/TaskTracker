@@ -30,7 +30,7 @@ public class TaskTests
     [Fact]
     public void UpdateState_ShouldFail_WhenNewStateIdIsNotValid()
     {
-        var statesManager = new TaskStatesManager(Guid.NewGuid());
+        var statesManager = TaskStatesManager.Create(Guid.NewGuid());
         var initialState = statesManager.AllStates.First(x => x.IsInitial);
         var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialState.Id);
 
@@ -42,7 +42,7 @@ public class TaskTests
     [Fact]
     public void UpdateState_ShouldFail_WhenStateCannotTransitionToNewState()
     {
-        var statesManager = new TaskStatesManager(Guid.NewGuid());
+        var statesManager = TaskStatesManager.Create(Guid.NewGuid());
         var initialState = statesManager.AllStates.First(x => x.IsInitial);
         var unavailableState = statesManager.AllStates.First(x => !initialState.CanTransitionTo(x.Id));
 
@@ -56,7 +56,7 @@ public class TaskTests
     [Fact]
     public void UpdateState_ShouldUpdateStateId_WhenStateCanTransitionToNewState()
     {
-        var statesManager = new TaskStatesManager(Guid.NewGuid());
+        var statesManager = TaskStatesManager.Create(Guid.NewGuid());
         var initialState = statesManager.AllStates.First(x => x.IsInitial);
         var availableState = statesManager.AllStates.First(x => initialState.CanTransitionTo(x.Id));
 
