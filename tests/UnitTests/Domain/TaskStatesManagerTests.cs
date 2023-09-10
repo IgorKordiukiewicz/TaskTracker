@@ -23,6 +23,7 @@ public class TaskStatesManagerTests
             var doneState = result.AllStates.First(x => x.Name.Value.ToLower() == "done");
             doneState.IsInitial.Should().BeFalse();
 
+            // Transitions
             todoState.CanTransitionTo(inProgressState.Id).Should().BeTrue();
             todoState.CanTransitionTo(doneState.Id).Should().BeFalse();
 
@@ -31,6 +32,10 @@ public class TaskStatesManagerTests
 
             doneState.CanTransitionTo(todoState.Id).Should().BeFalse();
             doneState.CanTransitionTo(inProgressState.Id).Should().BeTrue();
+
+            // Display orders
+            result.AllStates.OrderBy(x => x.DisplayOrder).Select(x => x.Name.Value.ToLower())
+                .Should().BeEquivalentTo(new[] { "todo", "inprogress", "done" }, options => options.WithStrictOrdering());
         }
     }
 
@@ -49,7 +54,7 @@ public class TaskStatesManagerTests
         var availableState = Guid.NewGuid();
         var unavailableState = Guid.NewGuid();
 
-        var taskState = TaskState.Create(Guid.NewGuid(), new("test"), new[] { availableState });
+        var taskState = TaskState.Create(Guid.NewGuid(), new("test"), new[] { availableState }, 0);
 
         using(new AssertionScope())
         {

@@ -51,7 +51,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
             }).ToListAsync();
 
         var allTaskStates = taskStatesManager.AllStates
-            .Select(x => new TaskStateVM(x.Id, x.Name.Value))
+            .Select(x => new TaskStateDetailedVM(x.Id, x.Name.Value, x.DisplayOrder))
             .ToList();
 
         return new TasksVM(tasks.Select(x => new TaskVM

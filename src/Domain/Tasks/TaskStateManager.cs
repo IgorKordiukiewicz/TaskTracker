@@ -24,9 +24,9 @@ public class TaskStatesManager : Entity, IAggregateRoot
         var doneId = Guid.NewGuid();
 
         var taskStatesManager = new TaskStatesManager(projectId);
-        taskStatesManager._allStates.Add(TaskState.Create(toDoId, new("ToDo"), new[] { inProgressId }, true));
-        taskStatesManager._allStates.Add(TaskState.Create(inProgressId, new("InProgress"), new[] { toDoId, doneId }));
-        taskStatesManager._allStates.Add(TaskState.Create(doneId, new("Done"), new[] { inProgressId }));
+        taskStatesManager._allStates.Add(TaskState.Create(toDoId, new("ToDo"), new[] { inProgressId }, 0, true));
+        taskStatesManager._allStates.Add(TaskState.Create(inProgressId, new("InProgress"), new[] { toDoId, doneId }, 1));
+        taskStatesManager._allStates.Add(TaskState.Create(doneId, new("Done"), new[] { inProgressId }, 2));
 
         return taskStatesManager;
     }

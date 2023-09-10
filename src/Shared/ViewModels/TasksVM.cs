@@ -1,6 +1,6 @@
 ﻿namespace Shared.ViewModels;
 
-public record TasksVM(IReadOnlyList<TaskVM> Tasks, IReadOnlyList<TaskStateVM> AllTaskStates);
+public record TasksVM(IReadOnlyList<TaskVM> Tasks, IReadOnlyList<TaskStateDetailedVM> AllTaskStates);
 
 public record TaskVM
 {
@@ -13,3 +13,4 @@ public record TaskVM
 }
 
 public record TaskStateVM(Guid Id, string Name);
+public record TaskStateDetailedVM(Guid Id, string Name, int DisplayOrder) : TaskStateVM(Id, Name);

@@ -46,7 +46,7 @@
         <MudDropContainer T="TaskVM" Items="@_tasksVM.Tasks" ItemsSelector="@((items, dropzone) => items.State.Name == dropzone)" Class="d-flex flex-wrap flex-grow-1" ApplyDropClassesOnDragStarted="true"
             ItemDropped="TaskDropped" CanDropClass="mud-border-success" NoDropClass="mud-border-error">
             <ChildContent>
-                @foreach(var state in _tasksVM.AllTaskStates.Select(x => x.Name))
+                @foreach(var state in _tasksVM.AllTaskStates.OrderBy(x => x.DisplayOrder).Select(x => x.Name))
                 {
                     <MudDropZone Identifier="@state" T="TaskVM" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1 border-2 border-solid mud-border-lines-default" 
                     CanDrop="@((item) => item.AvailableStates.Any(x => x.Name == state))">
