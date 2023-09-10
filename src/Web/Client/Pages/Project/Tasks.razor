@@ -8,27 +8,56 @@
 
 @if(_tasksVM is not null)
 {
-    <MudTable Items="@_tasksVM.Tasks" Hover="true">
-        <HeaderContent>
-            <MudTh>ID</MudTh>
-            <MudTh>Title</MudTh>
-            <MudTh>Description</MudTh>
-            <MudTh>State</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="ID">@context.ShortId</MudTd>
-            <MudTd DataLabel="Title">@context.Title</MudTd>
-            <MudTd DataLabel="Description">@context.Description</MudTd>
-            <MudTd DataLabel="State">
-                <MudSelect T="TaskStateVM" Value="@context.State" ValueChanged="e => UpdateTaskState(context.Id, e.Id)" ToStringFunc="@(x => x.Name)" Margin="Margin.Dense" Variant="Variant.Outlined">
-                    @foreach(var availableState in context.AvailableStates)
-                    {
-                        <MudSelectItem Value="@availableState"></MudSelectItem>
-                    }
-                </MudSelect>
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
+    <MudSelect @bind-Value="_displayType" Label="Display Type" Variant="Variant.Outlined" Class="mb-4">
+        <MudSelectItem Value="DisplayType.Table">Table</MudSelectItem>
+        <MudSelectItem Value="DisplayType.Board">Board</MudSelectItem>
+    </MudSelect>
+    if(_displayType == DisplayType.Table)
+    {
+        <MudTable Items="@_tasksVM.Tasks" Hover="true">
+            <HeaderContent>
+                <MudTh>ID</MudTh>
+                <MudTh>Title</MudTh>
+                <MudTh>Description</MudTh>
+                <MudTh>State</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="ID">@context.ShortId</MudTd>
+                <MudTd DataLabel="Title">@context.Title</MudTd>
+                <MudTd DataLabel="Description">@context.Description</MudTd>
+                <MudTd DataLabel="State">
+                    <MudSelect T="TaskStateVM" Value="@context.State" ValueChanged="e => UpdateTaskState(context.Id, e.Id)" ToStringFunc="@(x => x.Name)" Margin="Margin.Dense" Variant="Variant.Outlined">
+                        @foreach (var availableState in context.AvailableStates)
+                        {
+                            <MudSelectItem Value="@availableState"></MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+    else
+    {
+        <MudDropContainer T="TaskVM" Items="@_tasksVM.Tasks" ItemsSelector="@((items, dropzone) => items.State.Name == dropzone)" Class="d-flex flex-wrap flex-grow-1" ApplyDropClassesOnDragStarted="true"
+            ItemDropped="TaskDropped" CanDropClass="mud-border-success" NoDropClass="mud-border-error">
+            <ChildContent>
+                @foreach(var state in _tasksVM.AllTaskStates.Select(x => x.Name))
+                {
+                    <MudDropZone Identifier="@state" T="TaskVM" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1 border-2 border-solid mud-border-lines-default" 
+                    CanDrop="@((item) => item.AvailableStates.Any(x => x.Name == state))">
+                        <MudText Typo="Typo.h6">
+                            @state
+                        </MudText>
+                    </MudDropZone>
+                }
+            </ChildContent>
+            <ItemRenderer>
+                <MudPaper Class="pa-4 my-4">
+                    @context.Title
+                </MudPaper>
+            </ItemRenderer>
+        </MudDropContainer>
+    }
 }
 
 @code {
@@ -41,6 +70,14 @@
     private RequestHandler _requestHandler = null!;
 
     private TasksVM? _tasksVM;
+    private Dictionary<string, Guid>? _taskStateIdByName = new();
+
+    private enum DisplayType
+    {
+        Table,
+        Board
+    }
+    private DisplayType _displayType = DisplayType.Table;
 
     protected override async Task OnInitializedAsync()
     {
@@ -53,11 +90,23 @@
     private async Task UpdateTasksVM()
     {
         _tasksVM = await _requestHandler.GetAsync<TasksVM>("tasks", new[] { ("ProjectId", ProjectId.ToString() )});
+        _taskStateIdByName = _tasksVM?.AllTaskStates
+            .ToDictionary(x => x.Name, x => x.Id);
     }
 
     private async Task UpdateTaskState(Guid taskId, Guid newStateId)
     {
         await _requestHandler.PostAsync($"tasks/{taskId}/update-state/{newStateId}", headers: new[] { ("ProjectId", ProjectId.ToString()) });
         await UpdateTasksVM(); // TODO: Optimize it, don't fetch all tasks again
+    }
+
+    private async Task TaskDropped(MudItemDropInfo<TaskVM> dropItem)
+    {
+        if(dropItem.Item is null || _taskStateIdByName is null)
+        {
+            return;
+        }
+
+        await UpdateTaskState(dropItem.Item.Id, _taskStateIdByName[dropItem.DropzoneIdentifier]);
     }
 }

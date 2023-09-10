@@ -50,6 +50,10 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
                 AvailableStates = state.PossibleNextStates
             }).ToListAsync();
 
+        var allTaskStates = taskStatesManager.AllStates
+            .Select(x => new TaskStateVM(x.Id, x.Name.Value))
+            .ToList();
+
         return new TasksVM(tasks.Select(x => new TaskVM
         {
             Id = x.Id,
@@ -57,7 +61,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
             Title = x.Title,
             Description = x.Description,
             State = new(x.State, statesById[x.State].Name.Value),
-            AvailableStates = x.AvailableStates.Select(xx => new TaskStateVM(xx, statesById[xx].Name.Value)).ToList()
-        }).ToList());
+            AvailableStates = x.AvailableStates.Select(xx => new TaskStateVM(xx, statesById[xx].Name.Value)).ToList(),
+        }).ToList(), allTaskStates);
     }
 }

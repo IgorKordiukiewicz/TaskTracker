@@ -72,7 +72,7 @@ public class TasksTests
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task GetAll_ShouldReturnProjectTasks()
+    public async System.Threading.Tasks.Task GetAll_ShouldReturnProjectTasksAndAllPossibleStates()
     {
         var user = User.Create("authId", "user");
         var organization = Organization.Create("org", user.Id);
@@ -100,6 +100,7 @@ public class TasksTests
         {
             result.IsSuccess.Should().BeTrue();
             result.Value.Tasks.Should().HaveCount(2);
+            result.Value.AllTaskStates.Should().HaveCount(taskStatesManager1.AllStates.Count);
         }
     }
 
