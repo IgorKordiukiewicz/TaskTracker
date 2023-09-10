@@ -60,14 +60,14 @@
 
     private ProjectsVM? _projectsVM;
 
-    private record CreateProjectFormData
+    private class CreateProjectForm
     {
         public bool Visible { get; set; } = false;
         public string Name { get; set; } = string.Empty;
 
         public bool IsValid() => !string.IsNullOrWhiteSpace(Name);
     }
-    private CreateProjectFormData _createProjectForm = new();
+    private CreateProjectForm _createProjectForm = new();
 
     protected override async Task OnInitializedAsync()
     {

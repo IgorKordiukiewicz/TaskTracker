@@ -6,12 +6,17 @@
 @inject HttpClient _httpClient
 @inject IDialogService _dialogService
 
-@if(_tasksVM is not null)
+@if(_tasksVM is not null) // TODO: Display DisplayType selector in the navbar: Tasks/Board and Tasks/Table
 {
-    <MudSelect @bind-Value="_displayType" Label="Display Type" Variant="Variant.Outlined" Class="mb-4">
-        <MudSelectItem Value="DisplayType.Table">Table</MudSelectItem>
-        <MudSelectItem Value="DisplayType.Board">Board</MudSelectItem>
-    </MudSelect>
+    <div class="d-flex gap-2 align-center mb-4">
+        <MudSelect @bind-Value="_displayType" Label="Display Type" Variant="Variant.Outlined">
+            <MudSelectItem Value="DisplayType.Table">Table</MudSelectItem>
+            <MudSelectItem Value="DisplayType.Board">Board</MudSelectItem>
+        </MudSelect>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenCreateTaskDialog" Style="height: 50%;">
+            Create
+        </MudButton>
+    </div>
     if(_displayType == DisplayType.Table)
     {
         <MudTable Items="@_tasksVM.Tasks" Hover="true">
@@ -60,6 +65,22 @@
     }
 }
 
+<MudDialog IsVisible="@_createTaskForm.Visible">
+    <TitleContent>
+        <MudText>
+            Create a new task
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@_createTaskForm.Title" Label="Title" Required="true" />
+        <MudTextField @bind-Value="@_createTaskForm.Description" Label="Description" Required="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" OnClick="CloseCreateTaskDialog">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_createTaskForm.IsValid())" OnClick="CreateTask">Create</MudButton>
+    </DialogActions>
+</MudDialog>
+
 @code {
     [Parameter]
     public Guid ProjectId { get; init; }
@@ -78,6 +99,16 @@
         Board
     }
     private DisplayType _displayType = DisplayType.Table;
+
+    private class CreateTaskForm
+    {
+        public bool Visible { get; set; } = false;
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+
+        public bool IsValid() => !string.IsNullOrWhiteSpace(Title) && !string.IsNullOrWhiteSpace(Description);
+    }
+    private CreateTaskForm _createTaskForm = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -108,5 +139,32 @@
         }
 
         await UpdateTaskState(dropItem.Item.Id, _taskStateIdByName[dropItem.DropzoneIdentifier]);
+    }
+
+    private void OpenCreateTaskDialog()
+    {
+        _createTaskForm.Visible = true;
+    }
+
+    private void CloseCreateTaskDialog()
+    {
+        _createTaskForm.Visible = false;
+    }
+
+    private async Task CreateTask()
+    {
+        if(!_createTaskForm.IsValid())
+        {
+            return;
+        }
+
+        var model = new CreateTaskDto()
+        {
+            Title = _createTaskForm.Title,
+            Description = _createTaskForm.Description
+        };
+        await _requestHandler.PostAsync("tasks", model, new[] { ("ProjectId", ProjectId.ToString()) });
+        await UpdateTasksVM();
+        _createTaskForm = new();
     }
 }
