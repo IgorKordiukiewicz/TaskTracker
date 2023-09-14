@@ -35,11 +35,11 @@ public class TasksController : ControllerBase
         return result.ToHttpResult();
     }
 
-    [HttpPost("{taskId:guid}/update-state/{newStateId:guid}")]
+    [HttpPost("{taskId:guid}/update-status/{newStatusId:guid}")]
     [Authorize(Policy.ProjectMember)]
-    public async Task<IActionResult> UpdateTaskState(Guid taskId, Guid newStateId)
+    public async Task<IActionResult> UpdateTaskStatus(Guid taskId, Guid newStatusId)
     {
-        var result = await _mediator.Send(new UpdateTaskStateCommand(taskId, newStateId));
+        var result = await _mediator.Send(new UpdateTaskStatusCommand(taskId, newStatusId));
         return result.ToHttpResult();
     }
 }

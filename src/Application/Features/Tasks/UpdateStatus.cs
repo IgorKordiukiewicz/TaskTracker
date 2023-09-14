@@ -4,29 +4,29 @@ using Domain.Tasks;
 
 namespace Application.Features.Tasks;
 
-public record UpdateTaskStateCommand(Guid TaskId, Guid NewStateId) : IRequest<Result>;
+public record UpdateTaskStatusCommand(Guid TaskId, Guid NewStatusId) : IRequest<Result>;
 
-internal class UpdateTaskStateCommandValidator : AbstractValidator<UpdateTaskStateCommand>
+internal class UpdateTaskStatusCommandValidator : AbstractValidator<UpdateTaskStatusCommand>
 {
-    public UpdateTaskStateCommandValidator()
+    public UpdateTaskStatusCommandValidator()
     {
         RuleFor(x => x.TaskId).NotEmpty();
-        RuleFor(x => x.NewStateId).NotEmpty();
+        RuleFor(x => x.NewStatusId).NotEmpty();
     }
 }
 
-internal class UpdateTaskStateHandler : IRequestHandler<UpdateTaskStateCommand, Result>
+internal class UpdateTaskStatusHandler : IRequestHandler<UpdateTaskStatusCommand, Result>
 {
     private readonly IRepository<Workflow> _workflowRepository;
     private readonly IRepository<Domain.Tasks.Task> _taskRepository;
 
-    public UpdateTaskStateHandler(IRepository<Domain.Tasks.Task> taskRepository, IRepository<Workflow> workflowRepository)
+    public UpdateTaskStatusHandler(IRepository<Domain.Tasks.Task> taskRepository, IRepository<Workflow> workflowRepository)
     {
         _taskRepository = taskRepository;
         _workflowRepository = workflowRepository;
     }
 
-    public async Task<Result> Handle(UpdateTaskStateCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
     {
         var task = await _taskRepository.GetById(request.TaskId);
         if(task is null)
@@ -36,7 +36,7 @@ internal class UpdateTaskStateHandler : IRequestHandler<UpdateTaskStateCommand, 
 
         var workflow = await _workflowRepository.GetBy(x => x.ProjectId == task.ProjectId);
 
-        var result = task.UpdateState(request.NewStateId, workflow!);
+        var result = task.UpdateStatus(request.NewStatusId, workflow!);
         if(result.IsFailed)
         {
             return Result.Fail(result.Errors);

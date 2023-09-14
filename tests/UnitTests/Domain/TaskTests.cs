@@ -12,9 +12,9 @@ public class TaskTests
         var projectId = Guid.NewGuid();
         var title = "Title";
         var description = "Description";
-        var stateId = Guid.NewGuid();
+        var statusId = Guid.NewGuid();
 
-        var result = Task.Create(shortId, projectId, title, description, stateId);
+        var result = Task.Create(shortId, projectId, title, description, statusId);
 
         using(new AssertionScope())
         {
@@ -23,51 +23,51 @@ public class TaskTests
             result.ProjectId.Should().Be(projectId);
             result.Title.Should().Be(title);
             result.Description.Should().Be(description);
-            result.StateId.Should().Be(stateId);
+            result.StatusId.Should().Be(statusId);
         }
     }
 
     [Fact]
-    public void UpdateState_ShouldFail_WhenNewStateIdIsNotValid()
+    public void UpdateStatus_ShouldFail_WhenNewStatusIdIsNotValid()
     {
         var workflow = Workflow.Create(Guid.NewGuid());
-        var initialState = workflow.AllStates.First(x => x.IsInitial);
-        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialState.Id);
+        var initialStatus = workflow.Statuses.First(x => x.IsInitial);
+        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialStatus.Id);
 
-        var result = task.UpdateState(Guid.NewGuid(), workflow);
+        var result = task.UpdateStatus(Guid.NewGuid(), workflow);
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public void UpdateState_ShouldFail_WhenStateCannotTransitionToNewState()
+    public void UpdateStatus_ShouldFail_WhenStatusCannotTransitionToNewStatus()
     {
         var workflow = Workflow.Create(Guid.NewGuid());
-        var initialState = workflow.AllStates.First(x => x.IsInitial);
-        var unavailableState = workflow.AllStates.First(x => !initialState.CanTransitionTo(x.Id));
+        var initialStatus = workflow.Statuses.First(x => x.IsInitial);
+        var unavailableStatus = workflow.Statuses.First(x => !initialStatus.CanTransitionTo(x.Id));
 
-        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialState.Id);
+        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialStatus.Id);
 
-        var result = task.UpdateState(unavailableState.Id, workflow);
+        var result = task.UpdateStatus(unavailableStatus.Id, workflow);
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public void UpdateState_ShouldUpdateStateId_WhenStateCanTransitionToNewState()
+    public void UpdateStatus_ShouldUpdateStatusId_WhenStatusCanTransitionToNewStatus()
     {
         var workflow = Workflow.Create(Guid.NewGuid());
-        var initialState = workflow.AllStates.First(x => x.IsInitial);
-        var availableState = workflow.AllStates.First(x => initialState.CanTransitionTo(x.Id));
+        var initialStatus = workflow.Statuses.First(x => x.IsInitial);
+        var availableStatus = workflow.Statuses.First(x => initialStatus.CanTransitionTo(x.Id));
 
-        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialState.Id);
+        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialStatus.Id);
 
-        var result = task.UpdateState(availableState.Id, workflow);
+        var result = task.UpdateStatus(availableStatus.Id, workflow);
 
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            task.StateId.Should().Be(availableState.Id);
+            task.StatusId.Should().Be(availableStatus.Id);
         }
     }
 }

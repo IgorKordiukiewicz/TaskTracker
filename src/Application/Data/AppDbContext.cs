@@ -19,7 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<ProjectMember> ProjectMembers { get; set; }
 
     public DbSet<Domain.Tasks.Task> Tasks { get; set; }
-    public DbSet<TaskState> TaskStates { get; set; }
+    public DbSet<Domain.Tasks.TaskStatus> TaskStatuses { get; set; }
     public DbSet<Workflow> Workflows { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) 

@@ -5,61 +5,52 @@ namespace UnitTests.Domain;
 public class WorkflowTests
 {
     [Fact]
-    public void Create_ShouldWorkflow_WithDefaultStates()
+    public void Create_ShouldWorkflow_WithDefaultStatuses()
     {
         var result = Workflow.Create(Guid.NewGuid());
 
         using(new AssertionScope())
         {
             result.Id.Should().NotBeEmpty();
-            result.AllStates.Should().HaveCount(3);
+            result.Statuses.Should().HaveCount(3);
 
-            var todoState = result.AllStates.First(x => x.Name.Value.ToLower() == "todo");
-            todoState.IsInitial.Should().BeTrue();
+            var todoStatus = result.Statuses.First(x => x.Name.ToLower() == "todo");
+            todoStatus.IsInitial.Should().BeTrue();
 
-            var inProgressState = result.AllStates.First(x => x.Name.Value.ToLower() == "inprogress");
-            inProgressState.IsInitial.Should().BeFalse();
+            var inProgressStatus = result.Statuses.First(x => x.Name.ToLower() == "inprogress");
+            inProgressStatus.IsInitial.Should().BeFalse();
 
-            var doneState = result.AllStates.First(x => x.Name.Value.ToLower() == "done");
-            doneState.IsInitial.Should().BeFalse();
+            var doneStatus = result.Statuses.First(x => x.Name.ToLower() == "done");
+            doneStatus.IsInitial.Should().BeFalse();
 
             // Transitions
-            todoState.CanTransitionTo(inProgressState.Id).Should().BeTrue();
-            todoState.CanTransitionTo(doneState.Id).Should().BeFalse();
+            todoStatus.CanTransitionTo(inProgressStatus.Id).Should().BeTrue();
+            todoStatus.CanTransitionTo(doneStatus.Id).Should().BeFalse();
 
-            inProgressState.CanTransitionTo(todoState.Id).Should().BeTrue();
-            inProgressState.CanTransitionTo(doneState.Id).Should().BeTrue();
+            inProgressStatus.CanTransitionTo(todoStatus.Id).Should().BeTrue();
+            inProgressStatus.CanTransitionTo(doneStatus.Id).Should().BeTrue();
 
-            doneState.CanTransitionTo(todoState.Id).Should().BeFalse();
-            doneState.CanTransitionTo(inProgressState.Id).Should().BeTrue();
+            doneStatus.CanTransitionTo(todoStatus.Id).Should().BeFalse();
+            doneStatus.CanTransitionTo(inProgressStatus.Id).Should().BeTrue();
 
             // Display orders
-            result.AllStates.OrderBy(x => x.DisplayOrder).Select(x => x.Name.Value.ToLower())
+            result.Statuses.OrderBy(x => x.DisplayOrder).Select(x => x.Name.ToLower())
                 .Should().BeEquivalentTo(new[] { "todo", "inprogress", "done" }, options => options.WithStrictOrdering());
         }
     }
 
     [Fact]
-    public void TaskStateName_ShouldBeCaseInsensitive()
+    public void TaskStatus_CanTransitionTo_ReturnsWhetherStatusCanTransitionToGivenStatus()
     {
-        var name1 = new TaskStateName("todo");
-        var name2 = new TaskStateName("TODO");
+        var availableStatus = Guid.NewGuid();
+        var unavailableStatus = Guid.NewGuid();
 
-        name1.Should().Be(name2);
-    }
-
-    [Fact]
-    public void TaskState_CanTransitionTo_ReturnsWhetherStateCanTransitionToGivenState()
-    {
-        var availableState = Guid.NewGuid();
-        var unavailableState = Guid.NewGuid();
-
-        var taskState = TaskState.Create(Guid.NewGuid(), new("test"), new[] { availableState }, 0);
+        var taskStatus = global::Domain.Tasks.TaskStatus.Create(Guid.NewGuid(), new("test"), new[] { availableStatus }, 0);
 
         using(new AssertionScope())
         {
-            taskState.CanTransitionTo(availableState).Should().BeTrue();
-            taskState.CanTransitionTo(unavailableState).Should().BeFalse();
+            taskStatus.CanTransitionTo(availableStatus).Should().BeTrue();
+            taskStatus.CanTransitionTo(unavailableStatus).Should().BeFalse();
         }
     }
 }

@@ -14,7 +14,7 @@ internal class WorkflowConfiguration : IEntityTypeConfiguration<Workflow>
             .WithOne()
             .HasForeignKey<Workflow>(x => x.ProjectId);
 
-        builder.HasMany(x => x.AllStates)
+        builder.HasMany(x => x.Statuses)
             .WithOne();
     }
 }

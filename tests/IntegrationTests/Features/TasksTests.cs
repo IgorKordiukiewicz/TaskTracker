@@ -30,15 +30,15 @@ public class TasksTests
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task Create_ShouldCreateTask_WithCorrectShortIdAndInitialTaskState_WhenProjectExists()
+    public async System.Threading.Tasks.Task Create_ShouldCreateTask_WithCorrectShortIdAndInitialTaskStatus_WhenProjectExists()
     {
         var user = User.Create("authId", "user");
         var organization = Organization.Create("org", user.Id);
         var project = Project.Create("project", organization.Id, user.Id);
         var workflow = Workflow.Create(project.Id);
-        var initialStateId = workflow.AllStates.First(x => x.IsInitial).Id;
-        var task1 = Task.Create(1, project.Id, "title1", "desc1", initialStateId);
-        var task2 = Task.Create(2, project.Id, "title2", "desc2", initialStateId);
+        var initialStatusId = workflow.Statuses.First(x => x.IsInitial).Id;
+        var task1 = Task.Create(1, project.Id, "title1", "desc1", initialStatusId);
+        var task2 = Task.Create(2, project.Id, "title2", "desc2", initialStatusId);
         await _fixture.SeedDb(async db =>
         {
             await db.Users.AddAsync(user);
@@ -58,8 +58,8 @@ public class TasksTests
             var task = await _fixture.FirstAsync<Task>(x => x.Id == result.Value);
             task.ShortId.Should().Be(3);
 
-            var initialTaskState = await _fixture.FirstAsync<TaskState>(x => x.IsInitial);
-            task.StateId.Should().Be(initialTaskState.Id);
+            var initialTaskStatus = await _fixture.FirstAsync<Domain.Tasks.TaskStatus>(x => x.IsInitial);
+            task.StatusId.Should().Be(initialTaskStatus.Id);
         }
     }
 
@@ -72,19 +72,19 @@ public class TasksTests
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task GetAll_ShouldReturnProjectTasksAndAllPossibleStates()
+    public async System.Threading.Tasks.Task GetAll_ShouldReturnProjectTasksAndAllPossibleStatuses()
     {
         var user = User.Create("authId", "user");
         var organization = Organization.Create("org", user.Id);
         var project1 = Project.Create("project", organization.Id, user.Id);
         var project2 = Project.Create("project2", organization.Id, user.Id);
         var workflow1 = Workflow.Create(project1.Id);
-        var initialStateId1 = workflow1.AllStates.First(x => x.IsInitial).Id;
+        var initialStatusId1 = workflow1.Statuses.First(x => x.IsInitial).Id;
         var workflow2 = Workflow.Create(project2.Id);
-        var initialStateId2 = workflow1.AllStates.First(x => x.IsInitial).Id;
-        var task1 = Task.Create(1, project1.Id, "title1", "desc1", initialStateId1);
-        var task2 = Task.Create(2, project1.Id, "title2", "desc2", initialStateId1);
-        var task3 = Task.Create(1, project2.Id, "title3", "desc3", initialStateId2);
+        var initialStatusId2 = workflow1.Statuses.First(x => x.IsInitial).Id;
+        var task1 = Task.Create(1, project1.Id, "title1", "desc1", initialStatusId1);
+        var task2 = Task.Create(2, project1.Id, "title2", "desc2", initialStatusId1);
+        var task3 = Task.Create(1, project2.Id, "title3", "desc3", initialStatusId2);
         await _fixture.SeedDb(async db =>
         {
             await db.Users.AddAsync(user);
@@ -100,27 +100,27 @@ public class TasksTests
         {
             result.IsSuccess.Should().BeTrue();
             result.Value.Tasks.Should().HaveCount(2);
-            result.Value.AllTaskStates.Should().HaveCount(workflow1.AllStates.Count);
+            result.Value.AllTaskStatuses.Should().HaveCount(workflow1.Statuses.Count);
         }
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task UpdateState_ShouldFail_WhenTaskDoesNotExist()
+    public async System.Threading.Tasks.Task UpdateStatus_ShouldFail_WhenTaskDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new UpdateTaskStateCommand(Guid.NewGuid(), Guid.NewGuid()));
+        var result = await _fixture.SendRequest(new UpdateTaskStatusCommand(Guid.NewGuid(), Guid.NewGuid()));
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task UpdateState_ShouldUpdateTaskState_WhenValid()
+    public async System.Threading.Tasks.Task UpdateStatus_ShouldUpdateTaskStatus_WhenValid()
     {
         var user = User.Create("authId", "user");
         var organization = Organization.Create("org", user.Id);
         var project = Project.Create("project", organization.Id, user.Id);
         var workflow = Workflow.Create(project.Id);
-        var initialState = workflow.AllStates.First(x => x.IsInitial);
-        var task = Task.Create(1, project.Id, "title", "desc", initialState.Id);
+        var initialStatus = workflow.Statuses.First(x => x.IsInitial);
+        var task = Task.Create(1, project.Id, "title", "desc", initialStatus.Id);
         await _fixture.SeedDb(async db =>
         {
             await db.Users.AddAsync(user);
@@ -130,16 +130,16 @@ public class TasksTests
             await db.Tasks.AddAsync(task);
         });
 
-        var newStateId = initialState.PossibleNextStates.First();
+        var newStatusId = initialStatus.PossibleNextStatuses[0];
 
-        var result = await _fixture.SendRequest(new UpdateTaskStateCommand(task.Id, newStateId));
+        var result = await _fixture.SendRequest(new UpdateTaskStatusCommand(task.Id, newStatusId));
 
         using(new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
 
             var updatedTask = await _fixture.FirstAsync<Task>(x => x.Id == task.Id);
-            updatedTask.StateId.Should().Be(newStateId);
+            updatedTask.StatusId.Should().Be(newStatusId);
         }
     }
 }

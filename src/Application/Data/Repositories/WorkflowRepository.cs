@@ -31,7 +31,7 @@ public class WorkflowRepository : IRepository<Workflow>
 
     public async Task<Workflow?> GetBy(Expression<Func<Workflow, bool>> predicate)
         => await _dbContext.Workflows
-        .Include(x => x.AllStates)
+        .Include(x => x.Statuses)
         .FirstOrDefaultAsync(predicate);
 
     public async Task<Workflow?> GetById(Guid id)

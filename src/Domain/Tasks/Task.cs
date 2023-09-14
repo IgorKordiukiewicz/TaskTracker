@@ -10,7 +10,7 @@ public class Task : Entity, IAggregateRoot
     public Guid ProjectId { get; private set; }
     public string Title { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
-    public Guid StateId { get; private set; } = default!;
+    public Guid StatusId { get; private set; } = default!;
 
     private Task(Guid id)
         : base(id)
@@ -19,7 +19,7 @@ public class Task : Entity, IAggregateRoot
     }
 
     // TODO: Remove unnecessary factory methods
-    public static Task Create(int shortId, Guid projectId, string title, string description, Guid stateId)
+    public static Task Create(int shortId, Guid projectId, string title, string description, Guid statusId)
     {
         return new(Guid.NewGuid())
         {
@@ -27,25 +27,25 @@ public class Task : Entity, IAggregateRoot
             ProjectId = projectId,
             Title = title,
             Description = description,
-            StateId = stateId
+            StatusId = statusId
         };
     }
 
-    public Result UpdateState(Guid newStateId, Workflow workflow)
+    public Result UpdateStatus(Guid newStatusId, Workflow workflow)
     {
-        var state = workflow.AllStates.Single(x => x.Id == StateId);
+        var currentStatus = workflow.Statuses.Single(x => x.Id == StatusId);
 
-        if(!workflow.AllStates.Any(x => x.Id == newStateId))
+        if(!workflow.Statuses.Any(x => x.Id == newStatusId))
         {
-            return Result.Fail(new DomainError("Invalid state key."));
+            return Result.Fail(new DomainError("Invalid status key."));
         }
 
-        if(!state.CanTransitionTo(newStateId))
+        if(!currentStatus.CanTransitionTo(newStatusId))
         {
-            return Result.Fail(new DomainError($"Invalid state transition"));
+            return Result.Fail(new DomainError($"Invalid status transition"));
         }
 
-        StateId = newStateId;
+        StatusId = newStatusId;
         return Result.Ok();
     }
 }
