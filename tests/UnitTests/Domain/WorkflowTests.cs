@@ -2,12 +2,12 @@
 
 namespace UnitTests.Domain;
 
-public class TaskStatesManagerTests
+public class WorkflowTests
 {
     [Fact]
-    public void Create_ShouldCreateTaskStatesManager_WithDefaultStates()
+    public void Create_ShouldWorkflow_WithDefaultStates()
     {
-        var result = TaskStatesManager.Create(Guid.NewGuid());
+        var result = Workflow.Create(Guid.NewGuid());
 
         using(new AssertionScope())
         {

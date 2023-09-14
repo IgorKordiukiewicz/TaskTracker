@@ -22,13 +22,13 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
 {
     private readonly AppDbContext _dbContext;
     private readonly IRepository<Project> _projectRepository;
-    private readonly IRepository<TaskStatesManager> _taskStatesManagerRepository;
+    private readonly IRepository<Workflow> _workflowRepository;
 
-    public CreateProjectHandler(AppDbContext dbContext, IRepository<Project> projectRepository, IRepository<TaskStatesManager> taskStatesManagerRepository)
+    public CreateProjectHandler(AppDbContext dbContext, IRepository<Project> projectRepository, IRepository<Workflow> workflowRepository)
     {
         _dbContext = dbContext;
         _projectRepository = projectRepository;
-        _taskStatesManagerRepository = taskStatesManagerRepository;
+        _workflowRepository = workflowRepository;
     }
 
     public async Task<Result<Guid>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
@@ -50,8 +50,8 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
         var project = Project.Create(request.Model.Name, request.OrganizationId, userId); // TODO: Should UserId be validated or not since it is coming from internal sources so it should always be valid
         await _projectRepository.Add(project);
 
-        var taskStatesManager = TaskStatesManager.Create(project.Id);
-        await _taskStatesManagerRepository.Add(taskStatesManager);
+        var workflow = Workflow.Create(project.Id);
+        await _workflowRepository.Add(workflow);
 
         return project.Id;
     }

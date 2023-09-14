@@ -30,11 +30,11 @@ public class TaskTests
     [Fact]
     public void UpdateState_ShouldFail_WhenNewStateIdIsNotValid()
     {
-        var statesManager = TaskStatesManager.Create(Guid.NewGuid());
-        var initialState = statesManager.AllStates.First(x => x.IsInitial);
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var initialState = workflow.AllStates.First(x => x.IsInitial);
         var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialState.Id);
 
-        var result = task.UpdateState(Guid.NewGuid(), statesManager);
+        var result = task.UpdateState(Guid.NewGuid(), workflow);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -42,13 +42,13 @@ public class TaskTests
     [Fact]
     public void UpdateState_ShouldFail_WhenStateCannotTransitionToNewState()
     {
-        var statesManager = TaskStatesManager.Create(Guid.NewGuid());
-        var initialState = statesManager.AllStates.First(x => x.IsInitial);
-        var unavailableState = statesManager.AllStates.First(x => !initialState.CanTransitionTo(x.Id));
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var initialState = workflow.AllStates.First(x => x.IsInitial);
+        var unavailableState = workflow.AllStates.First(x => !initialState.CanTransitionTo(x.Id));
 
         var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialState.Id);
 
-        var result = task.UpdateState(unavailableState.Id, statesManager);
+        var result = task.UpdateState(unavailableState.Id, workflow);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -56,13 +56,13 @@ public class TaskTests
     [Fact]
     public void UpdateState_ShouldUpdateStateId_WhenStateCanTransitionToNewState()
     {
-        var statesManager = TaskStatesManager.Create(Guid.NewGuid());
-        var initialState = statesManager.AllStates.First(x => x.IsInitial);
-        var availableState = statesManager.AllStates.First(x => initialState.CanTransitionTo(x.Id));
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var initialState = workflow.AllStates.First(x => x.IsInitial);
+        var availableState = workflow.AllStates.First(x => initialState.CanTransitionTo(x.Id));
 
         var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialState.Id);
 
-        var result = task.UpdateState(availableState.Id, statesManager);
+        var result = task.UpdateState(availableState.Id, workflow);
 
         using (new AssertionScope())
         {

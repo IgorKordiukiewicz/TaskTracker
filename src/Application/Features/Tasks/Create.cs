@@ -39,7 +39,7 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
             .Where(x => x.ProjectId == request.ProjectId)
             .CountAsync()) + 1;
 
-        var initialTaskState = await _dbContext.TaskStatesManagers
+        var initialTaskState = await _dbContext.Workflows
             .AsNoTracking()
             .Include(x => x.AllStates)
             .Where(x => x.ProjectId == request.ProjectId)

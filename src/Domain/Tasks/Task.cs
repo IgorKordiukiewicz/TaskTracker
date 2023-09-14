@@ -31,11 +31,11 @@ public class Task : Entity, IAggregateRoot
         };
     }
 
-    public Result UpdateState(Guid newStateId, TaskStatesManager statesManager)
+    public Result UpdateState(Guid newStateId, Workflow workflow)
     {
-        var state = statesManager.AllStates.Single(x => x.Id == StateId);
+        var state = workflow.AllStates.Single(x => x.Id == StateId);
 
-        if(!statesManager.AllStates.Any(x => x.Id == newStateId))
+        if(!workflow.AllStates.Any(x => x.Id == newStateId))
         {
             return Result.Fail(new DomainError("Invalid state key."));
         }

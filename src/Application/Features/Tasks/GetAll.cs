@@ -23,17 +23,17 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
 
     public async Task<Result<TasksVM>> Handle(GetAllTasksQuery request, CancellationToken cancellationToken)
     {
-        var taskStatesManager = await _context.TaskStatesManagers
+        var workflow = await _context.Workflows
             .Include(x => x.AllStates)
             .Where(x => x.ProjectId == request.ProjectId)
             .SingleOrDefaultAsync();
 
-        if(taskStatesManager is null)
+        if(workflow is null)
         {
-            return Result.Fail<TasksVM>(new ApplicationError("Task states manager with this ID does not exist."));
+            return Result.Fail<TasksVM>(new ApplicationError("Workflow with this ID does not exist."));
         }
 
-        var statesById = taskStatesManager.AllStates.ToDictionary(x => x.Id, x => x);
+        var statesById = workflow.AllStates.ToDictionary(x => x.Id, x => x);
 
         var tasks = await _context.Tasks
             .Where(x => x.ProjectId == request.ProjectId)
@@ -50,7 +50,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
                 AvailableStates = state.PossibleNextStates
             }).ToListAsync();
 
-        var allTaskStates = taskStatesManager.AllStates
+        var allTaskStates = workflow.AllStates
             .Select(x => new TaskStateDetailedVM(x.Id, x.Name.Value, x.DisplayOrder))
             .ToList();
 
