@@ -33,14 +33,7 @@ public class Task : Entity, IAggregateRoot
 
     public Result UpdateStatus(Guid newStatusId, Workflow workflow)
     {
-        var currentStatus = workflow.Statuses.Single(x => x.Id == StatusId);
-
-        if(!workflow.Statuses.Any(x => x.Id == newStatusId))
-        {
-            return Result.Fail(new DomainError("Invalid status key."));
-        }
-
-        if(!currentStatus.CanTransitionTo(newStatusId))
+        if(!workflow.CanTransitionTo(StatusId, newStatusId))
         {
             return Result.Fail(new DomainError($"Invalid status transition"));
         }

@@ -35,6 +35,10 @@ internal class UpdateTaskStatusHandler : IRequestHandler<UpdateTaskStatusCommand
         }
 
         var workflow = await _workflowRepository.GetBy(x => x.ProjectId == task.ProjectId);
+        if(!workflow!.DoesStatusExist(request.NewStatusId))
+        {
+            return Result.Fail(new ApplicationError("Status with this ID does not exist."));
+        }
 
         var result = task.UpdateStatus(request.NewStatusId, workflow!);
         if(result.IsFailed)

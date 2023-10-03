@@ -8,10 +8,11 @@ public class TaskStatus : Entity
 
     public bool IsInitial { get; private set; } = false;
 
-    private List<Guid> _possibleNextStatuses = new();
+    private List<Guid> _possibleNextStatuses = new(); // TODO: Rename to _transitionStatuses ?
     public IReadOnlyList<Guid> PossibleNextStatuses => _possibleNextStatuses.AsReadOnly();
 
     public int DisplayOrder { get; private set; }
+    // TODO: Add color
 
     private TaskStatus(Guid id, string name, int displayOrder, bool isInitial = false)
         : base(id)

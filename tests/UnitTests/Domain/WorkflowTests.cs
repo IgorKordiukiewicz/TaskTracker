@@ -40,6 +40,49 @@ public class WorkflowTests
     }
 
     [Fact]
+    public void DoesStatusExist_ShouldReturnFalse_WhenStatusDoesNotExist()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+
+        var result = workflow.DoesStatusExist(Guid.NewGuid());
+
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public void DoesStatusExist_ShouldReturnTrue_WhenStatusExists()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var status = workflow.Statuses[0];
+
+        var result = workflow.DoesStatusExist(status.Id);
+
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CanTransitionTo_ShouldReturnFalse_WhenCantTransitionToNewStatus()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var status = workflow.Statuses[0];
+
+        var result = workflow.CanTransitionTo(status.Id, Guid.NewGuid());
+
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public void CanTransitionTo_ShouldReturnTrue_WhenCanTransitionToNewState()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var status = workflow.Statuses[0];
+
+        var result = workflow.CanTransitionTo(status.Id, status.PossibleNextStatuses[0]);
+
+        result.Should().BeTrue();
+    }
+
+    [Fact]
     public void TaskStatus_CanTransitionTo_ReturnsWhetherStatusCanTransitionToGivenStatus()
     {
         var availableStatus = Guid.NewGuid();

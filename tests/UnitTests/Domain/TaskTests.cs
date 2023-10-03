@@ -28,18 +28,6 @@ public class TaskTests
     }
 
     [Fact]
-    public void UpdateStatus_ShouldFail_WhenNewStatusIdIsNotValid()
-    {
-        var workflow = Workflow.Create(Guid.NewGuid());
-        var initialStatus = workflow.Statuses.First(x => x.IsInitial);
-        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialStatus.Id);
-
-        var result = task.UpdateStatus(Guid.NewGuid(), workflow);
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
     public void UpdateStatus_ShouldFail_WhenStatusCannotTransitionToNewStatus()
     {
         var workflow = Workflow.Create(Guid.NewGuid());

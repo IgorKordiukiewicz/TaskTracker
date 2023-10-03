@@ -50,7 +50,7 @@ public class TasksTests
 
         var result = await _fixture.SendRequest(new CreateTaskCommand(project.Id, _autoFixture.Create<CreateTaskDto>()));
 
-        using(new AssertionScope())
+        using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
 
@@ -96,7 +96,7 @@ public class TasksTests
 
         var result = await _fixture.SendRequest(new GetAllTasksQuery(project1.Id));
 
-        using(new AssertionScope())
+        using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
             result.Value.Tasks.Should().HaveCount(2);
@@ -108,6 +108,29 @@ public class TasksTests
     public async System.Threading.Tasks.Task UpdateStatus_ShouldFail_WhenTaskDoesNotExist()
     {
         var result = await _fixture.SendRequest(new UpdateTaskStatusCommand(Guid.NewGuid(), Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateStatus_ShouldFail_WhenTaskNewStatusIdDoesNotExist()
+    {
+        var user = User.Create("authId", "user");
+        var organization = Organization.Create("org", user.Id);
+        var project = Project.Create("project", organization.Id, user.Id);
+        var workflow = Workflow.Create(project.Id);
+        var initialStatus = workflow.Statuses.First(x => x.IsInitial);
+        var task = Task.Create(1, project.Id, "title", "desc", initialStatus.Id);
+        await _fixture.SeedDb(async db =>
+        {
+            await db.Users.AddAsync(user);
+            await db.Organizations.AddAsync(organization);
+            await db.Projects.AddAsync(project);
+            await db.Workflows.AddAsync(workflow);
+            await db.Tasks.AddAsync(task);
+        });
+
+        var result = await _fixture.SendRequest(new UpdateTaskStatusCommand(task.Id, Guid.NewGuid()));
 
         result.IsFailed.Should().BeTrue();
     }

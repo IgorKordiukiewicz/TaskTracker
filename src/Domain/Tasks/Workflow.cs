@@ -4,6 +4,7 @@ namespace Domain.Tasks;
 
 // TODO: what would happen if you tried to remove a status that was in use by a task?
 // TODO: move to separate folder?
+// TODO: Add TaskTransitionStatus Value object
 public class Workflow : Entity, IAggregateRoot
 {
     public Guid ProjectId { get; set; }
@@ -29,5 +30,14 @@ public class Workflow : Entity, IAggregateRoot
         workflow._statuses.Add(TaskStatus.Create(doneId, new("Done"), new[] { inProgressId }, 2));
 
         return workflow;
+    }
+
+    public bool DoesStatusExist(Guid statusId)
+        => _statuses.Any(x => x.Id == statusId);
+
+    public bool CanTransitionTo(Guid currentStatusId, Guid newStatusId)
+    {
+        var currentStatus = _statuses.Single(x => x.Id == currentStatusId);
+        return currentStatus.CanTransitionTo(newStatusId);
     }
 }
