@@ -1,0 +1,88 @@
+﻿@page "/project/{projectId:guid}/workflow"
+@layout ProjectLayout
+@attribute [Authorize]
+
+@using Blazor.Diagrams;
+@using Blazor.Diagrams.Components
+@using Blazor.Diagrams.Components.Widgets
+@using Blazor.Diagrams.Core.Anchors;
+@using Blazor.Diagrams.Core.Geometry;
+@using Blazor.Diagrams.Core.Models;
+@using Blazor.Diagrams.Core.PathGenerators;
+@using Blazor.Diagrams.Core.Positions;
+@using Blazor.Diagrams.Core.Routers;
+@using Blazor.Diagrams.Options;
+@using Web.Client.Diagrams;
+@using static Web.Client.Components.TaskStatusNode;
+
+@inject HttpClient _httpClient
+@inject IDialogService _dialogService
+
+<MudPaper>
+    <div class="diagram-container mt-6" style="height: calc(100vh - 130px); width: 100%; border: 2px solid white; border-radius: 10px;">
+        <CascadingValue Value="_diagram" IsFixed="true">
+            <DiagramCanvas>
+                <!--
+                <Widgets>
+                    <GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="gray" />
+                </Widgets>
+                -->
+            </DiagramCanvas>
+        </CascadingValue>
+    </div>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public Guid ProjectId { get; init; }
+
+    [CascadingParameter]
+    public ProjectLayout Layout { get; set; } = null!;
+
+    private RequestHandler _requestHandler = null!;
+
+    private BlazorDiagram _diagram = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Layout.ProjectId = ProjectId;
+        _requestHandler = new(_httpClient, _dialogService);
+
+        var options = new BlazorDiagramOptions
+        {
+            AllowMultiSelection = true,
+            AllowPanning = false,
+            Zoom =
+            {
+                Enabled = false,
+            },
+            Links =
+            {
+                DefaultRouter = new NormalRouter(),
+                DefaultPathGenerator = new StraightPathGenerator(),
+                DefaultColor = "#9E9E9E",
+                RequireTarget = true,
+            }
+        };
+        _diagram = new BlazorDiagram(options);
+        _diagram.RegisterComponent<TaskStatusNodeModel, TaskStatusNode>();
+
+        var firstNode = _diagram.Nodes.Add(new TaskStatusNodeModel(position: new Point(50, 50))
+        {
+            Name = "TODO"
+        });
+        var secondNode = _diagram.Nodes.Add(new TaskStatusNodeModel(position: new Point(200, 300))
+        {
+            Name = "IN PROGRESS"
+        });
+        var thirdNode = _diagram.Nodes.Add(new TaskStatusNodeModel(position: new Point(350, 50))
+        {
+            Name = "DONE"
+        });
+        
+        _diagram.Links.Add(DiagramFactory.CreateLink(firstNode, secondNode));
+        _diagram.Links.Add(DiagramFactory.CreateLink(secondNode, firstNode));
+        _diagram.Links.Add(DiagramFactory.CreateLink(secondNode, thirdNode));
+        _diagram.Links.Add(DiagramFactory.CreateLink(thirdNode, secondNode));
+    }
+}

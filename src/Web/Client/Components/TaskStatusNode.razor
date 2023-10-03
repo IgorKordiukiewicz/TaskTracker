@@ -1,0 +1,21 @@
+﻿@using Blazor.Diagrams.Components.Renderers
+@using Blazor.Diagrams.Core.Geometry;
+@using Blazor.Diagrams.Core.Models;
+@using Web.Client.Diagrams;
+
+<div>
+    <MudText Typo="Typo.h6" Align="Align.Center" Style="font-weight: bold; color: white;">
+        @Node.Name
+    </MudText>
+
+    @foreach(var port in Node.Ports)
+    {
+        <PortRenderer @key="port" Port="port" />
+    }
+</div>
+
+
+@code {
+    [Parameter]
+    public TaskStatusNodeModel Node { get; set; } = null!;
+}
