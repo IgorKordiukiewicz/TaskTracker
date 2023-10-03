@@ -26,7 +26,7 @@ public class Workflow : Entity, IAggregateRoot
 
         var workflow = new Workflow(projectId);
         workflow._statuses.Add(TaskStatus.Create(toDoId, new("ToDo"), new[] { inProgressId }, 0, true));
-        workflow._statuses.Add(TaskStatus.Create(inProgressId, new("InProgress"), new[] { toDoId, doneId }, 1));
+        workflow._statuses.Add(TaskStatus.Create(inProgressId, new("In Progress"), new[] { toDoId, doneId }, 1));
         workflow._statuses.Add(TaskStatus.Create(doneId, new("Done"), new[] { inProgressId }, 2));
 
         return workflow;

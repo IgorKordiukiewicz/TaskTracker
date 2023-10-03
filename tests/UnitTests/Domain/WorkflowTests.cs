@@ -17,7 +17,7 @@ public class WorkflowTests
             var todoStatus = result.Statuses.First(x => x.Name.ToLower() == "todo");
             todoStatus.IsInitial.Should().BeTrue();
 
-            var inProgressStatus = result.Statuses.First(x => x.Name.ToLower() == "inprogress");
+            var inProgressStatus = result.Statuses.First(x => x.Name.ToLower() == "in progress");
             inProgressStatus.IsInitial.Should().BeFalse();
 
             var doneStatus = result.Statuses.First(x => x.Name.ToLower() == "done");
@@ -35,7 +35,7 @@ public class WorkflowTests
 
             // Display orders
             result.Statuses.OrderBy(x => x.DisplayOrder).Select(x => x.Name.ToLower())
-                .Should().BeEquivalentTo(new[] { "todo", "inprogress", "done" }, options => options.WithStrictOrdering());
+                .Should().BeEquivalentTo(new[] { "todo", "in progress", "done" }, options => options.WithStrictOrdering());
         }
     }
 

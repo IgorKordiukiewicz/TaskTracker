@@ -18,19 +18,23 @@
 @inject HttpClient _httpClient
 @inject IDialogService _dialogService
 
-<MudPaper>
-    <div class="diagram-container mt-6" style="height: calc(100vh - 130px); width: 100%; border: 2px solid white; border-radius: 10px;">
-        <CascadingValue Value="_diagram" IsFixed="true">
-            <DiagramCanvas>
-                <!--
-                <Widgets>
-                    <GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="gray" />
-                </Widgets>
-                -->
-            </DiagramCanvas>
-        </CascadingValue>
-    </div>
-</MudPaper>
+@if(_workflowVM is not null)
+{
+    <MudPaper>
+        <div class="diagram-container mt-6" style="height: calc(100vh - 130px); width: 100%; border: 2px solid white; border-radius: 10px;">
+            <CascadingValue Value="_diagram" IsFixed="true">
+                <DiagramCanvas>
+                    <!--
+                    <Widgets>
+                        <GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="gray" />
+                    </Widgets>
+                    -->
+                </DiagramCanvas>
+            </CascadingValue>
+        </div>
+    </MudPaper>
+}
+
 
 @code {
     [Parameter]
@@ -43,10 +47,18 @@
 
     private BlazorDiagram _diagram = null!;
 
+    private WorkflowVM? _workflowVM;
+
     protected override async Task OnInitializedAsync()
     {
         Layout.ProjectId = ProjectId;
         _requestHandler = new(_httpClient, _dialogService);
+
+        _workflowVM = await _requestHandler.GetAsync<WorkflowVM>($"workflows/project/{ProjectId}");
+        if(_workflowVM is null)
+        {
+            return;
+        }
 
         var options = new BlazorDiagramOptions
         {
@@ -67,22 +79,27 @@
         _diagram = new BlazorDiagram(options);
         _diagram.RegisterComponent<TaskStatusNodeModel, TaskStatusNode>();
 
-        var firstNode = _diagram.Nodes.Add(new TaskStatusNodeModel(position: new Point(50, 50))
+        var currentPositionX = 50;
+        var nodeByStatusId = new Dictionary<Guid, TaskStatusNodeModel>();
+        foreach(var taskStatus in _workflowVM.TaskStatuses)
         {
-            Name = "TODO"
-        });
-        var secondNode = _diagram.Nodes.Add(new TaskStatusNodeModel(position: new Point(200, 300))
+            var node = _diagram.Nodes.Add(new TaskStatusNodeModel(position: new Point(currentPositionX, 50))
+            {
+                Name = taskStatus.Name.ToUpper()
+            });
+            nodeByStatusId.Add(taskStatus.Id, node);
+
+            currentPositionX += 150;
+        }
+
+        foreach(var taskStatus in _workflowVM.TaskStatuses)
         {
-            Name = "IN PROGRESS"
-        });
-        var thirdNode = _diagram.Nodes.Add(new TaskStatusNodeModel(position: new Point(350, 50))
-        {
-            Name = "DONE"
-        });
-        
-        _diagram.Links.Add(DiagramFactory.CreateLink(firstNode, secondNode));
-        _diagram.Links.Add(DiagramFactory.CreateLink(secondNode, firstNode));
-        _diagram.Links.Add(DiagramFactory.CreateLink(secondNode, thirdNode));
-        _diagram.Links.Add(DiagramFactory.CreateLink(thirdNode, secondNode));
+            var fromNode = nodeByStatusId[taskStatus.Id];
+            foreach(var possibleNextStatus in taskStatus.PossibleNextStatuses)
+            {
+                var toNode = nodeByStatusId[possibleNextStatus];
+                _diagram.Links.Add(DiagramFactory.CreateLink(fromNode, toNode));
+            }
+        }
     }
 }
