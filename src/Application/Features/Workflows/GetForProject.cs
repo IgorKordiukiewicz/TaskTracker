@@ -1,4 +1,6 @@
-﻿namespace Application.Features.Workflows;
+﻿using Application.Errors;
+
+namespace Application.Features.Workflows;
 
 public record GetWorkflowForProjectQuery(Guid ProjectId) : IRequest<Result<WorkflowVM>>;
 
@@ -26,7 +28,7 @@ internal class GetWorkflowForProjectHandler : IRequestHandler<GetWorkflowForProj
             .SingleOrDefaultAsync(x => x.ProjectId == request.ProjectId);
         if(workflow is null)
         {
-            return Result.Fail<WorkflowVM>($"Workflow does not exist for project with ID: {request.ProjectId}.");
+            return Result.Fail<WorkflowVM>(new ApplicationError($"Workflow does not exist for project with ID: {request.ProjectId}."));
         }
 
         return new WorkflowVM(workflow.Id, workflow.Statuses.Select(x => 

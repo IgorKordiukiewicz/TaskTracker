@@ -1,4 +1,6 @@
 ﻿using Domain.Common;
+using Domain.Errors;
+using FluentResults;
 
 namespace Domain.Tasks;
 
@@ -25,9 +27,9 @@ public class Workflow : Entity, IAggregateRoot
         var doneId = Guid.NewGuid();
 
         var workflow = new Workflow(projectId);
-        workflow._statuses.Add(TaskStatus.Create(toDoId, new("ToDo"), new[] { inProgressId }, 0, true));
-        workflow._statuses.Add(TaskStatus.Create(inProgressId, new("In Progress"), new[] { toDoId, doneId }, 1));
-        workflow._statuses.Add(TaskStatus.Create(doneId, new("Done"), new[] { inProgressId }, 2));
+        workflow._statuses.Add(TaskStatus.Create(toDoId, "ToDo", new[] { inProgressId }, 0, true));
+        workflow._statuses.Add(TaskStatus.Create(inProgressId, "In Progress", new[] { toDoId, doneId }, 1));
+        workflow._statuses.Add(TaskStatus.Create(doneId, "Done", new[] { inProgressId }, 2));
 
         return workflow;
     }
@@ -39,5 +41,19 @@ public class Workflow : Entity, IAggregateRoot
     {
         var currentStatus = _statuses.Single(x => x.Id == currentStatusId);
         return currentStatus.CanTransitionTo(newStatusId);
+    }
+
+    public Result AddStatus(string name)
+    {
+        if(_statuses.Any(x => x.Name.ToLower() == name.ToLower()))
+        {
+            return Result.Fail(new DomainError("Status with this name already exists."));
+        }
+
+        var displayOrder = _statuses.MaxBy(x => x.DisplayOrder)!.DisplayOrder + 1;
+
+        _statuses.Add(TaskStatus.Create(Guid.NewGuid(), name, Array.Empty<Guid>(), displayOrder));
+
+        return Result.Ok();
     }
 }

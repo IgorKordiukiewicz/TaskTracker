@@ -20,20 +20,33 @@
 
 @if(_workflowVM is not null)
 {
+    <div class="d-flex">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-2" OnClick="OpenCreateTaskStatusDialog">Add Status</MudButton>
+    </div>
     <MudPaper>
-        <div class="diagram-container mt-6" style="height: calc(100vh - 130px); width: 100%; border: 2px solid white; border-radius: 10px;">
+        <div class="diagram-container mt-2" style="height: calc(100vh - 130px); width: 100%; border: 2px solid white; border-radius: 10px;">
             <CascadingValue Value="_diagram" IsFixed="true">
                 <DiagramCanvas>
-                    <!--
-                    <Widgets>
-                        <GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="gray" />
-                    </Widgets>
-                    -->
                 </DiagramCanvas>
             </CascadingValue>
         </div>
     </MudPaper>
 }
+
+<MudDialog IsVisible="@_addTaskStatusForm.Visible">
+    <TitleContent>
+        <MudText>
+            Create a new task status
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@_addTaskStatusForm.Name" Label="Name" Required="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" OnClick="CloseCreateTaskStatusDialog">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_addTaskStatusForm.IsValid())" OnClick="AddTaskStatus">Create</MudButton>
+    </DialogActions>
+</MudDialog>
 
 
 @code {
@@ -48,6 +61,15 @@
     private BlazorDiagram _diagram = null!;
 
     private WorkflowVM? _workflowVM;
+
+    private class AddTaskStatusForm
+    {
+        public bool Visible { get; set; } = false;
+        public string Name { get; set; } = string.Empty;
+
+        public bool IsValid() => !string.IsNullOrWhiteSpace(Name);
+    }
+    private AddTaskStatusForm _addTaskStatusForm = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,5 +123,49 @@
                 _diagram.Links.Add(DiagramFactory.CreateLink(fromNode, toNode));
             }
         }
+    }
+
+    private async Task UpdateWorkflowVM()
+    {
+        _workflowVM = await _requestHandler.GetAsync<WorkflowVM>($"workflows/project/{ProjectId}");
+        if(_workflowVM is null)
+        {
+            return;
+        }
+
+        // TODO: Removing nodes, adding/removing links
+        var nodesByNames = _diagram.Nodes.Select(x => (x as TaskStatusNodeModel)!.Name).ToHashSet();
+        var newNodes = _workflowVM.TaskStatuses.Where(x => !nodesByNames.Contains(x.Name.ToUpper()));
+        foreach(var newNode in newNodes)
+        {
+            _diagram.Nodes.Add(new TaskStatusNodeModel(position: new Point(50, 50))
+            {
+                Name = newNode.Name.ToUpper()
+            });
+        }
+    }
+
+    private void OpenCreateTaskStatusDialog()
+    {
+        _addTaskStatusForm.Visible = true;
+    }
+
+    private void CloseCreateTaskStatusDialog()
+    {
+        _addTaskStatusForm.Visible = false;
+    }
+
+    private async Task AddTaskStatus()
+    {
+        if(!_addTaskStatusForm.IsValid() || _workflowVM is null)
+        {
+            return;
+        }
+
+        var model = new AddWorkflowTaskStatusDto(_addTaskStatusForm.Name);
+        await _requestHandler.PostAsync($"workflows/{_workflowVM.Id}/statuses", model, new[] { ("ProjectId", ProjectId.ToString()) });
+
+        _addTaskStatusForm = new();
+        await UpdateWorkflowVM();
     }
 }

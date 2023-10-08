@@ -83,6 +83,36 @@ public class WorkflowTests
     }
 
     [Fact]
+    public void AddStatus_ShouldFail_WhenNameIsTaken()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var status = workflow.Statuses[0];
+
+        var result = workflow.AddStatus(status.Name);
+        
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void AddStatus_ShouldAddNewStatusWithIncrementedDisplayOrder_WhenNameIsNotTaken()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var name = workflow.Statuses[0].Name + "1";
+        var statusesCountBefore = workflow.Statuses.Count;
+        var expectedDisplayOrder = statusesCountBefore;
+
+        var result = workflow.AddStatus(name);
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            workflow.Statuses.Count.Should().Be(statusesCountBefore + 1);
+            var newStatus = workflow.Statuses.First(x => x.Name == name);
+            newStatus.DisplayOrder.Should().Be(expectedDisplayOrder);
+        }
+    }
+
+    [Fact]
     public void TaskStatus_CanTransitionTo_ReturnsWhetherStatusCanTransitionToGivenStatus()
     {
         var availableStatus = Guid.NewGuid();
