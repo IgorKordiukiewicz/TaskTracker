@@ -31,7 +31,19 @@ internal class GetWorkflowForProjectHandler : IRequestHandler<GetWorkflowForProj
             return Result.Fail<WorkflowVM>(new ApplicationError($"Workflow does not exist for project with ID: {request.ProjectId}."));
         }
 
+        var usedStatusesIds = _dbContext.Tasks.Select(x => x.StatusId)
+            .Distinct()
+            .ToHashSet();
+
         return new WorkflowVM(workflow.Id, workflow.Statuses.Select(x => 
-            new WorkflowTaskStatusVM(x.Id, x.Name, x.IsInitial, x.DisplayOrder, x.PossibleNextStatuses)).ToList());
+            new WorkflowTaskStatusVM
+            {
+                Id = x.Id,
+                Name = x.Name,
+                IsInitial = x.IsInitial,
+                DisplayOrder = x.DisplayOrder,
+                PossibleNextStatuses = x.PossibleNextStatuses,
+                CanBeDeleted = !usedStatusesIds.Contains(x.Id) && !x.IsInitial
+            }).ToList());
     }
 }
