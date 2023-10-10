@@ -49,7 +49,7 @@
     </MudGrid>
 }
 
-<MudDialog IsVisible="@_addTaskStatusForm.Visible">
+<MudDialog @bind-IsVisible="_addTaskStatusForm.Visible">
     <TitleContent>
         <MudText>
             Add a new task status
@@ -64,7 +64,7 @@
     </DialogActions>
 </MudDialog>
 
-<MudDialog IsVisible="@_addTransitionForm.Visible">
+<MudDialog @bind-IsVisible="_addTransitionForm.Visible">
     <TitleContent>
         <MudText>
             Add a new transition
