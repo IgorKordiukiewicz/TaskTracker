@@ -1,5 +1,6 @@
 ﻿@page "/org/{organizationId:guid}/projects"
 @page "/org/{organizationId:guid}/"
+@using Web.Client.Common;
 @layout OrganizationLayout 
 @attribute [Authorize]
 
@@ -12,7 +13,7 @@
 {
     <MudGrid>
         <MudItem lg="3" sm="6">
-            <MudPaper Class="d-flex flex-column align-center justify-center" Style="height: 200px; cursor: pointer;" onclick="@(() => OpenCreateProjectDialog())">
+            <MudPaper Class="d-flex flex-column align-center justify-center" Style="height: 200px; cursor: pointer;" onclick="@(() => _createProjectForm.Open())">
                 <MudText Align="Align.Center">
                     Create a new project
                 </MudText>
@@ -44,7 +45,7 @@
         <MudTextField @bind-Value="@_createProjectForm.Name" Label="Name" Required="true" />
     </DialogContent>
     <DialogActions>
-        <MudButton Variant="Variant.Filled" OnClick="CloseCreateProjectDialog">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" OnClick="() => _createProjectForm.Close()">Cancel</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_createProjectForm.IsValid())" OnClick="CreateProject">Create</MudButton>
     </DialogActions>
 </MudDialog>
@@ -60,12 +61,11 @@
 
     private ProjectsVM? _projectsVM;
 
-    private class CreateProjectForm
+    private class CreateProjectForm : DialogForm
     {
-        public bool Visible { get; set; } = false;
         public string Name { get; set; } = string.Empty;
 
-        public bool IsValid() => !string.IsNullOrWhiteSpace(Name);
+        public override bool IsValid() => !string.IsNullOrWhiteSpace(Name);
     }
     private CreateProjectForm _createProjectForm = new();
 
@@ -86,16 +86,6 @@
     private void SelectProject(Guid projectId)
     {
         _navManager.NavigateTo($"/project/{projectId}");
-    }
-
-    private void OpenCreateProjectDialog()
-    {
-        _createProjectForm.Visible = true;
-    }
-
-    private void CloseCreateProjectDialog()
-    {
-        _createProjectForm.Visible = false;
     }
 
     private async Task CreateProject()

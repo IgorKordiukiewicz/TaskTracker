@@ -1,5 +1,6 @@
 ﻿@page "/project/{projectId:guid}/tasks"
 @page "/project/{projectId:guid}/"
+@using Web.Client.Common;
 @layout ProjectLayout
 @attribute [Authorize]
 
@@ -13,7 +14,7 @@
             <MudSelectItem Value="DisplayType.Table">Table</MudSelectItem>
             <MudSelectItem Value="DisplayType.Board">Board</MudSelectItem>
         </MudSelect>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenCreateTaskDialog" Style="height: 50%;">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _createTaskForm.Open()" Style="height: 50%;">
             Create
         </MudButton>
     </div>
@@ -76,7 +77,7 @@
         <MudTextField @bind-Value="@_createTaskForm.Description" Label="Description" Required="true" />
     </DialogContent>
     <DialogActions>
-        <MudButton Variant="Variant.Filled" OnClick="CloseCreateTaskDialog">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" OnClick="() => _createTaskForm.Close()">Cancel</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_createTaskForm.IsValid())" OnClick="CreateTask">Create</MudButton>
     </DialogActions>
 </MudDialog>
@@ -100,13 +101,12 @@
     }
     private DisplayType _displayType = DisplayType.Table;
 
-    private class CreateTaskForm
+    private class CreateTaskForm : DialogForm
     {
-        public bool Visible { get; set; } = false;
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
 
-        public bool IsValid() => !string.IsNullOrWhiteSpace(Title) && !string.IsNullOrWhiteSpace(Description);
+        public override bool IsValid() => !string.IsNullOrWhiteSpace(Title) && !string.IsNullOrWhiteSpace(Description);
     }
     private CreateTaskForm _createTaskForm = new();
 
@@ -139,16 +139,6 @@
         }
 
         await UpdateTaskStatus(dropItem.Item.Id, _taskStatusIdByName[dropItem.DropzoneIdentifier]);
-    }
-
-    private void OpenCreateTaskDialog()
-    {
-        _createTaskForm.Visible = true;
-    }
-
-    private void CloseCreateTaskDialog()
-    {
-        _createTaskForm.Visible = false;
     }
 
     private async Task CreateTask()

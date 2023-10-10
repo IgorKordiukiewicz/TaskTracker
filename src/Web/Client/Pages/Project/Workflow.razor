@@ -15,6 +15,7 @@
 @using Blazor.Diagrams.Core.Routers;
 @using Blazor.Diagrams.Options;
 @using System.Text.Json;
+@using Web.Client.Common;
 @using Web.Client.Diagrams;
 @using static Web.Client.Components.TaskStatusNode;
 
@@ -108,24 +109,20 @@
     private Dictionary<string, Guid>? _taskIdByName;
 
     // TODO: Create a common base class for dialog forms
-    private class AddTaskStatusForm
+    private class AddTaskStatusForm : DialogForm
     {
-        public bool Visible { get; set; } = false;
         public string Name { get; set; } = string.Empty;
 
-        public bool IsValid() => !string.IsNullOrWhiteSpace(Name);
-        public void Open() => Visible = true;
-        public void Close() => Visible = false;
+        public override bool IsValid() => !string.IsNullOrWhiteSpace(Name);
     }
     private AddTaskStatusForm _addTaskStatusForm = new();
 
-    private class AddTransitionForm
+    private class AddTransitionForm : DialogForm
     {
-        public bool Visible { get; set; } = false;
         public string FromStatus { get; set; } = string.Empty;
         public string ToStatus { get; set; } = string.Empty;
 
-        public bool IsValid()
+        public override bool IsValid()
         {
             if(string.IsNullOrWhiteSpace(FromStatus) || string.IsNullOrWhiteSpace(ToStatus))
             {
@@ -134,9 +131,6 @@
 
             return true;
         }
-
-        public void Open() => Visible = true;
-        public void Close() => Visible = false;
     }
     private AddTransitionForm _addTransitionForm = new();
 
