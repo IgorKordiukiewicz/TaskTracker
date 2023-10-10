@@ -27,7 +27,7 @@
     <MudGrid Class="mt-2">
         <MudItem md="2">
             <div class="d-flex flex-column gap-2">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addTaskStatusForm.Open()" FullWidth="true">Add Status</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addStatusForm.Open()" FullWidth="true">Add Status</MudButton>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addTransitionForm.Open()" FullWidth="true">Add Transition</MudButton>
                 @if(_selectedNode is not null)
                 {
@@ -49,18 +49,18 @@
     </MudGrid>
 }
 
-<MudDialog @bind-IsVisible="_addTaskStatusForm.Visible">
+<MudDialog @bind-IsVisible="_addStatusForm.Visible">
     <TitleContent>
         <MudText>
-            Add a new task status
+            Add a new status
         </MudText>
     </TitleContent>
     <DialogContent>
-        <MudTextField @bind-Value="@_addTaskStatusForm.Name" Label="Name" Required="true" />
+        <MudTextField @bind-Value="@_addStatusForm.Name" Label="Name" Required="true" />
     </DialogContent>
     <DialogActions>
-        <MudButton Variant="Variant.Filled" OnClick="() => _addTaskStatusForm.Close()">Cancel</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_addTaskStatusForm.IsValid())" OnClick="AddTaskStatus">Add</MudButton>
+        <MudButton Variant="Variant.Filled" OnClick="() => _addStatusForm.Close()">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_addStatusForm.IsValid())" OnClick="AddStatus">Add</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -108,14 +108,13 @@
     private WorkflowVM? _workflowVM;
     private Dictionary<string, Guid>? _taskIdByName;
 
-    // TODO: Create a common base class for dialog forms
-    private class AddTaskStatusForm : DialogForm
+    private class AddStatusForm : DialogForm
     {
         public string Name { get; set; } = string.Empty;
 
         public override bool IsValid() => !string.IsNullOrWhiteSpace(Name);
     }
-    private AddTaskStatusForm _addTaskStatusForm = new();
+    private AddStatusForm _addStatusForm = new();
 
     private class AddTransitionForm : DialogForm
     {
@@ -216,17 +215,17 @@
         }
     }
 
-    private async Task AddTaskStatus()
+    private async Task AddStatus()
     {
-        if(!_addTaskStatusForm.IsValid() || _workflowVM is null)
+        if(!_addStatusForm.IsValid() || _workflowVM is null)
         {
             return;
         }
 
-        var model = new AddWorkflowTaskStatusDto(_addTaskStatusForm.Name);
+        var model = new AddWorkflowTaskStatusDto(_addStatusForm.Name);
         await _requestHandler.PostAsync($"workflows/{_workflowVM.Id}/statuses", model, new[] { ("ProjectId", ProjectId.ToString()) });
 
-        _addTaskStatusForm = new();
+        _addStatusForm = new();
         await UpdateWorkflowVM();
     }
 
