@@ -6,12 +6,15 @@
 @using Blazor.Diagrams.Components
 @using Blazor.Diagrams.Components.Widgets
 @using Blazor.Diagrams.Core.Anchors;
+@using Blazor.Diagrams.Core.Behaviors;
 @using Blazor.Diagrams.Core.Geometry;
 @using Blazor.Diagrams.Core.Models;
+@using Blazor.Diagrams.Core.Models.Base;
 @using Blazor.Diagrams.Core.PathGenerators;
 @using Blazor.Diagrams.Core.Positions;
 @using Blazor.Diagrams.Core.Routers;
 @using Blazor.Diagrams.Options;
+@using System.Text.Json;
 @using Web.Client.Diagrams;
 @using static Web.Client.Components.TaskStatusNode;
 
@@ -20,31 +23,72 @@
 
 @if(_workflowVM is not null)
 {
-    <div class="d-flex">
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-2" OnClick="OpenCreateTaskStatusDialog">Add Status</MudButton>
-    </div>
-    <MudPaper>
-        <div class="diagram-container mt-2" style="height: calc(100vh - 130px); width: 100%; border: 2px solid white; border-radius: 10px;">
-            <CascadingValue Value="_diagram" IsFixed="true">
-                <DiagramCanvas>
-                </DiagramCanvas>
-            </CascadingValue>
-        </div>
-    </MudPaper>
+    <MudGrid Class="mt-2">
+        <MudItem md="2">
+            <div class="d-flex flex-column gap-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addTaskStatusForm.Open()" FullWidth="true">Add Status</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addTransitionForm.Open()" FullWidth="true">Add Transition</MudButton>
+                @if(_selectedNode is not null)
+                {
+                    <MudDivider />
+                    <MudText>@_selectedNode.Name</MudText>
+                }
+            </div>
+        </MudItem>
+        <MudItem md="10">
+            <MudPaper>
+                <div class="diagram-container" style="height: calc(100vh - 130px); width: 100%; border: 2px solid white; border-radius: 10px;">
+                    <CascadingValue Value="_diagram" IsFixed="true">
+                        <DiagramCanvas>
+                        </DiagramCanvas>
+                    </CascadingValue>
+                </div>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
 }
 
 <MudDialog IsVisible="@_addTaskStatusForm.Visible">
     <TitleContent>
         <MudText>
-            Create a new task status
+            Add a new task status
         </MudText>
     </TitleContent>
     <DialogContent>
         <MudTextField @bind-Value="@_addTaskStatusForm.Name" Label="Name" Required="true" />
     </DialogContent>
     <DialogActions>
-        <MudButton Variant="Variant.Filled" OnClick="CloseCreateTaskStatusDialog">Cancel</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_addTaskStatusForm.IsValid())" OnClick="AddTaskStatus">Create</MudButton>
+        <MudButton Variant="Variant.Filled" OnClick="() => _addTaskStatusForm.Close()">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_addTaskStatusForm.IsValid())" OnClick="AddTaskStatus">Add</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<MudDialog IsVisible="@_addTransitionForm.Visible">
+    <TitleContent>
+        <MudText>
+            Add a new transition
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudSelect T="string" Label="From Status" @bind-Value="_addTransitionForm.FromStatus">
+            @foreach(var fromStatus in GetAvailableFromStatuses())
+            {
+                <MudSelectItem Value="@fromStatus" />
+            }
+        </MudSelect>
+        <MudSelect T="string" Label="To Status" @bind-Value="_addTransitionForm.ToStatus" Disabled="@string.IsNullOrWhiteSpace(_addTransitionForm.FromStatus)">
+            @if (!string.IsNullOrWhiteSpace(_addTransitionForm.FromStatus))
+            {
+                foreach (var toStatus in GetAvailableToStatuses(_addTransitionForm.FromStatus))
+                {
+                    <MudSelectItem Value="@toStatus" />
+                }
+            }
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" OnClick="() => _addTransitionForm.Close()">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_addTransitionForm.IsValid())" OnClick="AddTransition">Add</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -61,16 +105,46 @@
     private BlazorDiagram _diagram = null!;
 
     private WorkflowVM? _workflowVM;
+    private Dictionary<string, Guid>? _taskIdByName;
 
+    // TODO: Create a common base class for dialog forms
     private class AddTaskStatusForm
     {
         public bool Visible { get; set; } = false;
         public string Name { get; set; } = string.Empty;
 
         public bool IsValid() => !string.IsNullOrWhiteSpace(Name);
+        public void Open() => Visible = true;
+        public void Close() => Visible = false;
     }
     private AddTaskStatusForm _addTaskStatusForm = new();
 
+    private class AddTransitionForm
+    {
+        public bool Visible { get; set; } = false;
+        public string FromStatus { get; set; } = string.Empty;
+        public string ToStatus { get; set; } = string.Empty;
+
+        public bool IsValid()
+        {
+            if(string.IsNullOrWhiteSpace(FromStatus) || string.IsNullOrWhiteSpace(ToStatus))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public void Open() => Visible = true;
+        public void Close() => Visible = false;
+    }
+    private AddTransitionForm _addTransitionForm = new();
+
+    private TaskStatusNodeModel? _selectedNode = null;
+
+    // Adding/removing transitions:
+    // 1. Add transition button with form: fromNode & toNode and deleting transitions from diagram with confirmation dialog, and deleting nodes also from diagram with confirmation dialog
+    // issue is that its hard to select transitions when they are in both directions. create 1 link (instead of 2) with 2 arrows and upon deleting select which direction to delete
     protected override async Task OnInitializedAsync()
     {
         Layout.ProjectId = ProjectId;
@@ -81,10 +155,11 @@
         {
             return;
         }
+        _taskIdByName = _workflowVM.TaskStatuses.ToDictionary(k => k.Name, v => v.Id);
 
         var options = new BlazorDiagramOptions
         {
-            AllowMultiSelection = true,
+            AllowMultiSelection = false,
             AllowPanning = false,
             Zoom =
             {
@@ -100,6 +175,8 @@
         };
         _diagram = new BlazorDiagram(options);
         _diagram.RegisterComponent<TaskStatusNodeModel, TaskStatusNode>();
+        _diagram.GetBehavior<KeyboardShortcutsBehavior>()?.RemoveShortcut("Delete", false, false, false);
+        _diagram.SelectionChanged += OnSelectionChanged;
 
         var currentPositionX = 50;
         var nodeByStatusId = new Dictionary<Guid, TaskStatusNodeModel>();
@@ -145,16 +222,6 @@
         }
     }
 
-    private void OpenCreateTaskStatusDialog()
-    {
-        _addTaskStatusForm.Visible = true;
-    }
-
-    private void CloseCreateTaskStatusDialog()
-    {
-        _addTaskStatusForm.Visible = false;
-    }
-
     private async Task AddTaskStatus()
     {
         if(!_addTaskStatusForm.IsValid() || _workflowVM is null)
@@ -167,5 +234,58 @@
 
         _addTaskStatusForm = new();
         await UpdateWorkflowVM();
+    }
+
+    private async Task AddTransition()
+    {
+        if (!_addTransitionForm.IsValid() || _workflowVM is null)
+        {
+            return;
+        }
+
+        _addTransitionForm = new();
+        // TODO
+    }
+
+    private void OnSelectionChanged(SelectableModel selectableModel)
+    {
+        _selectedNode = selectableModel.Selected ? selectableModel as TaskStatusNodeModel : null;
+        StateHasChanged();
+    }
+
+    // TODO: Extract it somewhere so it could be tested? maybe to view model as methods?
+    private List<string> GetAvailableFromStatuses()
+    {
+        if(_workflowVM is null)
+        {
+            return new();
+        }
+
+        var result = new List<string>();
+        foreach(var status in _workflowVM.TaskStatuses)
+        {
+            if(status.PossibleNextStatuses.Count < _workflowVM.TaskStatuses.Count - 1)
+            {
+                result.Add(status.Name);
+            }
+        }
+
+        return result;
+    }
+
+    private List<string> GetAvailableToStatuses(string fromStatus)
+    {
+        if (_workflowVM is null)
+        {
+            return new();
+        }
+
+        var existingTransitionsIds = _workflowVM.TaskStatuses.Single(x => x.Name == fromStatus).PossibleNextStatuses
+            .ToHashSet();
+
+        return _workflowVM.TaskStatuses
+            .Where(x => !existingTransitionsIds.Contains(x.Id) && x.Name != fromStatus)
+            .Select(x => x.Name)
+            .ToList();
     }
 }

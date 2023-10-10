@@ -3,7 +3,7 @@
 @using Blazor.Diagrams.Core.Models;
 @using Web.Client.Diagrams;
 
-<div>
+<div class="@(Node.Selected ? "selected" : "")">
     <MudText Typo="Typo.h6" Align="Align.Center" Style="font-weight: bold; color: white;">
         @Node.Name
     </MudText>
