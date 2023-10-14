@@ -127,6 +127,17 @@ public class WorkflowTests
     }
 
     [Fact]
+    public void AddTransition_ShouldFail_WhenTransitionAlreadyExists()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var transition = workflow.Transitions[0];
+
+        var result = workflow.AddTransition(transition.FromStatusId, transition.ToStatusId);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
     public void AddTransition_ShouldSucceed_WhenBothStatusesExistAndTransitionDoesNotExist()
     {
         var workflow = Workflow.Create(Guid.NewGuid());
