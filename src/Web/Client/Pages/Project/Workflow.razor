@@ -28,7 +28,7 @@
         <MudItem md="2">
             <div class="d-flex flex-column gap-2">
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addStatusForm.Open()" FullWidth="true">Add Status</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addTransitionForm.Open()" FullWidth="true">Add Transition</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addTransitionForm.Open()" FullWidth="true" Disabled="@(!GetAvailableFromStatuses().Any())">Add Transition</MudButton>
                 @if(_selectedNode is not null)
                 {
                     <MudDivider />
