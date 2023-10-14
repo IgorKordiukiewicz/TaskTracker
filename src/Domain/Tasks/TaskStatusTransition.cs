@@ -13,7 +13,7 @@ public class TaskStatusTransition : ValueObject
         ToStatusId = toStatusId;
     }
 
-    protected override IEnumerable<object> GetEqualityComponents()
+    protected override IEnumerable<object> GetEqualityComponents() // TODO: Unit tests?
     {
         yield return FromStatusId;
         yield return ToStatusId;

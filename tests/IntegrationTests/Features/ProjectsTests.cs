@@ -10,10 +10,12 @@ namespace IntegrationTests.Features;
 public class ProjectsTests
 {
     private readonly IntegrationTestsFixture _fixture;
+    private readonly EntitiesFactory _factory;
 
     public ProjectsTests(IntegrationTestsFixture fixture)
     {
         _fixture = fixture;
+        _factory = new(fixture);
 
         _fixture.ResetDb();
     }
@@ -30,17 +32,9 @@ public class ProjectsTests
     [Fact]
     public async Task Create_ShouldFail_WhenProjectWithSameNameAlreadyExistsWithinOrganization()
     {
-        var user = User.Create("authId", "user");
-        var organization = Organization.Create("org", user.Id);
-        var project = Project.Create("project", organization.Id, user.Id);
-        await _fixture.SeedDb(async db =>
-        {
-            await db.Users.AddAsync(user);
-            await db.Organizations.AddAsync(organization);
-            await db.Projects.AddAsync(project);
-        });
+        var project = (await _factory.CreateProjects())[0];
 
-        var result = await _fixture.SendRequest(new CreateProjectCommand(organization.Id, "123", new("project")));
+        var result = await _fixture.SendRequest(new CreateProjectCommand(project.OrganizationId, "123", new(project.Name)));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -48,16 +42,10 @@ public class ProjectsTests
     [Fact]
     public async Task Create_ShouldCreateNewProjectAndWorkflow_WhenValidationPassed()
     {
-        var userAuthId = "123";
-        var user = User.Create(userAuthId, "user");
-        var organization = Organization.Create("org", user.Id);
-        await _fixture.SeedDb(async db =>
-        {
-            await db.Users.AddAsync(user);
-            await db.Organizations.AddAsync(organization);
-        });
+        var organization = (await _factory.CreateOrganizations())[0];
+        var user = await _fixture.FirstAsync<User>();
 
-        var result = await _fixture.SendRequest(new CreateProjectCommand(organization.Id, userAuthId, new("project")));
+        var result = await _fixture.SendRequest(new CreateProjectCommand(organization.Id, user.AuthenticationId, new("project")));
 
         using(new AssertionScope())
         {
@@ -88,11 +76,11 @@ public class ProjectsTests
         var project1 = Project.Create("project1", organization.Id, user1.Id);
         var project2 = Project.Create("project2", organization.Id, user1.Id);
         var project3 = Project.Create("project3", organization.Id, user2.Id);
-        await _fixture.SeedDb(async db =>
+        await _fixture.SeedDb(db =>
         {
-            await db.Users.AddRangeAsync(new[] { user1, user2 });
-            await db.Organizations.AddAsync(organization);
-            await db.Projects.AddRangeAsync(new[] { project1, project2, project3 });
+            db.AddRange(user1, user2);
+            db.Add(organization);
+            db.AddRange(project1, project2, project3);
         });
 
         var result = await _fixture.SendRequest(new GetProjectsForOrganizationQuery(organization.Id, "123"));
@@ -127,16 +115,7 @@ public class ProjectsTests
     [Fact]
     public async Task AddMember_ShouldFail_WhenUserIsNotAMemberOfProjectsOrganization()
     {
-        var user = User.Create("123", "user");
-        var organization = Organization.Create("org", user.Id);
-        var project = Project.Create("project", organization.Id, user.Id);
-
-        await _fixture.SeedDb(async db =>
-        {
-            await db.Users.AddAsync(user);
-            await db.Organizations.AddAsync(organization);
-            await db.Projects.AddAsync(project);
-        });
+        var project = (await _factory.CreateProjects())[0];
 
         var result = await _fixture.SendRequest(new AddProjectMemberCommand(project.Id, new(Guid.NewGuid())));
 
@@ -151,11 +130,11 @@ public class ProjectsTests
         var organization = Organization.Create("org", user1.Id);
         var project = Project.Create("project", organization.Id, user2.Id);
 
-        await _fixture.SeedDb(async db =>
+        await _fixture.SeedDb(db =>
         {
-            await db.Users.AddRangeAsync(new[] { user1, user2 });
-            await db.Organizations.AddAsync(organization);
-            await db.Projects.AddAsync(project);
+            db.AddRange(user1, user2);
+            db.Add(organization);
+            db.Add(project);
         });
 
         var membersBefore = await _fixture.CountAsync<ProjectMember>();
@@ -172,16 +151,8 @@ public class ProjectsTests
     [Fact]
     public async Task GetMembers_ShouldReturnProjectMembers()
     {
-        var user = User.Create("123", "user");
-        var organization = Organization.Create("org", user.Id);
-        var project = Project.Create("project", organization.Id, user.Id);
-
-        await _fixture.SeedDb(async db =>
-        {
-            await db.Users.AddAsync(user);
-            await db.Organizations.AddAsync(organization);
-            await db.Projects.AddAsync(project);
-        });
+        var project = (await _factory.CreateProjects())[0];
+        var user = await _fixture.FirstAsync<User>();
 
         var result = await _fixture.SendRequest(new GetProjectMembersQuery(project.Id));
 
@@ -206,16 +177,7 @@ public class ProjectsTests
     [Fact]
     public async Task RemoveMember_ShuldRemoveMember_WhenProjectExists()
     {
-        var user = User.Create("123", "user");
-        var organization = Organization.Create("org", user.Id);
-        var project = Project.Create("project", organization.Id, user.Id);
-
-        await _fixture.SeedDb(async db =>
-        {
-            await db.Users.AddAsync(user);
-            await db.Organizations.AddAsync(organization);
-            await db.Projects.AddAsync(project);
-        });
+        var project = (await _factory.CreateProjects())[0];
 
         var membersBefore = await _fixture.CountAsync<ProjectMember>();
 
@@ -239,23 +201,14 @@ public class ProjectsTests
     [Fact]
     public async Task GetProjectOrganization_ShouldReturnProjectsOrganizationData_WhenProjectExists()
     {
-        var user = User.Create("123", "user");
-        var organization = Organization.Create("org", user.Id);
-        var project = Project.Create("project", organization.Id, user.Id);
-
-        await _fixture.SeedDb(async db =>
-        {
-            await db.Users.AddAsync(user);
-            await db.Organizations.AddAsync(organization);
-            await db.Projects.AddAsync(project);
-        });
+        var project = (await _factory.CreateProjects())[0];
 
         var result = await _fixture.SendRequest(new GetProjectOrganizationQuery(project.Id));
 
         using(new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            result.Value.OrganizationId.Should().Be(organization.Id);
+            result.Value.OrganizationId.Should().Be(project.OrganizationId);
         }
     }
 }

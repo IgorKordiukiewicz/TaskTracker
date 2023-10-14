@@ -53,6 +53,22 @@ public class IntegrationTestsFixture : IDisposable
         await db.SaveChangesAsync();
     }
 
+    public async Task AddEntities<TEntity>(params TEntity[] entities)
+        where TEntity : class
+    {
+        using var scope = _services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Set<TEntity>().AddRange(entities);
+        await db.SaveChangesAsync();
+    }
+
+    public async Task CommitDbSeeding()
+    {
+        using var scope = _services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await db.SaveChangesAsync();
+    }
+
     public void Dispose()
     {
         ResetDb();

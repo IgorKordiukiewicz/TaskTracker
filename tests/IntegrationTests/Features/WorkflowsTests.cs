@@ -1,9 +1,5 @@
 ﻿using Application.Features.Workflows;
-using Domain.Organizations;
-using Domain.Projects;
 using Domain.Tasks;
-using Domain.Users;
-using Task = Domain.Tasks.Task;
 using TaskStatus = Domain.Tasks.TaskStatus;
 
 namespace IntegrationTests.Features;
@@ -12,10 +8,12 @@ namespace IntegrationTests.Features;
 public class WorkflowsTests
 {
     private readonly IntegrationTestsFixture _fixture;
+    private readonly EntitiesFactory _factory;
 
     public WorkflowsTests(IntegrationTestsFixture fixture)
     {
         _fixture = fixture;
+        _factory = new(fixture);
 
         _fixture.ResetDb();
     }
@@ -31,19 +29,9 @@ public class WorkflowsTests
     [Fact]
     public async System.Threading.Tasks.Task GetForProject_ShouldReturnWorkflow_WhenWorkflowForProjectExists()
     {
-        var user = User.Create("authId", "user");
-        var organization = Organization.Create("org", user.Id);
-        var project = Project.Create("project", organization.Id, user.Id);
-        var workflow = Workflow.Create(project.Id);
-        await _fixture.SeedDb(async db =>
-        {
-            await db.Users.AddAsync(user);
-            await db.Organizations.AddAsync(organization);
-            await db.Projects.AddAsync(project);
-            await db.Workflows.AddAsync(workflow);
-        });
+        var workflow = (await _factory.CreateWorkflows())[0];
 
-        var result = await _fixture.SendRequest(new GetWorkflowForProjectQuery(project.Id));
+        var result = await _fixture.SendRequest(new GetWorkflowForProjectQuery(workflow.ProjectId));
 
         using(new AssertionScope())
         {
@@ -65,17 +53,7 @@ public class WorkflowsTests
     [Fact]
     public async System.Threading.Tasks.Task AddTaskStatus_ShouldCreateNewStatus_WhenWorkflowExists()
     {
-        var user = User.Create("authId", "user");
-        var organization = Organization.Create("org", user.Id);
-        var project = Project.Create("project", organization.Id, user.Id);
-        var workflow = Workflow.Create(project.Id);
-        await _fixture.SeedDb(async db =>
-        {
-            await db.Users.AddAsync(user);
-            await db.Organizations.AddAsync(organization);
-            await db.Projects.AddAsync(project);
-            await db.Workflows.AddAsync(workflow);
-        });
+        var workflow = (await _factory.CreateWorkflows())[0];
 
         var statusesBefore = await _fixture.CountAsync<TaskStatus>();
 
@@ -99,18 +77,13 @@ public class WorkflowsTests
     [Fact]
     public async System.Threading.Tasks.Task AddTransition_ShouldSucceed_WhenWorkflowExists()
     {
-        var user = User.Create("authId", "user");
-        var organization = Organization.Create("org", user.Id);
-        var project = Project.Create("project", organization.Id, user.Id);
+        var project = (await _factory.CreateProjects())[0];
         var workflow = Workflow.Create(project.Id);
         _ = workflow.AddStatus("from1");
         _ = workflow.AddStatus("to1");
-        await _fixture.SeedDb(async db =>
+        await _fixture.SeedDb(db =>
         {
-            await db.Users.AddAsync(user);
-            await db.Organizations.AddAsync(organization);
-            await db.Projects.AddAsync(project);
-            await db.Workflows.AddAsync(workflow);
+            db.Add(workflow);
         });
 
         var statusesIds = workflow.Statuses.Select(x => x.Id).ToHashSet();

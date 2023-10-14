@@ -9,10 +9,12 @@ namespace IntegrationTests.Features;
 public class OrganizationsTests
 {
     private readonly IntegrationTestsFixture _fixture;
+    private readonly EntitiesFactory _factory;
 
     public OrganizationsTests(IntegrationTestsFixture fixture)
     {
         _fixture = fixture;
+        _factory = new(fixture);
 
         _fixture.ResetDb();
     }
@@ -20,10 +22,7 @@ public class OrganizationsTests
     [Fact]
     public async Task Create_ShouldFail_WhenOwnerDoesNotExist()
     {
-        await _fixture.SeedDb(async db =>
-        {
-            await db.AddAsync(User.Create("123", "123"));
-        });
+        await _factory.CreateUsers();
 
         var result = await _fixture.SendRequest(new CreateOrganizationCommand(new("org", Guid.NewGuid())));
 
@@ -33,13 +32,9 @@ public class OrganizationsTests
     [Fact]
     public async Task Create_ShouldCreateNewOrganization_WhenOwnerExists()
     {
-        await _fixture.SeedDb(async db =>
-        {
-            await db.Users.AddAsync(User.Create("123", "123"));
-        });
-        var userId = (await _fixture.FirstAsync<User>()).Id;
+        var user = (await _factory.CreateUsers())[0];
 
-        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new("org", userId)));
+        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new("org", user.Id)));
 
         using(new AssertionScope())
         {
@@ -60,17 +55,11 @@ public class OrganizationsTests
     }
 
     [Fact]
-    public async Task CreateInvitation_ShouldFail_WhenOUserDoesNotExist()
+    public async Task CreateInvitation_ShouldFail_WhenUserDoesNotExist()
     {
-        await _fixture.SeedDb(async db =>
-        {
-            var user = User.Create("123", "user");
-            await db.Users.AddAsync(user);
-            await db.Organizations.AddAsync(Organization.Create("org", user.Id));
-        });
-        var organizationId = (await _fixture.FirstAsync<Organization>()).Id;
+        var organization = (await _factory.CreateOrganizations())[0];
 
-        var result = await _fixture.SendRequest(new CreateOrganizationInvitationCommand(organizationId, new(Guid.NewGuid())));
+        var result = await _fixture.SendRequest(new CreateOrganizationInvitationCommand(organization.Id, new(Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -78,16 +67,14 @@ public class OrganizationsTests
     [Fact]
     public async Task CreateInvitation_ShouldCreateNewInvitation_WhenOrganizationAndUserBothExist()
     {
-        var user1 = User.Create("123", "user1");
-        var user2 = User.Create("1234", "user2");
-        await _fixture.SeedDb(async db =>
+        var organization = (await _factory.CreateOrganizations())[0];
+        var newUser = User.Create("1234", "newUser");
+        await _fixture.SeedDb(db =>
         {
-            await db.Users.AddRangeAsync(new[] { user1, user2 });
-            await db.Organizations.AddAsync(Organization.Create("org", user1.Id));
+            db.Add(newUser);
         });
-        var organizationId = (await _fixture.FirstAsync<Organization>()).Id;
 
-        var result = await _fixture.SendRequest(new CreateOrganizationInvitationCommand(organizationId, new(user2.Id)));
+        var result = await _fixture.SendRequest(new CreateOrganizationInvitationCommand(organization.Id, new(newUser.Id)));
 
         using(new AssertionScope())
         {
@@ -107,28 +94,18 @@ public class OrganizationsTests
     [Fact]
     public async Task AcceptInvitation_ShouldAddNewOrganizationMemberAndUpdateInvitationState()
     {
-        var user1 = User.Create("123", "user1");
-        var user2 = User.Create("1234", "user2");
-        var organization = Organization.Create("org", user1.Id);
-        var invitation = organization.CreateInvitation(user2.Id).Value;
-
-        await _fixture.SeedDb(async db =>
-        {
-            await db.Users.AddAsync(user1);
-            await db.Users.AddAsync(user2);
-            await db.Organizations.AddAsync(organization);
-        });
+        var invitationId = await CreateOrganizationWithInvitation();
 
         var membersBefore = await _fixture.CountAsync<OrganizationMember>();
 
-        var result = await _fixture.SendRequest(new AcceptOrganizationInvitationCommand(invitation.Id));
+        var result = await _fixture.SendRequest(new AcceptOrganizationInvitationCommand(invitationId));
 
         using(new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<OrganizationMember>()).Should().Be(membersBefore + 1);
 
-            var orgInvitation = await _fixture.FirstAsync<OrganizationInvitation>(x => x.Id == invitation.Id);
+            var orgInvitation = await _fixture.FirstAsync<OrganizationInvitation>(x => x.Id == invitationId);
             orgInvitation.State.Should().Be(OrganizationInvitationState.Accepted);
         }
     }
@@ -144,27 +121,17 @@ public class OrganizationsTests
     [Fact]
     public async Task DeclineInvitation_ShouldUpdateInvitationState()
     {
-        var user1 = User.Create("123", "user1");
-        var user2 = User.Create("1234", "user2");
-        var organization = Organization.Create("org", user1.Id);
-        var invitation = organization.CreateInvitation(user2.Id).Value;
-
-        await _fixture.SeedDb(async db =>
-        {
-            await db.Users.AddAsync(user1);
-            await db.Users.AddAsync(user2);
-            await db.Organizations.AddAsync(organization);
-        });
+        var invitationId = await CreateOrganizationWithInvitation();
 
         var membersBefore = await _fixture.CountAsync<OrganizationMember>();
 
-        var result = await _fixture.SendRequest(new DeclineOrganizationInvitationCommand(invitation.Id));
+        var result = await _fixture.SendRequest(new DeclineOrganizationInvitationCommand(invitationId));
 
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
 
-            var orgMember = await _fixture.FirstAsync<OrganizationInvitation>(x => x.Id == invitation.Id);
+            var orgMember = await _fixture.FirstAsync<OrganizationInvitation>(x => x.Id == invitationId);
             orgMember.State.Should().Be(OrganizationInvitationState.Declined);
         }
     }
@@ -172,19 +139,11 @@ public class OrganizationsTests
     [Fact]
     public async Task GetForUser_ShouldReturnOrganizationsUserIsAMemberOf()
     {
-        var user1 = User.Create("123", "user1");
-        var user2 = User.Create("1234", "user2");
-        var org1 = Organization.Create("org1", user1.Id);
-        var org2 = Organization.Create("org2", user2.Id);
-        var org3 = Organization.Create("org3", user1.Id);
+        var organizations = await _factory.CreateOrganizations(2);
+        var user = await _fixture.FirstAsync<User>();
+        _ = await _factory.CreateOrganizations(); // organizations for different user
 
-        await _fixture.SeedDb(async db =>
-        {
-            await db.Users.AddRangeAsync(new[] { user1, user2 });
-            await db.Organizations.AddRangeAsync(new[] { org1, org2, org3 });
-        });
-
-        var result = await _fixture.SendRequest(new GetOrganizationsForUserQuery("123"));
+        var result = await _fixture.SendRequest(new GetOrganizationsForUserQuery(user.AuthenticationId));
 
         using (new AssertionScope())
         {
@@ -194,13 +153,13 @@ public class OrganizationsTests
             {
                 new OrganizationForUserVM()
                 {
-                    Id = org1.Id,
-                    Name = org1.Name,
+                    Id = organizations[0].Id,
+                    Name = organizations[0].Name,
                 },
                 new OrganizationForUserVM()
                 {
-                    Id = org3.Id,
-                    Name = org3.Name
+                    Id = organizations[1].Id,
+                    Name = organizations[1].Name
                 },
             });
         }
@@ -225,10 +184,10 @@ public class OrganizationsTests
         var invitation1 = org1.CreateInvitation(user2.Id).Value;
         var invitation2 = org3.CreateInvitation(user2.Id).Value;
 
-        await _fixture.SeedDb(async db =>
+        await _fixture.SeedDb(db =>
         {
-            await db.Users.AddRangeAsync(new[] { user1, user2 });
-            await db.Organizations.AddRangeAsync(new[] { org1, org2, org3 });
+            db.AddRange(user1, user2);
+            db.AddRange(org1, org2, org3);
         });
 
         var result = await _fixture.SendRequest(new GetOrganizationInvitationsForUserQuery("1234"));
@@ -249,14 +208,11 @@ public class OrganizationsTests
     [Fact]
     public async Task GetMembers_ShouldReturnOrganizationMembers()
     {
-        var user1 = User.Create("123", "user1");
-        var user2 = User.Create("1234", "user2");
-        var organization = Organization.Create("org", user1.Id);
-
-        await _fixture.SeedDb(async db =>
+        var organization = (await _factory.CreateOrganizations())[0];
+        var user = await _fixture.FirstAsync<User>();
+        await _fixture.SeedDb(db =>
         {
-            await db.Users.AddRangeAsync(new[] { user1, user2 });
-            await db.Organizations.AddAsync(organization);
+            db.Add(User.Create("1234", "newUser"));
         });
 
         var result = await _fixture.SendRequest(new GetOrganizationMembersQuery(organization.Id));
@@ -266,7 +222,7 @@ public class OrganizationsTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Members.Should().BeEquivalentTo(new[]
             {
-                new OrganizationMemberVM(organization.Members[0].Id, user1.Name)
+                new OrganizationMemberVM(organization.Members[0].Id, user.Name)
             });
         }
     }
@@ -288,10 +244,10 @@ public class OrganizationsTests
         var invitation = organization.CreateInvitation(user2.Id).Value;
         organization.AcceptInvitation(invitation.Id);
 
-        await _fixture.SeedDb(async db =>
+        await _fixture.SeedDb(db =>
         {
-            await db.Users.AddRangeAsync(new[] { user1, user2 });
-            await db.Organizations.AddAsync(organization);
+            db.AddRange(user1, user2);
+            db.Add(organization);
         });
 
         var membersBefore = await _fixture.CountAsync<OrganizationMember>();
@@ -304,5 +260,21 @@ public class OrganizationsTests
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<OrganizationMember>()).Should().Be(membersBefore - 1);
         }
+    }
+
+    private async Task<Guid> CreateOrganizationWithInvitation()
+    {
+        var user1 = User.Create("123", "user1");
+        var user2 = User.Create("1234", "user2");
+        var organization = Organization.Create("org", user1.Id);
+        var invitation = organization.CreateInvitation(user2.Id).Value;
+
+        await _fixture.SeedDb(db =>
+        {
+            db.AddRange(user1, user2);
+            db.Add(organization);
+        });
+
+        return invitation.Id;
     }
 }
