@@ -111,18 +111,31 @@ public class WorkflowTests
         }
     }
 
-    [Fact]
-    public void TaskStatus_CanTransitionTo_ReturnsWhetherStatusCanTransitionToGivenStatus()
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public void AddTransition_ShouldFail_WhenFromOrToStatusDoesNotExist(bool existingFromStatus, bool existingToStatus)
     {
-        var availableStatus = Guid.NewGuid();
-        var unavailableStatus = Guid.NewGuid();
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var status1 = workflow.Statuses[0];
+        var status2 = workflow.Statuses[1];
 
-        var taskStatus = global::Domain.Tasks.TaskStatus.Create(Guid.NewGuid(), new("test"), new[] { availableStatus }, 0);
+        var result = workflow.AddTransition(existingFromStatus ? status1.Id : Guid.NewGuid(), existingToStatus ? status2.Id : Guid.NewGuid());
 
-        using(new AssertionScope())
-        {
-            taskStatus.CanTransitionTo(availableStatus).Should().BeTrue();
-            taskStatus.CanTransitionTo(unavailableStatus).Should().BeFalse();
-        }
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void AddTransition_ShouldSucceed_WhenBothStatusesExistAndTransitionDoesNotExist()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+        _ = workflow.AddStatus("test");
+        var fromStatus = workflow.Statuses.First(x => x.Name != "test");
+        var toStatus = workflow.Statuses.First(x => x.Name == "test");
+
+        var result = workflow.AddTransition(fromStatus.Id, toStatus.Id);
+
+        result.IsSuccess.Should().BeTrue();
     }
 }

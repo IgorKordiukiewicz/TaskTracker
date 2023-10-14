@@ -39,15 +39,26 @@
     public async Task PostAsync<TBody>(string url, TBody? body, Headers? headers = null)
         where TBody : class
     {
+        _ = await PostWithResultAsync(url, body, headers);
+    }
+
+    public async Task<bool> PostWithResultAsync(string url, Headers? headers = null)
+        => await PostWithResultAsync(url, (object?)null, headers);
+
+    public async Task<bool> PostWithResultAsync<TBody>(string url, TBody? body, Headers? headers = null)
+        where TBody : class
+    {
         var requestMessage = CreateRequestMessage(HttpMethod.Post, url, headers);
         SetRequestMessageContent(requestMessage, body);
 
         var response = await _httpClient.SendAsync(requestMessage);
 
-        if(!response.IsSuccessStatusCode)
+        if (!response.IsSuccessStatusCode)
         {
             await DisplayErrorMessageBox(response);
         }
+
+        return response.IsSuccessStatusCode;
     }
 
     private async Task<TResponse?> GetResponseContent<TResponse>(HttpResponseMessage response) 

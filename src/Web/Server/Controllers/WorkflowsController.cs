@@ -34,4 +34,12 @@ public class WorkflowsController : ControllerBase
         var result = await _mediator.Send(new AddWorkflowTaskStatusCommand(workflowId, model));
         return result.ToHttpResult();
     }
+
+    [HttpPost("{workflowId:guid}/transitions")]
+    [Authorize(Policy.ProjectMember)]
+    public async Task<IActionResult> AddTransition(Guid workflowId, AddWorkflowTransitionDto model)
+    {
+        var result = await _mediator.Send(new AddWorkflowTransitionCommand(workflowId, model));
+        return result.ToHttpResult();
+    }
 }

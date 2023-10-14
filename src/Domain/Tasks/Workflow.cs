@@ -61,6 +61,23 @@ public class Workflow : Entity, IAggregateRoot
 
         return Result.Ok();
     }
+
+    public Result AddTransition(Guid fromStatusId, Guid toStatusId)
+    {
+        if (!_statuses.Any(x => x.Id == fromStatusId) || !_statuses.Any(x => x.Id == toStatusId))
+        {
+            return Result.Fail(new DomainError("One of the statuses does not exist."));
+        }
+
+        if(DoesTransitionExist(fromStatusId, toStatusId))
+        {
+            return Result.Fail(new DomainError("Transition already exists."));
+        }
+
+        _transitions.Add(new TaskStatusTransition(fromStatusId, toStatusId));
+        return Result.Ok();
+    }
+
     private bool DoesTransitionExist(Guid fromStatusId, Guid toStatusId)
         => _transitions.Any(x => x.FromStatusId == fromStatusId && x.ToStatusId == toStatusId);
 }

@@ -143,12 +143,11 @@
         Layout.ProjectId = ProjectId;
         _requestHandler = new(_httpClient, _dialogService);
 
-        _workflowVM = await _requestHandler.GetAsync<WorkflowVM>($"workflows/project/{ProjectId}");
+        await UpdateWorkflowVM();
         if(_workflowVM is null)
         {
             return;
         }
-        _taskIdByName = _workflowVM.TaskStatuses.ToDictionary(k => k.Name, v => v.Id);
 
         var options = new BlazorDiagramOptions
         {
@@ -188,28 +187,36 @@
         {
             var fromNode = nodeByStatusId[transition.FromStatusId];
             var toNode = nodeByStatusId[transition.ToStatusId];
-                _diagram.Links.Add(DiagramFactory.CreateLink(fromNode, toNode));
-            }
+            _diagram.Links.Add(DiagramFactory.CreateLink(fromNode, toNode));
         }
     }
 
-    private async Task UpdateWorkflowVM()
+    private async Task UpdateWorkflowVM(string? newStatus = null, (string FromStatus, string ToStatus)? newTransition = null)
     {
         _workflowVM = await _requestHandler.GetAsync<WorkflowVM>($"workflows/project/{ProjectId}");
         if(_workflowVM is null)
         {
             return;
         }
+        var statusNameComparer = StringComparer.OrdinalIgnoreCase;
+        _taskIdByName = _workflowVM.Statuses.ToDictionary(k => k.Name, v => v.Id, statusNameComparer);
 
-        // TODO: Removing nodes, adding/removing links
-        var nodesByNames = _diagram.Nodes.Select(x => (x as TaskStatusNodeModel)!.Name).ToHashSet();
-        var newNodes = _workflowVM.TaskStatuses.Where(x => !nodesByNames.Contains(x.Name.ToUpper()));
-        foreach(var newNode in newNodes)
+        if(newStatus is not null)
         {
             _diagram.Nodes.Add(new TaskStatusNodeModel(position: new Point(50, 50))
             {
-                Name = newNode.Name.ToUpper()
+                Name = newStatus.ToUpper()
             });
+        }
+
+        if(newTransition is not null)
+        {
+            var nodeModelByStatusName = _diagram.Nodes.Select(x => (x as TaskStatusNodeModel)!)
+                .ToDictionary(k => k.Name, v => v, statusNameComparer);
+
+            var fromStatusNode = nodeModelByStatusName[newTransition.Value.FromStatus];
+            var toStatusNode = nodeModelByStatusName[newTransition.Value.ToStatus];
+            _diagram.Links.Add(DiagramFactory.CreateLink(fromStatusNode, toStatusNode));
         }
     }
 
@@ -221,21 +228,34 @@
         }
 
         var model = new AddWorkflowStatusDto(_addStatusForm.Name);
-        await _requestHandler.PostAsync($"workflows/{_workflowVM.Id}/statuses", model, new[] { ("ProjectId", ProjectId.ToString()) });
+        var success = await _requestHandler.PostWithResultAsync($"workflows/{_workflowVM.Id}/statuses", model, new[] { ("ProjectId", ProjectId.ToString()) });
+
+        if(success)
+        {
+            await UpdateWorkflowVM(newStatus: model.Name);
+        }
 
         _addStatusForm = new();
-        await UpdateWorkflowVM();
     }
 
     private async Task AddTransition()
     {
-        if (!_addTransitionForm.IsValid() || _workflowVM is null)
+        if (!_addTransitionForm.IsValid() || _taskIdByName is null)
         {
             return;
         }
 
+        var fromStatusId = _taskIdByName[_addTransitionForm.FromStatus];
+        var toStatusId = _taskIdByName[_addTransitionForm.ToStatus];
+        var model = new AddWorkflowTransitionDto(fromStatusId, toStatusId);
+        var success = await _requestHandler.PostWithResultAsync($"workflows/{_workflowVM!.Id}/transitions", model, new[] { ("ProjectId", ProjectId.ToString()) });
+
+        if (success)
+        {
+            await UpdateWorkflowVM(newTransition: (_addTransitionForm.FromStatus, _addTransitionForm.ToStatus));
+        }
+
         _addTransitionForm = new();
-        // TODO
     }
 
     private void OnSelectionChanged(SelectableModel selectableModel)

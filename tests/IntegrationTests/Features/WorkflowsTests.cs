@@ -88,4 +88,43 @@ public class WorkflowsTests
         }
     }
 
+    [Fact]
+    public async System.Threading.Tasks.Task AddTransition_ShouldFail_WhenWorkflowDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new AddWorkflowTransitionCommand(Guid.NewGuid(), new(Guid.NewGuid(), Guid.NewGuid())));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task AddTransition_ShouldSucceed_WhenWorkflowExists()
+    {
+        var user = User.Create("authId", "user");
+        var organization = Organization.Create("org", user.Id);
+        var project = Project.Create("project", organization.Id, user.Id);
+        var workflow = Workflow.Create(project.Id);
+        _ = workflow.AddStatus("from1");
+        _ = workflow.AddStatus("to1");
+        await _fixture.SeedDb(async db =>
+        {
+            await db.Users.AddAsync(user);
+            await db.Organizations.AddAsync(organization);
+            await db.Projects.AddAsync(project);
+            await db.Workflows.AddAsync(workflow);
+        });
+
+        var statusesIds = workflow.Statuses.Select(x => x.Id).ToHashSet();
+        var fromStatus = workflow.Statuses.First(x => x.Name == "from1");
+        var toStatus = workflow.Statuses.First(x => x.Name == "to1");
+        var transitionsCountBefore = await _fixture.CountAsync<TaskStatusTransition>();
+
+        var result = await _fixture.SendRequest(new AddWorkflowTransitionCommand(workflow.Id, new(fromStatus.Id, toStatus.Id)));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            var transitionsCount = await _fixture.CountAsync<TaskStatusTransition>();
+            transitionsCount.Should().Be(transitionsCountBefore + 1);
+        }
+    }
 }
