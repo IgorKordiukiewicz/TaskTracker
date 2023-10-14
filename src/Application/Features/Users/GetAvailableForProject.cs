@@ -24,7 +24,7 @@ internal class GetUsersAvailableForProjectHandler : IRequestHandler<GetUsersAvai
 
     public async Task<Result<UsersSearchVM>> Handle(GetUsersAvailableForProjectQuery request, CancellationToken cancellationToken)
     {
-        var projectMembersUserIds = await _dbContext.Projects.AsNoTracking()
+        var projectMembersUserIds = await _dbContext.Projects
             .Include(x => x.Members)
             .Where(x => x.Id == request.ProjectId)
             .Select(x => x.Members.Select(xx => xx.UserId))
@@ -34,7 +34,7 @@ internal class GetUsersAvailableForProjectHandler : IRequestHandler<GetUsersAvai
             return Result.Fail<UsersSearchVM>(new ApplicationError("Project with this ID does not exist"));
         }
 
-        var organizationMembersUserIds = await _dbContext.Organizations.AsNoTracking()
+        var organizationMembersUserIds = await _dbContext.Organizations
             .Include(x => x.Members)
             .Where(x => x.Id == request.OrganizationId)
             .Select(x => x.Members.Select(xx => xx.UserId))

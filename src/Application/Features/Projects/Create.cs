@@ -47,7 +47,7 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
             .AsNoTracking()
             .FirstAsync(x => x.AuthenticationId == request.UserAuthId)).Id;
 
-        var project = Project.Create(request.Model.Name, request.OrganizationId, userId); // TODO: Should UserId be validated or not since it is coming from internal sources so it should always be valid
+        var project = Project.Create(request.Model.Name, request.OrganizationId, userId);
         await _projectRepository.Add(project);
 
         var workflow = Workflow.Create(project.Id);

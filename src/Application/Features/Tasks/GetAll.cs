@@ -24,6 +24,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
     public async Task<Result<TasksVM>> Handle(GetAllTasksQuery request, CancellationToken cancellationToken)
     {
         var workflow = await _context.Workflows
+            .AsNoTracking()
             .Include(x => x.Statuses)
             .Include(x => x.Transitions)
             .Where(x => x.ProjectId == request.ProjectId)

@@ -21,7 +21,7 @@ internal class GetProjectMembersHandler : IRequestHandler<GetProjectMembersQuery
 
     public async Task<Result<ProjectMembersVM>> Handle(GetProjectMembersQuery request, CancellationToken cancellationToken)
     {
-        var members = await _dbContext.Projects.AsNoTracking()
+        var members = await _dbContext.Projects
             .Include(x => x.Members)
             .Where(x => x.Id == request.ProjectId)
             .SelectMany(x => x.Members)

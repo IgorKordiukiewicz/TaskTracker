@@ -27,7 +27,8 @@ internal class GetUsersAvailableForOrganizationInvitationHandler : IRequestHandl
     {
         // TODO: Possible performance bottleneck?
         // Create a view which has a list of (UserId, UserName, OrganizationId) ?
-        var organization = await _dbContext.Organizations.AsNoTracking()
+        var organization = await _dbContext.Organizations
+            .AsNoTracking()
             .Include(x => x.Invitations)
             .Include(x => x.Members)
             .FirstOrDefaultAsync(x => x.Id == request.OrganizationId);
@@ -44,7 +45,8 @@ internal class GetUsersAvailableForOrganizationInvitationHandler : IRequestHandl
         var unavailableUsers = membersUsers.Concat(usersWithPendingInvitations);
 
         var searchValue = request.SearchValue.ToLower();
-        var users = await _dbContext.Users.Where(x => !unavailableUsers.Contains(x.Id) && x.Name.ToLower().Contains(searchValue))
+        var users = await _dbContext.Users
+            .Where(x => !unavailableUsers.Contains(x.Id) && x.Name.ToLower().Contains(searchValue))
             .Take(5)
             .Select(x => new UserSearchVM
             {

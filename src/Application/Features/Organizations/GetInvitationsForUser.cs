@@ -24,7 +24,9 @@ internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrg
 
     public async Task<Result<OrganizationInvitationsVM>> Handle(GetOrganizationInvitationsForUserQuery request, CancellationToken cancellationToken)
     {
-        var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.AuthenticationId == request.UserAuthenticationId);
+        var user = await _dbContext.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.AuthenticationId == request.UserAuthenticationId);
         if(user is null)
         {
             return Result.Fail<OrganizationInvitationsVM>(new ApplicationError("User with this authentication ID does not exist."));

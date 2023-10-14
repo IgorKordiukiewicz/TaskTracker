@@ -21,8 +21,9 @@ internal class GetOrganizationsForUserHandler : IRequestHandler<GetOrganizations
 
     public async Task<Result<OrganizationsForUserVM>> Handle(GetOrganizationsForUserQuery request, CancellationToken cancellationToken)
     {
-        var userId = (await _dbContext.Users.FirstOrDefaultAsync(x => x.AuthenticationId == request.UserAuthenticationId))?.Id 
-            ?? Guid.Empty;
+        var userId = (await _dbContext.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.AuthenticationId == request.UserAuthenticationId))?.Id ?? Guid.Empty;
 
         var organizations = await _dbContext.Organizations
             .Include(x => x.Members)

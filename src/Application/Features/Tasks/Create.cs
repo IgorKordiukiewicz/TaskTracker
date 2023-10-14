@@ -40,7 +40,6 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
             .CountAsync()) + 1;
 
         var initialTaskStatus = await _dbContext.Workflows
-            .AsNoTracking()
             .Include(x => x.Statuses)
             .Where(x => x.ProjectId == request.ProjectId)
             .SelectMany(x => x.Statuses)

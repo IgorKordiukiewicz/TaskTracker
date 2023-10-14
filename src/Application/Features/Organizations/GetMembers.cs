@@ -21,7 +21,7 @@ internal class GetOrganizationMembersHandler : IRequestHandler<GetOrganizationMe
 
     public async Task<Result<OrganizationMembersVM>> Handle(GetOrganizationMembersQuery request, CancellationToken cancellationToken)
     {
-        var members = await _dbContext.Organizations.AsNoTracking()
+        var members = await _dbContext.Organizations
             .Include(x => x.Members)
             .Where(x => x.Id == request.OrganizationId)
             .SelectMany(x => x.Members)

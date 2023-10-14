@@ -25,13 +25,18 @@ internal class CanWorkflowStatusBeDeletedHandler : IRequestHandler<CanWorkflowSt
 
     public async Task<Result<bool>> Handle(CanWorkflowStatusBeDeletedQuery request, CancellationToken cancellationToken)
     {
-        var projectId = await _dbContext.Workflows.Where(x => x.Id == request.WorkflowId).Select(x => x.ProjectId).FirstOrDefaultAsync();
+        var projectId = await _dbContext.Workflows
+            .Where(x => x.Id == request.WorkflowId)
+            .Select(x => x.ProjectId)
+            .FirstOrDefaultAsync();
         if (projectId == default)
         {
             return Result.Fail<bool>(new ApplicationError("Workflow with this ID does not exist."));
         }
 
-        var status = await _dbContext.TaskStatuses.FirstOrDefaultAsync(x => x.Id == request.StatusId);
+        var status = await _dbContext.TaskStatuses
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == request.StatusId);
         if (status is null)
         {
             return Result.Fail<bool>(new ApplicationError("Status with this ID does not exist."));
