@@ -22,6 +22,7 @@
 
 @inject HttpClient _httpClient
 @inject IDialogService _dialogService
+@inject ISnackbar _snackbar
 
 @if(_workflowVM is not null)
 {
@@ -35,11 +36,6 @@
                     Disabled="@(!GetAvailableFromStatuses().Any())">
                     Add Transition
                 </MudButton>
-                @if(_selectedNode is not null)
-                {
-                    <MudDivider />
-                    <MudText>@_selectedNode.Name</MudText>
-                }
             </div>
         </MudItem>
         <MudItem md="10">
@@ -148,6 +144,8 @@
         {
             return;
         }
+
+        _snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
 
         var options = new BlazorDiagramOptions
         {
@@ -299,20 +297,25 @@
             var selectedModel = _diagram.GetSelectedModels().Single();
             if(selectedModel is TaskStatusNodeModel node)
             {
-                if(await CanDeleteStatus(node.Name))
+                if(await CanStatusBeDeleted(node.Name))
                 {
 
                 }
                 else
                 {
-                    
+                    ShowStatusCantBeDeletedMessage();
                 }
             }
             // TODO: else if Link
         }
     }
 
-    private async Task<bool> CanDeleteStatus(string name)
+    private void ShowStatusCantBeDeletedMessage()
+    {
+        _snackbar.Add("This status can't be deleted!", Severity.Warning);
+    }
+
+    private async Task<bool> CanStatusBeDeleted(string name)
     {
         var statusId = _statusIdByName![name];
         return await _requestHandler.GetAsync<bool>($"workflows/{_workflowVM!.Id}/statuses/{statusId}/can-be-deleted", new[] { ("ProjectId", ProjectId.ToString()) });

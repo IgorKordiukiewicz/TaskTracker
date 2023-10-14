@@ -2,6 +2,7 @@
 
 namespace Application.Features.Workflows;
 
+// TODO: Return a VM with bool and optional Reason (enum?) so that UI can display why the status can't be deleted
 public record CanWorkflowStatusBeDeletedQuery(Guid WorkflowId, Guid StatusId) : IRequest<Result<bool>>;
 
 internal class CanWorkflowStatusBeDeletedQueryValidator : AbstractValidator<CanWorkflowStatusBeDeletedQuery>
