@@ -36,7 +36,7 @@ public class TasksTests
         var organization = Organization.Create("org", user.Id);
         var project = Project.Create("project", organization.Id, user.Id);
         var workflow = Workflow.Create(project.Id);
-        var initialStatusId = workflow.Statuses.First(x => x.IsInitial).Id;
+        var initialStatusId = workflow.Statuses.First(x => x.Initial).Id;
         var task1 = Task.Create(1, project.Id, "title1", "desc1", initialStatusId);
         var task2 = Task.Create(2, project.Id, "title2", "desc2", initialStatusId);
         await _fixture.SeedDb(async db =>
@@ -58,7 +58,7 @@ public class TasksTests
             var task = await _fixture.FirstAsync<Task>(x => x.Id == result.Value);
             task.ShortId.Should().Be(3);
 
-            var initialTaskStatus = await _fixture.FirstAsync<Domain.Tasks.TaskStatus>(x => x.IsInitial);
+            var initialTaskStatus = await _fixture.FirstAsync<Domain.Tasks.TaskStatus>(x => x.Initial);
             task.StatusId.Should().Be(initialTaskStatus.Id);
         }
     }
@@ -79,9 +79,9 @@ public class TasksTests
         var project1 = Project.Create("project", organization.Id, user.Id);
         var project2 = Project.Create("project2", organization.Id, user.Id);
         var workflow1 = Workflow.Create(project1.Id);
-        var initialStatusId1 = workflow1.Statuses.First(x => x.IsInitial).Id;
+        var initialStatusId1 = workflow1.Statuses.First(x => x.Initial).Id;
         var workflow2 = Workflow.Create(project2.Id);
-        var initialStatusId2 = workflow1.Statuses.First(x => x.IsInitial).Id;
+        var initialStatusId2 = workflow1.Statuses.First(x => x.Initial).Id;
         var task1 = Task.Create(1, project1.Id, "title1", "desc1", initialStatusId1);
         var task2 = Task.Create(2, project1.Id, "title2", "desc2", initialStatusId1);
         var task3 = Task.Create(1, project2.Id, "title3", "desc3", initialStatusId2);
@@ -119,7 +119,7 @@ public class TasksTests
         var organization = Organization.Create("org", user.Id);
         var project = Project.Create("project", organization.Id, user.Id);
         var workflow = Workflow.Create(project.Id);
-        var initialStatus = workflow.Statuses.First(x => x.IsInitial);
+        var initialStatus = workflow.Statuses.First(x => x.Initial);
         var task = Task.Create(1, project.Id, "title", "desc", initialStatus.Id);
         await _fixture.SeedDb(async db =>
         {
@@ -142,7 +142,7 @@ public class TasksTests
         var organization = Organization.Create("org", user.Id);
         var project = Project.Create("project", organization.Id, user.Id);
         var workflow = Workflow.Create(project.Id);
-        var initialStatus = workflow.Statuses.First(x => x.IsInitial);
+        var initialStatus = workflow.Statuses.First(x => x.Initial);
         var task = Task.Create(1, project.Id, "title", "desc", initialStatus.Id);
         await _fixture.SeedDb(async db =>
         {
@@ -153,7 +153,7 @@ public class TasksTests
             await db.Tasks.AddAsync(task);
         });
 
-        var newStatusId = initialStatus.PossibleNextStatuses[0];
+        var newStatusId = workflow.Transitions.First(x => x.FromStatusId == initialStatus.Id).ToStatusId;
 
         var result = await _fixture.SendRequest(new UpdateTaskStatusCommand(task.Id, newStatusId));
 

@@ -16,5 +16,8 @@ internal class WorkflowConfiguration : IEntityTypeConfiguration<Workflow>
 
         builder.HasMany(x => x.Statuses)
             .WithOne();
+
+        builder.HasMany(x => x.Transitions)
+            .WithOne();
     }
 }

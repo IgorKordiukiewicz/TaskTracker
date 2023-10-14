@@ -15,23 +15,22 @@ public class WorkflowTests
             result.Statuses.Should().HaveCount(3);
 
             var todoStatus = result.Statuses.First(x => x.Name.ToLower() == "todo");
-            todoStatus.IsInitial.Should().BeTrue();
+            todoStatus.Initial.Should().BeTrue();
 
             var inProgressStatus = result.Statuses.First(x => x.Name.ToLower() == "in progress");
-            inProgressStatus.IsInitial.Should().BeFalse();
+            inProgressStatus.Initial.Should().BeFalse();
 
             var doneStatus = result.Statuses.First(x => x.Name.ToLower() == "done");
-            doneStatus.IsInitial.Should().BeFalse();
+            doneStatus.Initial.Should().BeFalse();
 
             // Transitions
-            todoStatus.CanTransitionTo(inProgressStatus.Id).Should().BeTrue();
-            todoStatus.CanTransitionTo(doneStatus.Id).Should().BeFalse();
+            DoesTransitionExist(todoStatus.Id, inProgressStatus.Id).Should().BeTrue();
+            DoesTransitionExist(inProgressStatus.Id, todoStatus.Id).Should().BeTrue();
+            DoesTransitionExist(inProgressStatus.Id, doneStatus.Id).Should().BeTrue();
+            DoesTransitionExist(doneStatus.Id, inProgressStatus.Id).Should().BeTrue();
 
-            inProgressStatus.CanTransitionTo(todoStatus.Id).Should().BeTrue();
-            inProgressStatus.CanTransitionTo(doneStatus.Id).Should().BeTrue();
-
-            doneStatus.CanTransitionTo(todoStatus.Id).Should().BeFalse();
-            doneStatus.CanTransitionTo(inProgressStatus.Id).Should().BeTrue();
+            bool DoesTransitionExist(Guid fromStatusId, Guid toStatusId)
+                => result!.Transitions.Any(x => x.FromStatusId == fromStatusId && x.ToStatusId == toStatusId);
 
             // Display orders
             result.Statuses.OrderBy(x => x.DisplayOrder).Select(x => x.Name.ToLower())
@@ -75,9 +74,9 @@ public class WorkflowTests
     public void CanTransitionTo_ShouldReturnTrue_WhenCanTransitionToNewState()
     {
         var workflow = Workflow.Create(Guid.NewGuid());
-        var status = workflow.Statuses[0];
+        var transition = workflow.Transitions[0];
 
-        var result = workflow.CanTransitionTo(status.Id, status.PossibleNextStatuses[0]);
+        var result = workflow.CanTransitionTo(transition.FromStatusId, transition.ToStatusId);
 
         result.Should().BeTrue();
     }

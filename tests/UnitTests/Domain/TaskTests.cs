@@ -31,8 +31,9 @@ public class TaskTests
     public void UpdateStatus_ShouldFail_WhenStatusCannotTransitionToNewStatus()
     {
         var workflow = Workflow.Create(Guid.NewGuid());
-        var initialStatus = workflow.Statuses.First(x => x.IsInitial);
-        var unavailableStatus = workflow.Statuses.First(x => !initialStatus.CanTransitionTo(x.Id));
+        var initialStatus = workflow.Statuses.First(x => x.Initial);
+        var availableStatuses = workflow.Transitions.Where(x => x.FromStatusId == initialStatus.Id).Select(x => x.ToStatusId);
+        var unavailableStatus = workflow.Statuses.First(x => !availableStatuses.Contains(x.Id));
 
         var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialStatus.Id);
 
@@ -45,17 +46,17 @@ public class TaskTests
     public void UpdateStatus_ShouldUpdateStatusId_WhenStatusCanTransitionToNewStatus()
     {
         var workflow = Workflow.Create(Guid.NewGuid());
-        var initialStatus = workflow.Statuses.First(x => x.IsInitial);
-        var availableStatus = workflow.Statuses.First(x => initialStatus.CanTransitionTo(x.Id));
+        var initialStatus = workflow.Statuses.First(x => x.Initial);
+        var availableStatusId = workflow.Transitions.First(x => x.FromStatusId == initialStatus.Id).ToStatusId;
 
         var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialStatus.Id);
 
-        var result = task.UpdateStatus(availableStatus.Id, workflow);
+        var result = task.UpdateStatus(availableStatusId, workflow);
 
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            task.StatusId.Should().Be(availableStatus.Id);
+            task.StatusId.Should().Be(availableStatusId);
         }
     }
 }

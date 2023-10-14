@@ -14,6 +14,9 @@ public class Workflow : Entity, IAggregateRoot
     private readonly List<TaskStatus> _statuses = new();
     public IReadOnlyList<TaskStatus> Statuses => _statuses.AsReadOnly();
 
+    private readonly List<TaskStatusTransition> _transitions = new();
+    public IReadOnlyList<TaskStatusTransition> Transitions => _transitions.AsReadOnly();
+
     private Workflow(Guid projectId)
         : base(Guid.NewGuid())
     {
@@ -27,9 +30,14 @@ public class Workflow : Entity, IAggregateRoot
         var doneId = Guid.NewGuid();
 
         var workflow = new Workflow(projectId);
-        workflow._statuses.Add(TaskStatus.Create(toDoId, "ToDo", new[] { inProgressId }, 0, true));
-        workflow._statuses.Add(TaskStatus.Create(inProgressId, "In Progress", new[] { toDoId, doneId }, 1));
-        workflow._statuses.Add(TaskStatus.Create(doneId, "Done", new[] { inProgressId }, 2));
+        workflow._statuses.Add(TaskStatus.Create(toDoId, "ToDo", 0, true));
+        workflow._statuses.Add(TaskStatus.Create(inProgressId, "In Progress", 1));
+        workflow._statuses.Add(TaskStatus.Create(doneId, "Done", 2));
+
+        workflow._transitions.Add(new TaskStatusTransition(toDoId, inProgressId));
+        workflow._transitions.Add(new TaskStatusTransition(inProgressId, toDoId));
+        workflow._transitions.Add(new TaskStatusTransition(inProgressId, doneId));
+        workflow._transitions.Add(new TaskStatusTransition(doneId, inProgressId));
 
         return workflow;
     }
@@ -38,10 +46,7 @@ public class Workflow : Entity, IAggregateRoot
         => _statuses.Any(x => x.Id == statusId);
 
     public bool CanTransitionTo(Guid currentStatusId, Guid newStatusId)
-    {
-        var currentStatus = _statuses.Single(x => x.Id == currentStatusId);
-        return currentStatus.CanTransitionTo(newStatusId);
-    }
+        => DoesTransitionExist(currentStatusId, newStatusId);
 
     public Result AddStatus(string name)
     {
@@ -52,8 +57,10 @@ public class Workflow : Entity, IAggregateRoot
 
         var displayOrder = _statuses.MaxBy(x => x.DisplayOrder)!.DisplayOrder + 1;
 
-        _statuses.Add(TaskStatus.Create(Guid.NewGuid(), name, Array.Empty<Guid>(), displayOrder));
+        _statuses.Add(TaskStatus.Create(Guid.NewGuid(), name, displayOrder));
 
         return Result.Ok();
     }
+    private bool DoesTransitionExist(Guid fromStatusId, Guid toStatusId)
+        => _transitions.Any(x => x.FromStatusId == fromStatusId && x.ToStatusId == toStatusId);
 }

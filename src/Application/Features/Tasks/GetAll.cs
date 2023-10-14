@@ -25,6 +25,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
     {
         var workflow = await _context.Workflows
             .Include(x => x.Statuses)
+            .Include(x => x.Transitions)
             .Where(x => x.ProjectId == request.ProjectId)
             .SingleOrDefaultAsync();
 
@@ -47,12 +48,17 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
                 Title = task.Title,
                 Description = task.Description,
                 Status = status.Id,
-                PossibleNextStatuses = status.PossibleNextStatuses
             }).ToListAsync();
 
         var allTaskStatuses = workflow.Statuses
             .Select(x => new TaskStatusDetailedVM(x.Id, x.Name, x.DisplayOrder))
             .ToList();
+
+        var possibleNextStatusesByStatus = workflow.Statuses.ToDictionary(k => k.Id, v => new List<Guid>());
+        foreach(var (statusId, possibleNextStatuses) in possibleNextStatusesByStatus)
+        {
+            possibleNextStatuses.AddRange(workflow.Transitions.Where(x => x.FromStatusId == statusId).Select(x => x.ToStatusId));
+        }
 
         return new TasksVM(tasks.Select(x => new TaskVM
         {
@@ -61,7 +67,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
             Title = x.Title,
             Description = x.Description,
             Status = new(x.Status, statusesById[x.Status].Name),
-            PossibleNextStatuses = x.PossibleNextStatuses.Select(xx => new TaskStatusVM(xx, statusesById[xx].Name)).ToList(),
+            PossibleNextStatuses = possibleNextStatusesByStatus[x.Status].Select(xx => new TaskStatusVM(xx, statusesById[xx].Name)).ToList(),
         }).ToList(), allTaskStatuses);
     }
 }

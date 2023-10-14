@@ -4,7 +4,7 @@ using Domain.Tasks;
 
 namespace Application.Features.Workflows;
 
-public record AddWorkflowTaskStatusCommand(Guid WorkflowId, AddWorkflowTaskStatusDto Model) : IRequest<Result>;
+public record AddWorkflowTaskStatusCommand(Guid WorkflowId, AddWorkflowStatusDto Model) : IRequest<Result>;
 
 internal class AddWorkflowTaskStatusCommandValidator : AbstractValidator<AddWorkflowTaskStatusCommand>
 {

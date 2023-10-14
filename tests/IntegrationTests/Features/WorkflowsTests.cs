@@ -50,7 +50,7 @@ public class WorkflowsTests
             result.IsSuccess.Should().BeTrue();
 
             result.Value.Id.Should().Be(workflow.Id);
-            result.Value.TaskStatuses.Count.Should().Be(workflow.Statuses.Count);
+            result.Value.Statuses.Count.Should().Be(workflow.Statuses.Count);
         }
     }
 

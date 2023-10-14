@@ -44,12 +44,11 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
             .Include(x => x.Statuses)
             .Where(x => x.ProjectId == request.ProjectId)
             .SelectMany(x => x.Statuses)
-            .FirstAsync(x => x.IsInitial);
+            .FirstAsync(x => x.Initial);
 
         var task = Task.Create(shortId, request.ProjectId, request.Model.Title, request.Model.Description, initialTaskStatus.Id);
 
         await _taskRepository.Add(task);
-        await _dbContext.SaveChangesAsync();
 
         return task.Id;
     }

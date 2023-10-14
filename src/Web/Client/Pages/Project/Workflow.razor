@@ -173,23 +173,21 @@
 
         var currentPositionX = 50;
         var nodeByStatusId = new Dictionary<Guid, TaskStatusNodeModel>();
-        foreach(var taskStatus in _workflowVM.TaskStatuses)
+        foreach (var status in _workflowVM.Statuses)
         {
             var node = _diagram.Nodes.Add(new TaskStatusNodeModel(position: new Point(currentPositionX, 50))
             {
-                Name = taskStatus.Name.ToUpper()
+                Name = status.Name.ToUpper()
             });
-            nodeByStatusId.Add(taskStatus.Id, node);
+            nodeByStatusId.Add(status.Id, node);
 
             currentPositionX += 150;
         }
 
-        foreach(var taskStatus in _workflowVM.TaskStatuses)
+        foreach(var transition in _workflowVM.Transitions)
         {
-            var fromNode = nodeByStatusId[taskStatus.Id];
-            foreach(var possibleNextStatus in taskStatus.PossibleNextStatuses)
-            {
-                var toNode = nodeByStatusId[possibleNextStatus];
+            var fromNode = nodeByStatusId[transition.FromStatusId];
+            var toNode = nodeByStatusId[transition.ToStatusId];
                 _diagram.Links.Add(DiagramFactory.CreateLink(fromNode, toNode));
             }
         }
@@ -222,7 +220,7 @@
             return;
         }
 
-        var model = new AddWorkflowTaskStatusDto(_addStatusForm.Name);
+        var model = new AddWorkflowStatusDto(_addStatusForm.Name);
         await _requestHandler.PostAsync($"workflows/{_workflowVM.Id}/statuses", model, new[] { ("ProjectId", ProjectId.ToString()) });
 
         _addStatusForm = new();
@@ -255,9 +253,10 @@
         }
 
         var result = new List<string>();
-        foreach(var status in _workflowVM.TaskStatuses)
+        foreach (var status in _workflowVM.Statuses)
         {
-            if(status.PossibleNextStatuses.Count < _workflowVM.TaskStatuses.Count - 1)
+            var fromTransitionsCount = _workflowVM.Transitions.Count(x => x.FromStatusId == status.Id);
+            if (fromTransitionsCount < _workflowVM.Statuses.Count - 1)
             {
                 result.Add(status.Name);
             }
@@ -268,16 +267,17 @@
 
     private List<string> GetAvailableToStatuses(string fromStatus)
     {
-        if (_workflowVM is null)
+        if (_taskIdByName is null || _workflowVM is null)
         {
             return new();
         }
 
-        var existingTransitionsIds = _workflowVM.TaskStatuses.Single(x => x.Name == fromStatus).PossibleNextStatuses
-            .ToHashSet();
+        var fromStatusId = _taskIdByName[fromStatus];
+        var availableStatusesIds = _workflowVM.Transitions.Where(x => x.FromStatusId == fromStatusId)
+            .Select(x => x.ToStatusId).ToHashSet();
 
-        return _workflowVM.TaskStatuses
-            .Where(x => !existingTransitionsIds.Contains(x.Id) && x.Name != fromStatus)
+        return _workflowVM
+            .Statuses.Where(x => !availableStatusesIds.Contains(x.Id) && x.Id != fromStatusId)
             .Select(x => x.Name)
             .ToList();
     }

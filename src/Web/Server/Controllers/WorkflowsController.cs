@@ -29,7 +29,7 @@ public class WorkflowsController : ControllerBase
 
     [HttpPost("{workflowId:guid}/statuses")]
     [Authorize(Policy.ProjectMember)]
-    public async Task<IActionResult> AddStatus(Guid workflowId, AddWorkflowTaskStatusDto model)
+    public async Task<IActionResult> AddStatus(Guid workflowId, AddWorkflowStatusDto model)
     {
         var result = await _mediator.Send(new AddWorkflowTaskStatusCommand(workflowId, model));
         return result.ToHttpResult();

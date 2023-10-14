@@ -32,6 +32,7 @@ public class WorkflowRepository : IRepository<Workflow>
     public async Task<Workflow?> GetBy(Expression<Func<Workflow, bool>> predicate)
         => await _dbContext.Workflows
         .Include(x => x.Statuses)
+        .Include(x => x.Transitions)
         .FirstOrDefaultAsync(predicate);
 
     public async Task<Workflow?> GetById(Guid id)
@@ -39,7 +40,8 @@ public class WorkflowRepository : IRepository<Workflow>
 
     public async Task Update(Workflow entity)
     {
-        await _dbContext.AddRemoveDependents(entity.Statuses);
+        await _dbContext.AddRemoveDependentEntities(entity.Statuses);
+        await _dbContext.AddRemoveDependentValueObjects(entity.Transitions);
         await _dbContext.SaveChangesAsync();
     }
 }

@@ -1,3 +1,3 @@
 ﻿namespace Shared.Dtos;
 
-public record AddWorkflowTaskStatusDto(string Name);
+public record AddWorkflowStatusDto(string Name);

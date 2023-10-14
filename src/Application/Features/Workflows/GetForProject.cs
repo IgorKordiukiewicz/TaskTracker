@@ -24,7 +24,9 @@ internal class GetWorkflowForProjectHandler : IRequestHandler<GetWorkflowForProj
     public async Task<Result<WorkflowVM>> Handle(GetWorkflowForProjectQuery request, CancellationToken cancellationToken)
     {
         var workflow = await _dbContext.Workflows
+            .AsNoTracking()
             .Include(x => x.Statuses)
+            .Include(x => x.Transitions)
             .SingleOrDefaultAsync(x => x.ProjectId == request.ProjectId);
         if(workflow is null)
         {
@@ -35,15 +37,19 @@ internal class GetWorkflowForProjectHandler : IRequestHandler<GetWorkflowForProj
             .Distinct()
             .ToHashSet();
 
-        return new WorkflowVM(workflow.Id, workflow.Statuses.Select(x => 
+        var statuses = workflow.Statuses.Select(x =>
             new WorkflowTaskStatusVM
             {
                 Id = x.Id,
                 Name = x.Name,
-                IsInitial = x.IsInitial,
+                Initial = x.Initial,
                 DisplayOrder = x.DisplayOrder,
-                PossibleNextStatuses = x.PossibleNextStatuses,
-                CanBeDeleted = !usedStatusesIds.Contains(x.Id) && !x.IsInitial
-            }).ToList());
+                CanBeDeleted = !usedStatusesIds.Contains(x.Id) && !x.Initial
+            }).ToList();
+
+        var transitions = workflow.Transitions.Select(x =>
+            new WorkflowTaskStatusTransitionVM(x.FromStatusId, x.ToStatusId)).ToList();
+
+        return new WorkflowVM(workflow.Id, statuses, transitions);
     }
 }
