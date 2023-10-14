@@ -7,6 +7,7 @@
 @using Blazor.Diagrams.Components.Widgets
 @using Blazor.Diagrams.Core.Anchors;
 @using Blazor.Diagrams.Core.Behaviors;
+@using Blazor.Diagrams.Core.Events;
 @using Blazor.Diagrams.Core.Geometry;
 @using Blazor.Diagrams.Core.Models;
 @using Blazor.Diagrams.Core.Models.Base;
@@ -27,8 +28,13 @@
     <MudGrid Class="mt-2">
         <MudItem md="2">
             <div class="d-flex flex-column gap-2">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addStatusForm.Open()" FullWidth="true">Add Status</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addTransitionForm.Open()" FullWidth="true" Disabled="@(!GetAvailableFromStatuses().Any())">Add Transition</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addStatusForm.Open()" FullWidth="true">
+                    Add Status
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addTransitionForm.Open()" FullWidth="true" 
+                    Disabled="@(!GetAvailableFromStatuses().Any())">
+                    Add Transition
+                </MudButton>
                 @if(_selectedNode is not null)
                 {
                     <MudDivider />
@@ -106,8 +112,9 @@
     private BlazorDiagram _diagram = null!;
 
     private WorkflowVM? _workflowVM;
-    private Dictionary<string, Guid>? _taskIdByName;
+    private Dictionary<string, Guid>? _statusIdByName;
 
+    // TODO: Move forms to a separate file/folder and add unit tests for them?
     private class AddStatusForm : DialogForm
     {
         public string Name { get; set; } = string.Empty;
@@ -122,14 +129,7 @@
         public string ToStatus { get; set; } = string.Empty;
 
         public override bool IsValid()
-        {
-            if(string.IsNullOrWhiteSpace(FromStatus) || string.IsNullOrWhiteSpace(ToStatus))
-            {
-                return false;
-            }
-
-            return true;
-        }
+            => !string.IsNullOrWhiteSpace(FromStatus) && !string.IsNullOrWhiteSpace(ToStatus);
     }
     private AddTransitionForm _addTransitionForm = new();
 
@@ -169,6 +169,7 @@
         _diagram.RegisterComponent<TaskStatusNodeModel, TaskStatusNode>();
         _diagram.GetBehavior<KeyboardShortcutsBehavior>()?.RemoveShortcut("Delete", false, false, false);
         _diagram.SelectionChanged += OnSelectionChanged;
+        _diagram.KeyDown += OnKeyDown;
 
         var currentPositionX = 50;
         var nodeByStatusId = new Dictionary<Guid, TaskStatusNodeModel>();
@@ -216,7 +217,7 @@
             return;
         }
         var statusNameComparer = StringComparer.OrdinalIgnoreCase;
-        _taskIdByName = _workflowVM.Statuses.ToDictionary(k => k.Name, v => v.Id, statusNameComparer);
+        _statusIdByName = _workflowVM.Statuses.ToDictionary(k => k.Name, v => v.Id, statusNameComparer);
 
         if(newStatus is not null)
         {
@@ -267,13 +268,13 @@
 
     private async Task AddTransition()
     {
-        if (!_addTransitionForm.IsValid() || _taskIdByName is null)
+        if (!_addTransitionForm.IsValid() || _statusIdByName is null)
         {
             return;
         }
 
-        var fromStatusId = _taskIdByName[_addTransitionForm.FromStatus];
-        var toStatusId = _taskIdByName[_addTransitionForm.ToStatus];
+        var fromStatusId = _statusIdByName[_addTransitionForm.FromStatus];
+        var toStatusId = _statusIdByName[_addTransitionForm.ToStatus];
         var model = new AddWorkflowTransitionDto(fromStatusId, toStatusId);
         var success = await _requestHandler.PostWithResultAsync($"workflows/{_workflowVM!.Id}/transitions", model, new[] { ("ProjectId", ProjectId.ToString()) });
 
@@ -289,6 +290,32 @@
     {
         _selectedNode = selectableModel.Selected ? selectableModel as TaskStatusNodeModel : null;
         StateHasChanged();
+    }
+
+    private async void OnKeyDown(Blazor.Diagrams.Core.Events.KeyboardEventArgs e) // has to be void due to being an event handler
+    {
+        if(e.Key.ToLower() == "delete")
+        {
+            var selectedModel = _diagram.GetSelectedModels().Single();
+            if(selectedModel is TaskStatusNodeModel node)
+            {
+                if(await CanDeleteStatus(node.Name))
+                {
+
+                }
+                else
+                {
+                    
+                }
+            }
+            // TODO: else if Link
+        }
+    }
+
+    private async Task<bool> CanDeleteStatus(string name)
+    {
+        var statusId = _statusIdByName![name];
+        return await _requestHandler.GetAsync<bool>($"workflows/{_workflowVM!.Id}/statuses/{statusId}/can-be-deleted", new[] { ("ProjectId", ProjectId.ToString()) });
     }
 
     // TODO: Extract it somewhere so it could be tested? maybe to view model as methods?
@@ -314,12 +341,12 @@
 
     private List<string> GetAvailableToStatuses(string fromStatus)
     {
-        if (_taskIdByName is null || _workflowVM is null)
+        if (_statusIdByName is null || _workflowVM is null)
         {
             return new();
         }
 
-        var fromStatusId = _taskIdByName[fromStatus];
+        var fromStatusId = _statusIdByName[fromStatus];
         var availableStatusesIds = _workflowVM.Transitions.Where(x => x.FromStatusId == fromStatusId)
             .Select(x => x.ToStatusId).ToHashSet();
 
