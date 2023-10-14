@@ -183,11 +183,28 @@
             currentPositionX += 150;
         }
 
+        var linkCreatedByTransitionId = _workflowVM.Transitions.ToDictionary(k => (k.FromStatusId, k.ToStatusId), v => false);
         foreach(var transition in _workflowVM.Transitions)
         {
+            var transitionKey = (transition.FromStatusId, transition.ToStatusId);
+            if(linkCreatedByTransitionId[transitionKey])
+            {
+                continue;
+            }
+
             var fromNode = nodeByStatusId[transition.FromStatusId];
             var toNode = nodeByStatusId[transition.ToStatusId];
-            _diagram.Links.Add(DiagramFactory.CreateLink(fromNode, toNode));
+
+            var reverseTransitionKey = (transition.ToStatusId, transition.FromStatusId);
+            var bidirectional = linkCreatedByTransitionId.ContainsKey(reverseTransitionKey);
+
+            _diagram.Links.Add(DiagramFactory.CreateLink(fromNode, toNode, bidirectional));
+
+            linkCreatedByTransitionId[transitionKey] = true;
+            if(bidirectional)
+            {
+                linkCreatedByTransitionId[reverseTransitionKey] = true;
+            }
         }
     }
 
@@ -216,7 +233,17 @@
 
             var fromStatusNode = nodeModelByStatusName[newTransition.Value.FromStatus];
             var toStatusNode = nodeModelByStatusName[newTransition.Value.ToStatus];
-            _diagram.Links.Add(DiagramFactory.CreateLink(fromStatusNode, toStatusNode));
+
+            var reverseLink = _diagram.Links.FirstOrDefault(x => x.Source.Model == toStatusNode && x.Target.Model == fromStatusNode);
+            if(reverseLink is not null)
+            {
+                reverseLink.SourceMarker = LinkMarker.Arrow;
+                reverseLink.Refresh();
+            }
+            else
+            {
+                _diagram.Links.Add(DiagramFactory.CreateLink(fromStatusNode, toStatusNode));
+            }
         }
     }
 
