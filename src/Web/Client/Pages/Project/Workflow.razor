@@ -95,7 +95,6 @@
     </DialogActions>
 </MudDialog>
 
-
 @code {
     [Parameter]
     public Guid ProjectId { get; init; }
@@ -207,7 +206,9 @@
         }
     }
 
-    private async Task UpdateWorkflowVM(string? newStatus = null, (string FromStatus, string ToStatus)? newTransition = null)
+    private async Task UpdateWorkflowVM(string? newStatus = null, 
+        string? deletedStatus = null,
+        (string FromStatus, string ToStatus)? newTransition = null)
     {
         _workflowVM = await _requestHandler.GetAsync<WorkflowVM>($"workflows/project/{ProjectId}");
         if(_workflowVM is null)
@@ -223,6 +224,18 @@
             {
                 Name = newStatus.ToUpper()
             });
+        }
+
+        if(deletedStatus is not null)
+        {
+            var deletedStatusNameUpper = deletedStatus.ToUpper();
+            var node = _diagram.Nodes.First(x => (x as TaskStatusNodeModel)!.Name == deletedStatusNameUpper);
+            _diagram.Nodes.Remove(node);
+
+            var relatedLinks = _diagram.Links.Where(x =>
+                (x.Source.Model as TaskStatusNodeModel)!.Name == deletedStatusNameUpper
+                || (x.Target.Model as TaskStatusNodeModel)!.Name == deletedStatusNameUpper);
+            _diagram.Links.Remove(relatedLinks);
         }
 
         if(newTransition is not null)
@@ -299,7 +312,10 @@
             {
                 if(await CanStatusBeDeleted(node.Name))
                 {
-
+                    if(await ShowMessageBox($"Are you sure you want to delete the status '{node.Name}'?"))
+                    {
+                        await DeleteStatus(node.Name);
+                    }
                 }
                 else
                 {
@@ -307,6 +323,13 @@
                 }
             }
             // TODO: else if Link
+        }
+
+        async Task<bool> ShowMessageBox(string message) 
+        {
+            bool? result = await _dialogService.ShowMessageBox("Confirm action", message,
+                yesText: "Delete", cancelText: "Cancel");
+            return result is not null;
         }
     }
 
@@ -319,6 +342,23 @@
     {
         var statusId = _statusIdByName![name];
         return await _requestHandler.GetAsync<bool>($"workflows/{_workflowVM!.Id}/statuses/{statusId}/can-be-deleted", new[] { ("ProjectId", ProjectId.ToString()) });
+    }
+
+    private async Task DeleteStatus(string name)
+    {
+        if(_statusIdByName is null)
+        {
+            return;
+        }
+
+        var statusId = _statusIdByName[name];
+        var success = await _requestHandler.PostWithResultAsync($"workflows/{_workflowVM!.Id}/statuses/{statusId}/delete", headers:
+            new[] { ("ProjectId", ProjectId.ToString()) });
+
+        if (success)
+        {
+            await UpdateWorkflowVM(deletedStatus: name);
+        }
     }
 
     // TODO: Extract it somewhere so it could be tested? maybe to view model as methods?

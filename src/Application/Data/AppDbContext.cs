@@ -47,7 +47,7 @@ public class AppDbContext : DbContext
     public async System.Threading.Tasks.Task AddRemoveDependentValueObjects<TDependent>(IEnumerable<TDependent> actualEntities)
         where TDependent : ValueObject
     {
-        var dbEntities = await Set<TDependent>().AsNoTracking().ToListAsync();
+        var dbEntities = await Set<TDependent>().ToListAsync();
     
         var addedEntities = actualEntities.Where(x => !dbEntities.Any(y => y == x));
         Set<TDependent>().AddRange(addedEntities);

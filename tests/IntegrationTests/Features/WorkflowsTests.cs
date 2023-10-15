@@ -1,5 +1,6 @@
 ﻿using Application.Features.Workflows;
 using Domain.Tasks;
+using System.Threading.Tasks;
 using Task = Domain.Tasks.Task;
 using TaskStatus = Domain.Tasks.TaskStatus;
 
@@ -167,6 +168,50 @@ public class WorkflowsTests
         {
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().BeTrue();
+        }
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task DeleteStatus_ShouldFail_WhenWorkflowDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new DeleteWorkflowStatusCommand(Guid.NewGuid(), Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task DeleteStatus_ShouldFail_WhenStatusIsUsedByATask()
+    {
+        var workflow = (await _factory.CreateWorkflows())[0];
+        var notInitialStatus = workflow.Statuses.First(x => !x.Initial);
+        var task = Task.Create(1, workflow.ProjectId, "title", "desc", notInitialStatus.Id);
+        await _fixture.SeedDb(db =>
+        {
+            db.Add(task);
+        });
+
+        var result = await _fixture.SendRequest(new DeleteWorkflowStatusCommand(workflow.Id, task.StatusId));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task DeleteStatus_ShouldRemoveStatusAndRelatedTransitions_WhenStatusCanBeDeleted()
+    {
+        var workflow = (await _factory.CreateWorkflows())[0];
+        var notInitialStatus = workflow.Statuses.First(x => !x.Initial);
+        var statusesCountBefore = workflow.Statuses.Count;
+        var transitionsCountBefore = workflow.Transitions.Count;
+        var statusTransitions = workflow.Transitions.Count(x =>
+            x.FromStatusId == notInitialStatus.Id || x.ToStatusId == notInitialStatus.Id);
+
+        var result = await _fixture.SendRequest(new DeleteWorkflowStatusCommand(workflow.Id, notInitialStatus.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<TaskStatus>()).Should().Be(statusesCountBefore - 1);
+            (await _fixture.CountAsync<TaskStatusTransition>()).Should().Be(transitionsCountBefore - statusTransitions);
         }
     }
 }

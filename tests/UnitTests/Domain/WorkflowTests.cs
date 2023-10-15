@@ -149,4 +149,45 @@ public class WorkflowTests
 
         result.IsSuccess.Should().BeTrue();
     }
+
+    [Fact]
+    public void DeleteStatus_ShouldFail_WhenStatusDoesNotExist()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+
+        var result = workflow.DeleteStatus(Guid.NewGuid());
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]  
+    public void DeleteStatus_ShouldFail_WhenStatusIsTheInitialStatus()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var initialStatus = workflow.Statuses.First(x => x.Initial);
+
+        var result = workflow.DeleteStatus(initialStatus.Id);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void DeleteStatus_ShouldRemoveStatusAndRelatedTransitions_WhenStatusIsNotTheInitialStatus()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var notInitialStatus = workflow.Statuses.First(x => !x.Initial);
+        var statusesCountBefore = workflow.Statuses.Count;
+        var transitionsCountBefore = workflow.Transitions.Count;
+        var statusTransitions = workflow.Transitions.Count(x => 
+            x.FromStatusId == notInitialStatus.Id || x.ToStatusId == notInitialStatus.Id);
+
+        var result = workflow.DeleteStatus(notInitialStatus.Id);
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            workflow.Statuses.Count.Should().Be(statusesCountBefore - 1);
+            workflow.Transitions.Count.Should().Be(transitionsCountBefore - statusTransitions);
+        }
+    }
 }

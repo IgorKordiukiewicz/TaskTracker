@@ -1,0 +1,53 @@
+﻿using Application.Data.Repositories;
+using Application.Errors;
+using Domain.Errors;
+using Domain.Tasks;
+
+namespace Application.Features.Workflows;
+
+public record DeleteWorkflowStatusCommand(Guid WorkflowId, Guid StatusId) : IRequest<Result>;
+
+internal class DeleteWorkflowStatusCommandValidator : AbstractValidator<DeleteWorkflowStatusCommand>
+{
+    public DeleteWorkflowStatusCommandValidator()
+    {
+        RuleFor(x => x.WorkflowId).NotEmpty();
+        RuleFor(x => x.StatusId).NotEmpty();
+    }
+}
+
+internal class DeleteWorkflowStatusHandler : IRequestHandler<DeleteWorkflowStatusCommand, Result>
+{
+    private readonly IRepository<Workflow> _workflowRepository;
+    private readonly AppDbContext _dbContext;
+
+    public DeleteWorkflowStatusHandler(IRepository<Workflow> workflowRepository, AppDbContext dbContext)
+    {
+        _workflowRepository = workflowRepository;
+        _dbContext = dbContext;
+    }
+
+    public async Task<Result> Handle(DeleteWorkflowStatusCommand request, CancellationToken cancellationToken)
+    {
+        var workflow = await _workflowRepository.GetById(request.WorkflowId);
+        if(workflow is null)
+        {
+            return Result.Fail(new ApplicationError("Workflow with this ID does not exist."));
+        }
+
+        // TODO: Move to domain service or sth?
+        if(await _dbContext.Tasks.AnyAsync(x => x.ProjectId == workflow.ProjectId && x.StatusId == request.StatusId))
+        {
+            return Result.Fail(new DomainError("Status in use can't be deleted."));
+        }
+
+        var result = workflow.DeleteStatus(request.StatusId);
+        if(result.IsFailed)
+        {
+            return result;
+        }
+
+        await _workflowRepository.Update(workflow);
+        return Result.Ok();
+    }
+}

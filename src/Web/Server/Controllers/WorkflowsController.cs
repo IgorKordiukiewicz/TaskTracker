@@ -43,6 +43,14 @@ public class WorkflowsController : ControllerBase
         return result.ToHttpResult();
     }
 
+    [HttpPost("{workflowId:guid}/statuses/{statusId:guid}/delete")]
+    [Authorize(Policy.ProjectMember)]
+    public async Task<IActionResult> DeleteStatus(Guid workflowId, Guid statusId)
+    {
+        var result = await _mediator.Send(new DeleteWorkflowStatusCommand(workflowId, statusId));
+        return result.ToHttpResult();
+    }
+
     [HttpPost("{workflowId:guid}/transitions")]
     [Authorize(Policy.ProjectMember)]
     public async Task<IActionResult> AddTransition(Guid workflowId, AddWorkflowTransitionDto model)
