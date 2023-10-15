@@ -36,6 +36,61 @@
                     Disabled="@(!GetAvailableFromStatuses().Any())">
                     Add Transition
                 </MudButton>
+                @if(_selectedNode is not null)
+                {
+                    <MudDivider />
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" OnClick="() => DeleteStatus(_selectedNode.Name)">Delete Status</MudButton>
+                }
+                @if(_selectedLink is not null)
+                {
+                    <MudDivider />
+                    if(_selectedLink.Value.Bidirectional)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" 
+                            OnClick="() => DeleteTransition(_selectedLink.Value.SourceNode, _selectedLink.Value.TargetNode)">
+                            <div class="d-flex flex-column">
+                                <MudText Typo="Typo.button">
+                                    Delete Transition
+                                </MudText>
+                                <MudDivider />
+                                <div class="d-flex align-center gap-2">
+                                    <MudText Typo="Typo.button">
+                                        @_selectedLink.Value.SourceNode
+                                    </MudText>
+                                    <MudIcon Icon="@Icons.Material.Filled.ArrowRightAlt" />
+                                    <MudText Typo="Typo.button">
+                                        @_selectedLink.Value.TargetNode
+                                    </MudText>
+                                </div>
+                            </div>
+                        </MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" 
+                            OnClick="() => DeleteTransition(_selectedLink.Value.TargetNode, _selectedLink.Value.SourceNode)">
+                            <div class="d-flex flex-column">
+                                <MudText Typo="Typo.button">
+                                    Delete Transition
+                                </MudText>
+                                <MudDivider />
+                                <div class="d-flex align-center gap-2">
+                                    <MudText Typo="Typo.button">
+                                        @_selectedLink.Value.TargetNode
+                                    </MudText>
+                                    <MudIcon Icon="@Icons.Material.Filled.ArrowRightAlt" />
+                                    <MudText Typo="Typo.button">
+                                        @_selectedLink.Value.SourceNode
+                                    </MudText>
+                                </div>
+                            </div>
+                        </MudButton>
+                    }
+                    else
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" 
+                            OnClick="() => DeleteTransition(_selectedLink.Value.SourceNode, _selectedLink.Value.TargetNode)">
+                            Delete Transition
+                        </MudButton>
+                    }
+                }
             </div>
         </MudItem>
         <MudItem md="10">
@@ -129,6 +184,7 @@
     private AddTransitionForm _addTransitionForm = new();
 
     private TaskStatusNodeModel? _selectedNode = null;
+    private (string SourceNode, string TargetNode, bool Bidirectional)? _selectedLink = null;
 
     // Adding/removing transitions:
     // 1. Add transition button with form: fromNode & toNode and deleting transitions from diagram with confirmation dialog, and deleting nodes also from diagram with confirmation dialog
@@ -166,7 +222,6 @@
         _diagram.RegisterComponent<TaskStatusNodeModel, TaskStatusNode>();
         _diagram.GetBehavior<KeyboardShortcutsBehavior>()?.RemoveShortcut("Delete", false, false, false);
         _diagram.SelectionChanged += OnSelectionChanged;
-        _diagram.KeyDown += OnKeyDown;
 
         var currentPositionX = 50;
         var nodeByStatusId = new Dictionary<Guid, TaskStatusNodeModel>();
@@ -208,7 +263,8 @@
 
     private async Task UpdateWorkflowVM(string? newStatus = null, 
         string? deletedStatus = null,
-        (string FromStatus, string ToStatus)? newTransition = null)
+        (string FromStatus, string ToStatus)? newTransition = null,
+        (string FromStatus, string ToStatus)? deletedTransition = null)
     {
         _workflowVM = await _requestHandler.GetAsync<WorkflowVM>($"workflows/project/{ProjectId}");
         if(_workflowVM is null)
@@ -257,6 +313,11 @@
                 _diagram.Links.Add(DiagramFactory.CreateLink(fromStatusNode, toStatusNode));
             }
         }
+
+        if(deletedTransition is not null)
+        {
+            // TODO
+        }
     }
 
     private async Task AddStatus()
@@ -300,37 +361,29 @@
     private void OnSelectionChanged(SelectableModel selectableModel)
     {
         _selectedNode = selectableModel.Selected ? selectableModel as TaskStatusNodeModel : null;
-        StateHasChanged();
-    }
-
-    private async void OnKeyDown(Blazor.Diagrams.Core.Events.KeyboardEventArgs e) // has to be void due to being an event handler
-    {
-        if(e.Key.ToLower() == "delete")
+        if(selectableModel.Selected)
         {
-            var selectedModel = _diagram.GetSelectedModels().Single();
-            if(selectedModel is TaskStatusNodeModel node)
+            if(selectableModel is TaskStatusNodeModel node)
             {
-                if(await CanStatusBeDeleted(node.Name))
-                {
-                    if(await ShowMessageBox($"Are you sure you want to delete the status '{node.Name}'?"))
-                    {
-                        await DeleteStatus(node.Name);
-                    }
-                }
-                else
-                {
-                    ShowStatusCantBeDeletedMessage();
-                }
+                _selectedNode = node;
+                _selectedLink = null;
             }
-            // TODO: else if Link
+            else if(selectableModel is LinkModel link)
+            {
+                var sourceNodeName = (link.Source.Model as TaskStatusNodeModel)!.Name;
+                var targetNodeName = (link.Target.Model as TaskStatusNodeModel)!.Name;
+                var bidirectional = link.SourceMarker == LinkMarker.Arrow && link.TargetMarker == LinkMarker.Arrow;
+                _selectedLink = (sourceNodeName, targetNodeName, bidirectional);
+                _selectedNode = null;
+            }
+        }
+        else
+        {
+            _selectedNode = null;
+            _selectedLink = null;
         }
 
-        async Task<bool> ShowMessageBox(string message) 
-        {
-            bool? result = await _dialogService.ShowMessageBox("Confirm action", message,
-                yesText: "Delete", cancelText: "Cancel");
-            return result is not null;
-        }
+        StateHasChanged();
     }
 
     private void ShowStatusCantBeDeletedMessage()
@@ -351,14 +404,39 @@
             return;
         }
 
+        // TODO: yes/no instead of delete/canceL?
+        if (await _dialogService.ShowMessageBox("Confirm action", $"Are you sure you want to delete the status {name}?", yesText: "Delete", cancelText: "Cancel") is null)
+        {
+            return;
+        }
+
         var statusId = _statusIdByName[name];
         var success = await _requestHandler.PostWithResultAsync($"workflows/{_workflowVM!.Id}/statuses/{statusId}/delete", headers:
             new[] { ("ProjectId", ProjectId.ToString()) });
 
         if (success)
         {
+            _selectedNode = null;
             await UpdateWorkflowVM(deletedStatus: name);
         }
+    }
+
+    private async Task DeleteTransition(string fromStatusName, string toStatusName) // param for bidirectional?
+    {
+        if (_statusIdByName is null)
+        {
+            return;
+        }
+
+        // TODO: yes/no instead of delete/canceL?
+        if (await _dialogService.ShowMessageBox("Confirm action", $"Are you sure you want to delete the transition from {fromStatusName} to {toStatusName}?", yesText: "Delete", cancelText: "Cancel") is null)
+        {
+            return;
+        }
+
+        var fromStatusId = _statusIdByName[fromStatusName];
+        var toStatusId = _statusIdByName[toStatusName];
+        // model
     }
 
     // TODO: Extract it somewhere so it could be tested? maybe to view model as methods?
