@@ -190,4 +190,30 @@ public class WorkflowTests
             workflow.Transitions.Count.Should().Be(transitionsCountBefore - statusTransitions);
         }
     }
+
+    [Fact]
+    public void DeleteTransition_ShouldFail_WhenTransitionDoesNotExist()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+
+        var result = workflow.DeleteTransition(Guid.NewGuid(), Guid.NewGuid());
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void DeleteTransition_ShouldRemoveTransition_WhenTransitionExists()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var transition = workflow.Transitions[0];
+        var transitionsCountBefore = workflow.Transitions.Count;
+
+        var result = workflow.DeleteTransition(transition.FromStatusId, transition.ToStatusId);
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            workflow.Transitions.Count.Should().Be(transitionsCountBefore - 1);
+        }
+    }
 }

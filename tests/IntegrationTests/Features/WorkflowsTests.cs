@@ -214,4 +214,28 @@ public class WorkflowsTests
             (await _fixture.CountAsync<TaskStatusTransition>()).Should().Be(transitionsCountBefore - statusTransitions);
         }
     }
+
+    [Fact]
+    public async System.Threading.Tasks.Task DeleteTransition_ShouldFail_WhenWorkflowDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new DeleteWorkflowTransitionCommand(Guid.NewGuid(), new(Guid.NewGuid(), Guid.NewGuid())));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task DeleteTransition_ShouldRemoveTransition_WhenWorkflowAndTransitionExist()
+    {
+        var workflow = (await _factory.CreateWorkflows())[0];
+        var transition = workflow.Transitions[0];
+        var transitionsCountBefore = workflow.Transitions.Count;
+
+        var result = await _fixture.SendRequest(new DeleteWorkflowTransitionCommand(workflow.Id, new(transition.FromStatusId, transition.ToStatusId)));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<TaskStatusTransition>()).Should().Be(transitionsCountBefore - 1);
+        }
+    }
 }

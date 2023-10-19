@@ -97,6 +97,18 @@ public class Workflow : Entity, IAggregateRoot
         return Result.Ok();
     }
 
+    public Result DeleteTransition(Guid fromStatusId, Guid toStatusId)
+    {
+        var transition = _transitions.SingleOrDefault(x => x.FromStatusId == fromStatusId && x.ToStatusId == toStatusId);
+        if(transition is null)
+        {
+            return Result.Fail(new DomainError("Transition between these statuses does not exist."));
+        }
+
+        _transitions.Remove(transition);
+        return Result.Ok();
+    }
+
     private bool DoesTransitionExist(Guid fromStatusId, Guid toStatusId)
         => _transitions.Any(x => x.FromStatusId == fromStatusId && x.ToStatusId == toStatusId);
 }

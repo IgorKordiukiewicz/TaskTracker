@@ -316,7 +316,23 @@
 
         if(deletedTransition is not null)
         {
-            // TODO
+            var nodeModelByStatusName = _diagram.Nodes.Select(x => (x as TaskStatusNodeModel)!)
+                .ToDictionary(k => k.Name, v => v, statusNameComparer);
+
+            var fromStatusNode = nodeModelByStatusName[deletedTransition.Value.FromStatus];
+            var toStatusNode = nodeModelByStatusName[deletedTransition.Value.ToStatus];
+
+            var reverseLink = _diagram.Links.FirstOrDefault(x => x.Source.Model == toStatusNode && x.Target.Model == fromStatusNode);
+            if (reverseLink is not null)
+            {
+                reverseLink.SourceMarker = null;
+                reverseLink.Refresh();
+            }
+            else
+            {
+                var link = _diagram.Links.First(x => x.Source.Model == fromStatusNode && x.Target.Model == toStatusNode);
+                _diagram.Links.Remove(link);
+            }
         }
     }
 
@@ -411,8 +427,8 @@
         }
 
         var statusId = _statusIdByName[name];
-        var success = await _requestHandler.PostWithResultAsync($"workflows/{_workflowVM!.Id}/statuses/{statusId}/delete", headers:
-            new[] { ("ProjectId", ProjectId.ToString()) });
+        var success = await _requestHandler.PostWithResultAsync($"workflows/{_workflowVM!.Id}/statuses/{statusId}/delete", 
+            headers: new[] { ("ProjectId", ProjectId.ToString()) });
 
         if (success)
         {
@@ -436,7 +452,15 @@
 
         var fromStatusId = _statusIdByName[fromStatusName];
         var toStatusId = _statusIdByName[toStatusName];
-        // model
+        var model = new DeleteWorkflowTransitionDto(fromStatusId, toStatusId);
+        var success = await _requestHandler.PostWithResultAsync($"workflows/{_workflowVM!.Id}/transitions/delete", model,
+            headers: new[] { ("ProjectId", ProjectId.ToString()) });
+
+        if(success)
+        {
+            _selectedLink = null;
+            await UpdateWorkflowVM(deletedTransition: (fromStatusName, toStatusName));
+        }
     }
 
     // TODO: Extract it somewhere so it could be tested? maybe to view model as methods?

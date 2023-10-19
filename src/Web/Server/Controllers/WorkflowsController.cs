@@ -58,4 +58,11 @@ public class WorkflowsController : ControllerBase
         var result = await _mediator.Send(new AddWorkflowTransitionCommand(workflowId, model));
         return result.ToHttpResult();
     }
+
+    [HttpPost("{workflowId:guid}/transitions/delete")]
+    public async Task<IActionResult> DeleteTransition(Guid workflowId, DeleteWorkflowTransitionDto model)
+    {
+        var result = await _mediator.Send(new DeleteWorkflowTransitionCommand(workflowId, model));
+        return result.ToHttpResult();
+    }
 }
