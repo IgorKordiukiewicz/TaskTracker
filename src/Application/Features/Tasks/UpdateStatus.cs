@@ -1,6 +1,6 @@
 ﻿using Application.Data.Repositories;
 using Application.Errors;
-using Domain.Tasks;
+using Domain.Workflows;
 
 namespace Application.Features.Tasks;
 

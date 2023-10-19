@@ -1,11 +1,9 @@
 ﻿using Application.Features.Tasks;
-using Domain.Organizations;
 using Domain.Projects;
-using Domain.Tasks;
-using Domain.Users;
+using Domain.Workflows;
 using Shared.Dtos;
 using Task = Domain.Tasks.Task;
-using TaskStatus = Domain.Tasks.TaskStatus;
+using TaskStatus = Domain.Workflows.TaskStatus;
 
 namespace IntegrationTests.Features;
 
@@ -49,7 +47,7 @@ public class TasksTests
             var task = await _fixture.FirstAsync<Task>(x => x.Id == result.Value);
             task.ShortId.Should().Be(3);
 
-            var initialTaskStatus = await _fixture.FirstAsync<Domain.Tasks.TaskStatus>(x => x.Initial);
+            var initialTaskStatus = await _fixture.FirstAsync<Domain.Workflows.TaskStatus>(x => x.Initial);
             task.StatusId.Should().Be(initialTaskStatus.Id);
         }
     }

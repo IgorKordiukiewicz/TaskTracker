@@ -52,7 +52,7 @@ public class ProjectsTests
             result.IsSuccess.Should().BeTrue();
             var project = await _fixture.FirstAsync<Project>(x => x.Id == result.Value);
             project.Should().NotBeNull();
-            var workflow = await _fixture.FirstAsync<Domain.Tasks.Workflow>(x => x.ProjectId == result.Value);
+            var workflow = await _fixture.FirstAsync<Domain.Workflows.Workflow>(x => x.ProjectId == result.Value);
             workflow.Should().NotBeNull();
         }
     }

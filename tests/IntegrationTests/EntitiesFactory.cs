@@ -1,7 +1,7 @@
 ﻿using Domain.Organizations;
 using Domain.Projects;
-using Domain.Tasks;
 using Domain.Users;
+using Domain.Workflows;
 using Task = Domain.Tasks.Task;
 
 namespace IntegrationTests;

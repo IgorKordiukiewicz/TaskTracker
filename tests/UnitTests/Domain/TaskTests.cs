@@ -1,4 +1,4 @@
-﻿using Domain.Tasks;
+﻿using Domain.Workflows;
 using Task = Domain.Tasks.Task;
 
 namespace UnitTests.Domain;

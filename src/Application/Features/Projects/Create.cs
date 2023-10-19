@@ -1,8 +1,7 @@
 ﻿using Application.Data.Repositories;
 using Application.Errors;
 using Domain.Projects;
-using Domain.Tasks;
-using Microsoft.EntityFrameworkCore;
+using Domain.Workflows;
 
 namespace Application.Features.Projects;
 

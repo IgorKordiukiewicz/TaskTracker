@@ -1,8 +1,7 @@
 ﻿using Application.Features.Workflows;
-using Domain.Tasks;
-using System.Threading.Tasks;
+using Domain.Workflows;
 using Task = Domain.Tasks.Task;
-using TaskStatus = Domain.Tasks.TaskStatus;
+using TaskStatus = Domain.Workflows.TaskStatus;
 
 namespace IntegrationTests.Features;
 

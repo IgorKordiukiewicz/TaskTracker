@@ -1,5 +1,5 @@
 ﻿using Domain.Projects;
-using Domain.Tasks;
+using Domain.Workflows;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Application.Data.Configurations;

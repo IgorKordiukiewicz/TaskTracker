@@ -16,7 +16,7 @@ internal class TaskConfiguration : IEntityTypeConfiguration<Domain.Tasks.Task>
             .WithMany()
             .HasForeignKey(x => x.ProjectId);
 
-        builder.HasOne<Domain.Tasks.TaskStatus>()
+        builder.HasOne<Domain.Workflows.TaskStatus>()
             .WithMany()
             .HasForeignKey(x => x.StatusId);
     }

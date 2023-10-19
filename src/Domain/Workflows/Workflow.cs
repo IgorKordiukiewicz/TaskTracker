@@ -2,7 +2,7 @@
 using Domain.Errors;
 using FluentResults;
 
-namespace Domain.Tasks;
+namespace Domain.Workflows;
 
 // TODO: what would happen if you tried to remove a status that was in use by a task?
 // TODO: move to separate folder?
@@ -50,7 +50,7 @@ public class Workflow : Entity, IAggregateRoot
 
     public Result AddStatus(string name)
     {
-        if(_statuses.Any(x => x.Name.ToLower() == name.ToLower()))
+        if (_statuses.Any(x => x.Name.ToLower() == name.ToLower()))
         {
             return Result.Fail(new DomainError("Status with this name already exists."));
         }
@@ -69,7 +69,7 @@ public class Workflow : Entity, IAggregateRoot
             return Result.Fail(new DomainError("One of the statuses does not exist."));
         }
 
-        if(DoesTransitionExist(fromStatusId, toStatusId))
+        if (DoesTransitionExist(fromStatusId, toStatusId))
         {
             return Result.Fail(new DomainError("Transition already exists."));
         }
@@ -81,12 +81,12 @@ public class Workflow : Entity, IAggregateRoot
     public Result DeleteStatus(Guid statusId)
     {
         var status = _statuses.SingleOrDefault(x => x.Id == statusId);
-        if(status is null)
+        if (status is null)
         {
             return Result.Fail(new DomainError("Status with this ID does not exist."));
         }
 
-        if(status.Initial)
+        if (status.Initial)
         {
             return Result.Fail(new DomainError("Initial status can't be deleted."));
         }
@@ -100,7 +100,7 @@ public class Workflow : Entity, IAggregateRoot
     public Result DeleteTransition(Guid fromStatusId, Guid toStatusId)
     {
         var transition = _transitions.SingleOrDefault(x => x.FromStatusId == fromStatusId && x.ToStatusId == toStatusId);
-        if(transition is null)
+        if (transition is null)
         {
             return Result.Fail(new DomainError("Transition between these statuses does not exist."));
         }

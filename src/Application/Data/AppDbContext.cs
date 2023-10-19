@@ -3,6 +3,7 @@ using Domain.Organizations;
 using Domain.Projects;
 using Domain.Tasks;
 using Domain.Users;
+using Domain.Workflows;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Data;
@@ -19,7 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<ProjectMember> ProjectMembers { get; set; }
 
     public DbSet<Domain.Tasks.Task> Tasks { get; set; }
-    public DbSet<Domain.Tasks.TaskStatus> TaskStatuses { get; set; }
+    public DbSet<Domain.Workflows.TaskStatus> TaskStatuses { get; set; }
     public DbSet<TaskStatusTransition> TaskStatusTransitions { get; set; }
     public DbSet<Workflow> Workflows { get; set; }
 

@@ -1,6 +1,6 @@
 ﻿using Domain.Common;
 
-namespace Domain.Tasks;
+namespace Domain.Workflows;
 
 public class TaskStatusTransition : ValueObject
 {
