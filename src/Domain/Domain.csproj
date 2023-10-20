@@ -10,4 +10,8 @@
     <PackageReference Include="FluentResults" Version="3.15.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
+
 </Project>

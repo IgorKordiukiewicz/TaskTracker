@@ -1,4 +1,5 @@
 ﻿using Domain.Organizations;
+using Shared.Enums;
 
 namespace UnitTests.Domain;
 

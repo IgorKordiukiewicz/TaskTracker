@@ -1,9 +1,10 @@
 ﻿using Application.Errors;
 using Domain.Organizations;
+using Shared.Enums;
 
 namespace Application.Features.Organizations;
 
-public record GetOrganizationInvitationsForUserQuery(string UserAuthenticationId) : IRequest<Result<OrganizationInvitationsVM>>;
+public record GetOrganizationInvitationsForUserQuery(string UserAuthenticationId) : IRequest<Result<UserOrganizationInvitations>>;
 
 internal class GetOrganizationInvitationsForUserQueryValidator : AbstractValidator<GetOrganizationInvitationsForUserQuery>
 {
@@ -13,7 +14,7 @@ internal class GetOrganizationInvitationsForUserQueryValidator : AbstractValidat
     }
 }
 
-internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrganizationInvitationsForUserQuery, Result<OrganizationInvitationsVM>>
+internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrganizationInvitationsForUserQuery, Result<UserOrganizationInvitations>>
 {
     private readonly AppDbContext _dbContext;
 
@@ -22,14 +23,14 @@ internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrg
         _dbContext = dbContext;
     }
 
-    public async Task<Result<OrganizationInvitationsVM>> Handle(GetOrganizationInvitationsForUserQuery request, CancellationToken cancellationToken)
+    public async Task<Result<UserOrganizationInvitations>> Handle(GetOrganizationInvitationsForUserQuery request, CancellationToken cancellationToken)
     {
         var user = await _dbContext.Users
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.AuthenticationId == request.UserAuthenticationId);
         if(user is null)
         {
-            return Result.Fail<OrganizationInvitationsVM>(new ApplicationError("User with this authentication ID does not exist."));
+            return Result.Fail<UserOrganizationInvitations>(new ApplicationError("User with this authentication ID does not exist."));
         }
 
         var invitations = await _dbContext.OrganizationInvitations
@@ -37,9 +38,9 @@ internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrg
             .Join(_dbContext.Organizations,
             invitation => invitation.OrganizationId,
             organization => organization.Id,
-            (invitation, organization) => new OrganizationInvitationVM(invitation.Id, organization.Name))
+            (invitation, organization) => new UserOrganizationInvitationVM(invitation.Id, organization.Name))
             .ToListAsync();
 
-        return Result.Ok(new OrganizationInvitationsVM(invitations));
+        return Result.Ok(new UserOrganizationInvitations(invitations));
     }
 }

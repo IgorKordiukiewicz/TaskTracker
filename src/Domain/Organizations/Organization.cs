@@ -1,6 +1,7 @@
 ﻿using Domain.Common;
 using Domain.Errors;
 using FluentResults;
+using Shared.Enums;
 
 namespace Domain.Organizations;
 

@@ -1,14 +1,7 @@
 ﻿using Domain.Common;
+using Shared.Enums;
 
 namespace Domain.Organizations;
-
-public enum OrganizationInvitationState
-{
-    Pending,
-    Accepted,
-    Declined,
-    // TODO: Expired, Canceled?
-}
 
 public class OrganizationInvitation : Entity
 {

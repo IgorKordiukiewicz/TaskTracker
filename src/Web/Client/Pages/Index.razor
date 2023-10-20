@@ -33,7 +33,7 @@
 @code {
     private RequestHandler _requestHandler = null!;
 
-    private OrganizationInvitationsVM? _invitations;
+    private UserOrganizationInvitations? _invitations;
     private OrganizationsForUserVM? _organizations;
 
     protected override async Task OnInitializedAsync()
@@ -78,7 +78,7 @@
     private async Task UpdateViewModels()
     {
         _organizations = await _requestHandler.GetAsync<OrganizationsForUserVM>("organizations/user");
-        _invitations = await _requestHandler.GetAsync<OrganizationInvitationsVM>("organizations/invitations/user");
+        _invitations = await _requestHandler.GetAsync<UserOrganizationInvitations>("organizations/invitations/user");
     }
 
     private bool HasOrganizationInvitations() 

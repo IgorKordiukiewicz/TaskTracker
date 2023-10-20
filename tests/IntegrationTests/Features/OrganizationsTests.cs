@@ -1,6 +1,7 @@
 ﻿using Application.Features.Organizations;
 using Domain.Organizations;
 using Domain.Users;
+using Shared.Enums;
 using Shared.ViewModels;
 
 namespace IntegrationTests.Features;
@@ -199,8 +200,8 @@ public class OrganizationsTests
             var invitations = result.Value.Invitations;
             invitations.Should().BeEquivalentTo(new[]
             {
-                new OrganizationInvitationVM(invitation1.Id, org1.Name),
-                new OrganizationInvitationVM(invitation2.Id, org3.Name),
+                new UserOrganizationInvitationVM(invitation1.Id, org1.Name),
+                new UserOrganizationInvitationVM(invitation2.Id, org3.Name),
             });
         }
     }
@@ -259,6 +260,50 @@ public class OrganizationsTests
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<OrganizationMember>()).Should().Be(membersBefore - 1);
+        }
+    }
+
+    [Fact]
+    public async Task GetInvitations_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetOrganizationInvitationsQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetInvitations_ShouldReturnAllCreatedInvitationsByOrganization_WhenOrganizationExists()
+    {
+        var user1 = User.Create("1", "user1");
+        var user2 = User.Create("2", "user2");
+        var user3 = User.Create("3", "user3");
+        var user4 = User.Create("4", "user4");
+        var organization = Organization.Create("org", user1.Id);
+        var acceptedInvitation = organization.CreateInvitation(user2.Id);
+        acceptedInvitation.Value.Accept();
+        var declinedInvitation = organization.CreateInvitation(user3.Id);
+        declinedInvitation.Value.Decline();
+        var pendingInvitation = organization.CreateInvitation(user4.Id);
+
+        await _fixture.SeedDb(db =>
+        {
+            db.Add(organization);
+            db.AddRange(user1, user2, user3, user4);
+        });
+
+        var expectedResult = new OrganizationInvitationsVM(new List<OrganizationInvitationVM>()
+        {
+            new(acceptedInvitation.Value.Id, user2.Name, OrganizationInvitationState.Accepted),
+            new(declinedInvitation.Value.Id, user3.Name, OrganizationInvitationState.Declined),
+            new(pendingInvitation.Value.Id, user4.Name, OrganizationInvitationState.Pending),
+        });
+
+        var result = await _fixture.SendRequest(new GetOrganizationInvitationsQuery(organization.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().BeEquivalentTo(expectedResult);
         }
     }
 

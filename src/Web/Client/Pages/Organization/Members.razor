@@ -1,32 +1,54 @@
 ﻿@page "/org/{organizationId:guid}/members"
+@using global::Shared.Enums;
 @layout OrganizationLayout
 @attribute [Authorize]
 
 @inject HttpClient _httpClient
 @inject IDialogService _dialogService
 
-<div class="d-flex gap-2 align-center">
-    <MudAutocomplete T="UserSearchVM" Label="Invite Users" @bind-Value="_selectedUserForInvitation" SearchFunc="SearchUsers"
-    ResetValueOnEmptyText="true" Class="mb-4" AdornmentIcon="@Icons.Material.Filled.Search" ToStringFunc="(user => user.Name)" />
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserForInvitation is null)" OnClick="SendInvitation">Invite</MudButton>
-</div>
-
-@if(_membersVM is not null)
-{
-    <MudPaper>
-        <MudList>
-            @foreach (var member in _membersVM.Members)
-            {
-                <MudListItem Icon="@Icons.Material.Filled.Person">
-                    <div class="d-flex justify-space-between align-center show-on-hover-parent">
-                        @member.Name
-                        <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)" Class="show-on-hover"></MudIconButton>
-                    </div>
-                </MudListItem>
-            }
-        </MudList>
-    </MudPaper>
-}
+<MudTabs Outlined="false" Border="true" ApplyEffectsToContainer="true" Color="Color.Default" Rounded="true" Position="Position.Top" Centered="false">
+    <MudTabPanel Text="Members">
+        @if (_membersVM is not null)
+        {
+            <MudPaper Class="mt-4">
+                <MudList>
+                    @foreach (var member in _membersVM.Members)
+                    {
+                        <MudListItem Icon="@Icons.Material.Filled.Person">
+                            <div class="d-flex justify-space-between align-center show-on-hover-parent">
+                                @member.Name
+                                <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)" Class="show-on-hover"></MudIconButton>
+                            </div>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudPaper>
+        }
+    </MudTabPanel>
+    <MudTabPanel Text="Invitations">
+        @if (_invitationsVM is not null)
+        {
+            <MudPaper Class="mt-2">
+                <div class="d-flex gap-2 align-center pa-2">
+                    <MudAutocomplete T="UserSearchVM" Label="Invite Users" @bind-Value="_selectedUserForInvitation" SearchFunc="SearchUsers"
+                                     ResetValueOnEmptyText="true" Class="mb-4" AdornmentIcon="@Icons.Material.Filled.Search" ToStringFunc="(user => user.Name)" />
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserForInvitation is null)" OnClick="SendInvitation">Invite</MudButton>
+                </div>
+                <MudList>
+                    @foreach (var invitation in _invitationsVM.Invitations)
+                    {
+                        <MudListItem>
+                            <div class="d-flex justify-space-between align-center">
+                                @invitation.UserName
+                                <MudChip Variant="Variant.Outlined" Color="@GetInvitationStateColor(invitation.State)">@invitation.State.ToString()</MudChip>
+                            </div>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudPaper>
+        }
+    </MudTabPanel>
+</MudTabs>
 
 @code {
     [Parameter]
@@ -39,18 +61,21 @@
     private RequestHandler _requestHandler = null!;
 
     private OrganizationMembersVM? _membersVM;
+    private OrganizationInvitationsVM? _invitationsVM;
+
     private UserSearchVM? _selectedUserForInvitation;
 
     protected override async Task OnInitializedAsync()
     {
         _requestHandler = new(_httpClient, _dialogService);
 
-        await UpdateMembersVM();
+        await UpdateViewModels();
     }
 
-    private async Task UpdateMembersVM()
+    private async Task UpdateViewModels()
     {
         _membersVM = await _requestHandler.GetAsync<OrganizationMembersVM>($"organizations/{OrganizationId}/members");
+        _invitationsVM = await _requestHandler.GetAsync<OrganizationInvitationsVM>($"organizations/{OrganizationId}/invitations");
     }
 
     private async Task<IEnumerable<UserSearchVM>> SearchUsers(string value)
@@ -83,6 +108,15 @@
     private async Task RemoveMember(Guid memberId)
     {
         await _requestHandler.PostAsync($"organizations/{OrganizationId}/members/{memberId}/remove");
-        await UpdateMembersVM();
+        await UpdateViewModels();
     }
+
+    private Color GetInvitationStateColor(OrganizationInvitationState state)
+        => state switch
+        {
+            OrganizationInvitationState.Pending => Color.Default,
+            OrganizationInvitationState.Accepted => Color.Success,
+            OrganizationInvitationState.Declined => Color.Error,
+            _ => Color.Default
+        };
 }
