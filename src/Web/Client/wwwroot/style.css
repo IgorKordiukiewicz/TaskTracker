@@ -5,3 +5,7 @@
 .show-on-hover-parent:hover .show-on-hover {
     visibility: visible;
 }
+
+.invisible {
+    visibility: hidden;
+}

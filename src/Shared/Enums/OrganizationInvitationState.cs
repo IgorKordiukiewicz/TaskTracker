@@ -11,5 +11,6 @@ public enum OrganizationInvitationState
     Pending,
     Accepted,
     Declined,
-    // TODO: Expired, Canceled?
+    Canceled
+    // TODO: Expired
 }

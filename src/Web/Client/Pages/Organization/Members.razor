@@ -40,7 +40,12 @@
                         <MudListItem>
                             <div class="d-flex justify-space-between align-center">
                                 @invitation.UserName
-                                <MudChip Variant="Variant.Outlined" Color="@GetInvitationStateColor(invitation.State)">@invitation.State.ToString()</MudChip>
+                                <div class="d-flex gap-1 show-on-hover-parent align-center">
+                                    <MudChip Variant="Variant.Outlined" Color="@GetInvitationStateColor(invitation.State)">@invitation.State.ToString()</MudChip>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => CancelInvitation(invitation.Id)"
+                                        Class="@(invitation.State == OrganizationInvitationState.Pending ? "show-on-hover" : "invisible")"></MudIconButton>
+                                </div>
+                                
                             </div>
                         </MudListItem>
                     }
@@ -69,12 +74,17 @@
     {
         _requestHandler = new(_httpClient, _dialogService);
 
-        await UpdateViewModels();
+        await UpdateMembersVM();
+        await UpdateInvitationsVM();
     }
 
-    private async Task UpdateViewModels()
+    private async Task UpdateMembersVM()
     {
         _membersVM = await _requestHandler.GetAsync<OrganizationMembersVM>($"organizations/{OrganizationId}/members");
+    }
+
+    private async Task UpdateInvitationsVM()
+    {
         _invitationsVM = await _requestHandler.GetAsync<OrganizationInvitationsVM>($"organizations/{OrganizationId}/invitations");
     }
 
@@ -103,12 +113,21 @@
         await _requestHandler.PostAsync($"organizations/{OrganizationId}/invitations", model);
 
         _selectedUserForInvitation = null;
+
+        await UpdateInvitationsVM();
     }
 
     private async Task RemoveMember(Guid memberId)
     {
         await _requestHandler.PostAsync($"organizations/{OrganizationId}/members/{memberId}/remove");
-        await UpdateViewModels();
+        await UpdateMembersVM();
+    }
+
+    private async Task CancelInvitation(Guid invitationId)
+    {
+        await _requestHandler.PostAsync($"organizations/invitations/{invitationId}/cancel", 
+            headers: new[] { ("OrganizationId", OrganizationId.ToString()) });
+        await UpdateInvitationsVM();
     }
 
     private Color GetInvitationStateColor(OrganizationInvitationState state)
@@ -117,6 +136,7 @@
             OrganizationInvitationState.Pending => Color.Default,
             OrganizationInvitationState.Accepted => Color.Success,
             OrganizationInvitationState.Declined => Color.Error,
+            OrganizationInvitationState.Canceled => Color.Warning,
             _ => Color.Default
         };
 }

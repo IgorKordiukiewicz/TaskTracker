@@ -57,7 +57,7 @@ public class Organization : Entity, IAggregateRoot
 
     public Result<OrganizationMember> AcceptInvitation(Guid invitationId)
     {
-        var invitationResult = GetInvitation(invitationId);
+        var invitationResult = GetPendingInvitation(invitationId);
         if (invitationResult.IsFailed)
         {
             return Result.Fail<OrganizationMember>(invitationResult.Errors);
@@ -70,13 +70,25 @@ public class Organization : Entity, IAggregateRoot
 
     public Result DeclineInvitation(Guid invitationId)
     {
-        var invitationResult = GetInvitation(invitationId);
+        var invitationResult = GetPendingInvitation(invitationId);
         if (invitationResult.IsFailed)
         {
             return Result.Fail(invitationResult.Errors);
         }
 
         invitationResult.Value.Decline();
+        return Result.Ok();
+    }
+
+    public Result CancelInvitation(Guid invitationId)
+    {
+        var invitationResult = GetPendingInvitation(invitationId);
+        if (invitationResult.IsFailed)
+        {
+            return Result.Fail(invitationResult.Errors);
+        }
+
+        invitationResult.Value.Cancel();
         return Result.Ok();
     }
 
@@ -92,7 +104,7 @@ public class Organization : Entity, IAggregateRoot
         return Result.Ok();
     }
 
-    private Result<OrganizationInvitation> GetInvitation(Guid invitationId)
+    private Result<OrganizationInvitation> GetPendingInvitation(Guid invitationId)
     {
         var invitation = _invitations.FirstOrDefault(x => x.Id == invitationId);
         if (invitation is null)

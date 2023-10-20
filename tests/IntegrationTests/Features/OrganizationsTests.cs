@@ -1,6 +1,7 @@
 ﻿using Application.Features.Organizations;
 using Domain.Organizations;
 using Domain.Users;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Shared.Enums;
 using Shared.ViewModels;
 
@@ -106,8 +107,8 @@ public class OrganizationsTests
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<OrganizationMember>()).Should().Be(membersBefore + 1);
 
-            var orgInvitation = await _fixture.FirstAsync<OrganizationInvitation>(x => x.Id == invitationId);
-            orgInvitation.State.Should().Be(OrganizationInvitationState.Accepted);
+            var invitation = await _fixture.FirstAsync<OrganizationInvitation>(x => x.Id == invitationId);
+            invitation.State.Should().Be(OrganizationInvitationState.Accepted);
         }
     }
 
@@ -124,16 +125,38 @@ public class OrganizationsTests
     {
         var invitationId = await CreateOrganizationWithInvitation();
 
-        var membersBefore = await _fixture.CountAsync<OrganizationMember>();
-
         var result = await _fixture.SendRequest(new DeclineOrganizationInvitationCommand(invitationId));
 
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
 
-            var orgMember = await _fixture.FirstAsync<OrganizationInvitation>(x => x.Id == invitationId);
-            orgMember.State.Should().Be(OrganizationInvitationState.Declined);
+            var invitation = await _fixture.FirstAsync<OrganizationInvitation>(x => x.Id == invitationId);
+            invitation.State.Should().Be(OrganizationInvitationState.Declined);
+        }
+    }
+
+    [Fact]
+    public async Task CancelInvitation_ShouldFail_WhenOrganizationWithInvitationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new CancelOrganizationInvitationCommand(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task CancelInvitation_ShouldUpdateInvitationState()
+    {
+        var invitationId = await CreateOrganizationWithInvitation();
+
+        var result = await _fixture.SendRequest(new CancelOrganizationInvitationCommand(invitationId));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+
+            var invitation = await _fixture.FirstAsync<OrganizationInvitation>(x => x.Id == invitationId);
+            invitation.State.Should().Be(OrganizationInvitationState.Canceled);
         }
     }
 

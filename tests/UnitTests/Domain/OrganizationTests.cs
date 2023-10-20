@@ -170,6 +170,43 @@ public class OrganizationTests
     }
 
     [Fact]
+    public void CancelInvitation_ShouldCancelInvitation()
+    {
+        var organization = Organization.Create("Name", Guid.NewGuid());
+        var invitation = organization.CreateInvitation(Guid.NewGuid()).Value;
+
+        var result = organization.CancelInvitation(invitation.Id);
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            invitation.State.Should().Be(OrganizationInvitationState.Canceled);
+        }
+    }
+
+    [Fact]
+    public void CancelInvitation_ShouldFail_WhenInvitationDoesNotExist()
+    {
+        var organization = Organization.Create("Name", Guid.NewGuid());
+
+        var result = organization.CancelInvitation(Guid.NewGuid());
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CancelInvitation_ShouldFail_WhenInvitationisNotPending()
+    {
+        var organization = Organization.Create("Name", Guid.NewGuid());
+        var invitation = organization.CreateInvitation(Guid.NewGuid()).Value;
+        organization.CancelInvitation(invitation.Id);
+
+        var result = organization.CancelInvitation(invitation.Id);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
     public void RemoveMember_ShouldFail_WhenMemberDoesNotExist()
     {
         var organization = Organization.Create("Name", Guid.NewGuid());

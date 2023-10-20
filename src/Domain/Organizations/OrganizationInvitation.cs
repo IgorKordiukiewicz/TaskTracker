@@ -33,4 +33,9 @@ public class OrganizationInvitation : Entity
     {
         State = OrganizationInvitationState.Declined;
     }
+
+    public void Cancel()
+    {
+        State = OrganizationInvitationState.Canceled;
+    }
 }
