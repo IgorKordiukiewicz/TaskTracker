@@ -1,4 +1,5 @@
-﻿using Application.Data;
+﻿using Application.Common;
+using Application.Data;
 using Domain.Common;
 using FluentAssertions.Common;
 using MediatR;
@@ -9,6 +10,11 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Linq.Expressions;
 
 namespace IntegrationTests;
+
+public class TestDateTimeProvider : IDateTimeProvider
+{
+    public DateTime Now() => new(2023, 10, 15);
+}
 
 public class IntegrationTestsFixture : IDisposable
 {
@@ -27,6 +33,8 @@ public class IntegrationTestsFixture : IDisposable
 
                 services.Remove(dbContextDescriptor);
                 services.AddDbContext<AppDbContext>(options => options.UseSqlServer(_connectionString));
+
+                services.AddScoped<IDateTimeProvider, TestDateTimeProvider>();
             });
 
             builder.UseEnvironment("Development");

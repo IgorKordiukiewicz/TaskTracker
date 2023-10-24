@@ -1,4 +1,5 @@
 ﻿using Application.Behaviors;
+using Application.Common;
 using Application.Data.Repositories;
 using Domain.Organizations;
 using Domain.Projects;
@@ -32,6 +33,8 @@ public static class Application
         services.AddScoped<IRepository<Project>, ProjectRepository>();
         services.AddScoped<IRepository<Domain.Tasks.Task>, TaskRepository>();
         services.AddScoped<IRepository<Workflow>, WorkflowRepository>();
+
+        services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 
         return services;
     }

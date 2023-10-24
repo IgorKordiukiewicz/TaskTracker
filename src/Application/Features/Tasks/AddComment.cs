@@ -1,4 +1,5 @@
-﻿using Application.Data.Repositories;
+﻿using Application.Common;
+using Application.Data.Repositories;
 using Application.Errors;
 using Task = Domain.Tasks.Task;
 
@@ -20,11 +21,13 @@ internal class AddTaskCommentHandler : IRequestHandler<AddTaskCommentCommand, Re
 {
     private readonly AppDbContext _dbContext;
     private readonly IRepository<Task> _taskRepository;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
-    public AddTaskCommentHandler(AppDbContext dbContext, IRepository<Task> taskRepository)
+    public AddTaskCommentHandler(AppDbContext dbContext, IRepository<Task> taskRepository, IDateTimeProvider dateTimeProvider)
     {
         _taskRepository = taskRepository;
         _dbContext = dbContext;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task<Result> Handle(AddTaskCommentCommand request, CancellationToken cancellationToken)
@@ -39,7 +42,7 @@ internal class AddTaskCommentHandler : IRequestHandler<AddTaskCommentCommand, Re
            .AsNoTracking()
            .FirstOrDefaultAsync(x => x.AuthenticationId == request.UserAuthenticationId))?.Id ?? Guid.Empty;
 
-        task.AddComment(request.Model.Content, userId, DateTime.Now); // TODO: IDateTimeProvider
+        task.AddComment(request.Model.Content, userId, _dateTimeProvider.Now());
 
         await _taskRepository.Update(task);
         return Result.Ok();
