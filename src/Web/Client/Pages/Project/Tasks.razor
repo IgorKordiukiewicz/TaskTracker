@@ -90,7 +90,7 @@
                                             <MudAvatar Color="Color.Primary">AA</MudAvatar> <!-- TODO: Initials -->
                                             <MudText Style="font-weight: bold;">@comment.AuthorName</MudText>
                                         </div>
-                                        <MudText Typo="Typo.caption">@comment.CreatedAt</MudText>
+                                        <MudText Typo="Typo.caption">@comment.CreatedAt.GetHumanReadableTimeDifference(DateTime.Now)</MudText>
                                     </div>
                                     <div style="width: 100%; border-radius: 5px; background-color: #32323a;" class="pa-2">
                                         <MudText>
