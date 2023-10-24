@@ -1,5 +1,4 @@
 ﻿using Shared.ViewModels;
-using System.Runtime.CompilerServices;
 
 namespace Web.Client.Common;
 

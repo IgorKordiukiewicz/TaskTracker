@@ -223,42 +223,8 @@
         _diagram.GetBehavior<KeyboardShortcutsBehavior>()?.RemoveShortcut("Delete", false, false, false);
         _diagram.SelectionChanged += OnSelectionChanged;
 
-        var currentPositionX = 50;
-        var nodeByStatusId = new Dictionary<Guid, TaskStatusNodeModel>();
-        foreach (var status in _workflowVM.Statuses)
-        {
-            var node = _diagram.Nodes.Add(new TaskStatusNodeModel(position: new Point(currentPositionX, 50))
-            {
-                Name = status.Name.ToUpper()
-            });
-            nodeByStatusId.Add(status.Id, node);
-
-            currentPositionX += 150;
-        }
-
-        var linkCreatedByTransitionId = _workflowVM.Transitions.ToDictionary(k => (k.FromStatusId, k.ToStatusId), v => false);
-        foreach(var transition in _workflowVM.Transitions)
-        {
-            var transitionKey = (transition.FromStatusId, transition.ToStatusId);
-            if(linkCreatedByTransitionId[transitionKey])
-            {
-                continue;
-            }
-
-            var fromNode = nodeByStatusId[transition.FromStatusId];
-            var toNode = nodeByStatusId[transition.ToStatusId];
-
-            var reverseTransitionKey = (transition.ToStatusId, transition.FromStatusId);
-            var bidirectional = linkCreatedByTransitionId.ContainsKey(reverseTransitionKey);
-
-            _diagram.Links.Add(DiagramFactory.CreateLink(fromNode, toNode, bidirectional));
-
-            linkCreatedByTransitionId[transitionKey] = true;
-            if(bidirectional)
-            {
-                linkCreatedByTransitionId[reverseTransitionKey] = true;
-            }
-        }
+        _diagram.InitializeStatusNodes(_workflowVM.Statuses, out var nodeByStatusId);
+        _diagram.InitializeTransitionLinks(_workflowVM.Transitions, nodeByStatusId);
     }
 
     private async Task UpdateWorkflowVM(string? newStatus = null, 
@@ -276,63 +242,22 @@
 
         if(newStatus is not null)
         {
-            _diagram.Nodes.Add(new TaskStatusNodeModel(position: new Point(50, 50))
-            {
-                Name = newStatus.ToUpper()
-            });
+            _diagram.AddStatusNode(newStatus);
         }
 
         if(deletedStatus is not null)
         {
-            var deletedStatusNameUpper = deletedStatus.ToUpper();
-            var node = _diagram.Nodes.First(x => (x as TaskStatusNodeModel)!.Name == deletedStatusNameUpper);
-            _diagram.Nodes.Remove(node);
-
-            var relatedLinks = _diagram.Links.Where(x =>
-                (x.Source.Model as TaskStatusNodeModel)!.Name == deletedStatusNameUpper
-                || (x.Target.Model as TaskStatusNodeModel)!.Name == deletedStatusNameUpper);
-            _diagram.Links.Remove(relatedLinks);
+            _diagram.DeleteStatusNode(deletedStatus);
         }
 
         if(newTransition is not null)
         {
-            var nodeModelByStatusName = _diagram.Nodes.Select(x => (x as TaskStatusNodeModel)!)
-                .ToDictionary(k => k.Name, v => v, statusNameComparer);
-
-            var fromStatusNode = nodeModelByStatusName[newTransition.Value.FromStatus];
-            var toStatusNode = nodeModelByStatusName[newTransition.Value.ToStatus];
-
-            var reverseLink = _diagram.Links.FirstOrDefault(x => x.Source.Model == toStatusNode && x.Target.Model == fromStatusNode);
-            if(reverseLink is not null)
-            {
-                reverseLink.SourceMarker = LinkMarker.Arrow;
-                reverseLink.Refresh();
-            }
-            else
-            {
-                _diagram.Links.Add(DiagramFactory.CreateLink(fromStatusNode, toStatusNode));
-            }
+            _diagram.AddTransitionLink(newTransition.Value);
         }
 
         if(deletedTransition is not null)
         {
-            var nodeModelByStatusName = _diagram.Nodes.Select(x => (x as TaskStatusNodeModel)!)
-                .ToDictionary(k => k.Name, v => v, statusNameComparer);
-
-            var fromStatusNode = nodeModelByStatusName[deletedTransition.Value.FromStatus];
-            var toStatusNode = nodeModelByStatusName[deletedTransition.Value.ToStatus];
-
-            var reverseLink = _diagram.Links.FirstOrDefault(x => x.Source.Model == toStatusNode && x.Target.Model == fromStatusNode);
-            if (reverseLink is not null)
-            {
-                reverseLink.SourceMarker = null;
-                reverseLink.Refresh();
-            }
-            else
-            {
-                var link = _diagram.Links.First(x => x.Source.Model == fromStatusNode && x.Target.Model == toStatusNode);
-                _diagram.Links.Remove(link);
-            }
+            _diagram.DeleteTransitionLink(deletedTransition.Value);
         }
     }
 
@@ -388,7 +313,7 @@
             {
                 var sourceNodeName = (link.Source.Model as TaskStatusNodeModel)!.Name;
                 var targetNodeName = (link.Target.Model as TaskStatusNodeModel)!.Name;
-                var bidirectional = link.SourceMarker == LinkMarker.Arrow && link.TargetMarker == LinkMarker.Arrow;
+                var bidirectional = link.IsBidirectional();
                 _selectedLink = (sourceNodeName, targetNodeName, bidirectional);
                 _selectedNode = null;
             }
