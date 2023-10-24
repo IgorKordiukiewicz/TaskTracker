@@ -46,8 +46,8 @@ public class Task : Entity, IAggregateRoot
         return Result.Ok();
     }
 
-    public void AddComment(string content, Guid authorId)
+    public void AddComment(string content, Guid authorId, DateTime now)
     {
-        _comments.Add(new(Id, content, authorId));
+        _comments.Add(new(Id, content, authorId, now));
     }
 }

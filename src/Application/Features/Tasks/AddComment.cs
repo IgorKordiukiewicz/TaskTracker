@@ -39,7 +39,7 @@ internal class AddTaskCommentHandler : IRequestHandler<AddTaskCommentCommand, Re
            .AsNoTracking()
            .FirstOrDefaultAsync(x => x.AuthenticationId == request.UserAuthenticationId))?.Id ?? Guid.Empty;
 
-        task.AddComment(request.Model.Content, userId);
+        task.AddComment(request.Model.Content, userId, DateTime.Now); // TODO: IDateTimeProvider
 
         await _taskRepository.Update(task);
         return Result.Ok();

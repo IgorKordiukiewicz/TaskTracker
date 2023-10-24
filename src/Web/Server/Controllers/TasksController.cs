@@ -50,4 +50,12 @@ public class TasksController : ControllerBase
         var result = await _mediator.Send(new AddTaskCommentCommand(taskId, User.GetUserAuthenticationId(), model));
         return result.ToHttpResult();
     }
+
+    [HttpGet("{taskId:guid}/comments")]
+    [Authorize(Policy.ProjectMember)]
+    public async Task<IActionResult> GetTaskComments(Guid taskId)
+    {
+        var result = await _mediator.Send(new GetTaskCommentsQuery(taskId));
+        return result.ToHttpResult();
+    }
 }

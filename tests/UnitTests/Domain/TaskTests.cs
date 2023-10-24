@@ -66,7 +66,7 @@ public class TaskTests
     {
         var task = Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
 
-        task.AddComment("abc", Guid.NewGuid());
+        task.AddComment("abc", Guid.NewGuid(), DateTime.Now);
 
         task.Comments.Count.Should().Be(1);
     }

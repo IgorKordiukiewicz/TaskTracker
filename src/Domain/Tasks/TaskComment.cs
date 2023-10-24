@@ -9,12 +9,12 @@ public class TaskComment : Entity
     public Guid AuthorId { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    public TaskComment(Guid taskId, string content, Guid authorId) 
+    public TaskComment(Guid taskId, string content, Guid authorId, DateTime createdAt) 
         : base(Guid.NewGuid())
     {
         TaskId = taskId;
         Content = content;
         AuthorId = authorId;
-        CreatedAt = DateTime.Now; // UTC?, TODO: Add IDateTimeProvider
+        CreatedAt = createdAt;
     }
 }

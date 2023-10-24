@@ -4,6 +4,7 @@ using Domain.Tasks;
 using Domain.Users;
 using Domain.Workflows;
 using Shared.Dtos;
+using Shared.ViewModels;
 using Task = Domain.Tasks.Task;
 using TaskStatus = Domain.Workflows.TaskStatus;
 
@@ -145,6 +146,44 @@ public class TasksTests
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<TaskComment>()).Should().Be(taskCommentsCountBefore + 1);
+        }
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GetComments_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetTaskCommentsQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GetComments_ShouldReturnTaskComments_WhenTaskExists()
+    {
+        var task = (await _factory.CreateTasks())[0];
+        var user = await _fixture.FirstAsync<User>();
+        var earlierDate = new DateTime(2023, 10, 20);
+        var laterDate = earlierDate.AddDays(1);
+        task.AddComment("abc", user.Id, laterDate);
+        task.AddComment("xyz", user.Id, earlierDate);
+
+        await _fixture.SeedDb(db =>
+        {
+            db.AddRange(task.Comments);
+        });
+
+        var result = await _fixture.SendRequest(new GetTaskCommentsQuery(task.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+
+            var comments = result.Value.Comments;
+            comments.Should().BeEquivalentTo(new[]
+            {
+                new TaskCommentVM("xyz", user.Name, earlierDate),
+                new TaskCommentVM("abc", user.Name, laterDate),
+            }, options => options.WithStrictOrdering());
         }
     }
 }

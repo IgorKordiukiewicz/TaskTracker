@@ -44,6 +44,18 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Style="width: 60px;" 
                     Disabled="@string.IsNullOrWhiteSpace(_newCommentText)" OnClick="AddNewComment" />
             </div>
+            @if(_commentsVM is not null)
+            {
+                <div class="d-flex flex-column mt-2 gap-2">
+                    @foreach(var comment in _commentsVM.Comments)
+                    {
+                        <MudField Label="@($"{comment.AuthorName} - {comment.CreatedAt}")" Variant="Variant.Filled">
+                            @comment.Content
+                        </MudField>
+                    }
+                </div>
+                
+            }
         </MudPaper>
     </MudOverlay>
     if(_displayType == DisplayType.Table)
@@ -123,6 +135,7 @@
     private Dictionary<string, Guid>? _taskStatusIdByName = new();
 
     private Guid? _openedTaskId = null;
+    private TaskCommentsVM? _commentsVM = null;
     private string _newCommentText = string.Empty;
 
     private enum DisplayType
@@ -192,7 +205,7 @@
     private async Task OpenTaskDetailsPopup(Guid taskId)
     {
         _openedTaskId = taskId;
-        // TODO: Load comments?
+        await UpdateCommentsVM();
     }
 
     private void CloseTaskDetailsPopup()
@@ -205,7 +218,13 @@
     {
         var model = new AddTaskCommentDto(_newCommentText);
         await _requestHandler.PostAsync($"tasks/{_openedTaskId}/comments", model, new[] { ("ProjectId", ProjectId.ToString()) });
+        await UpdateCommentsVM();
 
         _newCommentText = string.Empty;
+    }
+
+    private async Task UpdateCommentsVM()
+    {
+        _commentsVM = await _requestHandler.GetAsync<TaskCommentsVM>($"tasks/{_openedTaskId}/comments", new[] { ("ProjectId", ProjectId.ToString()) });
     }
 }
