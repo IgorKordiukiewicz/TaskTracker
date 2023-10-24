@@ -32,7 +32,12 @@
             <MudGrid>
                 <MudDivider />
                 <MudItem md="6">
-                    <MudSelect T="string" Label="Status" AnchorOrigin="Origin.BottomCenter" Variant="Variant.Filled">
+                    <MudSelect T="TaskStatusVM" Value="@currentTaskVM.Status" ValueChanged="e => UpdateTaskStatus(currentTaskVM.Id, e.Id)" 
+                        ToStringFunc="@(x => x.Name)" Variant="Variant.Filled" Label="Status" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var status in currentTaskVM.PossibleNextStatuses)
+                        {
+                            <MudSelectItem Value="@status"></MudSelectItem>
+                        }
                     </MudSelect>
                 </MudItem>
                 <MudItem md="6">
@@ -113,14 +118,7 @@
                 <MudTd DataLabel="ID">@context.ShortId</MudTd>
                 <MudTd DataLabel="Title">@context.Title</MudTd>
                 <MudTd DataLabel="Description">@context.Description</MudTd>
-                <MudTd DataLabel="Status">
-                    <MudSelect T="TaskStatusVM" Value="@context.Status" ValueChanged="e => UpdateTaskStatus(context.Id, e.Id)" ToStringFunc="@(x => x.Name)" Margin="Margin.Dense" Variant="Variant.Outlined">
-                        @foreach (var status in context.PossibleNextStatuses)
-                        {
-                            <MudSelectItem Value="@status"></MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudTd>
+                <MudTd DataLabel="Status">@context.Status.Name</MudTd>
             </RowTemplate>
         </MudTable>
     }
@@ -141,7 +139,10 @@
             </ChildContent>
             <ItemRenderer>
                 <MudPaper Class="pa-4 my-4">
-                    @context.Title
+                    <div class="d-flex align-center justify-space-between">
+                        @context.Title
+                        <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="() => OpenTaskDetailsPopup(context.Id)" />
+                    </div>
                 </MudPaper>
             </ItemRenderer>
         </MudDropContainer>
