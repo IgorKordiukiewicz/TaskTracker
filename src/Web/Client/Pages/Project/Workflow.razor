@@ -33,7 +33,7 @@
                     Add Status
                 </MudButton>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addTransitionForm.Open()" FullWidth="true" 
-                    Disabled="@(!GetAvailableFromStatuses().Any())">
+                    Disabled="@(!_workflowVM.GetAvailableFromStatuses().Any())">
                     Add Transition
                 </MudButton>
                 @if(_selectedNode is not null)
@@ -129,7 +129,7 @@
     </TitleContent>
     <DialogContent>
         <MudSelect T="string" Label="From Status" @bind-Value="_addTransitionForm.FromStatus">
-            @foreach(var fromStatus in GetAvailableFromStatuses())
+            @foreach(var fromStatus in _workflowVM.GetAvailableFromStatuses())
             {
                 <MudSelectItem Value="@fromStatus" />
             }
@@ -137,7 +137,7 @@
         <MudSelect T="string" Label="To Status" @bind-Value="_addTransitionForm.ToStatus" Disabled="@string.IsNullOrWhiteSpace(_addTransitionForm.FromStatus)">
             @if (!string.IsNullOrWhiteSpace(_addTransitionForm.FromStatus))
             {
-                foreach (var toStatus in GetAvailableToStatuses(_addTransitionForm.FromStatus))
+                foreach (var toStatus in _workflowVM.GetAvailableToStatuses(_addTransitionForm.FromStatus, _statusIdByName))
                 {
                     <MudSelectItem Value="@toStatus" />
                 }
@@ -461,43 +461,5 @@
             _selectedLink = null;
             await UpdateWorkflowVM(deletedTransition: (fromStatusName, toStatusName));
         }
-    }
-
-    // TODO: Extract it somewhere so it could be tested? maybe to view model as methods?
-    private List<string> GetAvailableFromStatuses()
-    {
-        if(_workflowVM is null)
-        {
-            return new();
-        }
-
-        var result = new List<string>();
-        foreach (var status in _workflowVM.Statuses)
-        {
-            var fromTransitionsCount = _workflowVM.Transitions.Count(x => x.FromStatusId == status.Id);
-            if (fromTransitionsCount < _workflowVM.Statuses.Count - 1)
-            {
-                result.Add(status.Name);
-            }
-        }
-
-        return result;
-    }
-
-    private List<string> GetAvailableToStatuses(string fromStatus)
-    {
-        if (_statusIdByName is null || _workflowVM is null)
-        {
-            return new();
-        }
-
-        var fromStatusId = _statusIdByName[fromStatus];
-        var availableStatusesIds = _workflowVM.Transitions.Where(x => x.FromStatusId == fromStatusId)
-            .Select(x => x.ToStatusId).ToHashSet();
-
-        return _workflowVM
-            .Statuses.Where(x => !availableStatusesIds.Contains(x.Id) && x.Id != fromStatusId)
-            .Select(x => x.Name)
-            .ToList();
     }
 }
