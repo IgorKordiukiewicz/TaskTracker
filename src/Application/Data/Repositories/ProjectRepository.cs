@@ -33,7 +33,7 @@ public class ProjectRepository : IRepository<Project>
 
     public async Task Update(Project entity)
     {
-        await _dbContext.AddRemoveDependentEntities(entity.Members);
+        await _dbContext.AddRemoveChildEntities(entity.Members);
         await _dbContext.SaveChangesAsync();
     }
 

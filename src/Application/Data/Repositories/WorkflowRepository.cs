@@ -40,8 +40,8 @@ public class WorkflowRepository : IRepository<Workflow>
 
     public async Task Update(Workflow entity)
     {
-        await _dbContext.AddRemoveDependentEntities(entity.Statuses);
-        await _dbContext.AddRemoveDependentValueObjects(entity.Transitions);
+        await _dbContext.AddRemoveChildEntities(entity.Statuses);
+        await _dbContext.AddRemoveChildValueObjects(entity.Transitions);
         await _dbContext.SaveChangesAsync();
     }
 }

@@ -13,6 +13,9 @@ public class Task : Entity, IAggregateRoot
     public string Description { get; private set; } = string.Empty;
     public Guid StatusId { get; private set; } = default!;
 
+    private readonly List<TaskComment> _comments = new();
+    public IReadOnlyList<TaskComment> Comments => _comments.AsReadOnly();
+
     private Task(Guid id)
         : base(id)
     {
@@ -41,5 +44,10 @@ public class Task : Entity, IAggregateRoot
 
         StatusId = newStatusId;
         return Result.Ok();
+    }
+
+    public void AddComment(string content, Guid authorId)
+    {
+        _comments.Add(new(Id, content, authorId));
     }
 }

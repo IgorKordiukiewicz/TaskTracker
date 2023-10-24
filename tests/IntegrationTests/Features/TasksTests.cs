@@ -1,5 +1,7 @@
 ﻿using Application.Features.Tasks;
 using Domain.Projects;
+using Domain.Tasks;
+using Domain.Users;
 using Domain.Workflows;
 using Shared.Dtos;
 using Task = Domain.Tasks.Task;
@@ -119,6 +121,30 @@ public class TasksTests
 
             var updatedTask = await _fixture.FirstAsync<Task>(x => x.Id == task.Id);
             updatedTask.StatusId.Should().Be(newStatusId);
+        }
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task AddComment_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new AddTaskCommentCommand(Guid.NewGuid(), "123", new("abc")));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task AddComment_ShouldAddComment_WhenTaskExists()
+    {
+        var task = (await _factory.CreateTasks())[0];
+        var user = await _fixture.FirstAsync<User>();
+        var taskCommentsCountBefore = await _fixture.CountAsync<TaskComment>();
+
+        var result = await _fixture.SendRequest(new AddTaskCommentCommand(task.Id, user.AuthenticationId, new("abc")));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<TaskComment>()).Should().Be(taskCommentsCountBefore + 1);
         }
     }
 }

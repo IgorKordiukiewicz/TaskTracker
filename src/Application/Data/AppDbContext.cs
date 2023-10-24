@@ -20,6 +20,8 @@ public class AppDbContext : DbContext
     public DbSet<ProjectMember> ProjectMembers { get; set; }
 
     public DbSet<Domain.Tasks.Task> Tasks { get; set; }
+    public DbSet<TaskComment> TaskComments { get; set; }
+
     public DbSet<Domain.Workflows.TaskStatus> TaskStatuses { get; set; }
     public DbSet<TaskStatusTransition> TaskStatusTransitions { get; set; }
     public DbSet<Workflow> Workflows { get; set; }
@@ -33,7 +35,7 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 
-    public async System.Threading.Tasks.Task AddRemoveDependentEntities<TDependent>(IEnumerable<TDependent> actualEntities)
+    public async System.Threading.Tasks.Task AddRemoveChildEntities<TDependent>(IEnumerable<TDependent> actualEntities) // TODO: Rename to AddRemoveChildEntities ?
         where TDependent : Entity
     {
         var dbEntities = await Set<TDependent>().AsNoTracking().Select(x => x.Id).ToListAsync();
@@ -45,7 +47,7 @@ public class AppDbContext : DbContext
         Set<TDependent>().RemoveRange(Set<TDependent>().Where(x => removedEntitiesIds.Contains(x.Id)));
     }
 
-    public async System.Threading.Tasks.Task AddRemoveDependentValueObjects<TDependent>(IEnumerable<TDependent> actualEntities)
+    public async System.Threading.Tasks.Task AddRemoveChildValueObjects<TDependent>(IEnumerable<TDependent> actualEntities)
         where TDependent : ValueObject
     {
         var dbEntities = await Set<TDependent>().ToListAsync();

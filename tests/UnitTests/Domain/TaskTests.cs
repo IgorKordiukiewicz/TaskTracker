@@ -1,4 +1,5 @@
-﻿using Domain.Workflows;
+﻿using Domain.Tasks;
+using Domain.Workflows;
 using Task = Domain.Tasks.Task;
 
 namespace UnitTests.Domain;
@@ -58,5 +59,15 @@ public class TaskTests
             result.IsSuccess.Should().BeTrue();
             task.StatusId.Should().Be(availableStatusId);
         }
+    }
+
+    [Fact]
+    public void AddComment_ShouldAddComment()
+    {
+        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
+
+        task.AddComment("abc", Guid.NewGuid());
+
+        task.Comments.Count.Should().Be(1);
     }
 }

@@ -25,10 +25,12 @@ public class TaskRepository : IRepository<Domain.Tasks.Task>
 
     public async Task<bool> Exists(Expression<Func<Domain.Tasks.Task, bool>> predicate)
         => await _dbContext.Tasks
+        .Include(x => x.Comments)
         .AnyAsync(predicate);
 
     public async Task<Domain.Tasks.Task?> GetBy(Expression<Func<Domain.Tasks.Task, bool>> predicate)
         => await _dbContext.Tasks
+        .Include(x => x.Comments)
         .FirstOrDefaultAsync(predicate);
 
     public async Task<Domain.Tasks.Task?> GetById(Guid id)
@@ -36,6 +38,7 @@ public class TaskRepository : IRepository<Domain.Tasks.Task>
 
     public async Task Update(Domain.Tasks.Task entity)
     {
+        await _dbContext.AddRemoveChildEntities(entity.Comments);
         await _dbContext.SaveChangesAsync();
     }
 }

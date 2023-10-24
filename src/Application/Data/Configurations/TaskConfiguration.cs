@@ -1,5 +1,4 @@
 ﻿using Domain.Projects;
-using Domain.Tasks;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Application.Data.Configurations;
@@ -19,5 +18,10 @@ internal class TaskConfiguration : IEntityTypeConfiguration<Domain.Tasks.Task>
         builder.HasOne<Domain.Workflows.TaskStatus>()
             .WithMany()
             .HasForeignKey(x => x.StatusId);
+
+        builder.HasMany(x => x.Comments)
+            .WithOne()
+            .HasForeignKey(x => x.TaskId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

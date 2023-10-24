@@ -36,8 +36,8 @@ public class OrganizationRepository : IRepository<Organization>
 
     public async Task Update(Organization entity)
     {
-        await _dbContext.AddRemoveDependentEntities(entity.Members);
-        await _dbContext.AddRemoveDependentEntities(entity.Invitations);
+        await _dbContext.AddRemoveChildEntities(entity.Members);
+        await _dbContext.AddRemoveChildEntities(entity.Invitations);
         await _dbContext.SaveChangesAsync();
     }
 

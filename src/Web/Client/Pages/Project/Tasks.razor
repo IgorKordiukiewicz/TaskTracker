@@ -41,7 +41,8 @@
             </MudText>
             <div class="d-flex gap-2">
                 <MudTextField @bind-Value="@_newCommentText" Variant="Variant.Filled" Label="Add new comment"></MudTextField>
-                <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Style="width: 60px;" />
+                <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Style="width: 60px;" 
+                    Disabled="@string.IsNullOrWhiteSpace(_newCommentText)" OnClick="AddNewComment" />
             </div>
         </MudPaper>
     </MudOverlay>
@@ -197,6 +198,14 @@
     private void CloseTaskDetailsPopup()
     {
         _openedTaskId = null;
+        _newCommentText = string.Empty;
+    }
+
+    private async Task AddNewComment()
+    {
+        var model = new AddTaskCommentDto(_newCommentText);
+        await _requestHandler.PostAsync($"tasks/{_openedTaskId}/comments", model, new[] { ("ProjectId", ProjectId.ToString()) });
+
         _newCommentText = string.Empty;
     }
 }
