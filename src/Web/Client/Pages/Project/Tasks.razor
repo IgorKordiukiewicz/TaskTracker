@@ -23,39 +23,81 @@
             @{
                 var currentTaskVM = _tasksVM.Tasks.Single(x => x.Id == _openedTaskId);
             }
-            <div class="d-flex justify-space-between align-center">
+            <div class="d-flex justify-space-between align-center mb-4">
                 <MudText Typo="Typo.h4">
                     @($"#{currentTaskVM.ShortId} {@currentTaskVM.Title}")
                 </MudText>
-                <MudIconButton Icon="@Icons.Material.Filled.Close" OnClick="CloseTaskDetailsPopup"/>
+                <MudIconButton Icon="@Icons.Material.Filled.Close" OnClick="CloseTaskDetailsPopup" />
             </div>
-            <MudDivider />
-            <MudText Typo="Typo.h6">
-                Description
-            </MudText>
-            <MudField ReadOnly="true" Variant="Variant.Filled">
-                @currentTaskVM.Description
-            </MudField>
-            <MudText Typo="Typo.h6">
-                Comments
-            </MudText>
-            <div class="d-flex gap-2">
-                <MudTextField @bind-Value="@_newCommentText" Variant="Variant.Filled" Label="Add new comment"></MudTextField>
-                <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Style="width: 60px;" 
-                    Disabled="@string.IsNullOrWhiteSpace(_newCommentText)" OnClick="AddNewComment" />
-            </div>
-            @if(_commentsVM is not null)
-            {
-                <div class="d-flex flex-column mt-2 gap-2">
-                    @foreach(var comment in _commentsVM.Comments)
+            <MudGrid>
+                <MudDivider />
+                <MudItem md="6">
+                    <MudSelect T="string" Label="Status" AnchorOrigin="Origin.BottomCenter" Variant="Variant.Filled">
+                    </MudSelect>
+                </MudItem>
+                <MudItem md="6">
+                    <MudSelect T="string" Label="Assignee" AnchorOrigin="Origin.BottomCenter" Variant="Variant.Filled">
+                    </MudSelect>
+                </MudItem>
+                <MudDivider />
+                <MudItem xs="12">
+                    <div class="d-flex justify-space-between align-center">
+                        <MudText Typo="Typo.h6">
+                            Description
+                        </MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" />
+                    </div>
+                    <MudText Typo="Typo.body1">
+                        @currentTaskVM.Description
+                    </MudText>
+                </MudItem>
+                <MudDivider />
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6">
+                        Comments
+                    </MudText>
+                    @if(_addCommentForm.Visible)
                     {
-                        <MudField Label="@($"{comment.AuthorName} - {comment.CreatedAt}")" Variant="Variant.Filled">
-                            @comment.Content
-                        </MudField>
+                        <MudTextField @bind-Value="_addCommentForm.Content" Variant="Variant.Filled" Label="New comment" Class="mb-1"></MudTextField>
+                        <div class="d-flex justify-end gap-2">
+                            <MudButton Variant="Variant.Outlined" OnClick="() => _addCommentForm.Close()">
+                                Cancel
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(!_addCommentForm.IsValid())" OnClick="AddNewComment">
+                                Add
+                            </MudButton>
+                        </div>
                     }
-                </div>
-                
-            }
+                    else
+                    {
+                        <MudButton Variant="Variant.Outlined" FullWidth="true" Class="mb-4 mt-1" OnClick="() => _addCommentForm.Open()">
+                            Add Comment
+                        </MudButton>
+                    }
+                    @if(_commentsVM is not null)
+                    {
+                        <div class="d-flex flex-column gap-4">
+                            @foreach (var comment in _commentsVM.Comments)
+                            {
+                                <div>
+                                    <div class="d-flex mb-1 align-center justify-space-between">
+                                        <div class="d-flex align-center gap-2">
+                                            <MudAvatar Color="Color.Primary">AA</MudAvatar> <!-- TODO: Initials -->
+                                            <MudText Style="font-weight: bold;">@comment.AuthorName</MudText>
+                                        </div>
+                                        <MudText Typo="Typo.caption">@comment.CreatedAt</MudText>
+                                    </div>
+                                    <div style="width: 100%; border-radius: 5px; background-color: #32323a;" class="pa-2">
+                                        <MudText>
+                                            @comment.Content
+                                        </MudText>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </MudItem>
+            </MudGrid>
         </MudPaper>
     </MudOverlay>
     if(_displayType == DisplayType.Table)
@@ -136,7 +178,13 @@
 
     private Guid? _openedTaskId = null;
     private TaskCommentsVM? _commentsVM = null;
-    private string _newCommentText = string.Empty;
+    private class AddCommentForm : DialogForm
+    {
+        public string Content { get; set; } = string.Empty;
+
+        public override bool IsValid() => !string.IsNullOrWhiteSpace(Content);
+    }
+    private AddCommentForm _addCommentForm = new();
 
     private enum DisplayType
     {
@@ -205,22 +253,27 @@
     private async Task OpenTaskDetailsPopup(Guid taskId)
     {
         _openedTaskId = taskId;
+        _addCommentForm = new();
         await UpdateCommentsVM();
     }
 
     private void CloseTaskDetailsPopup()
     {
         _openedTaskId = null;
-        _newCommentText = string.Empty;
     }
 
     private async Task AddNewComment()
     {
-        var model = new AddTaskCommentDto(_newCommentText);
-        await _requestHandler.PostAsync($"tasks/{_openedTaskId}/comments", model, new[] { ("ProjectId", ProjectId.ToString()) });
-        await UpdateCommentsVM();
+        if (!_addCommentForm.IsValid())
+        {
+            return;
+        }
 
-        _newCommentText = string.Empty;
+        var model = new AddTaskCommentDto(_addCommentForm.Content);
+        await _requestHandler.PostAsync($"tasks/{_openedTaskId}/comments", model, new[] { ("ProjectId", ProjectId.ToString()) });
+
+        await UpdateCommentsVM();
+        _addCommentForm = new();
     }
 
     private async Task UpdateCommentsVM()
