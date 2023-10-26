@@ -33,7 +33,7 @@
                 <MudDivider />
                 <MudItem md="6">
                     <MudSelect T="TaskStatusVM" Value="@currentTaskVM.Status" ValueChanged="e => UpdateTaskStatus(currentTaskVM.Id, e.Id)" 
-                        ToStringFunc="@(x => x.Name)" Variant="Variant.Filled" Label="Status" AnchorOrigin="Origin.BottomCenter">
+                        ToStringFunc="@(x => x.Name)" Label="Status" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
                         @foreach (var status in currentTaskVM.PossibleNextStatuses)
                         {
                             <MudSelectItem Value="@status"></MudSelectItem>
@@ -41,8 +41,16 @@
                     </MudSelect>
                 </MudItem>
                 <MudItem md="6">
-                    <MudSelect T="string" Label="Assignee" AnchorOrigin="Origin.BottomCenter" Variant="Variant.Filled">
-                    </MudSelect>
+                    @if(_membersVM is not null)
+                    {
+                        <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(currentTaskVM.AssigneeId)" ValueChanged="e => UpdateTaskAssignee(currentTaskVM.Id, e.Id)"
+                            ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                            @foreach(var member in GetPossibleAssignees(currentTaskVM))
+                            {
+                                <MudSelectItem Value="@member"></MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
                 </MudItem>
                 <MudDivider />
                 <MudItem xs="12">
@@ -177,6 +185,9 @@
     private TasksVM? _tasksVM;
     private Dictionary<string, Guid>? _taskStatusIdByName = new();
 
+    private ProjectMembersVM? _membersVM;
+    private Dictionary<Guid, string> _memberNameById = new();
+
     private Guid? _openedTaskId = null;
     private TaskCommentsVM? _commentsVM = null;
     private class AddCommentForm : DialogForm
@@ -209,6 +220,11 @@
         _requestHandler = new(_httpClient, _dialogService);
 
         await UpdateTasksVM();
+        _membersVM = await _requestHandler.GetAsync<ProjectMembersVM>($"projects/{ProjectId}/members");
+        if(_membersVM is not null)
+        {
+            _memberNameById = _membersVM.Members.ToDictionary(k => k.Id, v => v.Name);
+        }
     }
 
     private async Task UpdateTasksVM()
@@ -222,6 +238,13 @@
     {
         await _requestHandler.PostAsync($"tasks/{taskId}/update-status/{newStatusId}", headers: new[] { ("ProjectId", ProjectId.ToString()) });
         await UpdateTasksVM(); // TODO: Optimize it, don't fetch all tasks again
+    }
+
+    private async Task UpdateTaskAssignee(Guid taskId, Guid? memberId)
+    {
+        var model = new UpdateTaskAssigneeDto(memberId);
+        await _requestHandler.PostAsync($"tasks/{taskId}/update-assignee", model, headers: new[] { ("ProjectId", ProjectId.ToString()) });
+        await UpdateTasksVM();
     }
 
     private async Task TaskDropped(MudItemDropInfo<TaskVM> dropItem)
@@ -280,5 +303,38 @@
     private async Task UpdateCommentsVM()
     {
         _commentsVM = await _requestHandler.GetAsync<TaskCommentsVM>($"tasks/{_openedTaskId}/comments", new[] { ("ProjectId", ProjectId.ToString()) });
+    }
+
+    private string GetMemberName(Guid? memberId)
+    {
+        var defaultValue = "-";
+        if(memberId is null)
+        {
+            return defaultValue;
+        }
+
+        if(_memberNameById.TryGetValue(memberId.Value, out var name))
+        {
+            return name;
+        }
+
+        return defaultValue;
+    }
+
+    private ProjectMemberVM? GetCurrentAssigneeVM(Guid? assigneeId)
+    {
+        return _membersVM!.Members.FirstOrDefault(x => x.UserId == assigneeId);
+    }
+
+    private IEnumerable<ProjectMemberVM> GetPossibleAssignees(TaskVM task)
+    {
+        if(task.AssigneeId is not null)
+        {
+            return _membersVM!.Members.Where(x => x.UserId != task.AssigneeId.Value);
+        }
+        else
+        {
+            return _membersVM!.Members;
+        }
     }
 }

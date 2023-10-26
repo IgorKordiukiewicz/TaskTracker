@@ -62,6 +62,17 @@ public class TaskTests
     }
 
     [Fact]
+    public void UpdateAssignee_ShouldUpdateAssigneeId()
+    {
+        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
+        var assigneeId = Guid.NewGuid();
+
+        task.UpdateAssignee(assigneeId);
+
+        task.AssigneeId.Should().Be(assigneeId);
+    }
+
+    [Fact]
     public void AddComment_ShouldAddComment()
     {
         var task = Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());

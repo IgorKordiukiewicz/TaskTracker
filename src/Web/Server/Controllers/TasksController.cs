@@ -43,6 +43,14 @@ public class TasksController : ControllerBase
         return result.ToHttpResult();
     }
 
+    [HttpPost("{taskId:guid}/update-assignee")]
+    [Authorize(Policy.ProjectMember)]
+    public async Task<IActionResult> UpdateTaskAssignee(Guid taskId, UpdateTaskAssigneeDto model)
+    {
+        var result = await _mediator.Send(new UpdateTaskAssigneeCommand(taskId, model));
+        return result.ToHttpResult();
+    }
+
     [HttpPost("{taskId:guid}/comments")]
     [Authorize(Policy.ProjectMember)]
     public async Task<IActionResult> AddTaskComment(Guid taskId, AddTaskCommentDto model)

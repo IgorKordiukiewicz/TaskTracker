@@ -1,4 +1,5 @@
 ﻿using Domain.Projects;
+using Domain.Users;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Application.Data.Configurations;
@@ -22,6 +23,12 @@ internal class TaskConfiguration : IEntityTypeConfiguration<Domain.Tasks.Task>
         builder.HasMany(x => x.Comments)
             .WithOne()
             .HasForeignKey(x => x.TaskId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(x => x.AssigneeId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

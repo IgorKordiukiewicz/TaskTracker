@@ -7,3 +7,4 @@ public record CreateTaskDto
 }
 
 public record AddTaskCommentDto(string Content);
+public record UpdateTaskAssigneeDto(Guid? MemberId);

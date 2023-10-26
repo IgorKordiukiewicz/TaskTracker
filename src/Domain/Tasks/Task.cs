@@ -12,6 +12,7 @@ public class Task : Entity, IAggregateRoot
     public string Title { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
     public Guid StatusId { get; private set; } = default!;
+    public Guid? AssigneeId { get; private set; } = null;
 
     private readonly List<TaskComment> _comments = new();
     public IReadOnlyList<TaskComment> Comments => _comments.AsReadOnly();
@@ -44,6 +45,11 @@ public class Task : Entity, IAggregateRoot
 
         StatusId = newStatusId;
         return Result.Ok();
+    }
+
+    public void UpdateAssignee(Guid? newAssigneeId)
+    {
+        AssigneeId = newAssigneeId;
     }
 
     public void AddComment(string content, Guid authorId, DateTime now)

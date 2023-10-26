@@ -186,4 +186,40 @@ public class TasksTests
             }, options => options.WithStrictOrdering());
         }
     }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateAssignee_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateTaskAssigneeCommand(Guid.NewGuid(), new(Guid.NewGuid())));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateAssignee_ShouldFail_WhenMemberDoesNotExist()
+    {
+        var task = (await _factory.CreateTasks())[0];
+
+        var result = await _fixture.SendRequest(new UpdateTaskAssigneeCommand(task.Id, new(Guid.NewGuid())));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateAssignee_ShouldSucceed_WhenTaskAndMemberExist()
+    {
+        var task = (await _factory.CreateTasks())[0];
+        var member = await _fixture.FirstAsync<ProjectMember>();
+
+        var result = await _fixture.SendRequest(new UpdateTaskAssigneeCommand(task.Id, new(member.Id)));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+
+            var updatedTask = await _fixture.FirstAsync<Task>();
+            updatedTask.AssigneeId.Should().Be(member.UserId);
+        }
+            
+    }
 }

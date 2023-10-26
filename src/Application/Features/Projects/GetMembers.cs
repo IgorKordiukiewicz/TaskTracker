@@ -28,7 +28,7 @@ internal class GetProjectMembersHandler : IRequestHandler<GetProjectMembersQuery
             .Join(_dbContext.Users,
             member => member.UserId,
             user => user.Id,
-            (member, user) => new ProjectMemberVM(member.Id, user.Name))
+            (member, user) => new ProjectMemberVM(member.Id, user.Id, user.Name))
             .ToListAsync();
 
         return Result.Ok(new ProjectMembersVM(members));

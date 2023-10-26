@@ -8,6 +8,7 @@ public record TaskVM
     public required int ShortId { get; init; }
     public required string Title { get; init; }
     public required string Description { get; init; }
+    public required Guid? AssigneeId { get; init; }
     public required TaskStatusVM Status { get; init; }
     public required IReadOnlyList<TaskStatusVM> PossibleNextStatuses { get; init; }
 }
