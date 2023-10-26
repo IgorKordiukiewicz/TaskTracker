@@ -196,7 +196,7 @@ public class TasksTests
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task UpdateAssignee_ShouldFail_WhenMemberDoesNotExist()
+    public async System.Threading.Tasks.Task UpdateAssignee_ShouldFail_WhenMemberDoesNotExistAndNewAssigneeIdIsNotNull()
     {
         var task = (await _factory.CreateTasks())[0];
 
@@ -206,7 +206,7 @@ public class TasksTests
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task UpdateAssignee_ShouldSucceed_WhenTaskAndMemberExist()
+    public async System.Threading.Tasks.Task UpdateAssignee_ShouldSucceed_WhenTaskAndMemberExistAndNewAssigneeIdIsNotNull()
     {
         var task = (await _factory.CreateTasks())[0];
         var member = await _fixture.FirstAsync<ProjectMember>();
@@ -219,7 +219,23 @@ public class TasksTests
 
             var updatedTask = await _fixture.FirstAsync<Task>();
             updatedTask.AssigneeId.Should().Be(member.UserId);
+        }   
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateAssignee_ShouldSucceed_WhenTaskExistsAndNewAssigneeIdIsNull()
+    {
+        var task = (await _factory.CreateTasks())[0];
+        var member = await _fixture.FirstAsync<ProjectMember>();
+
+        var result = await _fixture.SendRequest(new UpdateTaskAssigneeCommand(task.Id, new(null)));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+
+            var updatedTask = await _fixture.FirstAsync<Task>();
+            updatedTask.AssigneeId.Should().BeNull();
         }
-            
     }
 }

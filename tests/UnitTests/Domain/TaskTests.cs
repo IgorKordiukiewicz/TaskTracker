@@ -72,6 +72,22 @@ public class TaskTests
         task.AssigneeId.Should().Be(assigneeId);
     }
 
+    [Fact] 
+    public void Unassign_ShouldSetAssigneeIdToNull()
+    {
+        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
+        task.UpdateAssignee(Guid.NewGuid());
+        var assigneeIdBefore = task.AssigneeId;
+
+        task.Unassign();
+
+        using(new AssertionScope())
+        {
+            task.AssigneeId.Should().BeNull();
+            task.AssigneeId.Should().NotBe(assigneeIdBefore.ToString());
+        }
+    }
+
     [Fact]
     public void AddComment_ShouldAddComment()
     {

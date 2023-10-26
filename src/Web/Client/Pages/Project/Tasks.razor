@@ -44,8 +44,8 @@
                     @if(_membersVM is not null)
                     {
                         <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(currentTaskVM.AssigneeId)" ValueChanged="e => UpdateTaskAssignee(currentTaskVM.Id, e.Id)"
-                            ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-                            @foreach(var member in GetPossibleAssignees(currentTaskVM))
+                                   ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                            @foreach (var member in GetPossibleAssignees(currentTaskVM))
                             {
                                 <MudSelectItem Value="@member"></MudSelectItem>
                             }
@@ -240,9 +240,9 @@
         await UpdateTasksVM(); // TODO: Optimize it, don't fetch all tasks again
     }
 
-    private async Task UpdateTaskAssignee(Guid taskId, Guid? memberId)
+    private async Task UpdateTaskAssignee(Guid taskId, Guid memberId)
     {
-        var model = new UpdateTaskAssigneeDto(memberId);
+        var model = new UpdateTaskAssigneeDto(memberId != Guid.Empty ? memberId : null);
         await _requestHandler.PostAsync($"tasks/{taskId}/update-assignee", model, headers: new[] { ("ProjectId", ProjectId.ToString()) });
         await UpdateTasksVM();
     }
@@ -305,32 +305,16 @@
         _commentsVM = await _requestHandler.GetAsync<TaskCommentsVM>($"tasks/{_openedTaskId}/comments", new[] { ("ProjectId", ProjectId.ToString()) });
     }
 
-    private string GetMemberName(Guid? memberId)
-    {
-        var defaultValue = "-";
-        if(memberId is null)
-        {
-            return defaultValue;
-        }
-
-        if(_memberNameById.TryGetValue(memberId.Value, out var name))
-        {
-            return name;
-        }
-
-        return defaultValue;
-    }
-
     private ProjectMemberVM? GetCurrentAssigneeVM(Guid? assigneeId)
     {
-        return _membersVM!.Members.FirstOrDefault(x => x.UserId == assigneeId);
+        return _membersVM!.Members.FirstOrDefault(x => x.UserId == assigneeId) ?? null;
     }
 
     private IEnumerable<ProjectMemberVM> GetPossibleAssignees(TaskVM task)
     {
         if(task.AssigneeId is not null)
         {
-            return _membersVM!.Members.Where(x => x.UserId != task.AssigneeId.Value);
+            return _membersVM!.Members.Where(x => x.UserId != task.AssigneeId.Value).Append(new(Guid.Empty, Guid.Empty, "-")).Reverse();
         }
         else
         {

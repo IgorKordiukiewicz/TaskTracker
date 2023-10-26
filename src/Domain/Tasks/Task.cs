@@ -52,6 +52,11 @@ public class Task : Entity, IAggregateRoot
         AssigneeId = newAssigneeId;
     }
 
+    public void Unassign()
+    {
+        AssigneeId = null;
+    }
+
     public void AddComment(string content, Guid authorId, DateTime now)
     {
         _comments.Add(new(Id, content, authorId, now));

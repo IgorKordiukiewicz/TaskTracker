@@ -34,17 +34,25 @@ internal class UpdateTaskAssigneeHandler : IRequestHandler<UpdateTaskAssigneeCom
             return Result.Fail(new ApplicationError("Task with this ID does not exist."));
         }
 
-        var member = (await _dbContext.Projects
+        if(request.Model.MemberId is not null)
+        {
+            var member = (await _dbContext.Projects
             .AsNoTracking()
             .Include(x => x.Members)
             .SingleAsync(x => x.Id == task.ProjectId))
             .Members.SingleOrDefault(x => x.Id == request.Model.MemberId);
-        if(member is null)
+            if (member is null)
+            {
+                return Result.Fail(new ApplicationError("Member with this ID does not exist."));
+            }
+
+            task.UpdateAssignee(member.UserId); // TODO: Store ref to UserId or MemberId ?
+        }
+        else
         {
-            return Result.Fail(new ApplicationError("Member with this ID does not exist."));
+            task.Unassign();
         }
 
-        task.UpdateAssignee(member.UserId); // TODO: Store ref to UserId or MemberId
         await _taskRepository.Update(task);
         
         return Result.Ok();
