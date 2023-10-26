@@ -116,7 +116,7 @@ public class DiagramExtensionsTests
         diagram.Links.Count.Should().Be(1);
     }
 
-    [Fact]
+    [Fact] 
     public void AddTransitionLink_ShouldUpdateExistingLink_WhenNewTransitionIsBidirectional()
     {
         var diagram = new BlazorDiagram();

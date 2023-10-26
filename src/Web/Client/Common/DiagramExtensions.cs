@@ -84,11 +84,15 @@ public static class DiagramExtensions
         var fromStatusNode = nodeModelByStatusName[newTransition.FromStatus];
         var toStatusNode = nodeModelByStatusName[newTransition.ToStatus];
 
-        var reverseLink = diagram.Links.FirstOrDefault(x => x.Source.Model == toStatusNode && x.Target.Model == fromStatusNode);
-        if (reverseLink is not null)
+        var link = diagram.Links.FirstOrDefault(x => (x.Source.Model == fromStatusNode && x.Target.Model == toStatusNode)
+            || (x.Source.Model == toStatusNode && x.Target.Model == fromStatusNode));
+        if (link is not null)
         {
-            reverseLink.SourceMarker = LinkMarker.Arrow;
-            reverseLink.Refresh();
+            // Set the currently null marker to arrow
+            link.SourceMarker ??= LinkMarker.Arrow;
+            link.TargetMarker ??= LinkMarker.Arrow;
+
+            link.Refresh();
         }
         else
         {

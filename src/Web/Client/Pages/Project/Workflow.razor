@@ -314,7 +314,15 @@
                 var sourceNodeName = (link.Source.Model as TaskStatusNodeModel)!.Name;
                 var targetNodeName = (link.Target.Model as TaskStatusNodeModel)!.Name;
                 var bidirectional = link.IsBidirectional();
-                _selectedLink = (sourceNodeName, targetNodeName, bidirectional);
+                var reverseNodes = bidirectional ? false : link.SourceMarker == LinkMarker.Arrow;
+                if(reverseNodes)
+                {
+                    _selectedLink = (targetNodeName, sourceNodeName, bidirectional);
+                }
+                else
+                {
+                    _selectedLink = (sourceNodeName, targetNodeName, bidirectional);
+                }
                 _selectedNode = null;
             }
         }
