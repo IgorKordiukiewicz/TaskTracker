@@ -13,3 +13,7 @@
 .clickable {
     cursor: pointer;
 }
+
+html, body, #app, .max-height {
+    height: 100%;
+}

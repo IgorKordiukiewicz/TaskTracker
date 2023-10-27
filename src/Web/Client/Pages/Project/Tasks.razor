@@ -9,112 +9,113 @@
 
 @if(_tasksVM is not null) // TODO: Display DisplayType selector in the navbar: Tasks/Board and Tasks/Table
 {
-    <div class="d-flex gap-2 align-center mb-4">
-        <MudSelect @bind-Value="_displayType" Label="Display Type" Variant="Variant.Outlined">
-            <MudSelectItem Value="DisplayType.Table">Table</MudSelectItem>
-            <MudSelectItem Value="DisplayType.Board">Board</MudSelectItem>
-        </MudSelect>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _createTaskForm.Open()" Style="height: 50%;">
-            Create
-        </MudButton>
-    </div>
-    <MudOverlay Visible="@(_openedTaskId is not null)" DarkBackground="true">
-        <MudPaper Class="pa-6" Style="width: 640px;">
-            @{
-                var currentTaskVM = _tasksVM.Tasks.Single(x => x.Id == _openedTaskId);
-            }
-            <div class="d-flex justify-space-between align-center mb-4">
-                <MudText Typo="Typo.h4">
-                    @($"#{currentTaskVM.ShortId} {@currentTaskVM.Title}")
-                </MudText>
-                <MudIconButton Icon="@Icons.Material.Filled.Close" OnClick="CloseTaskDetailsPopup" />
-            </div>
-            <MudGrid>
-                <MudDivider />
-                <MudItem md="6">
-                    <MudSelect T="TaskStatusVM" Value="@currentTaskVM.Status" ValueChanged="e => UpdateTaskStatus(currentTaskVM.Id, e.Id)" 
-                        ToStringFunc="@(x => x.Name)" Label="Status" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-                        @foreach (var status in currentTaskVM.PossibleNextStatuses)
-                        {
-                            <MudSelectItem Value="@status"></MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudItem>
-                <MudItem md="6">
-                    @if(_membersVM is not null)
-                    {
-                        <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(currentTaskVM.AssigneeId)" ValueChanged="e => UpdateTaskAssignee(currentTaskVM.Id, e.Id)"
-                                   ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-                            @foreach (var member in GetPossibleAssignees(currentTaskVM))
+    <div class="d-flex flex-column" style="height: 100%;">
+        <div class="d-flex gap-2 align-center mb-4">
+            <MudSelect @bind-Value="_displayType" Label="Display Type" Variant="Variant.Outlined">
+                <MudSelectItem Value="DisplayType.Table">Table</MudSelectItem>
+                <MudSelectItem Value="DisplayType.Board">Board</MudSelectItem>
+            </MudSelect>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _createTaskForm.Open()" Style="height: 50%;">
+                Create
+            </MudButton>
+        </div>
+        <MudOverlay Visible="@(_openedTaskId is not null)" DarkBackground="true">
+            <MudPaper Class="pa-6" Style="width: 640px;">
+                @{
+                    var currentTaskVM = _tasksVM.Tasks.Single(x => x.Id == _openedTaskId);
+                }
+                <div class="d-flex justify-space-between align-center mb-4">
+                    <MudText Typo="Typo.h4">
+                        @($"#{currentTaskVM.ShortId} {@currentTaskVM.Title}")
+                    </MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Close" OnClick="CloseTaskDetailsPopup" />
+                </div>
+                <MudGrid>
+                    <MudDivider />
+                    <MudItem md="6">
+                        <MudSelect T="TaskStatusVM" Value="@currentTaskVM.Status" ValueChanged="e => UpdateTaskStatus(currentTaskVM.Id, e.Id)"
+                                   ToStringFunc="@(x => x.Name)" Label="Status" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                            @foreach (var status in currentTaskVM.PossibleNextStatuses)
                             {
-                                <MudSelectItem Value="@member"></MudSelectItem>
+                                <MudSelectItem Value="@status"></MudSelectItem>
                             }
                         </MudSelect>
-                    }
-                </MudItem>
-                <MudDivider />
-                <MudItem xs="12">
-                    <div class="d-flex justify-space-between align-center">
-                        <MudText Typo="Typo.h6">
-                            Description
+                    </MudItem>
+                    <MudItem md="6">
+                        @if (_membersVM is not null)
+                        {
+                            <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(currentTaskVM.AssigneeId)" ValueChanged="e => UpdateTaskAssignee(currentTaskVM.Id, e.Id)"
+                                       ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                                @foreach (var member in GetPossibleAssignees(currentTaskVM))
+                                {
+                                    <MudSelectItem Value="@member"></MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
+                    </MudItem>
+                    <MudDivider />
+                    <MudItem xs="12">
+                        <div class="d-flex justify-space-between align-center">
+                            <MudText Typo="Typo.h6">
+                                Description
+                            </MudText>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" />
+                        </div>
+                        <MudText Typo="Typo.body1">
+                            @currentTaskVM.Description
                         </MudText>
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" />
-                    </div>
-                    <MudText Typo="Typo.body1">
-                        @currentTaskVM.Description
-                    </MudText>
-                </MudItem>
-                <MudDivider />
-                <MudItem xs="12">
-                    <MudText Typo="Typo.h6">
-                        Comments
-                    </MudText>
-                    @if(_addCommentForm.Visible)
-                    {
-                        <MudTextField @bind-Value="_addCommentForm.Content" Variant="Variant.Filled" Label="New comment" Class="mb-1"></MudTextField>
-                        <div class="d-flex justify-end gap-2">
-                            <MudButton Variant="Variant.Outlined" OnClick="() => _addCommentForm.Close()">
-                                Cancel
+                    </MudItem>
+                    <MudDivider />
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.h6">
+                            Comments
+                        </MudText>
+                        @if (_addCommentForm.Visible)
+                        {
+                            <MudTextField @bind-Value="_addCommentForm.Content" Variant="Variant.Filled" Label="New comment" Class="mb-1"></MudTextField>
+                            <div class="d-flex justify-end gap-2">
+                                <MudButton Variant="Variant.Outlined" OnClick="() => _addCommentForm.Close()">
+                                    Cancel
+                                </MudButton>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(!_addCommentForm.IsValid())" OnClick="AddNewComment">
+                                    Add
+                                </MudButton>
+                            </div>
+                        }
+                        else
+                        {
+                            <MudButton Variant="Variant.Outlined" FullWidth="true" Class="mb-4 mt-1" OnClick="() => _addCommentForm.Open()">
+                                Add Comment
                             </MudButton>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(!_addCommentForm.IsValid())" OnClick="AddNewComment">
-                                Add
-                            </MudButton>
-                        </div>
-                    }
-                    else
-                    {
-                        <MudButton Variant="Variant.Outlined" FullWidth="true" Class="mb-4 mt-1" OnClick="() => _addCommentForm.Open()">
-                            Add Comment
-                        </MudButton>
-                    }
-                    @if(_commentsVM is not null)
-                    {
-                        <div class="d-flex flex-column gap-4">
-                            @foreach (var comment in _commentsVM.Comments)
-                            {
-                                <div>
-                                    <div class="d-flex mb-1 align-center justify-space-between">
-                                        <div class="d-flex align-center gap-2">
-                                            <MudAvatar Color="Color.Primary">AA</MudAvatar> <!-- TODO: Initials -->
-                                            <MudText Style="font-weight: bold;">@comment.AuthorName</MudText>
+                        }
+                        @if (_commentsVM is not null)
+                        {
+                            <div class="d-flex flex-column gap-4">
+                                @foreach (var comment in _commentsVM.Comments)
+                                {
+                                    <div>
+                                        <div class="d-flex mb-1 align-center justify-space-between">
+                                            <div class="d-flex align-center gap-2">
+                                                <MudAvatar Color="Color.Primary">AA</MudAvatar> <!-- TODO: Initials -->
+                                                <MudText Style="font-weight: bold;">@comment.AuthorName</MudText>
+                                            </div>
+                                            <MudText Typo="Typo.caption">@comment.CreatedAt.GetHumanReadableTimeDifference(DateTime.Now)</MudText>
                                         </div>
-                                        <MudText Typo="Typo.caption">@comment.CreatedAt.GetHumanReadableTimeDifference(DateTime.Now)</MudText>
+                                        <div style="width: 100%; border-radius: 5px; background-color: #32323a;" class="pa-2">
+                                            <MudText>
+                                                @comment.Content
+                                            </MudText>
+                                        </div>
                                     </div>
-                                    <div style="width: 100%; border-radius: 5px; background-color: #32323a;" class="pa-2">
-                                        <MudText>
-                                            @comment.Content
-                                        </MudText>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
-                </MudItem>
-            </MudGrid>
-        </MudPaper>
-    </MudOverlay>
-    if(_displayType == DisplayType.Table)
-    {
+                                }
+                            </div>
+                        }
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        </MudOverlay>
+        @if(_displayType == DisplayType.Table)
+        {
         <MudTable Items="@_tasksVM.Tasks" Hover="true" RowClass="clickable" OnRowClick="(TableRowClickEventArgs<TaskVM> args) => OpenTaskDetailsPopup(args.Item.Id)">
             <HeaderContent>
                 <MudTh>ID</MudTh>
@@ -129,32 +130,36 @@
                 <MudTd DataLabel="Status">@context.Status.Name</MudTd>
             </RowTemplate>
         </MudTable>
-    }
-    else
-    {
-        <MudDropContainer T="TaskVM" Items="@_tasksVM.Tasks" ItemsSelector="@((items, dropzone) => items.Status.Name == dropzone)" Class="d-flex flex-wrap flex-grow-1" ApplyDropClassesOnDragStarted="true"
-            ItemDropped="TaskDropped" CanDropClass="mud-border-success" NoDropClass="mud-border-error">
-            <ChildContent>
-                @foreach(var status in _tasksVM.AllTaskStatuses.OrderBy(x => x.DisplayOrder).Select(x => x.Name))
-                {
-                    <MudDropZone Identifier="@status" T="TaskVM" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1 border-2 border-solid mud-border-lines-default" 
-                    CanDrop="@((item) => item.PossibleNextStatuses.Any(x => x.Name == status))">
-                        <MudText Typo="Typo.h6">
-                            @status
-                        </MudText>
-                    </MudDropZone>
-                }
-            </ChildContent>
-            <ItemRenderer>
-                <MudPaper Class="pa-4 my-4">
-                    <div class="d-flex align-center justify-space-between">
-                        @context.Title
-                        <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="() => OpenTaskDetailsPopup(context.Id)" />
-                    </div>
-                </MudPaper>
-            </ItemRenderer>
-        </MudDropContainer>
-    }
+        }
+        else
+        {
+        <div style="flex-grow: 1; position: relative;">
+            <MudDropContainer T="TaskVM" Items="@_tasksVM.Tasks" ItemsSelector="@((items, dropzone) => items.Status.Name == dropzone)" ApplyDropClassesOnDragStarted="true" Style="overflow-x: scroll; position: absolute; bottom: 0; left: 0; right: 0; top: 0; display: flex;"
+                              ItemDropped="TaskDropped" CanDropClass="mud-border-success" NoDropClass="mud-border-error">
+                <ChildContent>
+                    @foreach (var status in _tasksVM.AllTaskStatuses.OrderBy(x => x.DisplayOrder).Select(x => x.Name))
+                    {
+                        <MudDropZone Identifier="@status" T="TaskVM" Class="rounded mud-background-gray pa-6 ma-8 border-2 border-solid mud-border-lines-default"
+                                     CanDrop="@((item) => item.PossibleNextStatuses.Any(x => x.Name == status))">
+                            <MudText Typo="Typo.h6" Style="width: 250px;" Align="Align.Center">
+                                @status
+                            </MudText>
+                        </MudDropZone>
+                    }
+                </ChildContent>
+                <ItemRenderer>
+                    <MudPaper Class="pa-4 my-4">
+                        <div class="d-flex align-center justify-space-between">
+                            @context.Title
+                            <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="() => OpenTaskDetailsPopup(context.Id)" />
+                        </div>
+                    </MudPaper>
+                </ItemRenderer>
+            </MudDropContainer>
+        </div>
+
+        }
+    </div>
 }
 
 <MudDialog @bind-IsVisible="_createTaskForm.Visible">
