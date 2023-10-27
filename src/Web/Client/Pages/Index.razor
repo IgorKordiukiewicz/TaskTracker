@@ -18,7 +18,7 @@
         @foreach (var organization in _organizations.Organizations)
         {
             <MudItem lg="3" sm="6">
-                <MudCard Style="height: 200px; cursor: pointer;" onclick="@(() => SelectOrganization(organization.Id))">
+                <MudCard onclick="@(() => SelectOrganization(organization.Id))" Class="organization-card">
                     <MudCardContent>
                         <MudText Typo="Typo.h6">
                             @organization.Name

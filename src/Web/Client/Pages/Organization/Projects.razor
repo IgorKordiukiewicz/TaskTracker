@@ -13,7 +13,7 @@
 {
     <MudGrid>
         <MudItem lg="3" sm="6">
-            <MudPaper Class="d-flex flex-column align-center justify-center" Style="height: 200px; cursor: pointer;" onclick="@(() => _createProjectForm.Open())">
+            <MudPaper Class="d-flex flex-column align-center justify-center project-card" onclick="@(() => _createProjectForm.Open())">
                 <MudText Align="Align.Center">
                     Create a new project
                 </MudText>
@@ -23,7 +23,7 @@
         @foreach (var project in _projectsVM.Projects)
         {
             <MudItem lg="3" sm="6">
-                <MudCard Style="height: 200px; cursor: pointer;" onclick="@(() => SelectProject(project.Id))">
+                <MudCard Class="project-card" onclick="@(() => SelectProject(project.Id))">
                     <MudCardContent>
                         <MudText Typo="Typo.h6">
                             @project.Name

@@ -17,3 +17,36 @@
 html, body, #app, .max-height {
     height: 100%;
 }
+
+.status-board-container {
+    flex-grow: 1;
+    position: relative;
+}
+
+.status-board {
+    overflow-x: auto;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    top: 0;
+    right: 0;
+    display: flex;
+}
+
+.comment-text {
+    width: 100%;
+    border-radius: 5px;
+    background-color: #32323a;
+}
+
+.organization-card, .project-card {
+    height: 200px;
+    cursor: pointer;
+}
+
+.diagram-container {
+    height: calc(100vh - 130px);
+    width: 100%;
+    border: 2px solid white;
+    border-radius: 10px;
+}

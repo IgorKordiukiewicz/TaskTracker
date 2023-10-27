@@ -14,7 +14,7 @@
                 <MudSelectItem Value="@user">@user.Name</MudSelectItem>
             }
         </MudSelect>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserVM is null)" OnClick="() => AddMember(_selectedUserVM.Id)">Add</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserVM is null)" OnClick="() => AddMember(_selectedUserVM!.Id)">Add</MudButton>
     </div>
 }
 
