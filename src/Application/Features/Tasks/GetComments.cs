@@ -34,7 +34,7 @@ internal class GetTaskCommentsHandler : IRequestHandler<GetTaskCommentsQuery, Re
             .Join(_dbContext.Users,
             comment => comment.AuthorId,
             user => user.Id,
-            (comment, user) => new TaskCommentVM(comment.Content, user.Name, comment.CreatedAt))
+            (comment, user) => new TaskCommentVM(comment.Content, user.Email, comment.CreatedAt))
             .ToListAsync();
 
         return Result.Ok(new TaskCommentsVM(comments));

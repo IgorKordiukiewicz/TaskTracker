@@ -52,7 +52,7 @@ internal class GetUsersAvailableForProjectHandler : IRequestHandler<GetUsersAvai
             .Select(x => new UserSearchVM
             {
                 Id = x.Id,
-                Name = x.Name,
+                Name = x.Email,
             })
             .ToListAsync();
 

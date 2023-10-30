@@ -47,12 +47,12 @@ internal class GetUsersAvailableForOrganizationInvitationHandler : IRequestHandl
 
         var searchValue = request.SearchValue.ToLower();
         var users = await _dbContext.Users
-            .Where(x => !unavailableUsers.Contains(x.Id) && x.Name.ToLower().Contains(searchValue))
+            .Where(x => !unavailableUsers.Contains(x.Id) && x.Email.ToLower().Contains(searchValue))
             .Take(5)
             .Select(x => new UserSearchVM
             {
                 Id = x.Id,
-                Name = x.Name,
+                Name = x.Email,
             })
             .ToListAsync();
 

@@ -54,7 +54,7 @@ public class UsersTests
     {
         var user = (await _factory.CreateUsers())[0];
 
-        var result = await _fixture.SendRequest(new RegisterUserCommand(new(user.AuthenticationId, "Name")));
+        var result = await _fixture.SendRequest(new RegisterUserCommand(new(user.AuthenticationId, "email", "firstName", "lastName")));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -65,7 +65,7 @@ public class UsersTests
         var newUserAuthId = "999";
         await _factory.CreateUsers();
 
-        var result = await _fixture.SendRequest(new RegisterUserCommand(new(newUserAuthId, "Name")));
+        var result = await _fixture.SendRequest(new RegisterUserCommand(new(newUserAuthId, "email", "firstName", "lastName")));
 
         using(new AssertionScope())
         {

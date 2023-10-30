@@ -32,7 +32,7 @@ internal class GetOrganizationInvitationsHandler : IRequestHandler<GetOrganizati
             .Join(_dbContext.Users,
             invitation => invitation.UserId,
             user => user.Id,
-            (invitation, user) => new OrganizationInvitationVM(invitation.Id, user.Name, invitation.State))
+            (invitation, user) => new OrganizationInvitationVM(invitation.Id, user.Email, invitation.State))
             .ToListAsync();
 
         return Result.Ok(new OrganizationInvitationsVM(invitations));

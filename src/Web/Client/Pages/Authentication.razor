@@ -44,8 +44,6 @@
             return;
         }
 
-        var userName = state.User.Identity?.Name ?? string.Empty;
-        var model = new UserRegistrationDto(userAuthid, userName);
-        await _requestHandler.PostAsync("users/register", model);
+        _navigationManager.NavigateTo("complete-registration", true);
     }
 }

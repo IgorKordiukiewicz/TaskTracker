@@ -1,7 +1,6 @@
 ﻿using Application.Features.Organizations;
 using Domain.Organizations;
 using Domain.Users;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Shared.Enums;
 using Shared.ViewModels;
 
@@ -70,7 +69,7 @@ public class OrganizationsTests
     public async Task CreateInvitation_ShouldCreateNewInvitation_WhenOrganizationAndUserBothExist()
     {
         var organization = (await _factory.CreateOrganizations())[0];
-        var newUser = User.Create("1234", "newUser");
+        var newUser = User.Create("1234", "newUser","firstName", "lastName");
         await _fixture.SeedDb(db =>
         {
             db.Add(newUser);
@@ -200,8 +199,8 @@ public class OrganizationsTests
     [Fact]
     public async Task GetInvitationsForUser_ShouldReturnUsersInvitations_WhenUserExists()
     {
-        var user1 = User.Create("123", "user1");
-        var user2 = User.Create("1234", "user2");
+        var user1 = User.Create("123", "user1", "firstName", "lastName");
+        var user2 = User.Create("1234", "user2", "firstName", "lastName");
         var org1 = Organization.Create("org1", user1.Id);
         var org2 = Organization.Create("org2", user2.Id);
         var org3 = Organization.Create("org3", user1.Id);
@@ -236,7 +235,7 @@ public class OrganizationsTests
         var user = await _fixture.FirstAsync<User>();
         await _fixture.SeedDb(db =>
         {
-            db.Add(User.Create("1234", "newUser"));
+            db.Add(User.Create("1234", "newUser", "firstName", "lastName"));
         });
 
         var result = await _fixture.SendRequest(new GetOrganizationMembersQuery(organization.Id));
@@ -246,7 +245,7 @@ public class OrganizationsTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Members.Should().BeEquivalentTo(new[]
             {
-                new OrganizationMemberVM(organization.Members[0].Id, user.Name)
+                new OrganizationMemberVM(organization.Members[0].Id, user.Email)
             });
         }
     }
@@ -262,8 +261,8 @@ public class OrganizationsTests
     [Fact]
     public async Task RemoveMember_ShouldRemoveMember_WhenOrganizationExists()
     {
-        var user1 = User.Create("123", "user1");
-        var user2 = User.Create("456", "user2");
+        var user1 = User.Create("123", "user1", "firstName", "lastName");
+        var user2 = User.Create("456", "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
         var invitation = organization.CreateInvitation(user2.Id).Value;
         organization.AcceptInvitation(invitation.Id);
@@ -297,10 +296,10 @@ public class OrganizationsTests
     [Fact]
     public async Task GetInvitations_ShouldReturnAllCreatedInvitationsByOrganization_WhenOrganizationExists()
     {
-        var user1 = User.Create("1", "user1");
-        var user2 = User.Create("2", "user2");
-        var user3 = User.Create("3", "user3");
-        var user4 = User.Create("4", "user4");
+        var user1 = User.Create("1", "user1", "firstName", "lastName");
+        var user2 = User.Create("2", "user2", "firstName", "lastName");
+        var user3 = User.Create("3", "user3", "firstName", "lastName");
+        var user4 = User.Create("4", "user4", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
         var acceptedInvitation = organization.CreateInvitation(user2.Id);
         acceptedInvitation.Value.Accept();
@@ -316,9 +315,9 @@ public class OrganizationsTests
 
         var expectedResult = new OrganizationInvitationsVM(new List<OrganizationInvitationVM>()
         {
-            new(acceptedInvitation.Value.Id, user2.Name, OrganizationInvitationState.Accepted),
-            new(declinedInvitation.Value.Id, user3.Name, OrganizationInvitationState.Declined),
-            new(pendingInvitation.Value.Id, user4.Name, OrganizationInvitationState.Pending),
+            new(acceptedInvitation.Value.Id, user2.Email, OrganizationInvitationState.Accepted),
+            new(declinedInvitation.Value.Id, user3.Email, OrganizationInvitationState.Declined),
+            new(pendingInvitation.Value.Id, user4.Email, OrganizationInvitationState.Pending),
         });
 
         var result = await _fixture.SendRequest(new GetOrganizationInvitationsQuery(organization.Id));
@@ -332,8 +331,8 @@ public class OrganizationsTests
 
     private async Task<Guid> CreateOrganizationWithInvitation()
     {
-        var user1 = User.Create("123", "user1");
-        var user2 = User.Create("1234", "user2");
+        var user1 = User.Create("123", "user1","firstName", "lastName");
+        var user2 = User.Create("1234", "user2","firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
         var invitation = organization.CreateInvitation(user2.Id).Value;
 

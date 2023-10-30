@@ -28,7 +28,7 @@ internal class GetOrganizationMembersHandler : IRequestHandler<GetOrganizationMe
             .Join(_dbContext.Users,
             member => member.UserId,
             user => user.Id,
-            (member, user) => new OrganizationMemberVM(member.Id, user.Name))
+            (member, user) => new OrganizationMemberVM(member.Id, user.Email))
             .ToListAsync();
 
         return Result.Ok(new OrganizationMembersVM(members));

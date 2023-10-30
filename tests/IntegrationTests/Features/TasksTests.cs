@@ -181,8 +181,8 @@ public class TasksTests
             var comments = result.Value.Comments;
             comments.Should().BeEquivalentTo(new[]
             {
-                new TaskCommentVM("xyz", user.Name, earlierDate),
-                new TaskCommentVM("abc", user.Name, laterDate),
+                new TaskCommentVM("xyz", user.Email, earlierDate),
+                new TaskCommentVM("abc", user.Email, laterDate),
             }, options => options.WithStrictOrdering());
         }
     }

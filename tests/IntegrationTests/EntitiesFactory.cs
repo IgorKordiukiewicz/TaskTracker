@@ -17,7 +17,7 @@ public class EntitiesFactory
 
     public async Task<List<User>> CreateUsers(int count = 1)
     {
-        var users = CreateEntities(count, i => User.Create($"authId{DateTime.Now.Ticks}{i}", $"user{i}"));
+        var users = CreateEntities(count, i => User.Create($"authId{DateTime.Now.Ticks}{i}", $"user{i}", "firstName", "lastName"));
 
         await _fixture.SeedDb(db =>
         {

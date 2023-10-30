@@ -1,0 +1,51 @@
+﻿@page "/complete-registration"
+@layout EmptyLayout
+
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject HttpClient _httpClient
+@inject IDialogService _dialogService
+@inject NavigationManager _navigationManager
+
+<MudThemeProvider />
+<MudDialogProvider />
+
+<div style="background-color: black; height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center;">
+    <MudPaper Class="pa-10 d-flex flex-column gap-3" Style="width: 400px;">
+        <MudText Typo="Typo.h5" Align="Align.Center">
+            Complete Registration
+        </MudText>
+        <MudTextField T="string" Label="First Name" Required="true" Variant="Variant.Outlined" @bind-Value="_firstName" />
+        <MudTextField T="string" Label="Last Name" Required="true" Variant="Variant.Outlined" @bind-Value="_lastName" />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Disabled="@(!IsValid())" OnClick="OnCompleteRegistration">Continue</MudButton>
+    </MudPaper>
+</div>
+
+@code {
+    [Parameter]
+    public required string UserAuthId{ get; set; }
+
+    private RequestHandler _requestHandler = null!; // TODO: Inject request handler?
+    private string _firstName = string.Empty;
+    private string _lastName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _requestHandler = new(_httpClient, _dialogService);
+    }
+
+    private async Task OnCompleteRegistration()
+    {
+        var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var userAuthid = state.User.Claims.First(x => x.Type == "sub").Value;
+        var email = state.User.Identity?.Name ?? string.Empty;
+        var model = new UserRegistrationDto(userAuthid, email, _firstName, _lastName);
+        var result = await _requestHandler.PostWithResultAsync("users/register", model);
+        if(result)
+        {
+            _navigationManager.NavigateTo("/", true);
+        }
+    }
+
+    private bool IsValid()
+        => !string.IsNullOrWhiteSpace(_firstName) && !string.IsNullOrWhiteSpace(_lastName);
+}

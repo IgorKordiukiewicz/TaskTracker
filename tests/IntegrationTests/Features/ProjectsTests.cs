@@ -68,8 +68,8 @@ public class ProjectsTests
     [Fact]
     public async Task GetForOrganization_ShouldReturnAListOfProjectsUserIsAMemberOfInGivenOrganization()
     {
-        var user1 = User.Create("123", "user1");
-        var user2 = User.Create("456", "user2");
+        var user1 = User.Create("123", "user1", "firstName", "lastName");
+        var user2 = User.Create("456", "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
         var invitation = organization.CreateInvitation(user2.Id).Value;
         _ = organization.AcceptInvitation(invitation.Id);
@@ -125,8 +125,8 @@ public class ProjectsTests
     [Fact]
     public async Task AddMember_ShouldAddNewMember()
     {
-        var user1 = User.Create("123", "user1");
-        var user2 = User.Create("1234", "user2");
+        var user1 = User.Create("123", "user1", "firstName", "lastName");
+        var user2 = User.Create("1234", "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
         var project = Project.Create("project", organization.Id, user2.Id);
 
@@ -161,7 +161,7 @@ public class ProjectsTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Members.Should().BeEquivalentTo(new[]
             {
-                new ProjectMemberVM(project.Members[0].Id, user.Id, user.Name)
+                new ProjectMemberVM(project.Members[0].Id, user.Id, user.Email)
             });
         }
     }
