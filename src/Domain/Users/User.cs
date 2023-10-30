@@ -10,6 +10,8 @@ public class User : Entity, IAggregateRoot
     public string FirstName { get; private set; } = string.Empty;
     public string LastName { get; private set; } = string.Empty;
 
+    public string FullName => $"{FirstName} {LastName}";
+
     private User(Guid id)
         : base(id)
     { }

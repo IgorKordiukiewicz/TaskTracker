@@ -24,6 +24,8 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.LastName)
             .HasMaxLength(100);
 
+        builder.Ignore(x => x.FullName);
+
         builder.HasIndex(x => x.AuthenticationId)
             .IsUnique();
     }

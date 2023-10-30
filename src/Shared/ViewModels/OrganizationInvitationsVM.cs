@@ -3,4 +3,4 @@
 namespace Shared.ViewModels;
 
 public record OrganizationInvitationsVM(IReadOnlyList<OrganizationInvitationVM> Invitations);
-public record OrganizationInvitationVM(Guid Id, string UserName, OrganizationInvitationState State);
+public record OrganizationInvitationVM(Guid Id, string UserEmail, OrganizationInvitationState State);

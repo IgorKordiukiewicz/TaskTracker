@@ -161,7 +161,7 @@ public class ProjectsTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Members.Should().BeEquivalentTo(new[]
             {
-                new ProjectMemberVM(project.Members[0].Id, user.Id, user.Email)
+                new ProjectMemberVM(project.Members[0].Id, user.Id, user.FullName)
             });
         }
     }

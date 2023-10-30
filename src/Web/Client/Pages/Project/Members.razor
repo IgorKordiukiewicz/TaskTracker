@@ -11,7 +11,7 @@
         <MudSelect Label="Users" @bind-Value="_selectedUserVM" Variant="Variant.Filled" Disabled="@(!_usersVM.Users.Any())">
             @foreach (var user in _usersVM.Users)
             {
-                <MudSelectItem Value="@user">@user.Name</MudSelectItem>
+                <MudSelectItem Value="@user">@user.Email</MudSelectItem>
             }
         </MudSelect>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserVM is null)" OnClick="() => AddMember(_selectedUserVM!.Id)">Add</MudButton>

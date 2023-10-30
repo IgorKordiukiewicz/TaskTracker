@@ -96,7 +96,7 @@
                                     <div>
                                         <div class="d-flex mb-1 align-center justify-space-between">
                                             <div class="d-flex align-center gap-2">
-                                                <MudAvatar Color="Color.Primary">AA</MudAvatar> <!-- TODO: Initials -->
+                                                <MudAvatar Color="Color.Primary">@GetInitials(comment.AuthorName)</MudAvatar> <!-- TODO: Initials -->
                                                 <MudText Style="font-weight: bold;">@comment.AuthorName</MudText>
                                             </div>
                                             <MudText Typo="Typo.caption">@comment.CreatedAt.GetHumanReadableTimeDifference(DateTime.Now)</MudText>
@@ -326,4 +326,7 @@
             return _membersVM!.Members;
         }
     }
+
+    private string GetInitials(string fullName)
+        => string.Concat(fullName.Split(' ').Select(x => x[0]));
 }

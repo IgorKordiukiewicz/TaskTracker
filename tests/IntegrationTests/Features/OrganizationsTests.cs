@@ -245,7 +245,7 @@ public class OrganizationsTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Members.Should().BeEquivalentTo(new[]
             {
-                new OrganizationMemberVM(organization.Members[0].Id, user.Email)
+                new OrganizationMemberVM(organization.Members[0].Id, user.FullName)
             });
         }
     }

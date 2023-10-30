@@ -154,7 +154,7 @@ public class UsersTests
                 new UserSearchVM()
                 {
                     Id = users[1].Id,
-                    Name = "user1"
+                    Email = "user1"
                 }
             });
         }

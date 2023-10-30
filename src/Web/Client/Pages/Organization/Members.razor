@@ -31,7 +31,7 @@
             <MudPaper Class="mt-2">
                 <div class="d-flex gap-2 align-center pa-2">
                     <MudAutocomplete T="UserSearchVM" Label="Invite Users" @bind-Value="_selectedUserForInvitation" SearchFunc="SearchUsers"
-                                     ResetValueOnEmptyText="true" Class="mb-4" AdornmentIcon="@Icons.Material.Filled.Search" ToStringFunc="(user => user.Name)" />
+                                     ResetValueOnEmptyText="true" Class="mb-4" AdornmentIcon="@Icons.Material.Filled.Search" ToStringFunc="(user => user.Email)" />
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserForInvitation is null)" OnClick="SendInvitation">Invite</MudButton>
                 </div>
                 <MudList>
@@ -39,7 +39,7 @@
                     {
                         <MudListItem>
                             <div class="d-flex justify-space-between align-center">
-                                @invitation.UserName
+                                @invitation.UserEmail
                                 <div class="d-flex gap-1 show-on-hover-parent align-center">
                                     <MudChip Variant="Variant.Outlined" Color="@GetInvitationStateColor(invitation.State)">@invitation.State.ToString()</MudChip>
                                     <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => CancelInvitation(invitation.Id)"

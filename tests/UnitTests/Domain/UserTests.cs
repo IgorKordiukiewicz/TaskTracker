@@ -1,4 +1,5 @@
 ﻿using Domain.Users;
+using Web.Client.Pages;
 
 namespace UnitTests.Domain;
 
@@ -22,5 +23,16 @@ public class UserTests
             user.FirstName.Should().Be(firstName);
             user.LastName.Should().Be(lastName);
         }
+    }
+
+    [Fact]
+    public void FullName_ShouldReturnConcatenetedFirstAndLastNames()
+    {
+        var firstName = "FirstName";
+        var lastName = "LastName";
+
+        var user = User.Create("123", "email", firstName, lastName);
+
+        user.FullName.Should().Be($"{firstName} {lastName}");
     }
 }
