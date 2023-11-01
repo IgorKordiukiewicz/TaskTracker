@@ -229,6 +229,14 @@ public class OrganizationsTests
     }
 
     [Fact]
+    public async Task GetMembers_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetOrganizationMembersQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
     public async Task GetMembers_ShouldReturnOrganizationMembers()
     {
         var organization = (await _factory.CreateOrganizations())[0];
@@ -245,7 +253,7 @@ public class OrganizationsTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Members.Should().BeEquivalentTo(new[]
             {
-                new OrganizationMemberVM(organization.Members[0].Id, user.FullName)
+                new OrganizationMemberVM(organization.Members[0].Id, user.FullName, true)
             });
         }
     }

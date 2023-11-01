@@ -17,7 +17,8 @@
                         <MudListItem Icon="@Icons.Material.Filled.Person">
                             <div class="d-flex justify-space-between align-center show-on-hover-parent">
                                 @member.Name
-                                <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)" Class="show-on-hover"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)" 
+                                    Class="@(!member.Owner ? "show-on-hover" : "invisible")"></MudIconButton>
                             </div>
                         </MudListItem>
                     }

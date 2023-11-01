@@ -217,7 +217,18 @@ public class OrganizationTests
     }
 
     [Fact]
-    public void RemoveMember_ShouldRemoveMember_WhenMemberExists()
+    public void RemoveMember_ShouldFail_WhenMemberIsOwner()
+    {
+        var organization = Organization.Create("Name", Guid.NewGuid());
+        var member = organization.Members[0];
+
+        var result = organization.RemoveMember(member.Id);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RemoveMember_ShouldRemoveMember_WhenMemberExistsAndIsNotTheOwner()
     {
         var organization = Organization.Create("Name", Guid.NewGuid());
         var userId = Guid.NewGuid();

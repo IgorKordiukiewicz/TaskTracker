@@ -92,12 +92,17 @@ public class Organization : Entity, IAggregateRoot
         return Result.Ok();
     }
 
-    public Result RemoveMember(Guid memberId) // TODO: Don't allow removing owner
+    public Result RemoveMember(Guid memberId)
     {
         var member = _members.FirstOrDefault(x => x.Id == memberId);
         if (member is null)
         {
             return Result.Fail(new DomainError("Member with this ID does not exist."));
+        }
+
+        if(member.UserId == OwnerId)
+        {
+            return Result.Fail(new DomainError("Can't remove owner."));
         }
 
         _members.Remove(member);
