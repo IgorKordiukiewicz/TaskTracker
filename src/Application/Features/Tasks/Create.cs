@@ -35,6 +35,22 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
             return Result.Fail<Guid>(new ApplicationError("Project with this ID does not exist."));
         }
 
+        Guid? assigneeId = null;
+        if(request.Model.AssigneeMemberId is not null)
+        {
+            var member = (await _dbContext.Projects
+                .AsNoTracking()
+                .Include(x => x.Members)
+                .SingleAsync(x => x.Id == request.ProjectId))
+                .Members.SingleOrDefault(x => x.Id == request.Model.AssigneeMemberId);
+            if (member is null)
+            {
+                return Result.Fail(new ApplicationError("Member with this ID does not exist."));
+            }
+
+            assigneeId = member.UserId;
+        }
+
         var shortId = (await _dbContext.Tasks
             .Where(x => x.ProjectId == request.ProjectId)
             .CountAsync()) + 1;
@@ -45,7 +61,7 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
             .SelectMany(x => x.Statuses)
             .FirstAsync(x => x.Initial);
 
-        var task = Task.Create(shortId, request.ProjectId, request.Model.Title, request.Model.Description, initialTaskStatus.Id);
+        var task = Task.Create(shortId, request.ProjectId, request.Model.Title, request.Model.Description, initialTaskStatus.Id, assigneeId);
 
         await _taskRepository.Add(task);
 

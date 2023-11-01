@@ -46,7 +46,7 @@
                         {
                             <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(currentTaskVM.AssigneeId)" ValueChanged="e => UpdateTaskAssignee(currentTaskVM.Id, e.Id)"
                                        ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-                                @foreach (var member in GetPossibleAssignees(currentTaskVM))
+                                @foreach (var member in GetPossibleAssignees(currentTaskVM.AssigneeId))
                                 {
                                     <MudSelectItem Value="@member"></MudSelectItem>
                                 }
@@ -162,20 +162,26 @@
     </div>
 }
 
-<MudDialog @bind-IsVisible="_createTaskForm.Visible">
-    <TitleContent>
-        <MudText>
-            Create a new task
-        </MudText>
-    </TitleContent>
+<MudDialog @bind-IsVisible="_createTaskForm.Visible" Style="width: 320px;" Options="@(new DialogOptions { NoHeader = true })">
     <DialogContent>
-        <MudTextField @bind-Value="@_createTaskForm.Title" Label="Title" Required="true" />
-        <MudTextField @bind-Value="@_createTaskForm.Description" Label="Description" Required="true" />
+        <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Create a new task</MudText>
+        <MudTextField @bind-Value="@_createTaskForm.Title" Label="Title" Required="true" Variant="Variant.Filled" />
+        <MudTextField @bind-Value="@_createTaskForm.Description" Label="Description" Required="true" Variant="Variant.Filled" />
+        @if (_membersVM is not null)
+        {
+            <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(_createTaskForm.AssigneeMemberId)" ValueChanged="e => { _createTaskForm.AssigneeMemberId = e.Id; }"
+                       ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                @foreach (var member in GetPossibleAssignees(_createTaskForm.AssigneeMemberId))
+                {
+                    <MudSelectItem Value="@member"></MudSelectItem>
+                }
+            </MudSelect>
+        }
+        <div class="d-flex mt-3 gap-2">
+            <MudButton Variant="Variant.Outlined" OnClick="() => _createTaskForm.Close()" FullWidth="true">Cancel</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(!_createTaskForm.IsValid())" OnClick="CreateTask" FullWidth="true">Create</MudButton>
+        </div>
     </DialogContent>
-    <DialogActions>
-        <MudButton Variant="Variant.Filled" OnClick="() => _createTaskForm.Close()">Cancel</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_createTaskForm.IsValid())" OnClick="CreateTask">Create</MudButton>
-    </DialogActions>
 </MudDialog>
 
 @code {
@@ -214,6 +220,7 @@
     {
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public Guid? AssigneeMemberId { get; set; } = null;
 
         public override bool IsValid() => !string.IsNullOrWhiteSpace(Title) && !string.IsNullOrWhiteSpace(Description);
     }
@@ -272,7 +279,8 @@
         var model = new CreateTaskDto()
         {
             Title = _createTaskForm.Title,
-            Description = _createTaskForm.Description
+            Description = _createTaskForm.Description,
+            AssigneeMemberId = _createTaskForm.AssigneeMemberId
         };
         await _requestHandler.PostAsync("tasks", model, new[] { ("ProjectId", ProjectId.ToString()) });
         await UpdateTasksVM();
@@ -315,11 +323,11 @@
         return _membersVM!.Members.FirstOrDefault(x => x.UserId == assigneeId) ?? null;
     }
 
-    private IEnumerable<ProjectMemberVM> GetPossibleAssignees(TaskVM task)
+    private IEnumerable<ProjectMemberVM> GetPossibleAssignees(Guid? assigneeId)
     {
-        if(task.AssigneeId is not null)
+        if (assigneeId is not null)
         {
-            return _membersVM!.Members.Where(x => x.UserId != task.AssigneeId.Value).Append(new(Guid.Empty, Guid.Empty, "-")).Reverse();
+            return _membersVM!.Members.Where(x => x.UserId != assigneeId.Value).Append(new(Guid.Empty, Guid.Empty, "-")).Reverse();
         }
         else
         {

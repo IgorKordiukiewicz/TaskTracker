@@ -34,13 +34,34 @@ public class TasksTests
     }
 
     [Fact]
+    public async System.Threading.Tasks.Task Create_ShouldFail_WhenMemberDoesNotExistAndNewAssigneeIdIsNotNull()
+    {
+        var project = (await _factory.CreateProjects())[0];
+
+        var result = await _fixture.SendRequest(new CreateTaskCommand(project.Id, new CreateTaskDto()
+        {
+            Title = "abc",
+            Description = "abc",
+            AssigneeMemberId = Guid.NewGuid()
+        }));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
     public async System.Threading.Tasks.Task Create_ShouldCreateTask_WithCorrectShortIdAndInitialTaskStatus_WhenProjectExists()
     {
         var tasks = await _factory.CreateTasks(2);
 
         var project = await _fixture.FirstAsync<Project>();
+        var member = await _fixture.FirstAsync<ProjectMember>();
 
-        var result = await _fixture.SendRequest(new CreateTaskCommand(project.Id, _autoFixture.Create<CreateTaskDto>()));
+        var result = await _fixture.SendRequest(new CreateTaskCommand(project.Id, new CreateTaskDto()
+        {
+            Title = "abc",
+            Description = "abc",
+            AssigneeMemberId = member.Id
+        }));
 
         using (new AssertionScope())
         {

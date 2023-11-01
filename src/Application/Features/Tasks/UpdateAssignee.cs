@@ -37,10 +37,10 @@ internal class UpdateTaskAssigneeHandler : IRequestHandler<UpdateTaskAssigneeCom
         if(request.Model.MemberId is not null)
         {
             var member = (await _dbContext.Projects
-            .AsNoTracking()
-            .Include(x => x.Members)
-            .SingleAsync(x => x.Id == task.ProjectId))
-            .Members.SingleOrDefault(x => x.Id == request.Model.MemberId);
+                .AsNoTracking()
+                .Include(x => x.Members)
+                .SingleAsync(x => x.Id == task.ProjectId))
+                .Members.SingleOrDefault(x => x.Id == request.Model.MemberId);
             if (member is null)
             {
                 return Result.Fail(new ApplicationError("Member with this ID does not exist."));

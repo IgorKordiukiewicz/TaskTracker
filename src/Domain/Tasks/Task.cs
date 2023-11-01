@@ -24,7 +24,7 @@ public class Task : Entity, IAggregateRoot
     }
 
     // TODO: Remove unnecessary factory methods
-    public static Task Create(int shortId, Guid projectId, string title, string description, Guid statusId)
+    public static Task Create(int shortId, Guid projectId, string title, string description, Guid statusId, Guid? assigneeId = null)
     {
         return new(Guid.NewGuid())
         {
@@ -32,7 +32,8 @@ public class Task : Entity, IAggregateRoot
             ProjectId = projectId,
             Title = title,
             Description = description,
-            StatusId = statusId
+            StatusId = statusId,
+            AssigneeId = assigneeId
         };
     }
 
