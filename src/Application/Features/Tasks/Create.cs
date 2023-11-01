@@ -12,7 +12,7 @@ public class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
     {
         RuleFor(x => x.ProjectId).NotEmpty();
         RuleFor(x => x.Model.Title).NotEmpty();
-        RuleFor(x => x.Model.Description).NotEmpty(); // TODO: Make description optional?
+        RuleFor(x => x.Model.Description).NotNull();
     }
 }
 

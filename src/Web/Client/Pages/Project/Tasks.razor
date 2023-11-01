@@ -166,12 +166,12 @@
     <DialogContent>
         <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Create a new task</MudText>
         <MudTextField @bind-Value="@_createTaskForm.Title" Label="Title" Required="true" Variant="Variant.Filled" />
-        <MudTextField @bind-Value="@_createTaskForm.Description" Label="Description" Required="true" Variant="Variant.Filled" />
+        <MudTextField @bind-Value="@_createTaskForm.Description" Label="Description" Variant="Variant.Filled" />
         @if (_membersVM is not null)
         {
-            <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(_createTaskForm.AssigneeMemberId)" ValueChanged="e => { _createTaskForm.AssigneeMemberId = e.Id; }"
+            <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(_createTaskForm.Assignee?.UserId)" ValueChanged="e => { _createTaskForm.Assignee = e; }"
                        ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-                @foreach (var member in GetPossibleAssignees(_createTaskForm.AssigneeMemberId))
+                @foreach (var member in GetPossibleAssignees(_createTaskForm.Assignee?.UserId))
                 {
                     <MudSelectItem Value="@member"></MudSelectItem>
                 }
@@ -220,9 +220,9 @@
     {
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public Guid? AssigneeMemberId { get; set; } = null;
+        public ProjectMemberVM? Assignee { get; set; } = null;
 
-        public override bool IsValid() => !string.IsNullOrWhiteSpace(Title) && !string.IsNullOrWhiteSpace(Description);
+        public override bool IsValid() => !string.IsNullOrWhiteSpace(Title);
     }
     private CreateTaskForm _createTaskForm = new();
 
@@ -280,7 +280,7 @@
         {
             Title = _createTaskForm.Title,
             Description = _createTaskForm.Description,
-            AssigneeMemberId = _createTaskForm.AssigneeMemberId
+            AssigneeMemberId = _createTaskForm.Assignee?.Id
         };
         await _requestHandler.PostAsync("tasks", model, new[] { ("ProjectId", ProjectId.ToString()) });
         await UpdateTasksVM();
@@ -325,7 +325,7 @@
 
     private IEnumerable<ProjectMemberVM> GetPossibleAssignees(Guid? assigneeId)
     {
-        if (assigneeId is not null)
+        if (assigneeId is not null && assigneeId != Guid.Empty)
         {
             return _membersVM!.Members.Where(x => x.UserId != assigneeId.Value).Append(new(Guid.Empty, Guid.Empty, "-")).Reverse();
         }
