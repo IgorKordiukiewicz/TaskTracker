@@ -274,7 +274,7 @@
 
         var model = new CreateTaskDto()
         {
-            Title = string.Empty, // TEMP
+            Title =_createTaskForm.Title,
             Description = _createTaskForm.Description,
             AssigneeMemberId = _createTaskForm.Assignee?.Id
         };

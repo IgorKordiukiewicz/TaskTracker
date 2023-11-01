@@ -5,12 +5,13 @@
 
 @code {
     private readonly HttpClient _httpClient;
-    private readonly IDialogService _dialogService;
+    private readonly ISnackbar _snackbar;
 
-    public RequestHandler(HttpClient httpClient, IDialogService dialogService)
+    public RequestHandler(HttpClient httpClient, ISnackbar snackbar)
     {
         _httpClient = httpClient;
-        _dialogService = dialogService;
+        _snackbar = snackbar;
+        _snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
     }
 
     public async Task<TResponse?> GetAsync<TResponse>(string url, Headers? headers = null)
@@ -108,6 +109,6 @@
     private async Task DisplayErrorMessageBox(HttpResponseMessage response)
     {
         var message = response.StatusCode != HttpStatusCode.InternalServerError ? await response.Content.ReadAsStringAsync() : string.Empty;
-        await _dialogService.ShowMessageBox($"{(int)response.StatusCode} {response.ReasonPhrase}", message);
+        _snackbar.Add($"{(int)response.StatusCode} {response.ReasonPhrase}: \n {message}", Severity.Error);
     }
 }
