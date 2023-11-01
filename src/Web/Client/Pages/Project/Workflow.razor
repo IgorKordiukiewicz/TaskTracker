@@ -353,8 +353,7 @@
             return;
         }
 
-        // TODO: yes/no instead of delete/canceL?
-        if (await _dialogService.ShowMessageBox("Confirm action", $"Are you sure you want to delete the status {name}?", yesText: "Delete", cancelText: "Cancel") is null)
+        if (await _dialogService.ShowMessageBox("Confirm action", $"Are you sure you want to delete the status {name}?", yesText: "Yes", cancelText: "No") is null)
         {
             return;
         }
@@ -370,15 +369,14 @@
         }
     }
 
-    private async Task DeleteTransition(string fromStatusName, string toStatusName) // param for bidirectional?
+    private async Task DeleteTransition(string fromStatusName, string toStatusName)
     {
         if (_statusIdByName is null)
         {
             return;
         }
 
-        // TODO: yes/no instead of delete/canceL?
-        if (await _dialogService.ShowMessageBox("Confirm action", $"Are you sure you want to delete the transition from {fromStatusName} to {toStatusName}?", yesText: "Delete", cancelText: "Cancel") is null)
+        if (await _dialogService.ShowMessageBox("Confirm action", $"Are you sure you want to delete the transition from {fromStatusName} to {toStatusName}?", yesText: "Yes", cancelText: "No") is null)
         {
             return;
         }

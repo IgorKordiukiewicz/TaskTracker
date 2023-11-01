@@ -35,7 +35,7 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 
-    public async System.Threading.Tasks.Task AddRemoveChildEntities<TDependent>(IEnumerable<TDependent> actualEntities) // TODO: Rename to AddRemoveChildEntities ?
+    public async System.Threading.Tasks.Task AddRemoveChildEntities<TDependent>(IEnumerable<TDependent> actualEntities)
         where TDependent : Entity
     {
         var dbEntities = await Set<TDependent>().AsNoTracking().Select(x => x.Id).ToListAsync();

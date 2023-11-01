@@ -7,7 +7,7 @@ namespace Application.Data.Repositories;
 public interface IRepository<TEntity> 
     where TEntity : Entity 
 {
-    Task<TEntity?> GetById(Guid id); // TODO: Remove?
+    Task<TEntity?> GetById(Guid id);
     Task<TEntity?> GetBy(Expression<Func<TEntity, bool>> predicate);
     Task<bool> Exists(Expression<Func<TEntity, bool>> predicate);
 

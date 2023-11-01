@@ -4,9 +4,6 @@ using FluentResults;
 
 namespace Domain.Workflows;
 
-// TODO: what would happen if you tried to remove a status that was in use by a task?
-// TODO: move to separate folder?
-// TODO: Add TaskTransitionStatus Value object
 public class Workflow : Entity, IAggregateRoot
 {
     public Guid ProjectId { get; set; }
