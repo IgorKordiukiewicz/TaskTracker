@@ -4,8 +4,7 @@
 @layout ProjectLayout
 @attribute [Authorize]
 
-@inject HttpClient _httpClient
-@inject IDialogService _dialogService
+@inject RequestHandler _requestHandler
 
 @if(_tasksVM is not null) // TODO: Display DisplayType selector in the navbar: Tasks/Board and Tasks/Table
 {
@@ -191,8 +190,6 @@
     [CascadingParameter]
     public ProjectLayout Layout { get; set; } = null!;
 
-    private RequestHandler _requestHandler = null!;
-
     private TasksVM? _tasksVM;
     private Dictionary<string, Guid>? _taskStatusIdByName = new();
 
@@ -229,7 +226,6 @@
     protected override async Task OnInitializedAsync()
     {
         Layout.ProjectId = ProjectId;
-        _requestHandler = new(_httpClient, _dialogService);
 
         await UpdateTasksVM();
         _membersVM = await _requestHandler.GetAsync<ProjectMembersVM>($"projects/{ProjectId}/members");
@@ -278,7 +274,7 @@
 
         var model = new CreateTaskDto()
         {
-            Title = _createTaskForm.Title,
+            Title = string.Empty, // TEMP
             Description = _createTaskForm.Description,
             AssigneeMemberId = _createTaskForm.Assignee?.Id
         };

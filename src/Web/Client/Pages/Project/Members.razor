@@ -2,8 +2,7 @@
 @layout ProjectLayout
 @attribute [Authorize]
 
-@inject HttpClient _httpClient
-@inject IDialogService _dialogService
+@inject RequestHandler _requestHandler
 
 @if(_usersVM is not null)
 {
@@ -39,16 +38,12 @@
     [Parameter]
     public Guid ProjectId { get; init; }
 
-    private RequestHandler _requestHandler = null!;
-
     private ProjectMembersVM? _membersVM;
     private UsersSearchVM? _usersVM;
     private UserSearchVM? _selectedUserVM;
 
     protected override async Task OnInitializedAsync()
     {
-        _requestHandler = new(_httpClient, _dialogService);
-
         await UpdateMembersVM();
     }
 

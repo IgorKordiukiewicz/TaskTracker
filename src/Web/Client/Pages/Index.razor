@@ -1,9 +1,9 @@
 ﻿@page "/"
 @attribute [Authorize]
 
-@inject HttpClient _httpClient
-@inject IDialogService _dialogService
 @inject NavigationManager _navManager
+@inject RequestHandler _requestHandler
+@inject IDialogService _dialogService
 
 @if(_organizations is not null)
 {
@@ -31,15 +31,11 @@
 }
 
 @code {
-    private RequestHandler _requestHandler = null!;
-
     private UserOrganizationInvitations? _invitations;
     private OrganizationsForUserVM? _organizations;
 
     protected override async Task OnInitializedAsync()
     {
-        _requestHandler = new(_httpClient, _dialogService);
-
         await UpdateViewModels();
     }
 

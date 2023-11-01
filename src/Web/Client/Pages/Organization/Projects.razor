@@ -4,10 +4,8 @@
 @layout OrganizationLayout 
 @attribute [Authorize]
 
-@inject HttpClient _httpClient
-@inject IDialogService _dialogService
 @inject NavigationManager _navManager
-
+@inject RequestHandler _requestHandler
 
 @if (_projectsVM is not null)
 {
@@ -57,8 +55,6 @@
     [CascadingParameter]
     public OrganizationLayout Layout { get; set; } = null!;
 
-    private RequestHandler _requestHandler = null!;
-
     private ProjectsVM? _projectsVM;
 
     private class CreateProjectForm : DialogForm
@@ -72,8 +68,6 @@
     protected override async Task OnInitializedAsync()
     {
         Layout.OrganizationId = OrganizationId;
-
-        _requestHandler = new(_httpClient, _dialogService);
 
         await UpdateProjectsList();
     }

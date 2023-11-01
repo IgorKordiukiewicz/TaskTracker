@@ -3,8 +3,7 @@
 @layout OrganizationLayout
 @attribute [Authorize]
 
-@inject HttpClient _httpClient
-@inject IDialogService _dialogService
+@inject RequestHandler _requestHandler
 
 <MudTabs Outlined="false" Border="true" ApplyEffectsToContainer="true" Color="Color.Default" Rounded="true" Position="Position.Top" Centered="false">
     <MudTabPanel Text="Members">
@@ -62,8 +61,6 @@
 
     // TODO: Assign Layout.OrganizationId here too?
 
-    private RequestHandler _requestHandler = null!;
-
     private OrganizationMembersVM? _membersVM;
     private OrganizationInvitationsVM? _invitationsVM;
 
@@ -71,8 +68,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _requestHandler = new(_httpClient, _dialogService);
-
         await UpdateMembersVM();
         await UpdateInvitationsVM();
     }

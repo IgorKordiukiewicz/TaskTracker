@@ -2,9 +2,8 @@
 @layout EmptyLayout
 
 @inject AuthenticationStateProvider _authenticationStateProvider
-@inject HttpClient _httpClient
-@inject IDialogService _dialogService
 @inject NavigationManager _navigationManager
+@inject RequestHandler _requestHandler
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -24,14 +23,8 @@
     [Parameter]
     public required string UserAuthId{ get; set; }
 
-    private RequestHandler _requestHandler = null!; // TODO: Inject request handler?
     private string _firstName = string.Empty;
     private string _lastName = string.Empty;
-
-    protected override async Task OnInitializedAsync()
-    {
-        _requestHandler = new(_httpClient, _dialogService);
-    }
 
     private async Task OnCompleteRegistration()
     {

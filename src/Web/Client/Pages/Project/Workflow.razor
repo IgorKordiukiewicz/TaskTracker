@@ -20,9 +20,9 @@
 @using Web.Client.Diagrams;
 @using static Web.Client.Components.TaskStatusNode;
 
-@inject HttpClient _httpClient
-@inject IDialogService _dialogService
 @inject ISnackbar _snackbar
+@inject RequestHandler _requestHandler
+@inject IDialogService _dialogService
 
 @if(_workflowVM is not null)
 {
@@ -157,8 +157,6 @@
     [CascadingParameter]
     public ProjectLayout Layout { get; set; } = null!;
 
-    private RequestHandler _requestHandler = null!;
-
     private BlazorDiagram _diagram = null!;
 
     private WorkflowVM? _workflowVM;
@@ -192,7 +190,6 @@
     protected override async Task OnInitializedAsync()
     {
         Layout.ProjectId = ProjectId;
-        _requestHandler = new(_httpClient, _dialogService);
 
         await UpdateWorkflowVM();
         if(_workflowVM is null)

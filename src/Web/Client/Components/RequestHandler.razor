@@ -4,7 +4,6 @@
 @using Headers = IEnumerable<(string Name, string Value)>;
 
 @code {
-    // Dependencies have to be manually passed from parent component, because [Inject]/@Inject injects them after parent initialization
     private readonly HttpClient _httpClient;
     private readonly IDialogService _dialogService;
 
