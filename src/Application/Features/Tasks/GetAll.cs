@@ -50,7 +50,9 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
                 Description = task.Description,
                 AssigneeId = task.AssigneeId,
                 Status = status.Id,
-            }).ToListAsync();
+            })
+            .OrderByDescending(x => x.ShortId)
+            .ToListAsync();
 
         var allTaskStatuses = workflow.Statuses
             .Select(x => new TaskStatusDetailedVM(x.Id, x.Name, x.DisplayOrder))
