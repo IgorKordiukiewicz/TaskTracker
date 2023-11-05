@@ -167,27 +167,20 @@
     </div>
 }
 
-<MudDialog @bind-IsVisible="_createTaskForm.Visible" Style="width: 320px;" Options="@(new DialogOptions { NoHeader = true })">
-    <DialogContent>
-        <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">Create a new task</MudText>
-        <MudTextField @bind-Value="@_createTaskForm.Title" Label="Title" Required="true" Variant="Variant.Filled" />
-        <MudTextField @bind-Value="@_createTaskForm.Description" Label="Description" Variant="Variant.Filled" />
-        @if (_membersVM is not null)
-        {
-            <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(_createTaskForm.Assignee?.UserId)" ValueChanged="e => { _createTaskForm.Assignee = e; }"
-                       ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-                @foreach (var member in GetPossibleAssignees(_createTaskForm.Assignee?.UserId))
-                {
-                    <MudSelectItem Value="@member"></MudSelectItem>
-                }
-            </MudSelect>
-        }
-        <div class="d-flex mt-3 gap-2">
-            <MudButton Variant="Variant.Outlined" OnClick="() => _createTaskForm.Close()" FullWidth="true">Cancel</MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(!_createTaskForm.IsValid())" OnClick="CreateTask" FullWidth="true">Create</MudButton>
-        </div>
-    </DialogContent>
-</MudDialog>
+<Dialog Title="Create a new task" Form="_createTaskForm" OnConfirm="CreateTask">
+    <MudTextField @bind-Value="@_createTaskForm.Title" Label="Title" Required="true" Variant="Variant.Filled" />
+    <MudTextField @bind-Value="@_createTaskForm.Description" Label="Description" Variant="Variant.Filled" />
+    @if (_membersVM is not null)
+    {
+        <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(_createTaskForm.Assignee?.UserId)" ValueChanged="e => { _createTaskForm.Assignee = e; }"
+                   ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+            @foreach (var member in GetPossibleAssignees(_createTaskForm.Assignee?.UserId))
+            {
+                <MudSelectItem Value="@member"></MudSelectItem>
+            }
+        </MudSelect>
+    }
+</Dialog>
 
 @code {
     [Parameter]

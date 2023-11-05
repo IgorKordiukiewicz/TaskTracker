@@ -106,49 +106,28 @@
     </MudGrid>
 }
 
-<MudDialog @bind-IsVisible="_addStatusForm.Visible">
-    <TitleContent>
-        <MudText>
-            Add a new status
-        </MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudTextField @bind-Value="@_addStatusForm.Name" Label="Name" Required="true" />
-    </DialogContent>
-    <DialogActions>
-        <MudButton Variant="Variant.Filled" OnClick="() => _addStatusForm.Close()">Cancel</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_addStatusForm.IsValid())" OnClick="AddStatus">Add</MudButton>
-    </DialogActions>
-</MudDialog>
+<Dialog Title="Add a new status" Form="_addStatusForm" ConfirmButtonText="Add" OnConfirm="AddStatus">
+    <MudTextField @bind-Value="@_addStatusForm.Name" Label="Name" Required="true" Variant="Variant.Filled" />
+</Dialog>
 
-<MudDialog @bind-IsVisible="_addTransitionForm.Visible">
-    <TitleContent>
-        <MudText>
-            Add a new transition
-        </MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudSelect T="string" Label="From Status" @bind-Value="_addTransitionForm.FromStatus">
-            @foreach(var fromStatus in _workflowVM.GetAvailableFromStatuses())
+<Dialog Title="Add a new transition" Form="_addTransitionForm" ConfirmButtonText="Add" OnConfirm="AddTransition">
+    <MudSelect T="string" Label="From Status" @bind-Value="_addTransitionForm.FromStatus" AnchorOrigin="Origin.BottomCenter">
+        @foreach (var fromStatus in _workflowVM.GetAvailableFromStatuses())
+        {
+            <MudSelectItem Value="@fromStatus" />
+        }
+    </MudSelect>
+    <MudSelect T="string" Label="To Status" @bind-Value="_addTransitionForm.ToStatus" Disabled="@string.IsNullOrWhiteSpace(_addTransitionForm.FromStatus)" 
+        AnchorOrigin="Origin.BottomCenter">
+        @if (!string.IsNullOrWhiteSpace(_addTransitionForm.FromStatus))
+        {
+            foreach (var toStatus in _workflowVM.GetAvailableToStatuses(_addTransitionForm.FromStatus, _statusIdByName))
             {
-                <MudSelectItem Value="@fromStatus" />
+                <MudSelectItem Value="@toStatus" />
             }
-        </MudSelect>
-        <MudSelect T="string" Label="To Status" @bind-Value="_addTransitionForm.ToStatus" Disabled="@string.IsNullOrWhiteSpace(_addTransitionForm.FromStatus)">
-            @if (!string.IsNullOrWhiteSpace(_addTransitionForm.FromStatus))
-            {
-                foreach (var toStatus in _workflowVM.GetAvailableToStatuses(_addTransitionForm.FromStatus, _statusIdByName))
-                {
-                    <MudSelectItem Value="@toStatus" />
-                }
-            }
-        </MudSelect>
-    </DialogContent>
-    <DialogActions>
-        <MudButton Variant="Variant.Filled" OnClick="() => _addTransitionForm.Close()">Cancel</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_addTransitionForm.IsValid())" OnClick="AddTransition">Add</MudButton>
-    </DialogActions>
-</MudDialog>
+        }
+    </MudSelect>
+</Dialog>
 
 @code {
     [Parameter]

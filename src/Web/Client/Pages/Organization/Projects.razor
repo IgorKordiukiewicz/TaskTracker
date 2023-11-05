@@ -33,20 +33,9 @@
     </MudGrid>
 }
 
-<MudDialog @bind-IsVisible="_createProjectForm.Visible" >
-    <TitleContent>
-        <MudText>
-            Create a new project
-        </MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudTextField @bind-Value="@_createProjectForm.Name" Label="Name" Required="true" />
-    </DialogContent>
-    <DialogActions>
-        <MudButton Variant="Variant.Filled" OnClick="() => _createProjectForm.Close()">Cancel</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_createProjectForm.IsValid())" OnClick="CreateProject">Create</MudButton>
-    </DialogActions>
-</MudDialog>
+<Dialog Title="Create a new project" Form="_createProjectForm" OnConfirm="CreateProject">
+    <MudTextField @bind-Value="@_createProjectForm.Name" Label="Name" Required="true" Variant="Variant.Filled" />
+</Dialog>
 
 @code {
     [Parameter]
