@@ -231,7 +231,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Layout.ProjectId = ProjectId;
+        await Layout.SetProjectId(ProjectId);
 
         await UpdateTasksVM();
         _membersVM = await _requestHandler.GetAsync<ProjectMembersVM>($"projects/{ProjectId}/members");

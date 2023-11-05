@@ -1,5 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@using Web.Client.Common;
+@inherits LayoutComponentBase
 @layout MainLayout
+
+@inject HierarchyNavigationService _hierarchyNavigationService
 
 <CascadingValue Value="this">
     <MudDrawer ClipMode="DrawerClipMode.Always" Elevation="2" Open="true">
@@ -15,8 +18,14 @@
 
 
 @code {
-    public Guid ProjectId { get; set; }
+    public Guid ProjectId { get; private set; }
+
+    public async Task SetProjectId(Guid projectId)
+    {
+        ProjectId = projectId;
+        await _hierarchyNavigationService.OpenProjectPage(ProjectId);
+    }
 
     private string GetPageRoute(string page)
-        => $"project/{ProjectId}/{page}";
+    => $"project/{ProjectId}/{page}";
 }

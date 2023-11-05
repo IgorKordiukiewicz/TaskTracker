@@ -34,6 +34,13 @@ public class OrganizationsController : ControllerBase
         return result.ToHttpResult();
     }
 
+    [HttpGet("{organizationId:guid}/nav-data")]
+    public async Task<IActionResult> GetOrganizationNavData(Guid organizationId)
+    {
+        var result = await _mediator.Send(new GetOrganizationNavDataQuery(organizationId));
+        return result.ToHttpResult();
+    }
+
     [HttpPost("{organizationId:guid}/invitations")]
     [Authorize(Policy.OrganizationMember)]
     public async Task<IActionResult> CreateOrganizationInvitation(Guid organizationId, [FromBody] CreateOrganizationInvitationDto model)

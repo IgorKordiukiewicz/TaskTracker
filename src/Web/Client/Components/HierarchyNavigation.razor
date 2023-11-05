@@ -1,0 +1,11 @@
+﻿@using Web.Client.Common;
+@inject HierarchyNavigationService _hierarchyNavigationService
+
+<MudBreadcrumbs Items="@_hierarchyNavigationService.GetBreadcrumbs()"></MudBreadcrumbs>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        _hierarchyNavigationService.Updated += () => StateHasChanged();
+    }
+}

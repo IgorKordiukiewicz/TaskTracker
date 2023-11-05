@@ -1,9 +1,11 @@
 ﻿@page "/"
+@using Web.Client.Common;
 @attribute [Authorize]
 
 @inject NavigationManager _navManager
 @inject RequestHandler _requestHandler
 @inject IDialogService _dialogService
+@inject HierarchyNavigationService _hierarchyNavigationService
 
 @if(_organizations is not null)
 {
@@ -36,6 +38,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _hierarchyNavigationService.OpenIndexPage();
         await UpdateViewModels();
     }
 

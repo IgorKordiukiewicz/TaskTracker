@@ -16,6 +16,7 @@ builder.Services.AddHttpClient("ServerAPI",
 
 builder.Services.AddScoped<RequestHandler>();
 builder.Services.AddScoped<UserDataService>();
+builder.Services.AddScoped<HierarchyNavigationService>();
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ServerAPI"));
 
 builder.Services.AddOidcAuthentication(options =>

@@ -337,6 +337,28 @@ public class OrganizationsTests
         }
     }
 
+    [Fact]
+    public async Task GetNavData_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetOrganizationNavDataQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetNavData_ShouldReturnNavData_WhenOrganizationExist()
+    {
+        var organization = (await _factory.CreateOrganizations())[0];
+
+        var result = await _fixture.SendRequest(new GetOrganizationNavDataQuery(organization.Id));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().Be(new OrganizationNavigationVM(new(organization.Id, organization.Name)));
+        }
+    }
+
     private async Task<Guid> CreateOrganizationWithInvitation()
     {
         var user1 = User.Create("123", "user1","firstName", "lastName");

@@ -35,6 +35,13 @@ public class ProjectsController : ControllerBase
         return result.ToHttpResult();
     }
 
+    [HttpGet("{projectId:guid}/nav-data")]
+    public async Task<IActionResult> GetProjectNavData(Guid projectId)
+    {
+        var result = await _mediator.Send(new GetProjectNavDataQuery(projectId));
+        return result.ToHttpResult();
+    }
+
     [HttpPost("{projectId:guid}/members")]
     [Authorize(Policy.ProjectMember)]
     public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberDto model)

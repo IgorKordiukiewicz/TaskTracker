@@ -211,4 +211,27 @@ public class ProjectsTests
             result.Value.OrganizationId.Should().Be(project.OrganizationId);
         }
     }
+
+    [Fact]
+    public async Task GetNavData_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetProjectNavDataQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetNavData_ShouldReturnNavData_WhenProjectExists()
+    {
+        var project = (await _factory.CreateProjects())[0];
+        var organization = await _fixture.FirstAsync<Organization>();
+
+        var result = await _fixture.SendRequest(new GetProjectNavDataQuery(project.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().Be(new ProjectNavigationVM(new(project.Id, project.Name), new(organization.Id, organization.Name)));
+        }
+    }
 }

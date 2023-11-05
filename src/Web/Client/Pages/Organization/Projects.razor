@@ -67,7 +67,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Layout.OrganizationId = OrganizationId;
+        await Layout.SetOrganizationId(OrganizationId);
 
         await UpdateProjectsList();
     }

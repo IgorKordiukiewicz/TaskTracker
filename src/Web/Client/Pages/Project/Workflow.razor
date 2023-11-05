@@ -184,12 +184,9 @@
     private TaskStatusNodeModel? _selectedNode = null;
     private (string SourceNode, string TargetNode, bool Bidirectional)? _selectedLink = null;
 
-    // Adding/removing transitions:
-    // 1. Add transition button with form: fromNode & toNode and deleting transitions from diagram with confirmation dialog, and deleting nodes also from diagram with confirmation dialog
-    // issue is that its hard to select transitions when they are in both directions. create 1 link (instead of 2) with 2 arrows and upon deleting select which direction to delete
     protected override async Task OnInitializedAsync()
     {
-        Layout.ProjectId = ProjectId;
+        await Layout.SetProjectId(ProjectId);
 
         await UpdateWorkflowVM();
         if(_workflowVM is null)
