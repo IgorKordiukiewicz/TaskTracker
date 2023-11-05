@@ -26,6 +26,13 @@ public class UsersController : ControllerBase
         return result.ToHttpResult();
     }
 
+    [HttpGet("{userAuthenticationId}/data")] // without /data the endpoint is not called
+    public async Task<IActionResult> GetUser(string userAuthenticationId)
+    {
+        var result = await _mediator.Send(new GetUserQuery(userAuthenticationId));
+        return result.ToHttpResult();
+    }
+
     [HttpPost("register")]
     public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDto model)
     {

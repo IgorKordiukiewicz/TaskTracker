@@ -4,6 +4,7 @@ using MudBlazor.Services;
 using Web.Client;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Web.Client.Components;
+using Web.Client.Common;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -14,6 +15,7 @@ builder.Services.AddHttpClient("ServerAPI",
     .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 
 builder.Services.AddScoped<RequestHandler>();
+builder.Services.AddScoped<UserDataService>();
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ServerAPI"));
 
 builder.Services.AddOidcAuthentication(options =>

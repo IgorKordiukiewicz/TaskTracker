@@ -22,6 +22,30 @@ public class UsersTests
     }
 
     [Fact]
+    public async Task GetUser_ShouldFail_WhenUserWithGivenAuthIdDoesntExist()
+    {
+        await _factory.CreateUsers();
+
+        var result = await _fixture.SendRequest(new GetUserQuery("-"));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetUser_ShouldReturnUserData_WhenUserWithGivenAuthIdEixsts()
+    {
+        var user = (await _factory.CreateUsers())[0];
+
+        var result = await _fixture.SendRequest(new GetUserQuery(user.AuthenticationId));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().Be(new UserVM(user.Id, user.FullName, user.Email));
+        }
+    }
+
+    [Fact]
     public async Task IsUserRegistered_ShouldReturnTrue_WhenUserWithGivenAuthIdExists()
     {
         var user = (await _factory.CreateUsers())[0];
