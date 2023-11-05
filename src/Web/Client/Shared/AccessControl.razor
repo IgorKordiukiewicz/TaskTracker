@@ -12,7 +12,7 @@
         {
             <MudMenu TransformOrigin="Origin.TopCenter" AnchorOrigin="Origin.BottomCenter">
                 <ActivatorContent>
-                    <MudAvatar Color="Color.Primary">@GetInitials(_userDataService.CurrentUserVM.Name)</MudAvatar>
+                    <UserAvatar Name="@_userDataService.CurrentUserVM.Name" />
                 </ActivatorContent>
                 <ChildContent>
                     <MudMenuItem>Settings</MudMenuItem> <!-- TODO -->
@@ -44,8 +44,4 @@
         await _signOutManager.SetSignOutState();
         _navigationManager.NavigateTo("authentication/logout");
     }
-
-
-    private string GetInitials(string fullName)
-        => string.Concat(fullName.Split(' ').Select(x => x[0]));
 }
