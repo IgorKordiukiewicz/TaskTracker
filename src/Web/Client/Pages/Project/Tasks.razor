@@ -1,4 +1,4 @@
-﻿@page "/project/{projectId:guid}/tasks"
+﻿@page "/project/{projectId:guid}/tasks/{displayTypeStr}"
 @page "/project/{projectId:guid}/"
 @using Web.Client.Common;
 @layout ProjectLayout
@@ -6,18 +6,12 @@
 
 @inject RequestHandler _requestHandler
 
-@if(_tasksVM is not null) // TODO: Display DisplayType selector in the navbar: Tasks/Board and Tasks/Table
+@if(_tasksVM is not null)
 {
     <div class="d-flex flex-column max-height">
-        <div class="d-flex gap-2 align-center mb-4">
-            <MudSelect @bind-Value="_displayType" Label="Display Type" Variant="Variant.Outlined">
-                <MudSelectItem Value="DisplayType.Table">Table</MudSelectItem>
-                <MudSelectItem Value="DisplayType.Board">Board</MudSelectItem>
-            </MudSelect>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _createTaskForm.Open()" Style="height: 50%;">
-                Create
-            </MudButton>
-        </div>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _createTaskForm.Open()" Class="mb-4" Style="height: 40px;">
+            Create
+        </MudButton>
         <MudOverlay Visible="@(_openedTaskId is not null)" DarkBackground="true">
             <MudPaper Class="pa-6" Style="width: 640px;">
                 @{
@@ -113,7 +107,7 @@
                 </MudGrid>
             </MudPaper>
         </MudOverlay>
-        @if(_displayType == DisplayType.Table)
+        @if(GetDisplayType() == DisplayType.Table)
         {
         <MudTable Items="@_tasksVM.Tasks" Hover="true" RowClass="clickable" OnRowClick="(TableRowClickEventArgs<TaskVM> args) => OpenTaskDetailsPopup(args.Item.Id)" Bordered="true">
             <ColGroup>
@@ -186,6 +180,9 @@
     [Parameter]
     public Guid ProjectId { get; init; }
 
+    [Parameter]
+    public string? DisplayTypeStr { get; set; }
+
     [CascadingParameter]
     public ProjectLayout Layout { get; set; } = null!;
 
@@ -210,7 +207,6 @@
         Table,
         Board
     }
-    private DisplayType _displayType = DisplayType.Table;
 
     private class CreateTaskForm : DialogForm
     {
@@ -233,6 +229,13 @@
             _memberNameById = _membersVM.Members.ToDictionary(k => k.Id, v => v.Name);
         }
     }
+
+    private DisplayType GetDisplayType() => (DisplayTypeStr?.ToLower() ?? string.Empty) switch
+    {
+        "table" => DisplayType.Table,
+        "board" => DisplayType.Board,
+        _ => DisplayType.Table
+    };
 
     private async Task UpdateTasksVM()
     {
