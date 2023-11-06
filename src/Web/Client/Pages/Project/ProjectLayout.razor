@@ -7,12 +7,12 @@
 <CascadingValue Value="this">
     <MudDrawer ClipMode="DrawerClipMode.Always" Elevation="2" Open="true">
         <MudNavMenu>
-            <MudNavGroup Title="Tasks" Expanded="true">
-                <MudNavLink Href="@GetPageRoute("tasks/table")">Table</MudNavLink>
-                <MudNavLink Href="@GetPageRoute("tasks/board")">Board</MudNavLink>
+            <MudNavGroup Title="Tasks" Expanded="true" Icon="@Icons.Material.Filled.Task">
+                <MudNavLink Href="@GetPageRoute("tasks/table")" Icon="@Icons.Material.Filled.ViewList">Table</MudNavLink>
+                <MudNavLink Href="@GetPageRoute("tasks/board")" Icon="@Icons.Material.Filled.ViewKanban">Board</MudNavLink>
             </MudNavGroup>
-            <MudNavLink Href="@GetPageRoute("members")">Members</MudNavLink>
-            <MudNavLink Href="@GetPageRoute("workflow")">Workflow</MudNavLink>
+            <MudNavLink Href="@GetPageRoute("members")" Icon="@Icons.Material.Filled.Person">Members</MudNavLink>
+            <MudNavLink Href="@GetPageRoute("workflow")" Icon="@Icons.Material.Filled.Route">Workflow</MudNavLink>
         </MudNavMenu>
     </MudDrawer>
 
