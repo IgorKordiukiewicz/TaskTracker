@@ -16,6 +16,7 @@
 @using Blazor.Diagrams.Core.Routers;
 @using Blazor.Diagrams.Options;
 @using System.Text.Json;
+@using Blazored.LocalStorage;
 @using Web.Client.Common;
 @using Web.Client.Diagrams;
 @using static Web.Client.Components.TaskStatusNode;
@@ -23,6 +24,7 @@
 @inject ISnackbar _snackbar
 @inject RequestHandler _requestHandler
 @inject IDialogService _dialogService
+@inject ILocalStorageService _localStorage
 
 @if(_workflowVM is not null)
 {
@@ -196,8 +198,19 @@
         _diagram.GetBehavior<KeyboardShortcutsBehavior>()?.RemoveShortcut("Delete", false, false, false);
         _diagram.SelectionChanged += OnSelectionChanged;
 
-        _diagram.InitializeStatusNodes(_workflowVM.Statuses, out var nodeByStatusId);
+        var savedLayout = await _localStorage.GetDiagramLayout(ProjectId);
+        _diagram.InitializeStatusNodes(_workflowVM.Statuses, savedLayout, out var nodeByStatusId);
         _diagram.InitializeTransitionLinks(_workflowVM.Transitions, nodeByStatusId);
+
+        foreach(var node in _diagram.Nodes)
+        {
+            node.Moved += OnNodeMoved;
+        }
+    }
+
+    private async void OnNodeMoved(MovableModel? model)
+    {
+        await SaveDiagramLayout();
     }
 
     private async Task UpdateWorkflowVM(string? newStatus = null, 
@@ -231,6 +244,11 @@
         if(deletedTransition is not null)
         {
             _diagram.DeleteTransitionLink(deletedTransition.Value);
+        }
+
+        if(_diagram is not null)
+        {
+            await SaveDiagramLayout();
         }
     }
 
@@ -365,5 +383,10 @@
             _selectedLink = null;
             await UpdateWorkflowVM(deletedTransition: (fromStatusName, toStatusName));
         }
+    }
+
+    private async Task SaveDiagramLayout()
+    {
+        await _localStorage.SaveDiagramLayout(_diagram, ProjectId);
     }
 }

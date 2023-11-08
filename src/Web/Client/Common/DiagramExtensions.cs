@@ -11,20 +11,31 @@ namespace Web.Client.Common;
 public static class DiagramExtensions
 {
     public static void InitializeStatusNodes(this BlazorDiagram diagram, 
-        IReadOnlyList<WorkflowTaskStatusVM> Statuses, out Dictionary<Guid, TaskStatusNodeModel> nodeByStatusId)
+        IReadOnlyList<WorkflowTaskStatusVM> Statuses, WorkflowDiagramLayout? savedLayout, out Dictionary<Guid, TaskStatusNodeModel> nodeByStatusId)
     {
         var currentPositionX = 50;
         nodeByStatusId = new Dictionary<Guid, TaskStatusNodeModel>();
 
         foreach (var status in Statuses)
         {
-            var node = diagram.Nodes.Add(new TaskStatusNodeModel(position: new Point(currentPositionX, 50))
+            var nameUpper = status.Name.ToUpper();
+            Point position;
+            if(savedLayout is not null)
+            {
+                var (x, y) = savedLayout.PositionByNodeName[nameUpper];
+                position = new Point(x, y);
+            }
+            else
+            {
+                position = new Point(currentPositionX, 50);
+                currentPositionX += 250;
+            }
+
+            var node = diagram.Nodes.Add(new TaskStatusNodeModel(position: position)
             {
                 Name = status.Name.ToUpper()
             });
             nodeByStatusId.Add(status.Id, node);
-
-            currentPositionX += 250;
         }
     }
 

@@ -5,6 +5,7 @@ using Web.Client;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Web.Client.Components;
 using Web.Client.Common;
+using Blazored.LocalStorage;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -17,6 +18,7 @@ builder.Services.AddHttpClient("ServerAPI",
 builder.Services.AddScoped<RequestHandler>();
 builder.Services.AddScoped<UserDataService>();
 builder.Services.AddScoped<HierarchyNavigationService>();
+builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ServerAPI"));
 
 builder.Services.AddOidcAuthentication(options =>

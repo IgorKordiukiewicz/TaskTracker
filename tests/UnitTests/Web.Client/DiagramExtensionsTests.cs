@@ -19,7 +19,7 @@ public class DiagramExtensionsTests
         var diagram = new BlazorDiagram();
         var statuses = _fixture.CreateMany<WorkflowTaskStatusVM>(4).ToList();
 
-        diagram.InitializeStatusNodes(statuses, out var nodeByStatusId);
+        diagram.InitializeStatusNodes(statuses, null, out var nodeByStatusId);
 
         using(new AssertionScope())
         {
