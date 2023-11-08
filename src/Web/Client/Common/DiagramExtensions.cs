@@ -24,7 +24,7 @@ public static class DiagramExtensions
             });
             nodeByStatusId.Add(status.Id, node);
 
-            currentPositionX += 150;
+            currentPositionX += 250;
         }
     }
 
