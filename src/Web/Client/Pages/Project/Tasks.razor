@@ -148,6 +148,9 @@
                     <MudTd DataLabel="Status">@context.Status.Name</MudTd>
                     <MudTd DataLabel="Assignee">@(GetCurrentAssigneeVM(context.AssigneeId)?.Name ?? "-")</MudTd>
                 </RowTemplate>
+                <PagerContent>
+                    <MudTablePager HorizontalAlignment="HorizontalAlignment.End" />
+                </PagerContent>
             </MudTable>
         }
         else
