@@ -6,12 +6,32 @@
 
 @inject RequestHandler _requestHandler
 
-@if(_tasksVM is not null)
+@if(_tasksVM is not null && _membersVM is not null)
 {
     <div class="d-flex flex-column max-height">
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _createTaskForm.Open()" Class="mb-4" Style="height: 40px;">
-            Create
-        </MudButton>
+        <MudPaper Class="d-flex gap-2 mb-2 pa-4 align-end">
+            <MudTextField T="string" @bind-Value="_filters.Title" Label="Title" Variant="Variant.Filled" AdornmentIcon="@Icons.Material.Filled.Search" Adornment="Adornment.Start" Class="flex-grow-1" FullWidth="true"></MudTextField>
+            <MudSelect Label="Status" Variant="Variant.Filled" MultiSelection="true" SelectAll="true" SelectAllText="All" @bind-SelectedValues="_filters.Statuses" 
+                Style="width: 300px;" ToStringFunc="@(x => x.Name)">
+                @foreach(var status in _tasksVM.AllTaskStatuses)
+                {
+                    <MudSelectItem Value="@status"></MudSelectItem>
+                }
+            </MudSelect>
+            <MudSelect Label="Assignee" Variant="Variant.Filled" MultiSelection="true" SelectAll="true" SelectAllText="All" @bind-SelectedValues="_filters.Assignees"
+                    Style="width: 300px;" ToStringFunc="@(x => x.Name)">
+                @foreach(var member in _membersVM.Members)
+                {
+                    <MudSelectItem Value="@member"></MudSelectItem>
+                }
+            </MudSelect>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Search" Style="height: 90%;" Class="px-8" OnClick="() => FilterTasks()">
+                Search
+            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => _createTaskForm.Open()" Style="height: 90%;" StartIcon="@Icons.Material.Filled.AddTask" Class="px-8">
+                Create
+            </MudButton>
+        </MudPaper>
         <MudOverlay Visible="@(_openedTaskId is not null)" DarkBackground="true">
             <MudPaper Class="pa-6" Style="width: 640px;">
                 @{
@@ -109,31 +129,31 @@
         </MudOverlay>
         @if(GetDisplayType() == DisplayType.Table)
         {
-        <MudTable Items="@_tasksVM.Tasks" Hover="true" RowClass="clickable" OnRowClick="(TableRowClickEventArgs<TaskVM> args) => OpenTaskDetailsPopup(args.Item.Id)" Bordered="true">
-            <ColGroup>
-                <col style="width: 100px;" />
-                <col />
-                <col style="width: 200px;" />
-                <col style="width: 200px;" />
-            </ColGroup>
-            <HeaderContent>
-                <MudTh>ID</MudTh>
-                <MudTh>Title</MudTh>
-                <MudTh>Status</MudTh>
-                <MudTh>Assignee</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="ID">@context.ShortId</MudTd>
-                <MudTd DataLabel="Title">@context.Title</MudTd>
-                <MudTd DataLabel="Status">@context.Status.Name</MudTd>
-                <MudTd DataLabel="Assignee">@(GetCurrentAssigneeVM(context.AssigneeId)?.Name ?? "-")</MudTd>
-            </RowTemplate>
-        </MudTable>
+            <MudTable Items="@_tasks" Hover="true" RowClass="clickable" OnRowClick="(TableRowClickEventArgs<TaskVM> args) => OpenTaskDetailsPopup(args.Item.Id)" Bordered="true">
+                <ColGroup>
+                    <col style="width: 100px;" />
+                    <col />
+                    <col style="width: 200px;" />
+                    <col style="width: 200px;" />
+                </ColGroup>
+                <HeaderContent>
+                    <MudTh>ID</MudTh>
+                    <MudTh>Title</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh>Assignee</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="ID">@context.ShortId</MudTd>
+                    <MudTd DataLabel="Title">@context.Title</MudTd>
+                    <MudTd DataLabel="Status">@context.Status.Name</MudTd>
+                    <MudTd DataLabel="Assignee">@(GetCurrentAssigneeVM(context.AssigneeId)?.Name ?? "-")</MudTd>
+                </RowTemplate>
+            </MudTable>
         }
         else
         {
         <div class="status-board-container">
-            <MudDropContainer T="TaskVM" Items="@_tasksVM.Tasks" ItemsSelector="@((items, dropzone) => items.Status.Name == dropzone)" ApplyDropClassesOnDragStarted="true" Class="status-board"
+            <MudDropContainer T="TaskVM" Items="@_tasks" ItemsSelector="@((items, dropzone) => items.Status.Name == dropzone)" ApplyDropClassesOnDragStarted="true" Class="status-board"
                               ItemDropped="TaskDropped" CanDropClass="mud-border-success" NoDropClass="mud-border-error">
                 <ChildContent>
                     @foreach (var status in _tasksVM.AllTaskStatuses.OrderBy(x => x.DisplayOrder).Select(x => x.Name))
@@ -188,6 +208,7 @@
 
     private TasksVM? _tasksVM;
     private Dictionary<string, Guid>? _taskStatusIdByName = new();
+    private IEnumerable<TaskVM>? _tasks;
 
     private ProjectMembersVM? _membersVM;
     private Dictionary<Guid, string> _memberNameById = new();
@@ -218,6 +239,15 @@
     }
     private CreateTaskForm _createTaskForm = new();
 
+    private IEnumerable<TaskStatusDetailedVM> _selectedValues = new List<TaskStatusDetailedVM>();
+    private class Filters
+    {
+        public string Title { get; set; } = string.Empty;
+        public IEnumerable<TaskStatusDetailedVM> Statuses { get; set; } = new List<TaskStatusDetailedVM>();
+        public IEnumerable<ProjectMemberVM> Assignees { get; set; } = new List<ProjectMemberVM>();
+    }
+    private Filters _filters = new();
+
     protected override async Task OnInitializedAsync()
     {
         await Layout.SetProjectId(ProjectId);
@@ -237,11 +267,24 @@
         _ => DisplayType.Table
     };
 
+    private void FilterTasks()
+    {
+        var titleLower = _filters.Title.ToLower();
+        var statuses = _filters.Statuses.Select(x => x.Id).ToHashSet();
+        var assignees = _filters.Assignees.Select(x => x.UserId).ToHashSet();
+        _tasks = _tasksVM!.Tasks.Where(x => 
+            (!string.IsNullOrWhiteSpace(titleLower) ? x.Title.ToLower().Contains(titleLower) : true)
+            && (statuses.Any() ? statuses.Contains(x.Status.Id) : true)
+            && (assignees.Any() ? assignees.Contains(x.AssigneeId.GetValueOrDefault()) : true))
+            .ToList();
+    }
+
     private async Task UpdateTasksVM()
     {
         _tasksVM = await _requestHandler.GetAsync<TasksVM>("tasks", new[] { ("ProjectId", ProjectId.ToString() )});
         _taskStatusIdByName = _tasksVM?.AllTaskStatuses
             .ToDictionary(x => x.Name, x => x.Id);
+        FilterTasks();
     }
 
     private async Task UpdateTaskStatus(Guid taskId, Guid newStatusId)
