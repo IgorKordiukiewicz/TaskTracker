@@ -5,6 +5,7 @@
 @attribute [Authorize]
 
 @inject RequestHandler _requestHandler
+@inject UserDataService _userDataService
 
 @if(_tasksVM is not null && _membersVM is not null)
 {
@@ -20,7 +21,7 @@
             </MudSelect>
             <MudSelect Label="Assignee" Variant="Variant.Filled" MultiSelection="true" SelectAll="true" SelectAllText="All" @bind-SelectedValues="_filters.Assignees"
                     Style="width: 300px;" ToStringFunc="@(x => x.Name)">
-                @foreach(var member in _membersVM.Members)
+                @foreach(var member in GetAssigneesForFilters())
                 {
                     <MudSelectItem Value="@member"></MudSelectItem>
                 }
@@ -380,5 +381,11 @@
         {
             return _membersVM!.Members;
         }
+    }
+
+    private IEnumerable<ProjectMemberVM> GetAssigneesForFilters()
+    {
+        var currentUserMember = _membersVM!.Members.First(x => x.UserId == _userDataService.CurrentUserVM!.Id);
+        return new ProjectMemberVM[] { new(Guid.Empty, Guid.Empty, "-"), new(currentUserMember.Id, currentUserMember.UserId, "@me") }.Concat(_membersVM.Members);
     }
 }
