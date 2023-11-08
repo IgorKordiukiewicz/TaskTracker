@@ -25,6 +25,9 @@
                     <MudSelectItem Value="@member"></MudSelectItem>
                 }
             </MudSelect>
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Clear" Style="height: 90%;" Class="px-8" OnClick="() => { _filters = new(); FilterTasks(); }">
+                Clear
+            </MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Search" Style="height: 90%;" Class="px-8" OnClick="() => FilterTasks()">
                 Search
             </MudButton>
