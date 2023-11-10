@@ -11,38 +11,54 @@
 @if(_tasksVM is not null && _membersVM is not null)
 {
     <div class="d-flex flex-column max-height">
-        <MudPaper Class="d-flex gap-2 mb-2 pa-4 align-end">
-            <MudTextField T="string" @bind-Value="_filters.Title" Label="Title" Variant="Variant.Filled" AdornmentIcon="@Icons.Material.Filled.Search" Adornment="Adornment.Start" Class="flex-grow-1" FullWidth="true"></MudTextField>
-            <MudSelect Label="Status" Variant="Variant.Filled" MultiSelection="true" SelectAll="true" SelectAllText="All" @bind-SelectedValues="_filters.Statuses" 
-                Style="width: 300px;" ToStringFunc="@(x => x.Name)">
-                @foreach(var status in _tasksVM.AllTaskStatuses)
-                {
-                    <MudSelectItem Value="@status"></MudSelectItem>
-                }
-            </MudSelect>
-            <MudSelect Label="Priority" Variant="Variant.Filled" MultiSelection="true" SelectAll="true" SelectAllText="All" @bind-SelectedValues="_filters.Priorities"
-                       Style="width: 300px;">
-                @foreach (var priority in Enum.GetValues<TaskPriority>())
-                {
-                    <MudSelectItem Value="@priority"></MudSelectItem>
-                }
-            </MudSelect>
-            <MudSelect Label="Assignee" Variant="Variant.Filled" MultiSelection="true" SelectAll="true" SelectAllText="All" @bind-SelectedValues="_filters.Assignees"
-                    Style="width: 300px;" ToStringFunc="@(x => x.Name)">
-                @foreach(var member in GetAssigneesForFilters())
-                {
-                    <MudSelectItem Value="@member"></MudSelectItem>
-                }
-            </MudSelect>
-            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Clear" Style="height: 90%;" Class="px-8" OnClick="() => { _filters = new(); FilterTasks(); }">
-                Clear
-            </MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Search" Style="height: 90%;" Class="px-8" OnClick="() => FilterTasks()">
-                Search
-            </MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => _createTaskForm.Open()" Style="height: 90%;" StartIcon="@Icons.Material.Filled.AddTask" Class="px-8">
-                Create
-            </MudButton>
+        <MudPaper Class="mb-2" Style="width: 100%;">
+            <MudGrid Class="d-flex align-end  pa-3" Spacing="1">
+                <MudItem lg="3" xs="12">
+                    <MudTextField T="string" @bind-Value="_filters.Title" Label="Title" Variant="Variant.Filled" AdornmentIcon="@Icons.Material.Filled.Search" Adornment="Adornment.Start" Class="flex-grow-1" FullWidth="true"></MudTextField>
+                </MudItem>
+                <MudItem lg="2" xs="12">
+                    <MudSelect Label="Status" Variant="Variant.Filled" MultiSelection="true" SelectAll="true" SelectAllText="All" @bind-SelectedValues="_filters.Statuses"
+                               ToStringFunc="@(x => x.Name)" FullWidth="true" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var status in _tasksVM.AllTaskStatuses)
+                        {
+                            <MudSelectItem Value="@status"></MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem lg="2" xs="12">
+                    <MudSelect Label="Priority" Variant="Variant.Filled" MultiSelection="true" SelectAll="true" SelectAllText="All" @bind-SelectedValues="_filters.Priorities"
+                               FullWidth="true" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var priority in Enum.GetValues<TaskPriority>())
+                        {
+                            <MudSelectItem Value="@priority"></MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem lg="2" xs="12">
+                    <MudSelect Label="Assignee" Variant="Variant.Filled" MultiSelection="true" SelectAll="true" SelectAllText="All" @bind-SelectedValues="_filters.Assignees"
+                               ToStringFunc="@(x => x.Name)" FullWidth="true" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var member in GetAssigneesForFilters())
+                        {
+                            <MudSelectItem Value="@member"></MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem lg="1" xs="4">
+                    <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Clear" Style="height: 55px;" FullWidth="true" OnClick="() => { _filters = new(); FilterTasks(); }">
+                        Clear
+                    </MudButton>
+                </MudItem>
+                <MudItem lg="1" xs="4">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Search" Style="height: 55px;" FullWidth="true" OnClick="() => FilterTasks()">
+                    Search
+                </MudButton>
+                </MudItem>
+                <MudItem lg="1" xs="4">
+                    <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="() => _createTaskForm.Open()" Style="height: 55px;" StartIcon="@Icons.Material.Filled.AddTask" FullWidth="true">
+                        Create
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
         </MudPaper>
         <MudOverlay Visible="@(_openedTaskId is not null)" DarkBackground="true">
             <MudPaper Class="pa-6" Style="width: 640px;">
