@@ -1,6 +1,7 @@
 ﻿@page "/project/{projectId:guid}/tasks/{displayTypeStr}"
 @page "/project/{projectId:guid}/"
 @using Web.Client.Common;
+@using global::Shared.Enums;
 @layout ProjectLayout
 @attribute [Authorize]
 
@@ -17,6 +18,13 @@
                 @foreach(var status in _tasksVM.AllTaskStatuses)
                 {
                     <MudSelectItem Value="@status"></MudSelectItem>
+                }
+            </MudSelect>
+            <MudSelect Label="Priority" Variant="Variant.Filled" MultiSelection="true" SelectAll="true" SelectAllText="All" @bind-SelectedValues="_filters.Priorities"
+                       Style="width: 300px;">
+                @foreach (var priority in Enum.GetValues<TaskPriority>())
+                {
+                    <MudSelectItem Value="@priority"></MudSelectItem>
                 }
             </MudSelect>
             <MudSelect Label="Assignee" Variant="Variant.Filled" MultiSelection="true" SelectAll="true" SelectAllText="All" @bind-SelectedValues="_filters.Assignees"
@@ -49,7 +57,7 @@
                 </div>
                 <MudGrid>
                     <MudDivider />
-                    <MudItem md="6">
+                    <MudItem md="12">
                         <MudSelect T="TaskStatusVM" Value="@currentTaskVM.Status" ValueChanged="e => UpdateTaskStatus(currentTaskVM.Id, e.Id)"
                                    ToStringFunc="@(x => x.Name)" Label="Status" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
                             @foreach (var status in currentTaskVM.PossibleNextStatuses)
@@ -57,8 +65,13 @@
                                 <MudSelectItem Value="@status"></MudSelectItem>
                             }
                         </MudSelect>
-                    </MudItem>
-                    <MudItem md="6">
+                        <MudSelect T="TaskPriority" Value="@currentTaskVM.Priority" ValueChanged="e => UpdateTaskPriority(currentTaskVM.Id, e)"
+                                   Label="Priority" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                            @foreach (var priority in Enum.GetValues<TaskPriority>())
+                            {
+                                <MudSelectItem Value="@priority"></MudSelectItem>
+                            }
+                        </MudSelect>
                         @if (_membersVM is not null)
                         {
                             <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(currentTaskVM.AssigneeId)" ValueChanged="e => UpdateTaskAssignee(currentTaskVM.Id, e.Id)"
@@ -139,17 +152,20 @@
                     <col />
                     <col style="width: 200px;" />
                     <col style="width: 200px;" />
+                    <col style="width: 200px;" />
                 </ColGroup>
                 <HeaderContent>
                     <MudTh>ID</MudTh>
                     <MudTh>Title</MudTh>
                     <MudTh>Status</MudTh>
+                    <MudTh>Priority</MudTh>
                     <MudTh>Assignee</MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="ID">@context.ShortId</MudTd>
                     <MudTd DataLabel="Title">@context.Title</MudTd>
                     <MudTd DataLabel="Status">@context.Status.Name</MudTd>
+                    <MudTd DataLabel="Priority">@context.Priority</MudTd>
                     <MudTd DataLabel="Assignee">@(GetCurrentAssigneeVM(context.AssigneeId)?.Name ?? "-")</MudTd>
                 </RowTemplate>
                 <PagerContent>
@@ -194,6 +210,12 @@
 <Dialog Title="Create a new task" Form="_createTaskForm" OnConfirm="CreateTask">
     <MudTextField @bind-Value="@_createTaskForm.Title" Label="Title" Required="true" Variant="Variant.Filled" />
     <MudTextField @bind-Value="@_createTaskForm.Description" Label="Description" Variant="Variant.Filled" />
+    <MudSelect @bind-Value="@_createTaskForm.Priority" Label="Priority" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+        @foreach(var priority in Enum.GetValues<TaskPriority>())
+        {
+            <MudSelectItem Value="@priority"></MudSelectItem>
+        }
+    </MudSelect>
     @if (_membersVM is not null)
     {
         <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(_createTaskForm.Assignee?.UserId)" ValueChanged="e => { _createTaskForm.Assignee = e; }"
@@ -243,6 +265,7 @@
     {
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public TaskPriority Priority { get; set; } = TaskPriority.Normal;
         public ProjectMemberVM? Assignee { get; set; } = null;
 
         public override bool IsValid() => !string.IsNullOrWhiteSpace(Title);
@@ -255,6 +278,7 @@
         public string Title { get; set; } = string.Empty;
         public IEnumerable<TaskStatusDetailedVM> Statuses { get; set; } = new List<TaskStatusDetailedVM>();
         public IEnumerable<ProjectMemberVM> Assignees { get; set; } = new List<ProjectMemberVM>();
+        public IEnumerable<TaskPriority> Priorities { get; set; } = new List<TaskPriority>();
     }
     private Filters _filters = new();
 
@@ -282,10 +306,13 @@
         var titleLower = _filters.Title.ToLower();
         var statuses = _filters.Statuses.Select(x => x.Id).ToHashSet();
         var assignees = _filters.Assignees.Select(x => x.UserId).ToHashSet();
+        var priorities = _filters.Priorities.ToHashSet();
+
         _tasks = _tasksVM!.Tasks.Where(x => 
             (!string.IsNullOrWhiteSpace(titleLower) ? x.Title.ToLower().Contains(titleLower) : true)
             && (statuses.Any() ? statuses.Contains(x.Status.Id) : true)
-            && (assignees.Any() ? assignees.Contains(x.AssigneeId.GetValueOrDefault()) : true))
+            && (assignees.Any() ? assignees.Contains(x.AssigneeId.GetValueOrDefault()) : true)
+            && (priorities.Any() ? priorities.Contains(x.Priority) : true))
             .ToList();
     }
 
@@ -301,6 +328,11 @@
     {
         await _requestHandler.PostAsync($"tasks/{taskId}/update-status/{newStatusId}", headers: new[] { ("ProjectId", ProjectId.ToString()) });
         await UpdateTasksVM(); // TODO: Optimize it, don't fetch all tasks again
+    }
+
+    private async Task UpdateTaskPriority(Guid taskId, TaskPriority newPriority)
+    {
+        // TODO
     }
 
     private async Task UpdateTaskAssignee(Guid taskId, Guid memberId)
@@ -331,6 +363,7 @@
         {
             Title =_createTaskForm.Title,
             Description = _createTaskForm.Description,
+            Priority = _createTaskForm.Priority,
             AssigneeMemberId = _createTaskForm.Assignee?.Id
         };
         await _requestHandler.PostAsync("tasks", model, new[] { ("ProjectId", ProjectId.ToString()) });

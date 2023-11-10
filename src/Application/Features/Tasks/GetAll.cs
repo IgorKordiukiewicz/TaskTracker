@@ -49,6 +49,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
                 Title = task.Title,
                 Description = task.Description,
                 AssigneeId = task.AssigneeId,
+                Priority = task.Priority,
                 Status = status.Id,
             })
             .OrderByDescending(x => x.ShortId)
@@ -71,6 +72,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
             Title = x.Title,
             Description = x.Description,
             AssigneeId = x.AssigneeId,
+            Priority = x.Priority,
             Status = new(x.Status, statusesById[x.Status].Name),
             PossibleNextStatuses = possibleNextStatusesByStatus[x.Status].Select(xx => new TaskStatusVM(xx, statusesById[xx].Name)).ToList(),
         }).ToList(), allTaskStatuses);

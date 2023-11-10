@@ -1,5 +1,6 @@
 ﻿using Domain.Tasks;
 using Domain.Workflows;
+using Shared.Enums;
 using Task = Domain.Tasks.Task;
 
 namespace UnitTests.Domain;
@@ -87,6 +88,19 @@ public class TaskTests
             task.AssigneeId.Should().NotBe(assigneeIdBefore.ToString());
         }
     }
+
+    [Fact]
+    public void UpdatePriority_ShouldUpdatePriority()
+    {
+        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
+        var priority = task.Priority;
+        var newPriority = Enum.GetValues<TaskPriority>().Where(x => x != priority).First();
+
+        task.UpdatePriority(newPriority);
+
+        task.Priority.Should().Be(newPriority);
+    }
+        
 
     [Fact]
     public void AddComment_ShouldAddComment()

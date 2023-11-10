@@ -2,6 +2,7 @@
 using Domain.Errors;
 using Domain.Workflows;
 using FluentResults;
+using Shared.Enums;
 
 namespace Domain.Tasks;
 
@@ -13,6 +14,8 @@ public class Task : Entity, IAggregateRoot
     public string Description { get; private set; } = string.Empty;
     public Guid StatusId { get; private set; } = default!;
     public Guid? AssigneeId { get; private set; } = null;
+    public TaskPriority Priority { get; private set; } = TaskPriority.Normal;
+
 
     private readonly List<TaskComment> _comments = new();
     public IReadOnlyList<TaskComment> Comments => _comments.AsReadOnly();
@@ -24,7 +27,7 @@ public class Task : Entity, IAggregateRoot
     }
 
     // TODO: Remove unnecessary factory methods
-    public static Task Create(int shortId, Guid projectId, string title, string description, Guid statusId, Guid? assigneeId = null)
+    public static Task Create(int shortId, Guid projectId, string title, string description, Guid statusId, Guid? assigneeId = null, TaskPriority priority = TaskPriority.Normal)
     {
         return new(Guid.NewGuid())
         {
@@ -33,7 +36,8 @@ public class Task : Entity, IAggregateRoot
             Title = title,
             Description = description,
             StatusId = statusId,
-            AssigneeId = assigneeId
+            AssigneeId = assigneeId,
+            Priority = priority
         };
     }
 
@@ -56,6 +60,11 @@ public class Task : Entity, IAggregateRoot
     public void Unassign()
     {
         AssigneeId = null;
+    }
+
+    public void UpdatePriority(TaskPriority newPriority)
+    {
+        Priority = newPriority;
     }
 
     public void AddComment(string content, Guid authorId, DateTime now)

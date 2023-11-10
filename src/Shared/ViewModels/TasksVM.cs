@@ -1,4 +1,6 @@
-﻿namespace Shared.ViewModels;
+﻿using Shared.Enums;
+
+namespace Shared.ViewModels;
 
 public record TasksVM(IReadOnlyList<TaskVM> Tasks, IReadOnlyList<TaskStatusDetailedVM> AllTaskStatuses);
 
@@ -9,6 +11,7 @@ public record TaskVM
     public required string Title { get; init; }
     public required string Description { get; init; }
     public required Guid? AssigneeId { get; init; }
+    public required TaskPriority Priority { get; init; }
     public required TaskStatusVM Status { get; init; }
     public required IReadOnlyList<TaskStatusVM> PossibleNextStatuses { get; init; }
 }

@@ -61,7 +61,8 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
             .SelectMany(x => x.Statuses)
             .FirstAsync(x => x.Initial);
 
-        var task = Task.Create(shortId, request.ProjectId, request.Model.Title, request.Model.Description, initialTaskStatus.Id, assigneeId);
+        var task = Task.Create(shortId, request.ProjectId, request.Model.Title, request.Model.Description, 
+            initialTaskStatus.Id, assigneeId, request.Model.Priority);
 
         await _taskRepository.Add(task);
 

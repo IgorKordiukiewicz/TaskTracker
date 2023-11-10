@@ -1,9 +1,12 @@
-﻿namespace Shared.Dtos;
+﻿using Shared.Enums;
+
+namespace Shared.Dtos;
 
 public record CreateTaskDto
 {
     public required string Title { get; init; }
     public string Description { get; init; } = string.Empty;
+    public TaskPriority Priority { get; init; }
     public Guid? AssigneeMemberId { get; init; }
 }
 
