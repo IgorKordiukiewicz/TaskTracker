@@ -12,3 +12,4 @@ public record CreateTaskDto
 
 public record AddTaskCommentDto(string Content);
 public record UpdateTaskAssigneeDto(Guid? MemberId);
+public record UpdateTaskPriorityDto(TaskPriority Priority);

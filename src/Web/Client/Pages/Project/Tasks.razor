@@ -348,7 +348,9 @@
 
     private async Task UpdateTaskPriority(Guid taskId, TaskPriority newPriority)
     {
-        // TODO
+        var model = new UpdateTaskPriorityDto(newPriority);
+        await _requestHandler.PostAsync($"tasks/{taskId}/update-priority", model, headers: new[] { ("ProjectId", ProjectId.ToString()) });
+        await UpdateTasksVM();
     }
 
     private async Task UpdateTaskAssignee(Guid taskId, Guid memberId)

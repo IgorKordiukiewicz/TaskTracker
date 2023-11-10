@@ -4,6 +4,7 @@ using Domain.Tasks;
 using Domain.Users;
 using Domain.Workflows;
 using Shared.Dtos;
+using Shared.Enums;
 using Shared.ViewModels;
 using Task = Domain.Tasks.Task;
 using TaskStatus = Domain.Workflows.TaskStatus;
@@ -247,7 +248,6 @@ public class TasksTests
     public async System.Threading.Tasks.Task UpdateAssignee_ShouldSucceed_WhenTaskExistsAndNewAssigneeIdIsNull()
     {
         var task = (await _factory.CreateTasks())[0];
-        var member = await _fixture.FirstAsync<ProjectMember>();
 
         var result = await _fixture.SendRequest(new UpdateTaskAssigneeCommand(task.Id, new(null)));
 
@@ -257,6 +257,29 @@ public class TasksTests
 
             var updatedTask = await _fixture.FirstAsync<Task>();
             updatedTask.AssigneeId.Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdatePriority_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateTaskPriorityCommand(Guid.NewGuid(), new(TaskPriority.Normal)));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdatePriority_ShouldSucceed_WhenTaskExists()
+    {
+        var task = (await _factory.CreateTasks())[0];
+        var newPriority = TaskPriority.Urgent;
+
+        var result = await _fixture.SendRequest(new UpdateTaskPriorityCommand(task.Id, new(newPriority)));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<Task>(x => x.Id == task.Id)).Priority.Should().Be(newPriority);
         }
     }
 }
