@@ -4,16 +4,17 @@
 
 @inject HierarchyNavigationService _hierarchyNavigationService
 
-<CascadingValue Value="this">
-    <MudDrawer ClipMode="DrawerClipMode.Always" Elevation="2" Open="true">
-        <MudNavMenu>
-            <MudNavLink Href="@GetPageRoute("projects")" Icon="@Icons.Material.Filled.ViewQuilt">Projects</MudNavLink>
-            <MudNavLink Href="@GetPageRoute("members")" Icon="@Icons.Material.Filled.Person">Members</MudNavLink>
-        </MudNavMenu>
-    </MudDrawer>
-
-    @Body
-</CascadingValue>
+<AuthorizeView Policy="OrganizationMember">
+    <CascadingValue Value="this">
+        <MudDrawer ClipMode="DrawerClipMode.Always" Elevation="2" Open="true">
+            <MudNavMenu>
+                <MudNavLink Href="@GetPageRoute("projects")" Icon="@Icons.Material.Filled.ViewQuilt">Projects</MudNavLink>
+                <MudNavLink Href="@GetPageRoute("members")" Icon="@Icons.Material.Filled.Person">Members</MudNavLink>
+            </MudNavMenu>
+        </MudDrawer>
+        @Body
+    </CascadingValue>
+</AuthorizeView>
 
 
 @code {

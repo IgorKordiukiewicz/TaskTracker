@@ -4,20 +4,22 @@
 
 @inject HierarchyNavigationService _hierarchyNavigationService
 
-<CascadingValue Value="this">
-    <MudDrawer ClipMode="DrawerClipMode.Always" Elevation="2" Open="true">
-        <MudNavMenu>
-            <MudNavGroup Title="Tasks" Expanded="true" Icon="@Icons.Material.Filled.Task">
-                <MudNavLink Href="@GetPageRoute("tasks/table")" Icon="@Icons.Material.Filled.ViewList">Table</MudNavLink>
-                <MudNavLink Href="@GetPageRoute("tasks/board")" Icon="@Icons.Material.Filled.ViewKanban">Board</MudNavLink>
-            </MudNavGroup>
-            <MudNavLink Href="@GetPageRoute("members")" Icon="@Icons.Material.Filled.Person">Members</MudNavLink>
-            <MudNavLink Href="@GetPageRoute("workflow")" Icon="@Icons.Material.Filled.Route">Workflow</MudNavLink>
-        </MudNavMenu>
-    </MudDrawer>
+<AuthorizeView Policy="ProjectMember">
+    <CascadingValue Value="this">
+        <MudDrawer ClipMode="DrawerClipMode.Always" Elevation="2" Open="true">
+            <MudNavMenu>
+                <MudNavGroup Title="Tasks" Expanded="true" Icon="@Icons.Material.Filled.Task">
+                    <MudNavLink Href="@GetPageRoute("tasks/table")" Icon="@Icons.Material.Filled.ViewList">Table</MudNavLink>
+                    <MudNavLink Href="@GetPageRoute("tasks/board")" Icon="@Icons.Material.Filled.ViewKanban">Board</MudNavLink>
+                </MudNavGroup>
+                <MudNavLink Href="@GetPageRoute("members")" Icon="@Icons.Material.Filled.Person">Members</MudNavLink>
+                <MudNavLink Href="@GetPageRoute("workflow")" Icon="@Icons.Material.Filled.Route">Workflow</MudNavLink>
+            </MudNavMenu>
+        </MudDrawer>
 
-    @Body
-</CascadingValue>
+        @Body
+    </CascadingValue>
+</AuthorizeView>
 
 
 @code {

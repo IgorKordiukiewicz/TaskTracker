@@ -2,6 +2,7 @@
 
 namespace Application.Features.Users;
 
+// TODO: Rename to GetUserAuthData or GetUserMembershipData or sth
 public record GetUserQuery(string AuthenticationId) : IRequest<Result<UserVM>>;
 
 internal class GetUserQueryValidator : AbstractValidator<GetUserQuery>
@@ -24,8 +25,8 @@ internal class GetUserHandler : IRequestHandler<GetUserQuery, Result<UserVM>>
     public async Task<Result<UserVM>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
         var user = await _dbContext.Users
+            .AsNoTracking()
             .Where(x => x.AuthenticationId == request.AuthenticationId)
-            .Select(x => new UserVM(x.Id, x.FullName, x.Email))
             .SingleOrDefaultAsync();
 
         if(user is null)
@@ -33,6 +34,18 @@ internal class GetUserHandler : IRequestHandler<GetUserQuery, Result<UserVM>>
             return Result.Fail<UserVM>(new ApplicationError("User with this AuthID does not exist."));
         }
 
-        return user;
+        var organizationsMember = await _dbContext.Organizations
+            .Include(x => x.Members)
+            .Where(x => x.Members.Any(xx => xx.UserId == user.Id))
+            .Select(x => x.Id)
+            .ToListAsync();
+
+        var projectsMember = await _dbContext.Projects
+            .Include(x => x.Members)
+            .Where(x => x.Members.Any(xx => xx.UserId == user.Id))
+            .Select(x => x.Id)
+            .ToListAsync();
+
+        return Result.Ok(new UserVM(user.Id, user.FullName, user.Email, organizationsMember, projectsMember));
     }
 }
