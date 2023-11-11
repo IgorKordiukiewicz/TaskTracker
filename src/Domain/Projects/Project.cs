@@ -4,7 +4,7 @@ using FluentResults;
 
 namespace Domain.Projects;
 
-public class Project : Entity
+public class Project : Entity, IAggregateRoot
 {
     public string Name { get; private set; } = string.Empty;
     public Guid OrganizationId { get; private set; }
