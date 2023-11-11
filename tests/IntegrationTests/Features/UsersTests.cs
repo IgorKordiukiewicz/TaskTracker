@@ -35,13 +35,15 @@ public class UsersTests
     public async Task GetUser_ShouldReturnUserData_WhenUserWithGivenAuthIdEixsts()
     {
         var user = (await _factory.CreateUsers())[0];
+        var organizationsIds = (await _fixture.GetAsync<Organization>()).Select(x => x.Id).ToList();
+        var projectsIds = (await _fixture.GetAsync<Project>()).Select(x => x.Id).ToList();
 
         var result = await _fixture.SendRequest(new GetUserQuery(user.AuthenticationId));
 
         using(new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().Be(new UserVM(user.Id, user.FullName, user.Email));
+            result.Value.Should().BeEquivalentTo(new UserVM(user.Id, user.FullName, user.Email, organizationsIds, projectsIds));
         }
     }
 
