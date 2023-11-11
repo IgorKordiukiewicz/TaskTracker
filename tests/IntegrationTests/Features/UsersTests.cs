@@ -11,7 +11,6 @@ public class UsersTests
 {
     private readonly IntegrationTestsFixture _fixture;
     private readonly EntitiesFactory _factory;
-    private readonly string _authId = "123123";
 
     public UsersTests(IntegrationTestsFixture fixture)
     {
