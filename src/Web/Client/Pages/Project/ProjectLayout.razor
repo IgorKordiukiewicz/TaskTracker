@@ -1,10 +1,11 @@
 ﻿@using Web.Client.Common;
+@using global::Shared;
 @inherits LayoutComponentBase
 @layout MainLayout
 
 @inject HierarchyNavigationService _hierarchyNavigationService
 
-<AuthorizeView Policy="ProjectMember">
+<AuthorizeView Policy="@Policy.ProjectMember">
     <CascadingValue Value="this">
         <MudDrawer ClipMode="DrawerClipMode.Always" Elevation="2" Open="true">
             <MudNavMenu>
