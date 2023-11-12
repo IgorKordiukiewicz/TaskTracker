@@ -1,4 +1,7 @@
 ﻿using Domain.Common;
+using Domain.Organizations;
+using Domain.Projects;
+using Shared.Enums;
 
 namespace UnitTests.Domain;
 
@@ -13,8 +16,8 @@ public enum TestPermissions
 
 public class TestRole : Role<TestPermissions>
 {
-    public TestRole(string name, TestPermissions permissions, bool modifiable = true) 
-        : base(name, permissions, modifiable)
+    public TestRole(string name, TestPermissions permissions, RoleType type = RoleType.Custom) 
+        : base(name, permissions, type)
     {
     }
 }
@@ -74,4 +77,69 @@ public class RoleTests
 
         role.Permissions.Should().Be(TestPermissions.A);
     }
+
+    [Fact]
+    public void ProjectRole_CreateDefaultRoles_ShouldReturnAdminAndReadOnlyRole()
+    {
+        var projectId = Guid.NewGuid();
+        var result = ProjectRole.CreateDefaultRoles(projectId);
+
+        using(new AssertionScope())
+        {
+            result.Length.Should().Be(2);
+            result[0].Permissions.Should().Be(ProjectPermissions.Members | ProjectPermissions.Workflows | ProjectPermissions.Tasks);
+            result[0].Type.Should().Be(RoleType.Admin);
+            result[1].Permissions.Should().Be(ProjectPermissions.None);
+            result[1].Type.Should().Be(RoleType.ReadOnly);
+            result.All(x => x.ProjectId == projectId).Should().BeTrue();
+        }
+    }
+
+    [Fact]
+    public void OrganizationRole_CreateDefaultRoles_ShouldReturnAdminAndReadOnlyRole()
+    {
+        var organizationId = Guid.NewGuid();
+        var result = OrganizationRole.CreateDefaultRoles(organizationId);
+
+        using (new AssertionScope())
+        {
+            result.Length.Should().Be(2);
+            result[0].Permissions.Should().Be(OrganizationPermissions.Projects | OrganizationPermissions.Members);
+            result[0].Type.Should().Be(RoleType.Admin);
+            result[1].Permissions.Should().Be(OrganizationPermissions.None);
+            result[1].Type.Should().Be(RoleType.ReadOnly);
+            result.All(x => x.OrganizationId == organizationId).Should().BeTrue();
+        }
+    }
+
+    [Fact]
+    public void RolesExtensions_GetAdminRoleId_ShouldReturnIdOfTheAdminRole()
+    {
+        var roles = CreateTestRoles();
+        var adminRoleId = roles.Single(x => x.Type == RoleType.Admin).Id;
+
+        var result = roles.GetAdminRoleId();
+
+        result.Should().Be(adminRoleId);
+    }
+
+    [Fact]
+    public void RolesExtensions_GetReadOnlyRoleId_ShouldReturnIdOfTheReadOnlyRole()
+    {
+        var roles = CreateTestRoles();
+        var readOnlyRoleId = roles.Single(x => x.Type == RoleType.ReadOnly).Id;
+
+        var result = roles.GetReadOnlyRoleId();
+
+        result.Should().Be(readOnlyRoleId);
+    }
+
+    private static List<TestRole> CreateTestRoles()
+        => new()
+        {
+            new("a", default, RoleType.Admin),
+            new("b", default, RoleType.Custom),
+            new("c", default, RoleType.Custom),
+            new("d", default, RoleType.ReadOnly),
+        };
 }

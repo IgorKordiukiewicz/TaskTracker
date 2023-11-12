@@ -1,19 +1,26 @@
 ﻿namespace Domain.Common;
 
+public enum RoleType
+{
+    Custom,
+    Admin,
+    ReadOnly,
+}
+
 public abstract class Role<TPermissions> : Entity 
     where TPermissions: struct, Enum
 {
     public string Name { get; private set; }
-    public bool Modifiable { get; private init; }
+    public RoleType Type { get; private set; }
 
     public TPermissions Permissions { get; private set; }
 
-    public Role(string name, TPermissions permissions, bool modifiable = true)
+    public Role(string name, TPermissions permissions, RoleType type = RoleType.Custom)
         : base(Guid.NewGuid())
     {
         Name = name;
         Permissions = permissions;
-        Modifiable = modifiable;
+        Type = type;
     }
 
     public bool HasPermission(TPermissions flag) // extract to Shared/FlagsHelpers or sth so it can also be used in Client code
@@ -36,8 +43,4 @@ public abstract class Role<TPermissions> : Entity
 
     private (int Permissions, int Flag) GetPermissionsValues(TPermissions flag)
         => (Convert.ToInt32(Permissions), Convert.ToInt32(flag));
-
-
-    public bool IsAdminRole() => Name == "Administrator";
-    public bool IsReadOnlyRole() => Name == "Read-Only";
 }

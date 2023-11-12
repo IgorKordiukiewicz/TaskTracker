@@ -1,5 +1,6 @@
 ﻿using Domain.Common;
 using Domain.Errors;
+using Domain.Projects;
 using FluentResults;
 using Shared.Enums;
 
@@ -35,10 +36,9 @@ public class Organization : Entity, IAggregateRoot
             OwnerId = ownerId,
         };
 
-        result._roles.Add(new OrganizationRole("Administrator", result.Id, OrganizationPermissions.Members | OrganizationPermissions.Projects)); // TODO: Create All enum field ?
-        result._roles.Add(new OrganizationRole("Read-Only", result.Id, OrganizationPermissions.None)); // TODO: Create All enum field ?
+        result._roles.AddRange(OrganizationRole.CreateDefaultRoles(result.Id));
 
-        _ = result.AddMember(ownerId, result._roles.Single(x => x.IsAdminRole()).Id);
+        _ = result.AddMember(ownerId, result._roles.GetAdminRoleId());
 
         return result;
     }
@@ -71,7 +71,7 @@ public class Organization : Entity, IAggregateRoot
 
         var invitation = invitationResult.Value;
         invitation.Accept();
-        return AddMember(invitation.UserId, _roles.Single(x => x.IsReadOnlyRole()).Id);
+        return AddMember(invitation.UserId, _roles.GetReadOnlyRoleId());
     }
 
     public Result DeclineInvitation(Guid invitationId)

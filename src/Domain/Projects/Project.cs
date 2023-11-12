@@ -30,10 +30,9 @@ public class Project : Entity, IAggregateRoot
             OrganizationId = organizationId,
         };
 
-        result._roles.Add(new ProjectRole("Administrator", result.Id, ProjectPermissions.Tasks | ProjectPermissions.Members | ProjectPermissions.Workflows)); // TODO: Create All enum field ?
-        result._roles.Add(new ProjectRole("Read-Only", result.Id, ProjectPermissions.None));
+        result._roles.AddRange(ProjectRole.CreateDefaultRoles(result.Id));
 
-        var member = ProjectMember.Create(createdByUserId, result._roles.Single(x => x.IsAdminRole()).Id);
+        var member = ProjectMember.Create(createdByUserId, result._roles.GetAdminRoleId());
         result._members.Add(member);
 
         return result;
@@ -46,7 +45,7 @@ public class Project : Entity, IAggregateRoot
             return Result.Fail<ProjectMember>(new DomainError("User is already a member of this project."));
         }
 
-        var member = ProjectMember.Create(userId, _roles.Single(x => x.IsReadOnlyRole()).Id);
+        var member = ProjectMember.Create(userId, _roles.GetReadOnlyRoleId());
         _members.Add(member);
 
         return member;
@@ -63,4 +62,7 @@ public class Project : Entity, IAggregateRoot
         _members.Remove(member);
         return Result.Ok();
     }
+
+    // RemoveRole: check if is used by any member and don't remove default role,
+    // Add interface to ProjectMember & OrganizationMember: IHasRole and then RolesService/Manager can accept a list of IHasRole objects to check whether any use a given role ?
 }
