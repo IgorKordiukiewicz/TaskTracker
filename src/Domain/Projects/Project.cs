@@ -1,6 +1,8 @@
 ﻿using Domain.Common;
 using Domain.Errors;
+using Domain.Organizations;
 using FluentResults;
+using Shared.Enums;
 
 namespace Domain.Projects;
 
@@ -11,6 +13,9 @@ public class Project : Entity, IAggregateRoot
 
     private readonly List<ProjectMember> _members = new();
     public IReadOnlyList<ProjectMember> Members => _members.AsReadOnly();
+
+    private readonly List<ProjectRole> _roles = new();
+    public IReadOnlyList<ProjectRole> Roles => _roles.AsReadOnly();
 
     private Project(Guid id)
         : base(id)
@@ -25,7 +30,10 @@ public class Project : Entity, IAggregateRoot
             OrganizationId = organizationId,
         };
 
-        var member = ProjectMember.Create(createdByUserId);
+        result._roles.Add(new ProjectRole("Administrator", result.Id, ProjectPermissions.Tasks | ProjectPermissions.Members | ProjectPermissions.Workflows)); // TODO: Create All enum field ?
+        result._roles.Add(new ProjectRole("Read-Only", result.Id, ProjectPermissions.None));
+
+        var member = ProjectMember.Create(createdByUserId, result._roles.Single(x => x.IsAdminRole()).Id);
         result._members.Add(member);
 
         return result;
@@ -38,7 +46,7 @@ public class Project : Entity, IAggregateRoot
             return Result.Fail<ProjectMember>(new DomainError("User is already a member of this project."));
         }
 
-        var member = ProjectMember.Create(userId);
+        var member = ProjectMember.Create(userId, _roles.Single(x => x.IsReadOnlyRole()).Id);
         _members.Add(member);
 
         return member;

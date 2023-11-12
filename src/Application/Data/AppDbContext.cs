@@ -15,9 +15,11 @@ public class AppDbContext : DbContext
     public DbSet<Organization> Organizations { get; set; }
     public DbSet<OrganizationInvitation> OrganizationInvitations { get; set; }
     public DbSet<OrganizationMember> OrganizationMembers { get; set; }
+    public DbSet<OrganizationRole> OrganizationRoles { get; set; }
 
     public DbSet<Project> Projects { get; set; }
     public DbSet<ProjectMember> ProjectMembers { get; set; }
+    public DbSet<ProjectRole> ProjectRoles { get; set; }
 
     public DbSet<Domain.Tasks.Task> Tasks { get; set; }
     public DbSet<TaskComment> TaskComments { get; set; }

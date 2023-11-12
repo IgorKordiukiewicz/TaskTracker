@@ -15,6 +15,7 @@ public class ProjectRepository : IRepository<Project>
     public async Task<Project?> GetBy(Expression<Func<Project, bool>> predicate)
         => await _dbContext.Projects
         .Include(x => x.Members)
+        .Include(x => x.Roles)
         .FirstOrDefaultAsync(predicate);
 
     public async Task<Project?> GetById(Guid id)
@@ -23,6 +24,7 @@ public class ProjectRepository : IRepository<Project>
     public async Task<bool> Exists(Expression<Func<Project, bool>> predicate)
         => await _dbContext.Projects
         .Include(x => x.Members)
+        .Include(x => x.Roles)
         .AnyAsync(predicate);
 
     public async Task Add(Project entity)
@@ -34,6 +36,7 @@ public class ProjectRepository : IRepository<Project>
     public async Task Update(Project entity)
     {
         await _dbContext.AddRemoveChildEntities(entity.Members);
+        await _dbContext.AddRemoveChildEntities(entity.Roles);
         await _dbContext.SaveChangesAsync();
     }
 

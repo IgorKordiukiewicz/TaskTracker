@@ -21,5 +21,10 @@ internal class ProjectConfiguration : IEntityTypeConfiguration<Project>
         builder.HasMany(x => x.Members)
             .WithOne()
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(x => x.Roles)
+            .WithOne()
+            .HasForeignKey(x => x.ProjectId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

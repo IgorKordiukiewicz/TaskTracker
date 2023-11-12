@@ -18,6 +18,9 @@ public class Organization : Entity, IAggregateRoot
     private readonly List<OrganizationInvitation> _invitations = new();
     public IReadOnlyList<OrganizationInvitation> Invitations => _invitations.AsReadOnly();
 
+    private readonly List<OrganizationRole> _roles = new();
+    public IReadOnlyList<OrganizationRole> Roles => _roles.AsReadOnly();
+
     private Organization(Guid id)
         : base(id)
     {
@@ -32,7 +35,10 @@ public class Organization : Entity, IAggregateRoot
             OwnerId = ownerId,
         };
 
-        _ = result.AddMember(ownerId);
+        result._roles.Add(new OrganizationRole("Administrator", result.Id, OrganizationPermissions.Members | OrganizationPermissions.Projects)); // TODO: Create All enum field ?
+        result._roles.Add(new OrganizationRole("Read-Only", result.Id, OrganizationPermissions.None)); // TODO: Create All enum field ?
+
+        _ = result.AddMember(ownerId, result._roles.Single(x => x.IsAdminRole()).Id);
 
         return result;
     }
@@ -65,7 +71,7 @@ public class Organization : Entity, IAggregateRoot
 
         var invitation = invitationResult.Value;
         invitation.Accept();
-        return AddMember(invitation.UserId);
+        return AddMember(invitation.UserId, _roles.Single(x => x.IsReadOnlyRole()).Id);
     }
 
     public Result DeclineInvitation(Guid invitationId)
@@ -125,9 +131,9 @@ public class Organization : Entity, IAggregateRoot
         return invitation;
     }
 
-    private OrganizationMember AddMember(Guid userId)
+    private OrganizationMember AddMember(Guid userId, Guid roleId)
     {
-        var member = OrganizationMember.Create(userId);
+        var member = OrganizationMember.Create(userId, roleId);
         _members.Add(member);
         return member;
     }

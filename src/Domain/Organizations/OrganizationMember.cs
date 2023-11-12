@@ -6,6 +6,7 @@ namespace Domain.Organizations;
 public class OrganizationMember : Entity
 {
     public Guid UserId { get; private init; }
+    public Guid RoleId { get; private set; }
 
     private OrganizationMember(Guid id)
         : base(id)
@@ -13,11 +14,12 @@ public class OrganizationMember : Entity
 
     }
 
-    public static OrganizationMember Create(Guid userId)
+    public static OrganizationMember Create(Guid userId, Guid roleId)
     {
         return new(Guid.NewGuid())
         {
             UserId = userId,
+            RoleId = roleId
         };
     }
 }

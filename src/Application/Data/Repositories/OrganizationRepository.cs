@@ -17,6 +17,7 @@ public class OrganizationRepository : IRepository<Organization>
         => await _dbContext.Organizations
         .Include(x => x.Members)
         .Include(x => x.Invitations)
+        .Include(x => x.Roles)
         .FirstOrDefaultAsync(predicate);
 
     public async Task<Organization?> GetById(Guid id)
@@ -26,6 +27,7 @@ public class OrganizationRepository : IRepository<Organization>
         => await _dbContext.Organizations
         .Include(x => x.Members)
         .Include(x => x.Invitations)
+        .Include(x => x.Roles)
         .AnyAsync(predicate);
 
     public async Task Add(Organization entity)
@@ -38,6 +40,7 @@ public class OrganizationRepository : IRepository<Organization>
     {
         await _dbContext.AddRemoveChildEntities(entity.Members);
         await _dbContext.AddRemoveChildEntities(entity.Invitations);
+        await _dbContext.AddRemoveChildEntities(entity.Roles);
         await _dbContext.SaveChangesAsync();
     }
 
