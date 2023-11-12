@@ -1,11 +1,12 @@
-﻿using Domain.Projects;
+﻿using Domain.Common;
+using Domain.Projects;
 
 namespace UnitTests.Domain;
 
 public class ProjectTests
 {
     [Fact]
-    public void Create_ShouldCreateProjectWithGivenParameters()
+    public void Create_ShouldCreateProjectWithOwnerMemberAndDefaultRoles()
     {
         var name = "project";
         var orgId = Guid.NewGuid();
@@ -18,8 +19,14 @@ public class ProjectTests
             result.Name.Should().Be(name);
             result.OrganizationId.Should().Be(orgId);
 
-            result.Members.Count().Should().Be(1);
+            // Ensure default roles are created
+            result.Roles.Count.Should().Be(2);
+            result.Roles.Select(x => x.Type).Should().BeEquivalentTo(new RoleType[] { RoleType.Admin, RoleType.ReadOnly });
+            var adminRoleId = result.Roles.First(x => x.Type == RoleType.Admin).Id;
+
+            result.Members.Count.Should().Be(1);
             result.Members[0].UserId.Should().Be(userId);
+            result.Members[0].RoleId.Should().Be(adminRoleId);
         }
     }
 
@@ -27,6 +34,7 @@ public class ProjectTests
     public void AddMember_ShouldAddNewMember()
     {
         var project = Project.Create("name", Guid.NewGuid(), Guid.NewGuid());
+        var expectedRoleId = project.Roles.First(x => x.Type == RoleType.ReadOnly).Id;
         var userId = Guid.NewGuid();
 
         var result = project.AddMember(userId);
@@ -36,6 +44,7 @@ public class ProjectTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Id.Should().NotBeEmpty();
             result.Value.UserId.Should().Be(userId);
+            result.Value.RoleId.Should().Be(expectedRoleId);
             project.Members.Count.Should().Be(2);
         }
     }

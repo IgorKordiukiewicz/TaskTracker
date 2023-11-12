@@ -1,4 +1,6 @@
-﻿using Domain.Organizations;
+﻿using Domain.Common;
+using Domain.Organizations;
+using Domain.Projects;
 using Shared.Enums;
 
 namespace UnitTests.Domain;
@@ -6,7 +8,7 @@ namespace UnitTests.Domain;
 public class OrganizationTests
 {
     [Fact]
-    public void Create_ShouldCreateOrganizationWithGivenParameters()
+    public void Create_ShouldCreateOrganizationWithOwnerMemberAndDefaultRoles()
     {
         var name = "OrgName";
         var ownerId = Guid.NewGuid();
@@ -18,8 +20,15 @@ public class OrganizationTests
             result.Name.Should().Be(name);
             result.OwnerId.Should().Be(ownerId);
             result.Id.Should().NotBeEmpty();
+
+            // Ensure default roles are created
+            result.Roles.Count.Should().Be(2);
+            result.Roles.Select(x => x.Type).Should().BeEquivalentTo(new RoleType[] { RoleType.Admin, RoleType.ReadOnly });
+            var adminRoleId = result.Roles.First(x => x.Type == RoleType.Admin).Id;
+
             result.Members.Count.Should().Be(1);
             result.Members[0].UserId.Should().Be(ownerId);
+            result.Members[0].RoleId.Should().Be(adminRoleId);
         }
     }
 
@@ -97,6 +106,7 @@ public class OrganizationTests
     public void AcceptInvitation_ShouldAcceptInvitationAndCreateNewMember()
     {
         var organization = Organization.Create("Name", Guid.NewGuid());
+        var expectedRoleId = organization.Roles.First(x => x.Type == RoleType.ReadOnly).Id;
         var invitation = organization.CreateInvitation(Guid.NewGuid()).Value;
 
         var result = organization.AcceptInvitation(invitation.Id);
@@ -106,6 +116,7 @@ public class OrganizationTests
             result.IsSuccess.Should().BeTrue();
             invitation.State.Should().Be(OrganizationInvitationState.Accepted);
             result.Value.Should().NotBeNull();
+            result.Value.RoleId.Should().Be(expectedRoleId);
             organization.Members.Should().HaveCount(2);
         }
     }
