@@ -1,5 +1,5 @@
 ﻿@using Web.Client.Common;
-@using global::Shared;
+@using global::Shared.Authorization;
 @inherits LayoutComponentBase
 @layout MainLayout
 
@@ -17,7 +17,6 @@
                 <MudNavLink Href="@GetPageRoute("workflow")" Icon="@Icons.Material.Filled.Route">Workflow</MudNavLink>
             </MudNavMenu>
         </MudDrawer>
-
         @Body
     </CascadingValue>
 </AuthorizeView>

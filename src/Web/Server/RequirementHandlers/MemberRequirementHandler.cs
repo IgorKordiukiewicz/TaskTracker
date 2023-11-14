@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Web.Server.Extensions;
 
-namespace Web.Server.Requirements;
+namespace Web.Server.RequirementHandlers;
 
 public abstract class MemberRequirementHandler<TAuthorizationRequirement> : AuthorizationHandler<TAuthorizationRequirement>
     where TAuthorizationRequirement : IAuthorizationRequirement

@@ -29,23 +29,32 @@ internal class GetUserHandler : IRequestHandler<GetUserQuery, Result<UserVM>>
             .Where(x => x.AuthenticationId == request.AuthenticationId)
             .SingleOrDefaultAsync();
 
-        if(user is null)
+        if (user is null)
         {
             return Result.Fail<UserVM>(new ApplicationError("User with this AuthID does not exist."));
         }
 
-        var organizationsMember = await _dbContext.Organizations
+        var permissionsByOrganization = await _dbContext.Organizations
             .Include(x => x.Members)
+            .Include(x => x.Roles)
             .Where(x => x.Members.Any(xx => xx.UserId == user.Id))
-            .Select(x => x.Id)
-            .ToListAsync();
+            .Select(x => new { x.Id, x.Roles.First(xx => xx.Id == x.Members.First(xxx => xxx.UserId == user.Id).RoleId).Permissions })
+            .ToDictionaryAsync(k => k.Id, v => v.Permissions);
 
-        var projectsMember = await _dbContext.Projects
+        var permissionsByProject = await _dbContext.Projects
             .Include(x => x.Members)
+            .Include(x => x.Roles)
             .Where(x => x.Members.Any(xx => xx.UserId == user.Id))
-            .Select(x => x.Id)
-            .ToListAsync();
+            .Select(x => new { x.Id, x.Roles.First(xx => xx.Id == x.Members.First(xxx => xxx.UserId == user.Id).RoleId).Permissions })
+            .ToDictionaryAsync(k => k.Id, v => v.Permissions);
 
-        return Result.Ok(new UserVM(user.Id, user.FullName, user.Email, organizationsMember, projectsMember));
+        return Result.Ok(new UserVM
+        {
+            Id = user.Id,
+            Name = user.FullName,
+            Email = user.Email,
+            PermissionsByOrganization = permissionsByOrganization,
+            PermissionsByProject = permissionsByProject
+        });
     }
 }

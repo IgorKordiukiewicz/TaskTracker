@@ -1,19 +1,8 @@
 ﻿using Application.Data;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Shared.Enums;
+using Shared.Authorization;
 
-namespace Web.Server.Requirements;
-
-public class ProjectMemberRequirement : IAuthorizationRequirement
-{
-    public ProjectPermissions? Permissions { get; set; }
-
-    public ProjectMemberRequirement(ProjectPermissions? permissions = null)
-    {
-        Permissions = permissions;
-    }
-}
+namespace Web.Server.RequirementHandlers;
 
 public class ProjectMemberRequirementHandler : MemberRequirementHandler<ProjectMemberRequirement>
 {

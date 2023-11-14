@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Application;
 using Serilog;
 using System.Security.Claims;
-using Web.Server.Requirements;
+using Web.Server.RequirementHandlers;
 using Microsoft.AspNetCore.Authorization;
 using Web.Server.Extensions;
 

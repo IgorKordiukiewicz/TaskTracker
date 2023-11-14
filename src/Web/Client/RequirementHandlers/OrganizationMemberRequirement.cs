@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Shared.Authorization;
 using Web.Client.Common;
 
-namespace Web.Client.Requirements;
+namespace Web.Client.RequirementHandlers;
 
-public class OrganizationMemberRequirement : IAuthorizationRequirement
-{
-}
-
+// TODO: Extract a common base class for organization & project handlers
 public class OrganizationMemberRequirementHandler : AuthorizationHandler<OrganizationMemberRequirement>
 {
     private readonly UserDataService _userDataService;
@@ -38,7 +36,13 @@ public class OrganizationMemberRequirementHandler : AuthorizationHandler<Organiz
             return;
         }
 
-        if(!currentUser.OrganizationsMember.Contains(orgId))
+        if(!currentUser.PermissionsByOrganization.TryGetValue(orgId, out var permissions))
+        {
+            context.Fail();
+            return;
+        }
+        
+        if(requirement.Permissions is not null && !permissions.HasFlag(requirement.Permissions.Value))
         {
             context.Fail();
             return;

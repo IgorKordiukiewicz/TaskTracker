@@ -1,3 +1,12 @@
-﻿namespace Shared.ViewModels;
+﻿using Shared.Enums;
 
-public record UserVM(Guid Id, string Name, string Email, IReadOnlyList<Guid> OrganizationsMember, IReadOnlyList<Guid> ProjectsMember); // TODO: Dictionary with list of permissions?
+namespace Shared.ViewModels;
+
+public record UserVM
+{
+    public required Guid Id { get; init; }
+    public required string Name { get; init; }
+    public required string Email { get; init; }
+    public required IReadOnlyDictionary<Guid, OrganizationPermissions> PermissionsByOrganization { get; init; }
+    public required IReadOnlyDictionary<Guid, ProjectPermissions> PermissionsByProject { get; init; }
+}

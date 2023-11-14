@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Shared.Authorization;
 using Web.Client.Common;
 
-namespace Web.Client.Requirements;
+namespace Web.Client.RequirementHandlers;
 
-public class ProjectMemberRequirement : IAuthorizationRequirement
-{
-}
 
 public class ProjectMemberRequirementHandler : AuthorizationHandler<ProjectMemberRequirement>
 {
@@ -38,7 +36,13 @@ public class ProjectMemberRequirementHandler : AuthorizationHandler<ProjectMembe
             return;
         }
 
-        if (!currentUser.ProjectsMember.Contains(projectId))
+        if (!currentUser.PermissionsByProject.TryGetValue(projectId, out var permissions))
+        {
+            context.Fail();
+            return;
+        }
+
+        if (requirement.Permissions is not null && !permissions.HasFlag(requirement.Permissions.Value))
         {
             context.Fail();
             return;
