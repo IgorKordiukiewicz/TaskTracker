@@ -23,11 +23,8 @@ public abstract class Role<TPermissions> : Entity
         Type = type;
     }
 
-    public bool HasPermission(TPermissions flag) // extract to Shared/FlagsHelpers or sth so it can also be used in Client code
-    {
-        var (permissionsValue, flagValue) = GetPermissionsValues(flag);
-        return (permissionsValue & flagValue) == flagValue;
-    }
+    public bool HasPermission(TPermissions flag)
+        => Permissions.HasFlag(flag);
 
     public void AddPermission(TPermissions flag)
     {
