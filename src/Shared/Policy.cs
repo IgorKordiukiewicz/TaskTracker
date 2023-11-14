@@ -3,13 +3,12 @@
 public static class Policy
 {
     // TODO: find better name than editor, Manager maybe?
-    // TODO: use nameof ?
-    public const string OrganizationMember = "OrganizationMember";
-    public const string OrganizationMembersEditor = "OrganizationMembersEditor";
-    public const string OrganizationProjectsEditor = "OrganizationProjectsEditor";
+    public const string OrganizationMember = nameof(OrganizationMember);
+    public const string OrganizationMembersEditor = nameof(OrganizationMembersEditor);
+    public const string OrganizationProjectsEditor = nameof(OrganizationProjectsEditor);
 
-    public const string ProjectMember = "ProjectMember";
-    public const string ProjectMembersEditor = "ProjectMembersEditor";
-    public const string ProjectTasksEditor = "ProjectTasksEditor";
-    public const string ProjectWorkflowsEditor = "ProjectWorkflowsEditor";
+    public const string ProjectMember = nameof(ProjectMember);
+    public const string ProjectMembersEditor = nameof(ProjectMembersEditor);
+    public const string ProjectTasksEditor = nameof(ProjectTasksEditor);
+    public const string ProjectWorkflowsEditor = nameof(ProjectWorkflowsEditor);
 }
