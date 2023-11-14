@@ -42,7 +42,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("available-for-invitation/organization/{organizationId:guid}")]
-    [Authorize(Policy.OrganizationMember)]
+    [Authorize(Policy.OrganizationMembersEditor)]
     public async Task<IActionResult> GetUsersNotInOrganization(Guid organizationId, [FromQuery] string searchValue) // TODO: OrganizationId from query?
     {
         var result = await _mediator.Send(new GetUsersAvailableForOrganizationInvitationQuery(organizationId, searchValue));
@@ -50,7 +50,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("available-for-project/project/{projectId:guid}")]
-    [Authorize(Policy.ProjectMember)]
+    [Authorize(Policy.ProjectMembersEditor)]
     public async Task<IActionResult> GetUsersAvailableForProject(Guid projectId, [FromQuery] Guid organizationId)
     {
         var result = await _mediator.Send(new GetUsersAvailableForProjectQuery(organizationId, projectId));

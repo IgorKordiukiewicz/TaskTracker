@@ -21,7 +21,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("organization/{organizationId:guid}")]
-    [Authorize(Policy.OrganizationMember)]
+    [Authorize(Policy.OrganizationProjectsEditor)]
     public async Task<IActionResult> CreateProject(Guid organizationId, [FromBody] CreateProjectDto model)
     {
         var result = await _mediator.Send(new CreateProjectCommand(organizationId, User.GetUserAuthenticationId(), model));
@@ -32,7 +32,7 @@ public class ProjectsController : ControllerBase
     [Authorize(Policy.OrganizationMember)]
     public async Task<IActionResult> GetProjects(Guid organizationId)
     {
-        var result = await _mediator.Send(new GetProjectsForOrganizationQuery(organizationId, User.GetUserAuthenticationId()));
+        var result = await _mediator.Send(new GetProjectsForOrganizationQuery(organizationId, User.GetUserAuthenticationId())); // TODO: rename to GetProjectsForUser ?, and api: projects/?organizationId
         return result.ToHttpResult();
     }
 
@@ -44,7 +44,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("{projectId:guid}/members")]
-    [Authorize(Policy.ProjectMember)]
+    [Authorize(Policy.ProjectMembersEditor)]
     public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberDto model)
     {
         var result = await _mediator.Send(new AddProjectMemberCommand(projectId, model));
@@ -60,7 +60,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("{projectId:guid}/members/{memberId:guid}/remove")] // TODO: Use HttpDelete?
-    [Authorize(Policy.ProjectMember)]
+    [Authorize(Policy.ProjectMembersEditor)]
     public async Task<IActionResult> RemoveProjectMember(Guid projectId, Guid memberId)
     {
         var result = await _mediator.Send(new RemoveProjectMemberCommand(projectId, memberId));

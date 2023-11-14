@@ -43,7 +43,7 @@ public abstract class MemberRequirementHandler<TAuthorizationRequirement> : Auth
             return;
         }
 
-        if(!await CheckRequirement(_dbContext, user.Id, entityId))
+        if(!await CheckRequirement(requirement, _dbContext, user.Id, entityId))
         {
             context.Fail();
             return;
@@ -53,7 +53,7 @@ public abstract class MemberRequirementHandler<TAuthorizationRequirement> : Auth
         return;
     }
 
-    protected abstract Task<bool> CheckRequirement(AppDbContext dbContext, Guid userId, Guid entityId);
+    protected abstract Task<bool> CheckRequirement(TAuthorizationRequirement requirement, AppDbContext dbContext, Guid userId, Guid entityId);
 
     private Guid GetEntityId(HttpContext? httpContext)
     {

@@ -1,14 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Shared;
+using Shared.Enums;
 using Web.Server.Requirements;
 
 namespace Web.Server.Extensions;
-
-public static class Policy
-{
-    public const string OrganizationMember = "OrganizationMember";
-    public const string ProjectMember = "ProjectMember";
-}
 
 public static class AuthExtensions
 {
@@ -27,8 +23,14 @@ public static class AuthExtensions
 
         services.AddAuthorization(options =>
         {
-            options.AddPolicy(Policy.OrganizationMember, policy => policy.Requirements.Add(new OrganizationMemberRequirement())); // TODO: Check if policy.RequireAuthenticatedUser() should be added?
+            options.AddPolicy(Policy.OrganizationMember, policy => policy.Requirements.Add(new OrganizationMemberRequirement()));
+            options.AddPolicy(Policy.OrganizationMembersEditor, policy => policy.Requirements.Add(new OrganizationMemberRequirement(OrganizationPermissions.Members)));
+            options.AddPolicy(Policy.OrganizationProjectsEditor, policy => policy.Requirements.Add(new OrganizationMemberRequirement(OrganizationPermissions.Projects)));
+
             options.AddPolicy(Policy.ProjectMember, policy => policy.Requirements.Add(new ProjectMemberRequirement()));
+            options.AddPolicy(Policy.ProjectMembersEditor, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.Members)));
+            options.AddPolicy(Policy.ProjectTasksEditor, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.Tasks)));
+            options.AddPolicy(Policy.ProjectWorkflowsEditor, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.Workflows)));
         });
         services.AddScoped<IAuthorizationHandler, OrganizationMemberRequirementHandler>();
         services.AddScoped<IAuthorizationHandler, ProjectMemberRequirementHandler>();

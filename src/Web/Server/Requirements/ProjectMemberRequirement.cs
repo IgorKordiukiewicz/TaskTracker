@@ -1,11 +1,18 @@
 ﻿using Application.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Shared.Enums;
 
 namespace Web.Server.Requirements;
 
 public class ProjectMemberRequirement : IAuthorizationRequirement
 {
+    public ProjectPermissions? Permissions { get; set; }
+
+    public ProjectMemberRequirement(ProjectPermissions? permissions = null)
+    {
+        Permissions = permissions;
+    }
 }
 
 public class ProjectMemberRequirementHandler : MemberRequirementHandler<ProjectMemberRequirement>
@@ -15,7 +22,28 @@ public class ProjectMemberRequirementHandler : MemberRequirementHandler<ProjectM
     {
     }
 
-    protected override async Task<bool> CheckRequirement(AppDbContext dbContext, Guid userId, Guid entityId)
-        => await dbContext.Projects.Include(x => x.Members)
-        .AnyAsync(x => x.Id == entityId && x.Members.Any(xx => xx.UserId == userId));
+    protected override async Task<bool> CheckRequirement(ProjectMemberRequirement requirement, AppDbContext dbContext, Guid userId, Guid entityId)
+    {
+        var member = await dbContext.Projects
+            .Include(x => x.Members)
+            .Where(x => x.Id == entityId)
+            .SelectMany(x => x.Members)
+            .FirstOrDefaultAsync(x => x.UserId == userId);
+
+        if (member is null)
+        {
+            return false;
+        }
+
+        if (requirement.Permissions is null)
+        {
+            return true;
+        }
+
+        var role = await dbContext.ProjectRoles
+            .AsNoTracking()
+            .Where(x => x.Id == member.RoleId)
+            .FirstAsync();
+        return role.HasPermission(requirement.Permissions.Value);
+    }
 }
