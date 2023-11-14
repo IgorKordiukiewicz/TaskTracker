@@ -2,6 +2,7 @@
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Users;
+using Shared.Enums;
 using Shared.ViewModels;
 
 namespace IntegrationTests.Features;
@@ -33,16 +34,22 @@ public class UsersTests
     [Fact]
     public async Task GetUser_ShouldReturnUserData_WhenUserWithGivenAuthIdEixsts()
     {
+        // TODO: Check if permissions are correctly returned
         var user = (await _factory.CreateUsers())[0];
-        var organizationsIds = (await _fixture.GetAsync<Organization>()).Select(x => x.Id).ToList();
-        var projectsIds = (await _fixture.GetAsync<Project>()).Select(x => x.Id).ToList();
 
         var result = await _fixture.SendRequest(new GetUserQuery(user.AuthenticationId));
 
         using(new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(new UserVM(user.Id, user.FullName, user.Email, organizationsIds, projectsIds));
+            result.Value.Should().BeEquivalentTo(new UserVM
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Name = user.FullName,
+                PermissionsByOrganization = new Dictionary<Guid, OrganizationPermissions>(),
+                PermissionsByProject = new Dictionary<Guid, ProjectPermissions>()
+            });
         }
     }
 
