@@ -1,10 +1,12 @@
 ﻿@page "/project/{projectId:guid}/members"
+@using global::Shared.Authorization;
 @layout ProjectLayout
 @attribute [Authorize]
 
 @inject RequestHandler _requestHandler
+@inject IAuthorizationService _authorizationService
 
-@if(_usersVM is not null)
+@if(_usersVM is not null && _isMembersEditor)
 {
     <div class="d-flex gap-2 align-center mb-4">
         <MudSelect Label="Users" @bind-Value="_selectedUserVM" Variant="Variant.Filled" Disabled="@(!_usersVM.Users.Any())">
@@ -26,7 +28,10 @@
                 <MudListItem Icon="@Icons.Material.Filled.Person">
                     <div class="d-flex justify-space-between align-center show-on-hover-parent">
                         @member.Name
-                        <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" Class="show-on-hover" OnClick="() => RemoveMember(member.Id)"></MudIconButton>
+                        @if(_isMembersEditor)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" Class="show-on-hover" OnClick="() => RemoveMember(member.Id)"></MudIconButton>
+                        }
                     </div>
                 </MudListItem>
             }
@@ -37,6 +42,11 @@
 @code {
     [Parameter]
     public Guid ProjectId { get; init; }
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+
+    private bool _isMembersEditor = false;
 
     private ProjectMembersVM? _membersVM;
     private UsersSearchVM? _usersVM;
@@ -49,14 +59,20 @@
 
     private async Task UpdateMembersVM()
     {
+        var user = (await AuthenticationState).User;
+        _isMembersEditor = (await _authorizationService.AuthorizeAsync(user, Policy.ProjectMembersEditor)).Succeeded;
+
         _membersVM = await _requestHandler.GetAsync<ProjectMembersVM>($"projects/{ProjectId}/members");
 
         var organizationId = (await _requestHandler.GetAsync<ProjectOrganizationVM>($"projects/{ProjectId}/organization"))?.OrganizationId ?? default;
 
-        var url = $"users/available-for-project/project/{ProjectId}"
+        if(_isMembersEditor)
+        {
+            var url = $"users/available-for-project/project/{ProjectId}"
             .SetQueryParam("organizationId", organizationId)
             .ToString();
-        _usersVM = await _requestHandler.GetAsync<UsersSearchVM>(url);
+            _usersVM = await _requestHandler.GetAsync<UsersSearchVM>(url);
+        }
     }
 
     private async Task AddMember(Guid userId)

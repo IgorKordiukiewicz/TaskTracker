@@ -1,6 +1,6 @@
 ﻿@page "/project/{projectId:guid}/workflow"
 @layout ProjectLayout
-@attribute [Authorize]
+@attribute [Authorize(Policy = Policy.ProjectWorkflowsEditor)]
 
 @using Blazor.Diagrams;
 @using Blazor.Diagrams.Components
@@ -19,6 +19,7 @@
 @using Blazored.LocalStorage;
 @using Web.Client.Common;
 @using Web.Client.Diagrams;
+@using global::Shared.Authorization;
 @using static Web.Client.Components.TaskStatusNode;
 
 @inject ISnackbar _snackbar

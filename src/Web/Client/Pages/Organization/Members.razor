@@ -1,9 +1,11 @@
 ﻿@page "/org/{organizationId:guid}/members"
+@using global::Shared.Authorization;
 @using global::Shared.Enums;
 @layout OrganizationLayout
 @attribute [Authorize]
 
 @inject RequestHandler _requestHandler
+@inject IAuthorizationService _authorizationService
 
 <MudTabs Outlined="false" Border="true" ApplyEffectsToContainer="true" Color="Color.Default" Rounded="true" Position="Position.Top" Centered="false">
     <MudTabPanel Text="Members">
@@ -16,8 +18,11 @@
                         <MudListItem Icon="@Icons.Material.Filled.Person">
                             <div class="d-flex justify-space-between align-center show-on-hover-parent">
                                 @member.Name
-                                <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)" 
-                                    Class="@(!member.Owner ? "show-on-hover" : "invisible")"></MudIconButton>
+                                @if(_isMembersEditor)
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)"
+                                                   Class="@(!member.Owner ? "show-on-hover" : "invisible")"></MudIconButton>
+                                }
                             </div>
                         </MudListItem>
                     }
@@ -25,39 +30,45 @@
             </MudPaper>
         }
     </MudTabPanel>
-    <MudTabPanel Text="Invitations">
-        @if (_invitationsVM is not null)
-        {
-            <MudPaper Class="mt-2">
-                <div class="d-flex gap-2 align-center pa-2">
-                    <MudAutocomplete T="UserSearchVM" Label="Invite Users" @bind-Value="_selectedUserForInvitation" SearchFunc="SearchUsers"
-                                     ResetValueOnEmptyText="true" Class="mb-4" AdornmentIcon="@Icons.Material.Filled.Search" ToStringFunc="(user => user.Email)" />
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserForInvitation is null)" OnClick="SendInvitation">Invite</MudButton>
-                </div>
-                <MudList>
-                    @foreach (var invitation in _invitationsVM.Invitations)
-                    {
-                        <MudListItem>
-                            <div class="d-flex justify-space-between align-center">
-                                @invitation.UserEmail
-                                <div class="d-flex gap-1 show-on-hover-parent align-center">
-                                    <MudChip Variant="Variant.Outlined" Color="@GetInvitationStateColor(invitation.State)">@invitation.State.ToString()</MudChip>
-                                    <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => CancelInvitation(invitation.Id)"
-                                        Class="@(invitation.State == OrganizationInvitationState.Pending ? "show-on-hover" : "invisible")"></MudIconButton>
+    @if (_isMembersEditor)
+    {
+        <MudTabPanel Text="Invitations">
+            @if (_invitationsVM is not null)
+            {
+                <MudPaper Class="mt-2">
+                    <div class="d-flex gap-2 align-center pa-2">
+                        <MudAutocomplete T="UserSearchVM" Label="Invite Users" @bind-Value="_selectedUserForInvitation" SearchFunc="SearchUsers"
+                                         ResetValueOnEmptyText="true" Class="mb-4" AdornmentIcon="@Icons.Material.Filled.Search" ToStringFunc="(user => user.Email)" />
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserForInvitation is null)" OnClick="SendInvitation">Invite</MudButton>
+                    </div>
+                    <MudList>
+                        @foreach (var invitation in _invitationsVM.Invitations)
+                        {
+                            <MudListItem>
+                                <div class="d-flex justify-space-between align-center">
+                                    @invitation.UserEmail
+                                    <div class="d-flex gap-1 show-on-hover-parent align-center">
+                                        <MudChip Variant="Variant.Outlined" Color="@GetInvitationStateColor(invitation.State)">@invitation.State.ToString()</MudChip>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => CancelInvitation(invitation.Id)"
+                                                       Class="@(invitation.State == OrganizationInvitationState.Pending ? "show-on-hover" : "invisible")"></MudIconButton>
+                                    </div>
+
                                 </div>
-                                
-                            </div>
-                        </MudListItem>
-                    }
-                </MudList>
-            </MudPaper>
-        }
-    </MudTabPanel>
+                            </MudListItem>
+                        }
+                    </MudList>
+                </MudPaper>
+            }
+        </MudTabPanel>
+    }
 </MudTabs>
 
 @code {
     [Parameter]
     public Guid OrganizationId { get; init; }
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
     // TODO: Assign Layout.OrganizationId here too?
 
@@ -66,10 +77,19 @@
 
     private UserSearchVM? _selectedUserForInvitation;
 
+    private bool _isMembersEditor = false;
+
     protected override async Task OnInitializedAsync()
     {
+        var user = (await AuthenticationState).User;
+        _isMembersEditor = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationMembersEditor)).Succeeded;
+
         await UpdateMembersVM();
-        await UpdateInvitationsVM();
+
+        if(_isMembersEditor)
+        {
+            await UpdateInvitationsVM();
+        }
     }
 
     private async Task UpdateMembersVM()

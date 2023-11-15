@@ -1,12 +1,14 @@
 ﻿@page "/project/{projectId:guid}/tasks/{displayTypeStr}"
 @page "/project/{projectId:guid}/"
 @using Web.Client.Common;
+@using global::Shared.Authorization;
 @using global::Shared.Enums;
 @layout ProjectLayout
 @attribute [Authorize]
 
 @inject RequestHandler _requestHandler
 @inject UserDataService _userDataService
+@inject IAuthorizationService _authorizationService
 
 @if(_tasksVM is not null && _membersVM is not null)
 {
@@ -53,11 +55,15 @@
                     Search
                 </MudButton>
                 </MudItem>
-                <MudItem lg="1" xs="4">
-                    <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="() => _createTaskForm.Open()" Style="height: 55px;" StartIcon="@Icons.Material.Filled.AddTask" FullWidth="true">
-                        Create
-                    </MudButton>
-                </MudItem>
+                <!--TODO: use d-flex instead of column layout?-->
+                @if(_isTasksEditor)
+                {
+                    <MudItem lg="1" xs="4">
+                        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="() => _createTaskForm.Open()" Style="height: 55px;" StartIcon="@Icons.Material.Filled.AddTask" FullWidth="true">
+                            Create
+                        </MudButton>
+                    </MudItem>
+                }
             </MudGrid>
         </MudPaper>
         <MudOverlay Visible="@(_openedTaskId is not null)" DarkBackground="true">
@@ -74,29 +80,47 @@
                 <MudGrid>
                     <MudDivider />
                     <MudItem md="12">
-                        <MudSelect T="TaskStatusVM" Value="@currentTaskVM.Status" ValueChanged="e => UpdateTaskStatus(currentTaskVM.Id, e.Id)"
-                                   ToStringFunc="@(x => x.Name)" Label="Status" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-                            @foreach (var status in currentTaskVM.PossibleNextStatuses)
-                            {
-                                <MudSelectItem Value="@status"></MudSelectItem>
-                            }
-                        </MudSelect>
-                        <MudSelect T="TaskPriority" Value="@currentTaskVM.Priority" ValueChanged="e => UpdateTaskPriority(currentTaskVM.Id, e)"
-                                   Label="Priority" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-                            @foreach (var priority in Enum.GetValues<TaskPriority>())
-                            {
-                                <MudSelectItem Value="@priority"></MudSelectItem>
-                            }
-                        </MudSelect>
-                        @if (_membersVM is not null)
+                        @if(_isTasksEditor)
                         {
-                            <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(currentTaskVM.AssigneeId)" ValueChanged="e => UpdateTaskAssignee(currentTaskVM.Id, e.Id)"
-                                       ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-                                @foreach (var member in GetPossibleAssignees(currentTaskVM.AssigneeId))
+                            <MudSelect T="TaskStatusVM" Value="@currentTaskVM.Status" ValueChanged="e => UpdateTaskStatus(currentTaskVM.Id, e.Id)"
+                                       ToStringFunc="@(x => x.Name)" Label="Status" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                                @foreach (var status in currentTaskVM.PossibleNextStatuses)
                                 {
-                                    <MudSelectItem Value="@member"></MudSelectItem>
+                                    <MudSelectItem Value="@status"></MudSelectItem>
                                 }
                             </MudSelect>
+                            <MudSelect T="TaskPriority" Value="@currentTaskVM.Priority" ValueChanged="e => UpdateTaskPriority(currentTaskVM.Id, e)"
+                                       Label="Priority" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                                @foreach (var priority in Enum.GetValues<TaskPriority>())
+                                {
+                                    <MudSelectItem Value="@priority"></MudSelectItem>
+                                }
+                            </MudSelect>
+                            @if (_membersVM is not null)
+                            {
+                                <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(currentTaskVM.AssigneeId)" ValueChanged="e => UpdateTaskAssignee(currentTaskVM.Id, e.Id)"
+                                           ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                                    @foreach (var member in GetPossibleAssignees(currentTaskVM.AssigneeId))
+                                    {
+                                        <MudSelectItem Value="@member"></MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
+                        }
+                        else
+                        {
+                            <MudField Variant="Variant.Filled" Label="Status">
+                                @currentTaskVM.Status.Name
+                            </MudField>
+                            <MudField Variant="Variant.Filled" Label="Priority">
+                                @currentTaskVM.Priority
+                            </MudField>
+                            @if(_membersVM is not null)
+                            {
+                                <MudField Variant="Variant.Filled" Label="Assignee">
+                                    @(GetCurrentAssigneeVM(currentTaskVM.AssigneeId)?.Name ?? string.Empty)
+                                </MudField>
+                            }
                         }
                     </MudItem>
                     <MudDivider />
@@ -105,7 +129,10 @@
                             <MudText Typo="Typo.h6">
                                 Description
                             </MudText>
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit" />
+                            @if(_isTasksEditor)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" />
+                            }
                         </div>
                         <MudText Typo="Typo.body1">
                             @currentTaskVM.Description
@@ -199,7 +226,7 @@
                     {
                         <div style="margin-bottom: 40px;">
                                 <MudDropZone Identifier="@status" T="TaskVM" Class="rounded mud-background-gray pa-6 mt-4 border-2 border-solid mud-border-lines-default" Style="overflow-y: auto; height: 100%;"
-                                             CanDrop="@((item) => item.PossibleNextStatuses.Any(x => x.Name == status))">
+                                             CanDrop="@((item) => _isTasksEditor && item.PossibleNextStatuses.Any(x => x.Name == status))">
                                     <MudText Typo="Typo.h6" Style="width: 350px;" Align="Align.Center">
                                         @status
                                     </MudText>
@@ -254,6 +281,11 @@
     [CascadingParameter]
     public ProjectLayout Layout { get; set; } = null!;
 
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+
+    private bool _isTasksEditor = false;
+
     private TasksVM? _tasksVM;
     private Dictionary<string, Guid>? _taskStatusIdByName = new();
     private IEnumerable<TaskVM>? _tasks;
@@ -300,6 +332,9 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var user = (await AuthenticationState).User;
+        _isTasksEditor = (await _authorizationService.AuthorizeAsync(user, Policy.ProjectTasksEditor)).Succeeded;
+
         await Layout.SetProjectId(ProjectId);
 
         await UpdateTasksVM();

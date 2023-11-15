@@ -1,23 +1,28 @@
 ﻿@page "/org/{organizationId:guid}/projects"
 @page "/org/{organizationId:guid}/"
 @using Web.Client.Common;
+@using global::Shared.Authorization;
 @layout OrganizationLayout 
 @attribute [Authorize]
 
 @inject NavigationManager _navManager
 @inject RequestHandler _requestHandler
+@inject IAuthorizationService _authorizationService
 
 @if (_projectsVM is not null)
 {
     <MudGrid>
-        <MudItem lg="3" sm="6">
-            <MudPaper Class="d-flex flex-column align-center justify-center project-card" onclick="@(() => _createProjectForm.Open())">
-                <MudText Align="Align.Center">
-                    Create a new project
-                </MudText>
-                <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Large" />
-            </MudPaper>
-        </MudItem>
+        @if(_isProjectsEditor)
+        {
+            <MudItem lg="3" sm="6">
+                <MudPaper Class="d-flex flex-column align-center justify-center project-card" onclick="@(() => _createProjectForm.Open())">
+                    <MudText Align="Align.Center">
+                        Create a new project
+                    </MudText>
+                    <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Large" />
+                </MudPaper>
+            </MudItem>
+        }
         @foreach (var project in _projectsVM.Projects)
         {
             <MudItem lg="3" sm="6">
@@ -44,6 +49,11 @@
     [CascadingParameter]
     public OrganizationLayout Layout { get; set; } = null!;
 
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+
+    private bool _isProjectsEditor = false;
+
     private ProjectsVM? _projectsVM;
 
     private class CreateProjectForm : DialogForm
@@ -56,6 +66,9 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var user = (await AuthenticationState).User;
+        _isProjectsEditor = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationProjectsEditor)).Succeeded;
+
         await Layout.SetOrganizationId(OrganizationId);
 
         await UpdateProjectsList();

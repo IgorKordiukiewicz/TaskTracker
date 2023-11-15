@@ -14,7 +14,9 @@
                     <MudNavLink Href="@GetPageRoute("tasks/board")" Icon="@Icons.Material.Filled.ViewKanban">Board</MudNavLink>
                 </MudNavGroup>
                 <MudNavLink Href="@GetPageRoute("members")" Icon="@Icons.Material.Filled.Person">Members</MudNavLink>
-                <MudNavLink Href="@GetPageRoute("workflow")" Icon="@Icons.Material.Filled.Route">Workflow</MudNavLink>
+                <AuthorizeView Policy="@Policy.ProjectWorkflowsEditor" Context=childContext>
+                    <MudNavLink Href="@GetPageRoute("workflow")" Icon="@Icons.Material.Filled.Route">Workflow</MudNavLink>
+                </AuthorizeView>
             </MudNavMenu>
         </MudDrawer>
         @Body
