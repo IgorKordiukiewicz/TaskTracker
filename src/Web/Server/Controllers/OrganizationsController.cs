@@ -102,4 +102,12 @@ public class OrganizationsController : ControllerBase
         var result = await _mediator.Send(new RemoveOrganizationMemberCommand(organizationId, memberId));
         return result.ToHttpResult();
     }
+
+    [HttpGet("{organizationId:guid}/roles")]
+    [Authorize(Policy.OrganizationMembersEditor)]
+    public async Task<IActionResult> GetOrganizationRoles(Guid organizationId)
+    {
+        var result = await _mediator.Send(new GetOrganizationRolesQuery(organizationId));
+        return result.ToHttpResult();
+    }
 }

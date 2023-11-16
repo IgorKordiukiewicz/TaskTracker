@@ -1,7 +1,10 @@
-﻿using Application.Features.Projects;
+﻿using Application.Features.Organizations;
+using Application.Features.Projects;
+using Domain.Common;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Users;
+using Shared.Enums;
 using Shared.ViewModels;
 
 namespace IntegrationTests.Features;
@@ -232,6 +235,41 @@ public class ProjectsTests
         {
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().Be(new ProjectNavigationVM(new(project.Id, project.Name), new(organization.Id, organization.Name)));
+        }
+    }
+
+    [Fact]
+    public async Task GetRoles_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetProjectRolesQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetRoles_ShouldReturnRoles_WhenProjectExists()
+    {
+        var project = (await _factory.CreateProjects())[0];
+        // TODO: create 1 custom role
+
+        var expectedRoles = new List<RoleVM<ProjectPermissions>>();
+        foreach (var role in project.Roles)
+        {
+            expectedRoles.Add(new()
+            {
+                Id = role.Id,
+                Name = role.Name,
+                Permissions = role.Permissions,
+                Modifiable = role.Type == RoleType.Custom
+            });
+        }
+
+        var result = await _fixture.SendRequest(new GetProjectRolesQuery(project.Id));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Roles.Should().BeEquivalentTo(expectedRoles);
         }
     }
 }

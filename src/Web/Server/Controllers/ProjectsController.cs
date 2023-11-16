@@ -1,4 +1,5 @@
-﻿using Application.Features.Projects;
+﻿using Application.Features.Organizations;
+using Application.Features.Projects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -72,6 +73,14 @@ public class ProjectsController : ControllerBase
     public async Task<IActionResult> GetProjectOrganization(Guid projectId)
     {
         var result = await _mediator.Send(new GetProjectOrganizationQuery(projectId));
+        return result.ToHttpResult();
+    }
+
+    [HttpGet("{projectId:guid}/roles")]
+    [Authorize(Policy.ProjectMembersEditor)]
+    public async Task<IActionResult> GetOrganizationRoles(Guid projectId)
+    {
+        var result = await _mediator.Send(new GetProjectRolesQuery(projectId));
         return result.ToHttpResult();
     }
 }

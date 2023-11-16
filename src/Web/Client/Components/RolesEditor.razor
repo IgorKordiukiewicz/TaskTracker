@@ -1,0 +1,81 @@
+﻿@typeparam TPermissions where TPermissions: struct, Enum
+
+@inject RequestHandler _requestHandler
+
+@if(_rolesVM is not null)
+{
+    <MudPaper Class="pa-4">
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mb-1">Create</MudButton>
+        @foreach (var role in _rolesData)
+        {
+            <div class="d-flex gap-2 align-end">
+                <MudTextField Variant="Variant.Outlined" Value="@role.RoleVM.Name" T="string" ReadOnly="@(!role.NameEditEnabled)" Adornment="Adornment.End"
+                              AdornmentIcon="@GetEditButtonIcon(role)" OnAdornmentClick="() => ToggleEdit(role)" ValueChanged="(name) => OnNameChanged(role.RoleVM.Id, name)" />
+                <MudSelect Label="Permissions" Variant="Variant.Outlined" MultiSelection="true" T="TPermissions" SelectedValues="@role.PermissionsFlags" 
+                SelectedValuesChanged="(v) => OnPermissionsChanged(role.RoleVM.Id, v)" AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var permission in _allPermissionsFlags)
+                    {
+                        <MudSelectItem Value="@permission"></MudSelectItem>
+                    }
+                </MudSelect>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Variant="Variant.Filled" Style="height: 56px; width: 56px;" Disabled="@(!role.RoleVM.Modifiable)" />
+            </div>
+        }
+    </MudPaper>
+}
+
+
+@code {
+    [Parameter]
+    public required string GetRolesApiUrl{ get; init; }
+
+    private readonly TPermissions[] _allPermissionsFlags = Enum.GetValues<TPermissions>().Where(x => Convert.ToInt32(x) != 0).ToArray();
+
+    private RolesVM<TPermissions>? _rolesVM;
+
+    private class RoleData
+    {
+        public required RoleVM<TPermissions> RoleVM{ get; set; }
+        public required IEnumerable<TPermissions> PermissionsFlags { get; set; }
+        public bool NameEditEnabled { get; set; } = false;
+    }
+    private List<RoleData> _rolesData = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _rolesVM = await _requestHandler.GetAsync<RolesVM<TPermissions>>(GetRolesApiUrl);
+        if(_rolesVM is null)
+        {
+            return;
+        }
+
+        foreach(var role in _rolesVM.Roles)
+        {
+            _rolesData.Add(new()
+            {
+                RoleVM = role,
+                    PermissionsFlags = _allPermissionsFlags.Where(x => role.Permissions.HasFlag(x))
+            });
+        }
+    }
+
+    private void ToggleEdit(RoleData role)
+    {
+        role.NameEditEnabled = !role.NameEditEnabled;
+    }
+
+    private string GetEditButtonIcon(RoleData role)
+        => role.RoleVM.Modifiable 
+        ? (role.NameEditEnabled ? @Icons.Material.Filled.EditOff : @Icons.Material.Filled.Edit) 
+        : string.Empty;
+
+    private async Task OnNameChanged(Guid roleId, string newName)
+    {
+
+    }
+
+    private async Task OnPermissionsChanged(Guid roleId, IEnumerable<TPermissions> permissions)
+    {
+        
+    }
+}

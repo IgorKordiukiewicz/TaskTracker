@@ -1,43 +1,53 @@
 ﻿@page "/project/{projectId:guid}/members"
 @using global::Shared.Authorization;
+@using global::Shared.Enums;
 @layout ProjectLayout
 @attribute [Authorize]
 
 @inject RequestHandler _requestHandler
 @inject IAuthorizationService _authorizationService
 
-@if(_usersVM is not null && _isMembersEditor)
-{
-    <div class="d-flex gap-2 align-center mb-4">
-        <MudSelect Label="Users" @bind-Value="_selectedUserVM" Variant="Variant.Filled" Disabled="@(!_usersVM.Users.Any())">
-            @foreach (var user in _usersVM.Users)
-            {
-                <MudSelectItem Value="@user">@user.Email</MudSelectItem>
-            }
-        </MudSelect>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserVM is null)" OnClick="() => AddMember(_selectedUserVM!.Id)">Add</MudButton>
-    </div>
-}
-
-@if(_membersVM is not null)
-{
-    <MudPaper>
-        <MudList>
-            @foreach(var member in _membersVM.Members)
-            {
-                <MudListItem Icon="@Icons.Material.Filled.Person">
-                    <div class="d-flex justify-space-between align-center show-on-hover-parent">
-                        @member.Name
-                        @if(_isMembersEditor)
-                        {
-                            <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" Class="show-on-hover" OnClick="() => RemoveMember(member.Id)"></MudIconButton>
-                        }
-                    </div>
-                </MudListItem>
-            }
-        </MudList>
-    </MudPaper>
-}
+<MudTabs Outlined="false" Border="true" ApplyEffectsToContainer="true" Color="Color.Default" Rounded="true" Position="Position.Top" Centered="false">
+    <MudTabPanel Text="Members">
+        @if (_usersVM is not null && _isMembersEditor)
+        {
+            <div class="d-flex gap-2 align-center mb-4">
+                <MudSelect Label="Users" @bind-Value="_selectedUserVM" Variant="Variant.Filled" Disabled="@(!_usersVM.Users.Any())">
+                    @foreach (var user in _usersVM.Users)
+                    {
+                        <MudSelectItem Value="@user">@user.Email</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserVM is null)" OnClick="() => AddMember(_selectedUserVM!.Id)">Add</MudButton>
+            </div>
+        }
+        @if (_membersVM is not null)
+        {
+            <MudPaper>
+                <MudList>
+                    @foreach (var member in _membersVM.Members)
+                    {
+                        <MudListItem Icon="@Icons.Material.Filled.Person">
+                            <div class="d-flex justify-space-between align-center show-on-hover-parent">
+                                @member.Name
+                                @if (_isMembersEditor)
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" Class="show-on-hover" OnClick="() => RemoveMember(member.Id)"></MudIconButton>
+                                }
+                            </div>
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudPaper>
+        }
+    </MudTabPanel>
+    <MudTabPanel Text="Roles">
+        @if(_isMembersEditor)
+        {
+            <RolesEditor TPermissions="ProjectPermissions" GetRolesApiUrl="@($"projects/{ProjectId}/roles")"></RolesEditor>
+        }
+    </MudTabPanel>
+</MudTabs>
 
 @code {
     [Parameter]

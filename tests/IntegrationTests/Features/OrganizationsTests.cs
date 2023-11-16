@@ -1,4 +1,5 @@
 ﻿using Application.Features.Organizations;
+using Domain.Common;
 using Domain.Organizations;
 using Domain.Users;
 using Shared.Enums;
@@ -356,6 +357,41 @@ public class OrganizationsTests
         {
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().Be(new OrganizationNavigationVM(new(organization.Id, organization.Name)));
+        }
+    }
+
+    [Fact]
+    public async Task GetRoles_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetOrganizationRolesQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetRoles_ShouldReturnRoles_WhenOrganizationExists()
+    {
+        var organization = (await _factory.CreateOrganizations())[0];
+        // TODO: create 1 custom role
+
+        var expectedRoles = new List<RoleVM<OrganizationPermissions>>();
+        foreach(var role in organization.Roles)
+        {
+            expectedRoles.Add(new()
+            {
+                Id = role.Id,
+                Name = role.Name,
+                Permissions = role.Permissions,
+                Modifiable = role.Type == RoleType.Custom
+            });
+        }
+
+        var result = await _fixture.SendRequest(new GetOrganizationRolesQuery(organization.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Roles.Should().BeEquivalentTo(expectedRoles);
         }
     }
 
