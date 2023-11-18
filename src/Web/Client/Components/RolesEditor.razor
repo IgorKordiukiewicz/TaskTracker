@@ -80,7 +80,7 @@
         }
 
         _rolesData.Clear();
-        foreach(var role in _rolesVM.Roles)
+        foreach(var role in _rolesVM.Roles.OrderBy(x => x.Modifiable).ThenBy(x => x.Name))
         {
             _rolesData.Add(new()
             {
