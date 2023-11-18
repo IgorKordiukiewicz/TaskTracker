@@ -1,4 +1,7 @@
-﻿@inherits LayoutComponentBase
+﻿@using Web.Client.Common;
+@inherits LayoutComponentBase
+
+@inject UserDataService _userDataService
 
 <MudThemeProvider IsDarkMode="true" />
 <MudDialogProvider />
@@ -17,3 +20,11 @@
         </MudContainer>
     </MudMainContent>
 </MudLayout>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Added here to set the current user when refreshing a page or opening a new tab as an authenticated user
+        await _userDataService.OnSignIn();
+    }
+}
