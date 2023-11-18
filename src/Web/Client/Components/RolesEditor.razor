@@ -10,16 +10,21 @@
         @foreach (var role in _rolesData)
         {
             <div class="d-flex gap-2 align-end">
-                <MudTextField Variant="Variant.Outlined" Value="@role.RoleVM.Name" T="string" ReadOnly="@(!role.NameEditEnabled)" Adornment="Adornment.End"
+                <div style="width: 50%">
+                    <MudTextField Variant="Variant.Outlined" Value="@role.RoleVM.Name" T="string" ReadOnly="@(!role.NameEditEnabled)" Adornment="Adornment.End"
                               AdornmentIcon="@GetEditButtonIcon(role)" OnAdornmentClick="() => ToggleEdit(role)" ValueChanged="(name) => OnNameChanged(role.RoleVM.Id, name)" />
-                <MudSelect Label="Permissions" Variant="Variant.Outlined" MultiSelection="true" T="TPermissions" SelectedValues="@role.PermissionsFlags" 
-                SelectedValuesChanged="(v) => OnPermissionsChanged(role.RoleVM.Id, v)" AnchorOrigin="Origin.BottomCenter">
-                    @foreach (var permission in _allPermissionsFlags)
-                    {
-                        <MudSelectItem Value="@permission"></MudSelectItem>
-                    }
-                </MudSelect>
+                </div>
+                <div style="width: 50%">
+                    <MudSelect Label="Permissions" Variant="Variant.Outlined" MultiSelection="true" T="TPermissions" SelectedValues="@role.PermissionsFlags"
+                               SelectedValuesChanged="(v) => OnPermissionsChanged(role.RoleVM.Id, v)" AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var permission in _allPermissionsFlags)
+                        {
+                            <MudSelectItem Value="@permission"></MudSelectItem>
+                        }
+                    </MudSelect>
+                </div>
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Variant="Variant.Filled" Style="height: 56px; width: 56px;" Disabled="@(!role.RoleVM.Modifiable)" />
+                
             </div>
         }
     </MudPaper>
