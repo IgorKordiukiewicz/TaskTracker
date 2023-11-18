@@ -255,4 +255,22 @@ public class OrganizationTests
             organization.Members.Count.Should().Be(1);
         }
     }
+
+    [Fact]
+    public void AddRole_ShouldCreateANewRoleWithCorrectPermissions()
+    {
+        var organization = Organization.Create("name", Guid.NewGuid());
+        var rolesCountBefore = organization.Roles.Count;
+        var name = "abc";
+        var permissions = OrganizationPermissions.Members;
+
+        _ = organization.AddRole(name, permissions);
+
+        using (new AssertionScope())
+        {
+            organization.Roles.Count.Should().Be(rolesCountBefore + 1);
+            var addedRole = organization.Roles.First(x => x.Name == name);
+            addedRole.Permissions.Should().Be(permissions);
+        }
+    }
 }

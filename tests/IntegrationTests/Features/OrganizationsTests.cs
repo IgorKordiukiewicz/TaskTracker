@@ -1,6 +1,8 @@
 ﻿using Application.Features.Organizations;
+using Application.Features.Projects;
 using Domain.Common;
 using Domain.Organizations;
+using Domain.Projects;
 using Domain.Users;
 using Shared.Enums;
 using Shared.ViewModels;
@@ -392,6 +394,29 @@ public class OrganizationsTests
         {
             result.IsSuccess.Should().BeTrue();
             result.Value.Roles.Should().BeEquivalentTo(expectedRoles);
+        }
+    }
+
+    [Fact]
+    public async Task CreateRole_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(Guid.NewGuid(), new("abc", OrganizationPermissions.Members)));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task CreateRole_ShouldAddNewRole_WhenOrganizationExists()
+    {
+        var organization = (await _factory.CreateOrganizations())[0];
+        var rolesCountBefore = await _fixture.CountAsync<OrganizationRole>();
+
+        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(organization.Id, new("abc", OrganizationPermissions.Members)));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<OrganizationRole>()).Should().Be(rolesCountBefore + 1);
         }
     }
 

@@ -63,6 +63,9 @@ public class Project : Entity, IAggregateRoot
         return Result.Ok();
     }
 
+    public Result AddRole(string name, ProjectPermissions permissions)
+        => _roles.AddRole<ProjectPermissions, ProjectRole>(new ProjectRole(name, Id, permissions));
+
     // RemoveRole: check if is used by any member and don't remove default role,
     // Add interface to ProjectMember & OrganizationMember: IHasRole and then RolesService/Manager can accept a list of IHasRole objects to check whether any use a given role ?
 }

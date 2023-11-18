@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Authorization;
 using Shared.Dtos;
+using Shared.Enums;
 using Web.Server.Extensions;
 
 namespace Web.Server.Controllers;
@@ -78,9 +79,17 @@ public class ProjectsController : ControllerBase
 
     [HttpGet("{projectId:guid}/roles")]
     [Authorize(Policy.ProjectMembersEditor)]
-    public async Task<IActionResult> GetOrganizationRoles(Guid projectId)
+    public async Task<IActionResult> GetProjectRoles(Guid projectId)
     {
         var result = await _mediator.Send(new GetProjectRolesQuery(projectId));
+        return result.ToHttpResult();
+    }
+
+    [HttpPost("{projectId:guid}/roles")]
+    [Authorize(Policy.ProjectMembersEditor)]
+    public async Task<IActionResult> CreateProjectRole(Guid projectId, [FromBody] CreateRoleDto<ProjectPermissions> model)
+    {
+        var result = await _mediator.Send(new CreateProjectRoleCommand(projectId, model));
         return result.ToHttpResult();
     }
 }

@@ -1,4 +1,5 @@
-﻿using Domain.Common;
+﻿using AutoFixture.Kernel;
+using Domain.Common;
 using Domain.Organizations;
 using Domain.Projects;
 using Shared.Enums;
@@ -132,6 +133,29 @@ public class RoleTests
         var result = roles.GetReadOnlyRoleId();
 
         result.Should().Be(readOnlyRoleId);
+    }
+
+    [Fact]
+    public void RolesExtensions_AddRole_ShouldFail_WhenGivenNameIsTaken()
+    {
+        var roles = CreateTestRoles();
+        var result = roles.AddRole<TestPermissions, TestRole>(new TestRole(roles[0].Name, TestPermissions.A));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RolesExtensions_AddRole_ShouldSucceedAndAppendNewRole_WhenGivenNameIsNotTaken()
+    {
+        var roles = CreateTestRoles();
+        var rolesCountBefore = roles.Count;
+        var result = roles.AddRole<TestPermissions, TestRole>(new TestRole("abc", TestPermissions.A));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            roles.Count.Should().Be(rolesCountBefore + 1);
+        }
     }
 
     private static List<TestRole> CreateTestRoles()

@@ -272,4 +272,27 @@ public class ProjectsTests
             result.Value.Roles.Should().BeEquivalentTo(expectedRoles);
         }
     }
+
+    [Fact]
+    public async Task CreateRole_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new CreateProjectRoleCommand(Guid.NewGuid(), new("abc", ProjectPermissions.Tasks)));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task CreateRole_ShouldAddNewRole_WhenProjectExists()
+    {
+        var project = (await _factory.CreateProjects())[0];
+        var rolesCountBefore = await _fixture.CountAsync<ProjectRole>();
+
+        var result = await _fixture.SendRequest(new CreateProjectRoleCommand(project.Id, new("abc", ProjectPermissions.Tasks)));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<ProjectRole>()).Should().Be(rolesCountBefore + 1);
+        }
+    }
 }

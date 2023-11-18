@@ -44,7 +44,7 @@
     <MudTabPanel Text="Roles">
         @if(_isMembersEditor)
         {
-            <RolesEditor TPermissions="ProjectPermissions" GetRolesApiUrl="@($"projects/{ProjectId}/roles")"></RolesEditor>
+            <RolesEditor TPermissions="ProjectPermissions" ApiUrl="@($"projects/{ProjectId}/roles")"></RolesEditor>
         }
     </MudTabPanel>
 </MudTabs>

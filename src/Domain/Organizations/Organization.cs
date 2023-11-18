@@ -115,6 +115,9 @@ public class Organization : Entity, IAggregateRoot
         return Result.Ok();
     }
 
+    public Result AddRole(string name, OrganizationPermissions permissions)
+        => _roles.AddRole<OrganizationPermissions, OrganizationRole>(new OrganizationRole(name, Id, permissions));
+
     private Result<OrganizationInvitation> GetPendingInvitation(Guid invitationId)
     {
         var invitation = _invitations.FirstOrDefault(x => x.Id == invitationId);

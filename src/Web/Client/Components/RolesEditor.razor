@@ -1,11 +1,12 @@
-﻿@typeparam TPermissions where TPermissions: struct, Enum
+﻿@using Web.Client.Common;
+@typeparam TPermissions where TPermissions: struct, Enum
 
 @inject RequestHandler _requestHandler
 
 @if(_rolesVM is not null)
 {
     <MudPaper Class="pa-4">
-        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mb-1">Create</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mb-1" OnClick="() => _createRoleForm.Open()">Create</MudButton>
         @foreach (var role in _rolesData)
         {
             <div class="d-flex gap-2 align-end">
@@ -24,10 +25,20 @@
     </MudPaper>
 }
 
+<Dialog Title="Create a new role" Form="_createRoleForm" OnConfirm="CreateRole">
+    <MudTextField @bind-Value="@_createRoleForm.Name" Label="Name" Required="true" Variant="Variant.Filled" />
+    <MudSelect Label="Permissions" Variant="Variant.Outlined" MultiSelection="true" T="TPermissions" @bind-SelectedValues="@_createRoleForm.PermissionsFlags" AnchorOrigin="Origin.BottomCenter">
+        @foreach (var permission in _allPermissionsFlags)
+        {
+            <MudSelectItem Value="@permission"></MudSelectItem>
+        }
+    </MudSelect>
+</Dialog>
+
 
 @code {
     [Parameter]
-    public required string GetRolesApiUrl{ get; init; }
+    public required string ApiUrl{ get; init; }
 
     private readonly TPermissions[] _allPermissionsFlags = Enum.GetValues<TPermissions>().Where(x => Convert.ToInt32(x) != 0).ToArray();
 
@@ -41,20 +52,36 @@
     }
     private List<RoleData> _rolesData = new();
 
+    private class CreateRoleForm : DialogForm
+    {
+        public string Name { get; set; } = string.Empty;
+        public IEnumerable<TPermissions> PermissionsFlags { get; set; } = Enumerable.Empty<TPermissions>();
+
+        public override bool IsValid()
+            => !string.IsNullOrWhiteSpace(Name);
+    }
+    private CreateRoleForm _createRoleForm = new();
+
     protected override async Task OnInitializedAsync()
     {
-        _rolesVM = await _requestHandler.GetAsync<RolesVM<TPermissions>>(GetRolesApiUrl);
+        await UpdateRolesVM();
+    }
+
+    private async Task UpdateRolesVM()
+    {
+        _rolesVM = await _requestHandler.GetAsync<RolesVM<TPermissions>>(ApiUrl);
         if(_rolesVM is null)
         {
             return;
         }
 
+        _rolesData.Clear();
         foreach(var role in _rolesVM.Roles)
         {
             _rolesData.Add(new()
             {
                 RoleVM = role,
-                    PermissionsFlags = _allPermissionsFlags.Where(x => role.Permissions.HasFlag(x))
+                PermissionsFlags = _allPermissionsFlags.Where(x => role.Permissions.HasFlag(x))
             });
         }
     }
@@ -76,6 +103,31 @@
 
     private async Task OnPermissionsChanged(Guid roleId, IEnumerable<TPermissions> permissions)
     {
-        
+
+    }
+
+    private async Task CreateRole()
+    {
+        if (!_createRoleForm.IsValid())
+        {
+            return;
+        }
+
+        var permissions = CreatePermissionsFromList(_createRoleForm.PermissionsFlags);
+        var model = new CreateRoleDto<TPermissions>(_createRoleForm.Name, permissions);
+
+        await _requestHandler.PostAsync(ApiUrl, model);
+        await UpdateRolesVM();
+        _createRoleForm = new();
+    }
+
+    private static TPermissions CreatePermissionsFromList(IEnumerable<TPermissions> permissionsFlags)
+    {
+        var value = 0;
+        foreach(var flag in permissionsFlags)
+        {
+            value += Convert.ToInt32(flag);
+        }
+        return (TPermissions)(object)value;
     }
 }

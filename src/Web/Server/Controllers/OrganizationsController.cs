@@ -1,9 +1,11 @@
 ﻿using Application.Features.Organizations;
+using Application.Features.Projects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Authorization;
 using Shared.Dtos;
+using Shared.Enums;
 using Web.Server.Extensions;
 
 namespace Web.Server.Controllers;
@@ -108,6 +110,14 @@ public class OrganizationsController : ControllerBase
     public async Task<IActionResult> GetOrganizationRoles(Guid organizationId)
     {
         var result = await _mediator.Send(new GetOrganizationRolesQuery(organizationId));
+        return result.ToHttpResult();
+    }
+
+    [HttpPost("{organizationId:guid}/roles")]
+    [Authorize(Policy.OrganizationMembersEditor)]
+    public async Task<IActionResult> CreateOrganizationRole(Guid organizationId, [FromBody] CreateRoleDto<OrganizationPermissions> model)
+    {
+        var result = await _mediator.Send(new CreateOrganizationRoleCommand(organizationId, model));
         return result.ToHttpResult();
     }
 }

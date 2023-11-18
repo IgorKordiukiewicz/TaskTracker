@@ -61,7 +61,7 @@
             }
         </MudTabPanel>
         <MudTabPanel Text="Roles"> <!--Separate permission for editing and assigning roles?-->
-            <RolesEditor TPermissions="OrganizationPermissions" GetRolesApiUrl="@($"organizations/{OrganizationId}/roles")"></RolesEditor>
+            <RolesEditor TPermissions="OrganizationPermissions" ApiUrl="@($"organizations/{OrganizationId}/roles")"></RolesEditor>
         </MudTabPanel>
     }
 </MudTabs>
