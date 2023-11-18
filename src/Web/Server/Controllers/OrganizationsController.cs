@@ -120,4 +120,12 @@ public class OrganizationsController : ControllerBase
         var result = await _mediator.Send(new CreateOrganizationRoleCommand(organizationId, model));
         return result.ToHttpResult();
     }
+
+    [HttpPost("{organizationId:guid}/roles/{roleId:guid}/delete")]
+    [Authorize(Policy.OrganizationMembersEditor)]
+    public async Task<IActionResult> DeleteOrganizationRole(Guid organizationId, Guid roleId)
+    {
+        var result = await _mediator.Send(new DeleteOrganizationRoleCommand(organizationId, roleId));
+        return result.ToHttpResult();
+    }
 }

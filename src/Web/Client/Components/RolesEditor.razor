@@ -23,7 +23,8 @@
                         }
                     </MudSelect>
                 </div>
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Variant="Variant.Filled" Style="height: 56px; width: 56px;" Disabled="@(!role.RoleVM.Modifiable)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Variant="Variant.Filled" Style="height: 56px; width: 56px;" 
+                Disabled="@(!role.RoleVM.Modifiable)" OnClick="() => DeleteRole(role.RoleVM.Id)" />
             </div>
         }
     </MudPaper>
@@ -123,6 +124,12 @@
         await _requestHandler.PostAsync(ApiUrl, model);
         await UpdateRolesVM();
         _createRoleForm = new();
+    }
+
+    private async Task DeleteRole(Guid roleId)
+    {
+        await _requestHandler.PostAsync(ApiUrl + $"/{roleId}/delete");
+        await UpdateRolesVM();
     }
 
     private static TPermissions CreatePermissionsFromList(IEnumerable<TPermissions> permissionsFlags)

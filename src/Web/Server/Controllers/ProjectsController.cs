@@ -92,4 +92,12 @@ public class ProjectsController : ControllerBase
         var result = await _mediator.Send(new CreateProjectRoleCommand(projectId, model));
         return result.ToHttpResult();
     }
+
+    [HttpPost("{projectId:guid}/roles/{roleId:guid}/delete")]
+    [Authorize(Policy.ProjectMembersEditor)]
+    public async Task<IActionResult> DeleteProjectRole(Guid projectId, Guid roleId)
+    {
+        var result = await _mediator.Send(new DeleteProjectRoleCommand(projectId, roleId));
+        return result.ToHttpResult();
+    }
 }

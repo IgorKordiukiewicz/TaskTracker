@@ -33,4 +33,21 @@ public class RolesManager<TRole, TPermissions>
         _roles.Add(newRole);
         return Result.Ok();
     }
+
+    public Result DeleteRole(Guid roleId)
+    {
+        var role = _roles.FirstOrDefault(x => x.Id == roleId);
+        if(role is null)
+        {
+            return Result.Fail(new DomainError("Role wih this ID does not exist."));
+        }
+
+        if(!role.IsModifiable())
+        {
+            return Result.Fail(new DomainError("This role can not be deleted."));
+        }
+
+        _roles.Remove(role);
+        return Result.Ok();
+    }
 }

@@ -26,6 +26,9 @@ public abstract class Role<TPermissions> : Entity
     public bool HasPermission(TPermissions flag)
         => Permissions.HasFlag(flag);
 
+    public bool IsModifiable()
+        => Type == RoleType.Custom;
+
     public void AddPermission(TPermissions flag) // TODO: Remove add & remove ?
     {
         var (permissionsValue, flagValue) = GetPermissionsValues(flag);

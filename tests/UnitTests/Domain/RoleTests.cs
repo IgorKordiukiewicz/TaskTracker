@@ -162,6 +162,48 @@ public class RoleTests
         }
     }
 
+    [Fact]
+    public void RolesManager_DeleteRole_ShouldFail_WhenRoleDoesNotExist()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+
+        var result = rolesManager.DeleteRole(Guid.NewGuid());
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RolesManager_DeleteRole_ShouldFail_WhenRoleIsNotModifiable()
+    {
+        var roles = CreateTestRoles();
+        var notModifiableRole = roles.First(x => x.Type != RoleType.Custom);
+        var rolesManager = CreateRolesManager(roles);
+
+        var result = rolesManager.DeleteRole(notModifiableRole.Id);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RolesManager_DeleteRole_ShouldDeleteRole_WhenRoleIsModifiable()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+        var roleName = "abc";
+        _ = rolesManager.AddRole(roleName, TestPermissions.A);
+        var rolesCountBefore = roles.Count;
+        var roleToDelete = roles.First(x => x.Name == roleName);
+
+        var result = rolesManager.DeleteRole(roleToDelete.Id);
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            roles.Count.Should().Be(rolesCountBefore - 1);
+        }
+    }
+
     private static List<TestRole> CreateTestRoles()
         => new()
         {

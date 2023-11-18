@@ -420,6 +420,38 @@ public class OrganizationsTests
         }
     }
 
+    [Fact]
+    public async Task DeleteRole_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new DeleteOrganizationRoleCommand(Guid.NewGuid(), Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task DeleteRole_ShouldDeleteRole_WhenOrganizationExists()
+    {
+        var user = (await _factory.CreateUsers())[0];
+        var organization = Organization.Create("org", user.Id);
+        var roleName = "abc";
+        _ = organization.RolesManager.AddRole(roleName, OrganizationPermissions.Projects);
+
+        await _fixture.SeedDb(db =>
+        {
+            db.Add(organization);
+        });
+
+        var rolesCountBefore = await _fixture.CountAsync<OrganizationRole>();
+
+        var result = await _fixture.SendRequest(new DeleteOrganizationRoleCommand(organization.Id, organization.Roles.First(x => x.Name == roleName).Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<OrganizationRole>()).Should().Be(rolesCountBefore - 1);
+        }
+    }
+
     private async Task<Guid> CreateOrganizationWithInvitation()
     {
         var user1 = User.Create("123", "user1","firstName", "lastName");

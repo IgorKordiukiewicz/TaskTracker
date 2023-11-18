@@ -37,7 +37,7 @@ internal class GetOrganizationRolesHandler : IRequestHandler<GetOrganizationRole
                 Id = x.Id,
                 Name = x.Name,
                 Permissions = x.Permissions,
-                Modifiable = x.Type == RoleType.Custom,
+                Modifiable = x.IsModifiable(),
             })
             .ToListAsync();
 

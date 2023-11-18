@@ -295,4 +295,37 @@ public class ProjectsTests
             (await _fixture.CountAsync<ProjectRole>()).Should().Be(rolesCountBefore + 1);
         }
     }
+
+    [Fact]
+    public async Task DeleteRole_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new DeleteProjectRoleCommand(Guid.NewGuid(), Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task DeleteRole_ShouldDeleteRole_WhenPprojectExists()
+    {
+        var organization = (await _factory.CreateOrganizations())[0];
+        var user = await _fixture.FirstAsync<User>();
+        var project = Project.Create("abc", organization.Id, user.Id);
+        var roleName = "abc";
+        _ = project.RolesManager.AddRole(roleName, ProjectPermissions.Tasks);
+
+        await _fixture.SeedDb(db =>
+        {
+            db.Add(project);
+        });
+
+        var rolesCountBefore = await _fixture.CountAsync<ProjectRole>();
+
+        var result = await _fixture.SendRequest(new DeleteProjectRoleCommand(project.Id, project.Roles.First(x => x.Name == roleName).Id));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<ProjectRole>()).Should().Be(rolesCountBefore - 1);
+        }
+    }
 }
