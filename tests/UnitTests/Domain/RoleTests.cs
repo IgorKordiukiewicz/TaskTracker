@@ -114,42 +114,46 @@ public class RoleTests
     }
 
     [Fact]
-    public void RolesExtensions_GetAdminRoleId_ShouldReturnIdOfTheAdminRole()
+    public void RolesManager_GetAdminRoleId_ShouldReturnIdOfTheAdminRole()
     {
         var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
         var adminRoleId = roles.Single(x => x.Type == RoleType.Admin).Id;
 
-        var result = roles.GetAdminRoleId();
+        var result = rolesManager.GetAdminRoleId();
 
         result.Should().Be(adminRoleId);
     }
 
     [Fact]
-    public void RolesExtensions_GetReadOnlyRoleId_ShouldReturnIdOfTheReadOnlyRole()
+    public void RolesManager_GetReadOnlyRoleId_ShouldReturnIdOfTheReadOnlyRole()
     {
         var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
         var readOnlyRoleId = roles.Single(x => x.Type == RoleType.ReadOnly).Id;
 
-        var result = roles.GetReadOnlyRoleId();
+        var result = rolesManager.GetReadOnlyRoleId();
 
         result.Should().Be(readOnlyRoleId);
     }
 
     [Fact]
-    public void RolesExtensions_AddRole_ShouldFail_WhenGivenNameIsTaken()
+    public void RolesManager_AddRole_ShouldFail_WhenGivenNameIsTaken()
     {
         var roles = CreateTestRoles();
-        var result = roles.AddRole<TestPermissions, TestRole>(new TestRole(roles[0].Name, TestPermissions.A));
+        var rolesManager = CreateRolesManager(roles);
+        var result = rolesManager.AddRole(roles[0].Name, TestPermissions.A);
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public void RolesExtensions_AddRole_ShouldSucceedAndAppendNewRole_WhenGivenNameIsNotTaken()
+    public void RolesManager_AddRole_ShouldSucceedAndAppendNewRole_WhenGivenNameIsNotTaken()
     {
         var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
         var rolesCountBefore = roles.Count;
-        var result = roles.AddRole<TestPermissions, TestRole>(new TestRole("abc", TestPermissions.A));
+        var result = rolesManager.AddRole("abc", TestPermissions.A);
 
         using(new AssertionScope())
         {
@@ -166,4 +170,7 @@ public class RoleTests
             new("c", default, RoleType.Custom),
             new("d", default, RoleType.ReadOnly),
         };
+
+    private static RolesManager<TestRole, TestPermissions> CreateRolesManager(List<TestRole> roles)
+        => new(roles, (name, permissions) => new TestRole(name, permissions));
 }

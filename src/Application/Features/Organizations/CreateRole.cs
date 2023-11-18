@@ -35,7 +35,7 @@ internal class CreateOrganizationRoleHandler : IRequestHandler<CreateOrganizatio
             return Result.Fail(new ApplicationError("Organization with this ID does not exist."));
         }
 
-        var result = organization.AddRole(request.Model.Name, request.Model.Permissions);
+        var result = organization.RolesManager.AddRole(request.Model.Name, request.Model.Permissions);
         if (result.IsFailed)
         {
             return Result.Fail(result.Errors);

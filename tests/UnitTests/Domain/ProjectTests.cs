@@ -85,22 +85,4 @@ public class ProjectTests
             project.Members.Count.Should().Be(0);
         }
     }
-
-    [Fact]
-    public void AddRole_ShouldCreateANewRoleWithCorrectPermissions()
-    {
-        var project = Project.Create("name", Guid.NewGuid(), Guid.NewGuid());
-        var rolesCountBefore = project.Roles.Count;
-        var name = "abc";
-        var permissions = ProjectPermissions.Tasks;
-
-        _ = project.AddRole(name, permissions);
-
-        using(new AssertionScope())
-        {
-            project.Roles.Count.Should().Be(rolesCountBefore + 1);
-            var addedRole = project.Roles.First(x => x.Name == name);
-            addedRole.Permissions.Should().Be(permissions);
-        }
-    }
 }

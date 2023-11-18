@@ -26,7 +26,7 @@ public abstract class Role<TPermissions> : Entity
     public bool HasPermission(TPermissions flag)
         => Permissions.HasFlag(flag);
 
-    public void AddPermission(TPermissions flag)
+    public void AddPermission(TPermissions flag) // TODO: Remove add & remove ?
     {
         var (permissionsValue, flagValue) = GetPermissionsValues(flag);
         Permissions = (TPermissions)Enum.ToObject(typeof(TPermissions), permissionsValue | flagValue);

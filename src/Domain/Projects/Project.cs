@@ -17,9 +17,12 @@ public class Project : Entity, IAggregateRoot
     private readonly List<ProjectRole> _roles = new();
     public IReadOnlyList<ProjectRole> Roles => _roles.AsReadOnly();
 
+    public RolesManager<ProjectRole, ProjectPermissions> RolesManager { get; init; }
+
     private Project(Guid id)
         : base(id)
     {
+        RolesManager = new(_roles, (name, permissions) => new ProjectRole(name, Id, permissions));
     }
 
     public static Project Create(string name, Guid organizationId, Guid createdByUserId)
@@ -32,7 +35,7 @@ public class Project : Entity, IAggregateRoot
 
         result._roles.AddRange(ProjectRole.CreateDefaultRoles(result.Id));
 
-        var member = ProjectMember.Create(createdByUserId, result._roles.GetAdminRoleId());
+        var member = ProjectMember.Create(createdByUserId, result.RolesManager.GetAdminRoleId());
         result._members.Add(member);
 
         return result;
@@ -45,7 +48,7 @@ public class Project : Entity, IAggregateRoot
             return Result.Fail<ProjectMember>(new DomainError("User is already a member of this project."));
         }
 
-        var member = ProjectMember.Create(userId, _roles.GetReadOnlyRoleId());
+        var member = ProjectMember.Create(userId, RolesManager.GetReadOnlyRoleId());
         _members.Add(member);
 
         return member;
@@ -62,9 +65,6 @@ public class Project : Entity, IAggregateRoot
         _members.Remove(member);
         return Result.Ok();
     }
-
-    public Result AddRole(string name, ProjectPermissions permissions)
-        => _roles.AddRole<ProjectPermissions, ProjectRole>(new ProjectRole(name, Id, permissions));
 
     // RemoveRole: check if is used by any member and don't remove default role,
     // Add interface to ProjectMember & OrganizationMember: IHasRole and then RolesService/Manager can accept a list of IHasRole objects to check whether any use a given role ?

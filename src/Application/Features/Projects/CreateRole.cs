@@ -34,7 +34,7 @@ internal class CreateProjectRoleHandler : IRequestHandler<CreateProjectRoleComma
             return Result.Fail(new ApplicationError("Project with this ID does not exist."));
         }
 
-        var result = project.AddRole(request.Model.Name, request.Model.Permissions);
+        var result = project.RolesManager.AddRole(request.Model.Name, request.Model.Permissions);
         if(result.IsFailed)
         {
             return Result.Fail(result.Errors);

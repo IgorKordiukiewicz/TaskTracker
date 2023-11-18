@@ -14,6 +14,8 @@ internal class ProjectConfiguration : IEntityTypeConfiguration<Project>
             .IsRequired()
             .HasMaxLength(100);
 
+        builder.Ignore(x => x.RolesManager);
+
         builder.HasOne<Organization>()
             .WithMany()
             .HasForeignKey(x => x.OrganizationId);

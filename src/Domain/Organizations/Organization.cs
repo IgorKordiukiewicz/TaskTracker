@@ -1,6 +1,5 @@
 ﻿using Domain.Common;
 using Domain.Errors;
-using Domain.Projects;
 using FluentResults;
 using Shared.Enums;
 
@@ -22,10 +21,12 @@ public class Organization : Entity, IAggregateRoot
     private readonly List<OrganizationRole> _roles = new();
     public IReadOnlyList<OrganizationRole> Roles => _roles.AsReadOnly();
 
+    public RolesManager<OrganizationRole, OrganizationPermissions> RolesManager { get; init; }
+
     private Organization(Guid id)
         : base(id)
     {
-
+        RolesManager = new(_roles, (name, permissions) => new OrganizationRole(name, Id, permissions));
     }
 
     public static Organization Create(string name, Guid ownerId)
@@ -38,7 +39,7 @@ public class Organization : Entity, IAggregateRoot
 
         result._roles.AddRange(OrganizationRole.CreateDefaultRoles(result.Id));
 
-        _ = result.AddMember(ownerId, result._roles.GetAdminRoleId());
+        _ = result.AddMember(ownerId, result.RolesManager.GetAdminRoleId());
 
         return result;
     }
@@ -71,7 +72,7 @@ public class Organization : Entity, IAggregateRoot
 
         var invitation = invitationResult.Value;
         invitation.Accept();
-        return AddMember(invitation.UserId, _roles.GetReadOnlyRoleId());
+        return AddMember(invitation.UserId, RolesManager.GetReadOnlyRoleId());
     }
 
     public Result DeclineInvitation(Guid invitationId)
@@ -114,9 +115,6 @@ public class Organization : Entity, IAggregateRoot
         _members.Remove(member);
         return Result.Ok();
     }
-
-    public Result AddRole(string name, OrganizationPermissions permissions)
-        => _roles.AddRole<OrganizationPermissions, OrganizationRole>(new OrganizationRole(name, Id, permissions));
 
     private Result<OrganizationInvitation> GetPendingInvitation(Guid invitationId)
     {
