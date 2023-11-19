@@ -5,9 +5,12 @@
     <MudList>
         @foreach (var member in Members)
         {
-            <MudListItem Icon="@Icons.Material.Filled.Person">
+            <MudListItem>
                 <div class="d-flex justify-space-between align-center show-on-hover-parent">
-                    @member.Name
+                    <div class="d-flex gap-3 align-center">
+                        <UserAvatar Name="@member.Name"></UserAvatar>
+                        @member.Name
+                    </div>
                     @if (IsMembersEditor)
                     {
                         <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)"
