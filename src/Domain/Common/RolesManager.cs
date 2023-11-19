@@ -24,13 +24,35 @@ public class RolesManager<TRole, TPermissions>
 
     public Result AddRole(string name, TPermissions permissions)
     {
-        if (_roles.Any(x => x.Name.ToLower() == name.ToLower()))
+        if (IsNameTaken(name))
         {
             return Result.Fail(new DomainError("Role with this name already exists."));
         }
 
         var newRole = _createNewRoleFunc(name, permissions);
         _roles.Add(newRole);
+        return Result.Ok();
+    }
+
+    public Result UpdateRoleName(Guid roleId, string newName)
+    {
+        var role = _roles.FirstOrDefault(x => x.Id == roleId);
+        if (role is null)
+        {
+            return Result.Fail(new DomainError("Role wih this ID does not exist."));
+        }
+
+        if(!role.IsModifiable())
+        {
+            return Result.Fail(new DomainError("This role can not be modified."));
+        }
+
+        if (IsNameTaken(newName))
+        {
+            return Result.Fail(new DomainError("Role with this name already exists."));
+        }
+
+        role.UpdateName(newName);
         return Result.Ok();
     }
 
@@ -50,4 +72,7 @@ public class RolesManager<TRole, TPermissions>
         _roles.Remove(role);
         return Result.Ok();
     }
+
+    private bool IsNameTaken(string name)
+        => _roles.Any(x => x.Name.ToLower() == name.ToLower());
 }

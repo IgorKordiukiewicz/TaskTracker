@@ -431,16 +431,7 @@ public class OrganizationsTests
     [Fact]
     public async Task DeleteRole_ShouldDeleteRole_WhenOrganizationExists()
     {
-        var user = (await _factory.CreateUsers())[0];
-        var organization = Organization.Create("org", user.Id);
-        var roleName = "abc";
-        _ = organization.RolesManager.AddRole(roleName, OrganizationPermissions.Projects);
-
-        await _fixture.SeedDb(db =>
-        {
-            db.Add(organization);
-        });
-
+        var (organization, roleName) = await CreateOrganizationWithCustomRole();
         var rolesCountBefore = await _fixture.CountAsync<OrganizationRole>();
 
         var result = await _fixture.SendRequest(new DeleteOrganizationRoleCommand(organization.Id, organization.Roles.First(x => x.Name == roleName).Id));
@@ -449,6 +440,30 @@ public class OrganizationsTests
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<OrganizationRole>()).Should().Be(rolesCountBefore - 1);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateRoleName_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateOrganizationRoleNameCommand(Guid.NewGuid(), Guid.NewGuid(), new("abc")));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UpdateRoleName_ShouldUpdateRoleName_WhenOrganizationExists()
+    {
+        var (organization, roleName) = await CreateOrganizationWithCustomRole();
+        var newName = roleName + "A";
+        var roleId = organization.Roles.First(x => x.Name == roleName).Id;
+
+        var result = await _fixture.SendRequest(new UpdateOrganizationRoleNameCommand(organization.Id, roleId, new(newName)));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<OrganizationRole>(x => x.Id == roleId)).Name.Should().Be(newName);
         }
     }
 
@@ -466,5 +481,20 @@ public class OrganizationsTests
         });
 
         return invitation.Id;
+    }
+
+    private async Task<(Organization Organization, string RoleName)> CreateOrganizationWithCustomRole()
+    {
+        var user = (await _factory.CreateUsers())[0];
+        var organization = Organization.Create("org", user.Id);
+        var roleName = "abc";
+        _ = organization.RolesManager.AddRole(roleName, OrganizationPermissions.Projects);
+
+        await _fixture.SeedDb(db =>
+        {
+            db.Add(organization);
+        });
+
+        return (organization, roleName);
     }
 }

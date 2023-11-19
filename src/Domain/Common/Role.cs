@@ -28,6 +28,11 @@ public abstract class Role<TPermissions> : Entity
 
     public bool IsModifiable()
         => Type == RoleType.Custom;
+    
+    public void UpdateName(string newName)
+    {
+        Name = newName;
+    }
 
     public void AddPermission(TPermissions flag) // TODO: Remove add & remove ?
     {

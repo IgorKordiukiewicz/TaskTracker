@@ -307,6 +307,44 @@ public class ProjectsTests
     [Fact]
     public async Task DeleteRole_ShouldDeleteRole_WhenPprojectExists()
     {
+        var (project, roleName) = await CreateProjectWithCustomRole();
+        var rolesCountBefore = await _fixture.CountAsync<ProjectRole>();
+
+        var result = await _fixture.SendRequest(new DeleteProjectRoleCommand(project.Id, project.Roles.First(x => x.Name == roleName).Id));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<ProjectRole>()).Should().Be(rolesCountBefore - 1);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateRoleName_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateProjectRoleNameCommand(Guid.NewGuid(), Guid.NewGuid(), new("abc")));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UpdateRoleName_ShouldUpdateRoleName_WhenProjectExists()
+    {
+        var (project, roleName) = await CreateProjectWithCustomRole();
+        var newName = roleName + "A";
+        var roleId = project.Roles.First(x => x.Name == roleName).Id;
+
+        var result = await _fixture.SendRequest(new UpdateProjectRoleNameCommand(project.Id, roleId, new(newName)));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<ProjectRole>(x => x.Id == roleId)).Name.Should().Be(newName);
+        }
+    }
+
+    private async Task<(Project Project, string RoleName)> CreateProjectWithCustomRole()
+    {
         var organization = (await _factory.CreateOrganizations())[0];
         var user = await _fixture.FirstAsync<User>();
         var project = Project.Create("abc", organization.Id, user.Id);
@@ -318,14 +356,6 @@ public class ProjectsTests
             db.Add(project);
         });
 
-        var rolesCountBefore = await _fixture.CountAsync<ProjectRole>();
-
-        var result = await _fixture.SendRequest(new DeleteProjectRoleCommand(project.Id, project.Roles.First(x => x.Name == roleName).Id));
-
-        using (new AssertionScope())
-        {
-            result.IsSuccess.Should().BeTrue();
-            (await _fixture.CountAsync<ProjectRole>()).Should().Be(rolesCountBefore - 1);
-        }
+        return (project, roleName);
     }
 }

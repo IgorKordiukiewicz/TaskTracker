@@ -139,14 +139,16 @@
 
     private async Task UpdateName(RoleData role)
     {
-        // TODO: api request
+        var model = new UpdateRoleNameDto(role.NameEditValue);
+        await _requestHandler.PostAsync(ApiUrl + $"/{role.RoleVM.Id}/update-name", model);
+
         CancelNameEdit(role);
         await UpdateRolesVM();
     }
 
     private async Task OnPermissionsChanged(Guid roleId, IEnumerable<TPermissions> permissions)
     {
-
+        
     }
 
     private async Task CreateRole()

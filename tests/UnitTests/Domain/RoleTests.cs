@@ -70,13 +70,24 @@ public class RoleTests
     }
 
     [Fact]
-    public void RemovePermission_ShouldRNotChangePermissionsValue_WhenGivenPermissionWasNotAlreadyAdded()
+    public void RemovePermission_ShouldNotChangePermissionsValue_WhenGivenPermissionWasNotAlreadyAdded()
     {
         var role = new TestRole("role", TestPermissions.A);
 
         role.RemovePermission(TestPermissions.B);
 
         role.Permissions.Should().Be(TestPermissions.A);
+    }
+
+    [Fact]
+    public void UpdateName_ShouldUpdateName()
+    {
+        var role = new TestRole("role", TestPermissions.A);
+        var newName = "newName";
+
+        role.UpdateName(newName);
+
+        role.Name.Should().Be(newName);
     }
 
     [Fact]
@@ -201,6 +212,59 @@ public class RoleTests
         {
             result.IsSuccess.Should().BeTrue();
             roles.Count.Should().Be(rolesCountBefore - 1);
+        }
+    }
+
+    [Fact]
+    public void RolesManager_UpdateRoleName_ShouldFail_WhenRoleDoesNotExist()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+
+        var result = rolesManager.UpdateRoleName(Guid.NewGuid(), "abc");
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RolesManager_UpdateRoleName_ShouldFail_WhenRoleIsNotModifiable()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+        var roleId = roles.First(x => !x.IsModifiable()).Id;
+
+        var result = rolesManager.UpdateRoleName(roleId, "abc");
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RolesManager_UpdateRoleName_ShouldFail_WhenNameIsTaken()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+        var name = roles.First(x => !x.IsModifiable()).Name;
+        var roleId = roles.First(x => x.IsModifiable()).Id;
+
+        var result = rolesManager.UpdateRoleName(roleId, name);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RolesManager_UpdateRoleName_ShouldUpdateRoleName_WhenNameIsNotTakenAndRoleIsModifiable()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+        var name = "abc";
+        var roleId = roles.First(x => x.IsModifiable()).Id;
+
+        var result = rolesManager.UpdateRoleName(roleId, name);
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            roles.First(x => x.Id == roleId).Name.Should().Be(name);
         }
     }
 
