@@ -6,31 +6,64 @@
 @if(_rolesVM is not null)
 {
     <MudPaper Class="pa-4">
-        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mb-1" OnClick="() => _createRoleForm.Open()">Create</MudButton>
-        @foreach (var role in _rolesData)
-        {
-            <div class="d-flex gap-2 align-end">
-                <div style="width: 50%">
-                    <MudTextField Variant="Variant.Outlined" Value="@role.RoleVM.Name" T="string" ReadOnly="@(!role.NameEditEnabled)" Adornment="Adornment.End"
-                              AdornmentIcon="@GetEditButtonIcon(role)" OnAdornmentClick="() => ToggleEdit(role)" ValueChanged="(name) => OnNameChanged(role.RoleVM.Id, name)" />
-                </div>
-                <div style="width: 50%">
-                    <MudSelect Label="Permissions" Variant="Variant.Outlined" MultiSelection="true" T="TPermissions" SelectedValues="@role.PermissionsFlags"
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mb-2" OnClick="() => _createRoleForm.Open()">Create</MudButton>
+        <MudGrid Spacing="3">
+            @foreach (var role in _rolesData)
+            {
+                <MudItem md="12" Class="d-flex gap-2 flex-column">
+                    <div class="d-flex gap-2 align-center">
+                        @if(role.NameEditEnabled)
+                        {
+                            <MudTextField Variant="Variant.Text" @bind-Value="role.NameEditValue" />
+                            <MudButton Variant="Variant.Filled" OnClick="() => CancelNameEdit(role)">Cancel</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="() => UpdateName(role)" Disabled="@(role.NameEditValue == role.RoleVM.Name)">Save</MudButton>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.h6">
+                                @role.RoleVM.Name
+                            </MudText>
+                            @if(role.RoleVM.Modifiable)
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="() => StartNameEdit(role)" />
+                            }
+                        }
+                    </div>
+                    <MudSelect Variant="Variant.Outlined" MultiSelection="true" T="TPermissions" SelectedValues="@role.PermissionsFlags"
                                SelectedValuesChanged="(v) => OnPermissionsChanged(role.RoleVM.Id, v)" AnchorOrigin="Origin.BottomCenter">
                         @foreach (var permission in _allPermissionsFlags)
                         {
                             <MudSelectItem Value="@permission"></MudSelectItem>
                         }
                     </MudSelect>
-                </div>
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Variant="Variant.Filled" Style="height: 56px; width: 56px;" 
-                Disabled="@(!role.RoleVM.Modifiable)" OnClick="() => DeleteRole(role.RoleVM.Id)" />
-            </div>
-        }
+                    <div class="d-flex justify-space-between">
+                        <div class="d-flex gap-4 align-center">
+                            <MudText Typo="Typo.body1">
+                                Assigned to:
+                            </MudText>
+                            <!--TODO-->
+                            <MudAvatarGroup Spacing="3" Max="3" MaxColor="Color.Primary">
+                                <MudAvatar Color="Color.Primary">M</MudAvatar>
+                                <MudAvatar Color="Color.Secondary">U</MudAvatar>
+                                <MudAvatar Color="Color.Tertiary">D</MudAvatar>
+                                <MudAvatar Color="Color.Primary">M</MudAvatar>
+                                <MudAvatar Color="Color.Secondary">U</MudAvatar>
+                                <MudAvatar Color="Color.Tertiary">D</MudAvatar>
+                            </MudAvatarGroup>
+                        </div>
+                        <MudButton StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" Variant="Variant.Filled"
+                                   Disabled="@(!role.RoleVM.Modifiable)" OnClick="() => DeleteRole(role.RoleVM.Id)">
+                            Delete
+                        </MudButton>
+                    </div>
+                </MudItem>
+            }
+        </MudGrid>
+        
     </MudPaper>
 }
 
-<Dialog Title="Create a new role" Form="_createRoleForm" OnConfirm="CreateRole">
+<Dialog Title="Create a new role" Form="_createRoleForm" OnConfirm="CreateRole" >
     <MudTextField @bind-Value="@_createRoleForm.Name" Label="Name" Required="true" Variant="Variant.Filled" />
     <MudSelect Label="Permissions" Variant="Variant.Outlined" MultiSelection="true" T="TPermissions" @bind-SelectedValues="@_createRoleForm.PermissionsFlags" AnchorOrigin="Origin.BottomCenter">
         @foreach (var permission in _allPermissionsFlags)
@@ -53,6 +86,7 @@
     {
         public required RoleVM<TPermissions> RoleVM{ get; set; }
         public required IEnumerable<TPermissions> PermissionsFlags { get; set; }
+        public required string NameEditValue { get; set; }
         public bool NameEditEnabled { get; set; } = false;
     }
     private List<RoleData> _rolesData = new();
@@ -86,24 +120,28 @@
             _rolesData.Add(new()
             {
                 RoleVM = role,
-                PermissionsFlags = _allPermissionsFlags.Where(x => role.Permissions.HasFlag(x))
+                PermissionsFlags = _allPermissionsFlags.Where(x => role.Permissions.HasFlag(x)),
+                NameEditValue = role.Name
             });
         }
     }
 
-    private void ToggleEdit(RoleData role)
+    private void StartNameEdit(RoleData role)
     {
-        role.NameEditEnabled = !role.NameEditEnabled;
+        role.NameEditEnabled = true;
     }
 
-    private string GetEditButtonIcon(RoleData role)
-        => role.RoleVM.Modifiable 
-        ? (role.NameEditEnabled ? @Icons.Material.Filled.EditOff : @Icons.Material.Filled.Edit) 
-        : string.Empty;
-
-    private async Task OnNameChanged(Guid roleId, string newName)
+    private void CancelNameEdit(RoleData role)
     {
+        role.NameEditEnabled = false;
+        role.NameEditValue = role.RoleVM.Name;
+    }
 
+    private async Task UpdateName(RoleData role)
+    {
+        // TODO: api request
+        CancelNameEdit(role);
+        await UpdateRolesVM();
     }
 
     private async Task OnPermissionsChanged(Guid roleId, IEnumerable<TPermissions> permissions)
