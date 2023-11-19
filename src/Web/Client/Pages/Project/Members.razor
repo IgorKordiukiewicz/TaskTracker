@@ -23,22 +23,7 @@
         }
         @if (_membersVM is not null)
         {
-            <MudPaper>
-                <MudList>
-                    @foreach (var member in _membersVM.Members)
-                    {
-                        <MudListItem Icon="@Icons.Material.Filled.Person">
-                            <div class="d-flex justify-space-between align-center show-on-hover-parent">
-                                @member.Name
-                                @if (_isMembersEditor)
-                                {
-                                    <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" Class="show-on-hover" OnClick="() => RemoveMember(member.Id)"></MudIconButton>
-                                }
-                            </div>
-                        </MudListItem>
-                    }
-                </MudList>
-            </MudPaper>
+            <MembersList Members="@_membersVM.Members" IsMembersEditor="@_isMembersEditor" ApiUrl="@($"projects/{ProjectId}/members")" MemberRemoved="UpdateMembersVM"></MembersList>
         }
     </MudTabPanel>
     <MudTabPanel Text="Roles">
@@ -64,14 +49,14 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var user = (await AuthenticationState).User;
+        _isMembersEditor = (await _authorizationService.AuthorizeAsync(user, Policy.ProjectMembersEditor)).Succeeded;
+
         await UpdateMembersVM();
     }
 
     private async Task UpdateMembersVM()
     {
-        var user = (await AuthenticationState).User;
-        _isMembersEditor = (await _authorizationService.AuthorizeAsync(user, Policy.ProjectMembersEditor)).Succeeded;
-
         _membersVM = await _requestHandler.GetAsync<ProjectMembersVM>($"projects/{ProjectId}/members");
 
         var organizationId = (await _requestHandler.GetAsync<ProjectOrganizationVM>($"projects/{ProjectId}/organization"))?.OrganizationId ?? default;
@@ -91,13 +76,6 @@
         await _requestHandler.PostAsync($"projects/{ProjectId}/members", model);
 
         _selectedUserVM = null;
-        await UpdateMembersVM();
-    }
-
-    private async Task RemoveMember(Guid memberId)
-    {
-        await _requestHandler.PostAsync($"projects/{ProjectId}/members/{memberId}/remove");
-
         await UpdateMembersVM();
     }
 }

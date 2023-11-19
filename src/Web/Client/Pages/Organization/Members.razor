@@ -11,23 +11,7 @@
     <MudTabPanel Text="Members">
         @if (_membersVM is not null)
         {
-            <MudPaper Class="mt-4">
-                <MudList>
-                    @foreach (var member in _membersVM.Members)
-                    {
-                        <MudListItem Icon="@Icons.Material.Filled.Person">
-                            <div class="d-flex justify-space-between align-center show-on-hover-parent">
-                                @member.Name
-                                @if(_isMembersEditor)
-                                {
-                                    <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)"
-                                                   Class="@(!member.Owner ? "show-on-hover" : "invisible")"></MudIconButton>
-                                }
-                            </div>
-                        </MudListItem>
-                    }
-                </MudList>
-            </MudPaper>
+            <MembersList Members="@_membersVM.Members" IsMembersEditor="@_isMembersEditor" ApiUrl="@($"organizations/{OrganizationId}/members")" MemberRemoved="UpdateMembersVM"></MembersList>
         }
     </MudTabPanel>
     @if (_isMembersEditor)
@@ -35,7 +19,7 @@
         <MudTabPanel Text="Invitations">
             @if (_invitationsVM is not null)
             {
-                <MudPaper Class="mt-2">
+                <MudPaper>
                     <div class="d-flex gap-2 align-center pa-2">
                         <MudAutocomplete T="UserSearchVM" Label="Invite Users" @bind-Value="_selectedUserForInvitation" SearchFunc="SearchUsers"
                                          ResetValueOnEmptyText="true" Class="mb-4" AdornmentIcon="@Icons.Material.Filled.Search" ToStringFunc="(user => user.Email)" />
@@ -131,12 +115,6 @@
         _selectedUserForInvitation = null;
 
         await UpdateInvitationsVM();
-    }
-
-    private async Task RemoveMember(Guid memberId)
-    {
-        await _requestHandler.PostAsync($"organizations/{OrganizationId}/members/{memberId}/remove");
-        await UpdateMembersVM();
     }
 
     private async Task CancelInvitation(Guid invitationId)
