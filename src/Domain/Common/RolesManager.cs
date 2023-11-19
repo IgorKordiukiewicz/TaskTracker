@@ -3,6 +3,11 @@ using FluentResults;
 
 namespace Domain.Common;
 
+public interface IHasRole
+{
+    Guid RoleId { get; }
+}
+
 public class RolesManager<TRole, TPermissions>
     where TRole : Role<TPermissions>
     where TPermissions : struct, Enum
@@ -56,7 +61,7 @@ public class RolesManager<TRole, TPermissions>
         return Result.Ok();
     }
 
-    public Result DeleteRole(Guid roleId)
+    public Result DeleteRole(Guid roleId, IReadOnlyCollection<IHasRole> members)
     {
         var role = _roles.FirstOrDefault(x => x.Id == roleId);
         if(role is null)
@@ -64,7 +69,7 @@ public class RolesManager<TRole, TPermissions>
             return Result.Fail(new DomainError("Role wih this ID does not exist."));
         }
 
-        if(!role.IsModifiable())
+        if(!role.IsModifiable() || members.Any(x => x.RoleId == roleId))
         {
             return Result.Fail(new DomainError("This role can not be deleted."));
         }

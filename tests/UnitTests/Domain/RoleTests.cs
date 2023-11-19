@@ -179,7 +179,7 @@ public class RoleTests
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
 
-        var result = rolesManager.DeleteRole(Guid.NewGuid());
+        var result = rolesManager.DeleteRole(Guid.NewGuid(), Array.Empty<IHasRole>());
 
         result.IsFailed.Should().BeTrue();
     }
@@ -191,10 +191,12 @@ public class RoleTests
         var notModifiableRole = roles.First(x => x.Type != RoleType.Custom);
         var rolesManager = CreateRolesManager(roles);
 
-        var result = rolesManager.DeleteRole(notModifiableRole.Id);
+        var result = rolesManager.DeleteRole(notModifiableRole.Id, Array.Empty<IHasRole>());
 
         result.IsFailed.Should().BeTrue();
     }
+
+    // TODO: Add ShouldFail_WhenRoleIsAssignedToMember
 
     [Fact]
     public void RolesManager_DeleteRole_ShouldDeleteRole_WhenRoleIsModifiable()
@@ -206,7 +208,7 @@ public class RoleTests
         var rolesCountBefore = roles.Count;
         var roleToDelete = roles.First(x => x.Name == roleName);
 
-        var result = rolesManager.DeleteRole(roleToDelete.Id);
+        var result = rolesManager.DeleteRole(roleToDelete.Id, Array.Empty<IHasRole>());
 
         using(new AssertionScope())
         {

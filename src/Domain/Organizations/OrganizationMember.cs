@@ -3,7 +3,7 @@
 namespace Domain.Organizations;
 
 
-public class OrganizationMember : Entity
+public class OrganizationMember : Entity, IHasRole
 {
     public Guid UserId { get; private init; }
     public Guid RoleId { get; private set; }

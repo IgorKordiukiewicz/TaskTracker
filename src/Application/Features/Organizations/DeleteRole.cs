@@ -32,7 +32,7 @@ internal class DeleteProjectRoleHandler : IRequestHandler<DeleteOrganizationRole
             return Result.Fail(new ApplicationError("Organization with this ID does not exist."));
         }
 
-        var result = organization.RolesManager.DeleteRole(request.RoleId);
+        var result = organization.RolesManager.DeleteRole(request.RoleId, organization.Members);
         if (result.IsFailed)
         {
             return Result.Fail(result.Errors);
