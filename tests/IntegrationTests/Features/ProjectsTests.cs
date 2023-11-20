@@ -367,6 +367,30 @@ public class ProjectsTests
         }
     }
 
+    [Fact]
+    public async Task UpdateRolePermissions_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateProjectRolePermissionsCommand(Guid.NewGuid(), Guid.NewGuid(), new(ProjectPermissions.None)));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UpdateRolePermissions_ShouldUpdatePermissions_WhenProjectExists()
+    {
+        var (project, roleName) = await CreateProjectWithCustomRole();
+        var roleId = project.Roles.First(x => x.Name == roleName).Id;
+        var newPermissions = ProjectPermissions.Tasks | ProjectPermissions.Members;
+
+        var result = await _fixture.SendRequest(new UpdateProjectRolePermissionsCommand(project.Id, roleId, new(newPermissions)));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<ProjectRole>(x => x.Id == roleId)).Permissions.Should().Be(newPermissions);
+        }
+    }
+
     private async Task<(Project Project, string RoleName)> CreateProjectWithCustomRole()
     {
         var organization = (await _factory.CreateOrganizations())[0];

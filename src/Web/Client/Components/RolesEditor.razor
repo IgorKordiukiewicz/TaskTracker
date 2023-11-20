@@ -175,7 +175,11 @@
 
     private async Task UpdatePermissions(RoleData role)
     {
+        var permissions = CreatePermissionsFromList(role.PermissionsFlags);
+        var model = new UpdateRolePermissionsDto<TPermissions>(permissions);
 
+        await _requestHandler.PostAsync(ApiUrl + $"/{role.RoleVM.Id}/update-permissions", model);
+        await UpdateRolesVM();
     }
 
     private async Task CreateRole()

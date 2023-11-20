@@ -54,57 +54,6 @@ public class RoleTests
     }
 
     [Fact]
-    public void AddPermission_ShouldAddANewPermission_WhenGivenPermissionWasNotAlreadyAdded()
-    {
-        var role = new TestRole("role", TestPermissions.A);
-
-        role.AddPermission(TestPermissions.C);
-
-        role.Permissions.Should().Be(TestPermissions.A | TestPermissions.C);
-    }
-
-    [Fact]
-    public void AddPermission_ShouldNotChangePermissionsValue_WhenGivenPermissionWasAlreadyAdded()
-    {
-        var role = new TestRole("role", TestPermissions.A);
-
-        role.AddPermission(TestPermissions.A);
-
-        role.Permissions.Should().Be(TestPermissions.A);
-    }
-
-    [Fact]
-    public void RemovePermission_ShouldRemovePermission_WhenGivenPermissionWasAlreadyAdded()
-    {
-        var role = new TestRole("role", TestPermissions.A | TestPermissions.B);
-
-        role.RemovePermission(TestPermissions.A);
-
-        role.Permissions.Should().Be(TestPermissions.B);
-    }
-
-    [Fact]
-    public void RemovePermission_ShouldNotChangePermissionsValue_WhenGivenPermissionWasNotAlreadyAdded()
-    {
-        var role = new TestRole("role", TestPermissions.A);
-
-        role.RemovePermission(TestPermissions.B);
-
-        role.Permissions.Should().Be(TestPermissions.A);
-    }
-
-    [Fact]
-    public void UpdateName_ShouldUpdateName()
-    {
-        var role = new TestRole("role", TestPermissions.A);
-        var newName = "newName";
-
-        role.UpdateName(newName);
-
-        role.Name.Should().Be(newName);
-    }
-
-    [Fact]
     public void ProjectRole_CreateDefaultRoles_ShouldReturnAdminAndReadOnlyRole()
     {
         var projectId = Guid.NewGuid();
@@ -308,7 +257,7 @@ public class RoleTests
     }
 
     [Fact]
-    public void RolesManager_ShouldSucceed_WhenMemberAndRoleExist()
+    public void RolesManager_UpdateMemberRole_ShouldSucceed_WhenMemberAndRoleExist()
     {
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
@@ -317,6 +266,46 @@ public class RoleTests
         var result = rolesManager.UpdateMemberRole(members[0].Id, roles[1].Id, members);
 
         result.IsSuccess.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RolesManager_UpdateRolePermissions_ShouldFail_WhenRoleDoesNotExist()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+
+        var result = rolesManager.UpdateRolePermissions(Guid.NewGuid(), TestPermissions.A);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RolesManager_UpdateRolePermissions_ShouldFail_WhenRoleIsNotModifiable()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+        var roleId = roles.First(x => !x.IsModifiable()).Id;
+
+        var result = rolesManager.UpdateRolePermissions(roleId, TestPermissions.A);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RolesManager_UpdateRolePermissions_ShouldUpdatePermissions_WhenRoleIsModifiable()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+        var roleId = roles.First(x => x.IsModifiable()).Id;
+        var newPermissions = TestPermissions.A | TestPermissions.C;
+
+        var result = rolesManager.UpdateRolePermissions(roleId, newPermissions);
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            roles.First(x => x.Id == roleId).Permissions.Should().Be(newPermissions);
+        }
     }
 
     private static List<TestRole> CreateTestRoles()

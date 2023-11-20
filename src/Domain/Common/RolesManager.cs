@@ -59,7 +59,7 @@ public class RolesManager<TRole, TPermissions>
             return Result.Fail(new DomainError("Role with this name already exists."));
         }
 
-        role.UpdateName(newName);
+        role.Name = newName;
         return Result.Ok();
     }
 
@@ -94,6 +94,23 @@ public class RolesManager<TRole, TPermissions>
         }
 
         member.UpdateRole(roleId);
+        return Result.Ok();
+    }
+
+    public Result UpdateRolePermissions(Guid roleId, TPermissions permissions)
+    {
+        var role = _roles.FirstOrDefault(x => x.Id == roleId);
+        if(role is null)
+        {
+            return Result.Fail(new DomainError("Role wih this ID does not exist."));
+        }
+
+        if(!role.IsModifiable())
+        {
+            return Result.Fail(new DomainError("This role can not be modified."));
+        }
+
+        role.Permissions = permissions;
         return Result.Ok();
     }
 

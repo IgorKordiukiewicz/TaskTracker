@@ -491,6 +491,30 @@ public class OrganizationsTests
         }
     }
 
+    [Fact]
+    public async Task UpdateRolePermissions_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateOrganizationRolePermissionsCommand(Guid.NewGuid(), Guid.NewGuid(), new(OrganizationPermissions.None)));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UpdateRolePermissions_ShouldUpdatePermissions_WhenOrganizationExists()
+    {
+        var (organization, roleName) = await CreateOrganizationWithCustomRole();
+        var roleId = organization.Roles.First(x => x.Name == roleName).Id;
+        var newPermissions = OrganizationPermissions.Projects | OrganizationPermissions.Members;
+
+        var result = await _fixture.SendRequest(new UpdateOrganizationRolePermissionsCommand(organization.Id, roleId, new(newPermissions)));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<OrganizationRole>(x => x.Id == roleId)).Permissions.Should().Be(newPermissions);
+        }
+    }
+
     private async Task<Guid> CreateOrganizationWithInvitation()
     {
         var user1 = User.Create("123", "user1","firstName", "lastName");

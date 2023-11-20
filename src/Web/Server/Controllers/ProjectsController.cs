@@ -116,4 +116,12 @@ public class ProjectsController : ControllerBase
         var result = await _mediator.Send(new UpdateProjectRoleNameCommand(projectId, roleId, model));
         return result.ToHttpResult();
     }
+
+    [HttpPost("{projectId:guid}/roles/{roleId:guid}/update-permissions")]
+    [Authorize(Policy.ProjectMembersEditor)]
+    public async Task<IActionResult> UpdateRolePermissions(Guid projectId, Guid roleId, [FromBody] UpdateRolePermissionsDto<ProjectPermissions> model)
+    {
+        var result = await _mediator.Send(new UpdateProjectRolePermissionsCommand(projectId, roleId, model));
+        return result.ToHttpResult();
+    }
 }

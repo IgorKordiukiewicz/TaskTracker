@@ -144,4 +144,12 @@ public class OrganizationsController : ControllerBase
         var result = await _mediator.Send(new UpdateOrganizationRoleNameCommand(organizationId, roleId, model));
         return result.ToHttpResult();
     }
+
+    [HttpPost("{organizationId:guid}/roles/{roleId:guid}/update-permissions")]
+    [Authorize(Policy.OrganizationMembersEditor)]
+    public async Task<IActionResult> UpdateRolePermissions(Guid organizationId, Guid roleId, [FromBody] UpdateRolePermissionsDto<OrganizationPermissions> model)
+    {
+        var result = await _mediator.Send(new UpdateOrganizationRolePermissionsCommand(organizationId, roleId, model));
+        return result.ToHttpResult();
+    }
 }
