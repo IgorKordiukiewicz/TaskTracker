@@ -6,7 +6,7 @@
 @if(RolesVM is not null)
 {
     <MudPaper Class="pa-4">
-        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mb-2" OnClick="() => _createRoleForm.Open()">Create</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mb-4" OnClick="() => _createRoleForm.Open()">Create</MudButton>
         <MudGrid Spacing="3">
             @foreach (var role in _rolesData)
             {
@@ -25,36 +25,31 @@
                             </MudText>
                             @if(role.RoleVM.Modifiable)
                             {
-                                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="() => StartNameEdit(role)" />
+                                <MudMenu Icon="@Icons.Material.Filled.ArrowDropDown" AnchorOrigin="Origin.BottomCenter">
+                                    <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="() => StartNameEdit(role)">Edit name</MudMenuItem>
+                                    <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="() => DeleteRole(role.RoleVM.Id)">Delete</MudMenuItem>
+                                </MudMenu>
                             }
                         }
                     </div>
-                    <MudSelect Variant="Variant.Outlined" MultiSelection="true" T="TPermissions" SelectedValues="@role.PermissionsFlags"
-                               SelectedValuesChanged="(v) => OnPermissionsChanged(role.RoleVM.Id, v)" AnchorOrigin="Origin.BottomCenter">
-                        @foreach (var permission in _allPermissionsFlags)
+                    <div class="d-flex gap-2 align-center">
+                        @if (role.PermissionsEditEnabled)
                         {
-                            <MudSelectItem Value="@permission"></MudSelectItem>
+                            <MudSelect Variant="Variant.Filled" MultiSelection="true" @bind-SelectedValues="@role.PermissionsFlags" AnchorOrigin="Origin.BottomCenter" Label="Permissions">
+                                @foreach (var permission in _allPermissionsFlags)
+                                {
+                                    <MudSelectItem Value="@permission"></MudSelectItem>
+                                }
+                            </MudSelect>
+                            <MudButton Variant="Variant.Filled" OnClick="() => CancelPermissionsEdit(role)">Cancel</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="() => UpdatePermissions(role)">Save</MudButton>
                         }
-                    </MudSelect>
-                    <div class="d-flex justify-space-between">
-                        <div class="d-flex gap-4 align-center">
-                            <MudText Typo="Typo.body1">
-                                Assigned to:
-                            </MudText>
-                            <!--TODO-->
-                            <MudAvatarGroup Spacing="3" Max="3" MaxColor="Color.Primary">
-                                <MudAvatar Color="Color.Primary">M</MudAvatar>
-                                <MudAvatar Color="Color.Secondary">U</MudAvatar>
-                                <MudAvatar Color="Color.Tertiary">D</MudAvatar>
-                                <MudAvatar Color="Color.Primary">M</MudAvatar>
-                                <MudAvatar Color="Color.Secondary">U</MudAvatar>
-                                <MudAvatar Color="Color.Tertiary">D</MudAvatar>
-                            </MudAvatarGroup>
-                        </div>
-                        <MudButton StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" Variant="Variant.Filled"
-                                   Disabled="@(!role.RoleVM.Modifiable)" OnClick="() => DeleteRole(role.RoleVM.Id)">
-                            Delete
-                        </MudButton>
+                        else
+                        {
+                            <MudField Variant="Variant.Filled" Label="Permissions" Adornment="Adornment.End" AdornmentIcon="@GetEditPermissionsIcon(role)" OnAdornmentClick="() => StartPermissionsEdit(role)">
+                                @(string.Join(", ", role.PermissionsFlags))
+                            </MudField>
+                        }
                     </div>
                 </MudItem>
             }
@@ -91,7 +86,9 @@
         public required RoleVM<TPermissions> RoleVM{ get; set; }
         public required IEnumerable<TPermissions> PermissionsFlags { get; set; }
         public required string NameEditValue { get; set; }
+
         public bool NameEditEnabled { get; set; } = false;
+        public bool PermissionsEditEnabled { get; set; } = false;
     }
     private List<RoleData> _rolesData = new();
 
@@ -136,11 +133,14 @@
             _rolesData.Add(new()
             {
                 RoleVM = role,
-                PermissionsFlags = _allPermissionsFlags.Where(x => role.Permissions.HasFlag(x)),
+                PermissionsFlags = GetPermissionsFlags(role),
                 NameEditValue = role.Name
             });
         }
     }
+
+    private IEnumerable<TPermissions> GetPermissionsFlags(RoleVM<TPermissions> roleVM)
+        => _allPermissionsFlags.Where(x => roleVM.Permissions.HasFlag(x));
 
     private void StartNameEdit(RoleData role)
     {
@@ -162,9 +162,20 @@
         await UpdateRolesVM();
     }
 
-    private async Task OnPermissionsChanged(Guid roleId, IEnumerable<TPermissions> permissions)
+    private void StartPermissionsEdit(RoleData role)
     {
-        
+        role.PermissionsEditEnabled = true;
+    }
+
+    private void CancelPermissionsEdit(RoleData role)
+    {
+        role.PermissionsEditEnabled = false;
+        role.PermissionsFlags = GetPermissionsFlags(role.RoleVM);
+    }
+
+    private async Task UpdatePermissions(RoleData role)
+    {
+
     }
 
     private async Task CreateRole()
@@ -197,4 +208,7 @@
         }
         return (TPermissions)(object)value;
     }
+
+    private static string GetEditPermissionsIcon(RoleData role)
+        => role.RoleVM.Modifiable ? Icons.Material.Filled.Edit : string.Empty;
 }
