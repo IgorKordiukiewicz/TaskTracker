@@ -76,7 +76,20 @@ public class RolesManagerTests
         result.IsFailed.Should().BeTrue();
     }
 
-    // TODO: Add ShouldFail_WhenRoleIsAssignedToMember
+    [Fact]
+    public void DeleteRole_ShouldFail_WhenRoleIsAssignedToMember()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+        var roleName = "abc";
+        _ = rolesManager.AddRole(roleName, TestPermissions.A);
+        var roleToDelete = roles.First(x => x.Name == roleName);
+        var members = new List<TestMember>() { new(roleToDelete.Id) };
+
+        var result = rolesManager.DeleteRole(roleToDelete.Id, members);
+
+        result.IsFailed.Should().BeTrue();
+    }
 
     [Fact]
     public void DeleteRole_ShouldDeleteRole_WhenRoleIsModifiable()
