@@ -23,6 +23,20 @@ public class TestRole : Role<TestPermissions>
     }
 }
 
+public class TestMember : IHasRole
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    public Guid RoleId { get; set; }
+
+    public TestMember(Guid roleId)
+    {
+        RoleId = roleId;
+    }
+
+    public void UpdateRole(Guid roleId) {}
+}
+
 public class RoleTests
 {
     [Theory]
@@ -268,6 +282,41 @@ public class RoleTests
             result.IsSuccess.Should().BeTrue();
             roles.First(x => x.Id == roleId).Name.Should().Be(name);
         }
+    }
+
+    [Fact]
+    public void RolesManager_UpdateMemberRole_ShouldFail_WhenMemberDoesNotExist()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+
+        var result = rolesManager.UpdateMemberRole(Guid.NewGuid(), Guid.NewGuid(), Array.Empty<IHasRole>());
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RolesManager_UpdateMemberRole_ShouldFail_WhenRoleDoesNotExist()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+        var members = new List<TestMember>() { new(Guid.NewGuid()) };
+
+        var result = rolesManager.UpdateMemberRole(members[0].Id, Guid.NewGuid(), members);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RolesManager_ShouldSucceed_WhenMemberAndRoleExist()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+        var members = new List<TestMember>() { new(roles[0].Id) };
+
+        var result = rolesManager.UpdateMemberRole(members[0].Id, roles[1].Id, members);
+
+        result.IsSuccess.Should().BeTrue();
     }
 
     private static List<TestRole> CreateTestRoles()

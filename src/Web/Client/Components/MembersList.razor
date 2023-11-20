@@ -1,4 +1,5 @@
 ﻿@typeparam TMember where TMember : IMemberVM
+@typeparam TPermissions where TPermissions: struct, Enum
 @inject RequestHandler _requestHandler
 
 <MudPaper>
@@ -13,8 +14,22 @@
                     </div>
                     @if (IsMembersEditor)
                     {
-                        <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)"
-                                       Class="@GetRemoveIconButtonClass(member)"></MudIconButton>
+                        <div class="d-flex gap-3 align-center">
+                            @if (RolesVM is not null)
+                            {
+                                <div style="max-width: 400px;">
+                                    <MudSelect Value="@GetRoleVM(member.RoleId)" AnchorOrigin="Origin.BottomCenter" ToStringFunc="x => x.Name" T="RoleVM<TPermissions>"
+                                               Variant="Variant.Outlined" Label="Role" ValueChanged="e => UpdateRole(member.Id, e.Id)">
+                                        @foreach (var role in RolesVM.Roles)
+                                        {
+                                            <MudSelectItem Value="@role"></MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </div>
+                            }
+                            <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)"
+                                           Class="@GetRemoveIconButtonClass(member)"></MudIconButton>
+                        </div>
                     }
                 </div>
             </MudListItem>
@@ -33,12 +48,22 @@
     public required IReadOnlyList<TMember> Members { get; set; }
 
     [Parameter]
-    public EventCallback MemberRemoved { get; set; }
+    public required RolesVM<TPermissions>? RolesVM { get; set; }
+
+    [Parameter]
+    public EventCallback MembersUpdated { get; set; }
 
     private async Task RemoveMember(Guid memberId)
     {
         await _requestHandler.PostAsync(ApiUrl + $"/{memberId}/remove");
-        await MemberRemoved.InvokeAsync();
+        await MembersUpdated.InvokeAsync();
+    }
+
+    private async Task UpdateRole(Guid memberId, Guid newRoleId)
+    {
+        var model = new UpdateMemberRoleDto(newRoleId);
+        await _requestHandler.PostAsync(ApiUrl + $"/{memberId}/update-role", model);
+        await MembersUpdated.InvokeAsync();
     }
 
     private string GetRemoveIconButtonClass(TMember member)
@@ -50,4 +75,7 @@
 
         return "show-on-hover";
     }
+
+    private RoleVM<TPermissions> GetRoleVM(Guid roleId)
+        => RolesVM!.Roles.First(x => x.Id == roleId);
 }

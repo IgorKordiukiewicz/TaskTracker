@@ -22,4 +22,9 @@ public class OrganizationMember : Entity, IHasRole
             RoleId = roleId
         };
     }
+
+    public void UpdateRole(Guid roleId)
+    {
+        RoleId = roleId;
+    }
 }

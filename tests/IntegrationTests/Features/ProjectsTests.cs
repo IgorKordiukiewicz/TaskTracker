@@ -164,7 +164,7 @@ public class ProjectsTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Members.Should().BeEquivalentTo(new[]
             {
-                new ProjectMemberVM(project.Members[0].Id, user.Id, user.FullName)
+                new ProjectMemberVM(project.Members[0].Id, user.Id, user.FullName, project.Members[0].RoleId)
             });
         }
     }
@@ -340,6 +340,30 @@ public class ProjectsTests
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.FirstAsync<ProjectRole>(x => x.Id == roleId)).Name.Should().Be(newName);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateMemberRole_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateProjectMemberRoleCommand(Guid.NewGuid(), Guid.NewGuid(), new(Guid.NewGuid())));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UpdateMemberRole_ShouldUpdateMemberRoleId_WhenProjectExists()
+    {
+        var project = (await _factory.CreateProjects())[0];
+        var member = project.Members[0];
+        var newRoleId = project.Roles.First(x => x.Id != member.RoleId).Id;
+
+        var result = await _fixture.SendRequest(new UpdateProjectMemberRoleCommand(project.Id, member.Id, new(newRoleId)));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<ProjectMember>(x => x.Id == member.Id)).RoleId.Should().Be(newRoleId);
         }
     }
 

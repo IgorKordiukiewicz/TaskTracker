@@ -5,7 +5,9 @@ namespace Domain.Common;
 
 public interface IHasRole
 {
+    Guid Id { get; }
     Guid RoleId { get; }
+    void UpdateRole(Guid roleId);
 }
 
 public class RolesManager<TRole, TPermissions>
@@ -75,6 +77,23 @@ public class RolesManager<TRole, TPermissions>
         }
 
         _roles.Remove(role);
+        return Result.Ok();
+    }
+
+    public Result UpdateMemberRole(Guid memberId, Guid roleId, IReadOnlyCollection<IHasRole> members)
+    {
+        var member = members.FirstOrDefault(x => x.Id == memberId);
+        if(member is null)
+        {
+            return Result.Fail(new DomainError("Member with this ID does not exist."));
+        }
+
+        if (!_roles.Any(x => x.Id == roleId))
+        {
+            return Result.Fail(new DomainError("Role wih this ID does not exist."));
+        }
+
+        member.UpdateRole(roleId);
         return Result.Ok();
     }
 

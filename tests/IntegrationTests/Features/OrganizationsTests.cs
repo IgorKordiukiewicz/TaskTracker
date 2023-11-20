@@ -256,7 +256,7 @@ public class OrganizationsTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Members.Should().BeEquivalentTo(new[]
             {
-                new OrganizationMemberVM(organization.Members[0].Id, user.FullName, true)
+                new OrganizationMemberVM(organization.Members[0].Id, user.FullName, organization.Members[0].RoleId, true)
             });
         }
     }
@@ -464,6 +464,30 @@ public class OrganizationsTests
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.FirstAsync<OrganizationRole>(x => x.Id == roleId)).Name.Should().Be(newName);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateMemberRole_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateOrganizationMemberRoleCommand(Guid.NewGuid(), Guid.NewGuid(), new(Guid.NewGuid())));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UpdateMemberRole_ShouldUpdateMemberRoleId_WhenOrganizationExists()
+    {
+        var organization = (await _factory.CreateOrganizations())[0];
+        var member = organization.Members[0];
+        var newRoleId = organization.Roles.First(x => x.Id != member.RoleId).Id;
+
+        var result = await _fixture.SendRequest(new UpdateOrganizationMemberRoleCommand(organization.Id, member.Id, new(newRoleId)));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<OrganizationMember>(x => x.Id == member.Id)).RoleId.Should().Be(newRoleId);
         }
     }
 

@@ -85,4 +85,15 @@ public class ProjectTests
             project.Members.Count.Should().Be(0);
         }
     }
+
+    [Fact]
+    public void Member_UpdateRole_ShouldUpdateRoleId()
+    {
+        var member = ProjectMember.Create(Guid.NewGuid(), Guid.NewGuid());
+        var newRoleId = Guid.NewGuid();
+
+        member.UpdateRole(newRoleId);
+
+        member.RoleId.Should().Be(newRoleId);
+    }
 }

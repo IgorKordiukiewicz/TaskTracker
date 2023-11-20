@@ -255,4 +255,15 @@ public class OrganizationTests
             organization.Members.Count.Should().Be(1);
         }
     }
+
+    [Fact]
+    public void Member_UpdateRole_ShouldUpdateRoleId()
+    {
+        var member = OrganizationMember.Create(Guid.NewGuid(), Guid.NewGuid());
+        var newRoleId = Guid.NewGuid();
+
+        member.UpdateRole(newRoleId);
+
+        member.RoleId.Should().Be(newRoleId);
+    }
 }

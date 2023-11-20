@@ -69,6 +69,14 @@ public class ProjectsController : ControllerBase
         return result.ToHttpResult();
     }
 
+    [HttpPost("{projectId:guid}/members/{memberId:guid}/update-role")]
+    [Authorize(Policy.ProjectMembersEditor)]
+    public async Task<IActionResult> RemoveProjectMember(Guid projectId, Guid memberId, [FromBody] UpdateMemberRoleDto model)
+    {
+        var result = await _mediator.Send(new UpdateProjectMemberRoleCommand(projectId, memberId, model));
+        return result.ToHttpResult();
+    }
+
     [HttpGet("{projectId:guid}/organization")]
     [Authorize(Policy.ProjectMember)]
     public async Task<IActionResult> GetProjectOrganization(Guid projectId)

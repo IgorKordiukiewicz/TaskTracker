@@ -3,7 +3,7 @@
 
 @inject RequestHandler _requestHandler
 
-@if(_rolesVM is not null)
+@if(RolesVM is not null)
 {
     <MudPaper Class="pa-4">
         <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" Class="mb-2" OnClick="() => _createRoleForm.Open()">Create</MudButton>
@@ -76,11 +76,15 @@
 
 @code {
     [Parameter]
-    public required string ApiUrl{ get; init; }
+    public required string ApiUrl { get; init; }
+
+    [Parameter]
+    public EventCallback RolesUpdated { get; set; }
+
+    [Parameter]
+    public required RolesVM<TPermissions>? RolesVM { get; set; }
 
     private readonly TPermissions[] _allPermissionsFlags = Enum.GetValues<TPermissions>().Where(x => Convert.ToInt32(x) != 0).ToArray();
-
-    private RolesVM<TPermissions>? _rolesVM;
 
     private class RoleData
     {
@@ -103,19 +107,31 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await UpdateRolesVM();
+        if (RolesVM is null)
+        {
+            await UpdateRolesVM();
+        }
+        else
+        {
+            UpdateRolesData();
+        }
     }
 
     private async Task UpdateRolesVM()
     {
-        _rolesVM = await _requestHandler.GetAsync<RolesVM<TPermissions>>(ApiUrl);
-        if(_rolesVM is null)
+        await RolesUpdated.InvokeAsync();
+        UpdateRolesData();
+    }
+
+    private void UpdateRolesData()
+    {
+        if (RolesVM is null)
         {
             return;
         }
 
         _rolesData.Clear();
-        foreach(var role in _rolesVM.Roles.OrderBy(x => x.Modifiable).ThenBy(x => x.Name))
+        foreach (var role in RolesVM.Roles.OrderBy(x => x.Modifiable).ThenBy(x => x.Name))
         {
             _rolesData.Add(new()
             {

@@ -11,7 +11,8 @@
     <MudTabPanel Text="Members">
         @if (_membersVM is not null)
         {
-            <MembersList Members="@_membersVM.Members" IsMembersEditor="@_isMembersEditor" ApiUrl="@($"organizations/{OrganizationId}/members")" MemberRemoved="UpdateMembersVM"></MembersList>
+            <MembersList Members="@_membersVM.Members" IsMembersEditor="@_isMembersEditor" ApiUrl="@($"organizations/{OrganizationId}/members")" 
+                MembersUpdated="UpdateMembersVM" RolesVM="@_rolesVM"></MembersList>
         }
     </MudTabPanel>
     @if (_isMembersEditor)
@@ -43,8 +44,8 @@
                 </MudPaper>
             }
         </MudTabPanel>
-        <MudTabPanel Text="Roles"> <!--Separate permission for editing and assigning roles?-->
-            <RolesEditor TPermissions="OrganizationPermissions" ApiUrl="@($"organizations/{OrganizationId}/roles")"></RolesEditor>
+        <MudTabPanel Text="Roles"> 
+            <RolesEditor RolesVM="@_rolesVM" TPermissions="OrganizationPermissions" ApiUrl="@($"organizations/{OrganizationId}/roles")" RolesUpdated="UpdateRolesVM"></RolesEditor>
         </MudTabPanel>
     }
 </MudTabs>
@@ -60,6 +61,7 @@
 
     private OrganizationMembersVM? _membersVM;
     private OrganizationInvitationsVM? _invitationsVM;
+    private RolesVM<OrganizationPermissions>? _rolesVM;
 
     private UserSearchVM? _selectedUserForInvitation;
 
@@ -75,6 +77,7 @@
         if(_isMembersEditor)
         {
             await UpdateInvitationsVM();
+            await UpdateRolesVM();
         }
     }
 
@@ -86,6 +89,11 @@
     private async Task UpdateInvitationsVM()
     {
         _invitationsVM = await _requestHandler.GetAsync<OrganizationInvitationsVM>($"organizations/{OrganizationId}/invitations");
+    }
+
+    private async Task UpdateRolesVM()
+    {
+        _rolesVM = await _requestHandler.GetAsync<RolesVM<OrganizationPermissions>>($"organizations/{OrganizationId}/roles");
     }
 
     private async Task<IEnumerable<UserSearchVM>> SearchUsers(string value)

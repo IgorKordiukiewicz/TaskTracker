@@ -105,6 +105,14 @@ public class OrganizationsController : ControllerBase
         return result.ToHttpResult();
     }
 
+    [HttpPost("{organizationId:guid}/members/{memberId:guid}/update-role")]
+    [Authorize(Policy.OrganizationMembersEditor)]
+    public async Task<IActionResult> RemoveOrganizationMember(Guid organizationId, Guid memberId, [FromBody] UpdateMemberRoleDto model)
+    {
+        var result = await _mediator.Send(new UpdateOrganizationMemberRoleCommand(organizationId, memberId, model));
+        return result.ToHttpResult();
+    }
+
     [HttpGet("{organizationId:guid}/roles")]
     [Authorize(Policy.OrganizationMembersEditor)]
     public async Task<IActionResult> GetOrganizationRoles(Guid organizationId)

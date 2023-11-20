@@ -23,13 +23,14 @@
         }
         @if (_membersVM is not null)
         {
-            <MembersList Members="@_membersVM.Members" IsMembersEditor="@_isMembersEditor" ApiUrl="@($"projects/{ProjectId}/members")" MemberRemoved="UpdateMembersVM"></MembersList>
+            <MembersList Members="@_membersVM.Members" IsMembersEditor="@_isMembersEditor" ApiUrl="@($"projects/{ProjectId}/members")" 
+                MembersUpdated="UpdateMembersVM" RolesVM="@_rolesVM"></MembersList>
         }
     </MudTabPanel>
     <MudTabPanel Text="Roles">
         @if(_isMembersEditor)
         {
-            <RolesEditor TPermissions="ProjectPermissions" ApiUrl="@($"projects/{ProjectId}/roles")"></RolesEditor>
+            <RolesEditor RolesVM="@_rolesVM" TPermissions="ProjectPermissions" ApiUrl="@($"projects/{ProjectId}/roles")" RolesUpdated="UpdateRolesVM"></RolesEditor>
         }
     </MudTabPanel>
 </MudTabs>
@@ -46,6 +47,7 @@
     private ProjectMembersVM? _membersVM;
     private UsersSearchVM? _usersVM;
     private UserSearchVM? _selectedUserVM;
+    private RolesVM<ProjectPermissions>? _rolesVM;
 
     protected override async Task OnInitializedAsync()
     {
@@ -53,6 +55,10 @@
         _isMembersEditor = (await _authorizationService.AuthorizeAsync(user, Policy.ProjectMembersEditor)).Succeeded;
 
         await UpdateMembersVM();
+        if(_isMembersEditor)
+        {
+            await UpdateRolesVM();
+        }
     }
 
     private async Task UpdateMembersVM()
@@ -68,6 +74,11 @@
             .ToString();
             _usersVM = await _requestHandler.GetAsync<UsersSearchVM>(url);
         }
+    }
+
+    private async Task UpdateRolesVM()
+    {
+        _rolesVM = await _requestHandler.GetAsync<RolesVM<ProjectPermissions>>($"projects/{ProjectId}/roles");
     }
 
     private async Task AddMember(Guid userId)

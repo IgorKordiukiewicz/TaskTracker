@@ -20,4 +20,9 @@ public class ProjectMember : Entity, IHasRole
             RoleId = roleId
         };
     }
+
+    public void UpdateRole(Guid roleId)
+    {
+        RoleId = roleId;
+    }
 }
