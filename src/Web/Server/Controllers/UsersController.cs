@@ -42,7 +42,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("available-for-invitation/organization/{organizationId:guid}")]
-    [Authorize(Policy.OrganizationMembersEditor)]
+    [Authorize(Policy.OrganizationInviteMembers)]
     public async Task<IActionResult> GetUsersNotInOrganization(Guid organizationId, [FromQuery] string searchValue) // TODO: OrganizationId from query?
     {
         var result = await _mediator.Send(new GetUsersAvailableForOrganizationInvitationQuery(organizationId, searchValue));

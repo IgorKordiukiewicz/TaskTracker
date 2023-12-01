@@ -12,7 +12,7 @@
 @if (_projectsVM is not null)
 {
     <MudGrid>
-        @if(_isProjectsEditor)
+        @if(_createProjectsPermission)
         {
             <MudItem lg="3" sm="6">
                 <MudPaper Class="d-flex flex-column align-center justify-center project-card" onclick="@(() => _createProjectForm.Open())">
@@ -52,7 +52,7 @@
     [CascadingParameter]
     public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
-    private bool _isProjectsEditor = false;
+    private bool _createProjectsPermission = false;
 
     private ProjectsVM? _projectsVM;
 
@@ -67,7 +67,7 @@
     protected override async Task OnInitializedAsync()
     {
         var user = (await AuthenticationState).User;
-        _isProjectsEditor = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationProjectsEditor)).Succeeded;
+        _createProjectsPermission = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationCreateProjects)).Succeeded;
 
         await Layout.SetOrganizationId(OrganizationId);
 

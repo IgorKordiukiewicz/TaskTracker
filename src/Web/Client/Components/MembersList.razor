@@ -12,25 +12,25 @@
                         <UserAvatar Name="@member.Name"></UserAvatar>
                         @member.Name
                     </div>
-                    @if (IsMembersEditor)
-                    {
-                        <div class="d-flex gap-3 align-center">
-                            @if (RolesVM is not null)
-                            {
-                                <div style="max-width: 400px;">
-                                    <MudSelect Value="@GetRoleVM(member.RoleId)" AnchorOrigin="Origin.BottomCenter" ToStringFunc="x => x.Name" T="RoleVM<TPermissions>"
-                                               Variant="Variant.Outlined" Label="Role" ValueChanged="e => UpdateRole(member.Id, e.Id)">
-                                        @foreach (var role in RolesVM.Roles)
-                                        {
-                                            <MudSelectItem Value="@role"></MudSelectItem>
-                                        }
-                                    </MudSelect>
-                                </div>
-                            }
+                    <div class="d-flex gap-3 align-center">
+                        @if (RolesVM is not null && ManageRolesPermission)
+                        {
+                            <div style="max-width: 400px;">
+                                <MudSelect Value="@GetRoleVM(member.RoleId)" AnchorOrigin="Origin.BottomCenter" ToStringFunc="x => x.Name" T="RoleVM<TPermissions>"
+                                           Variant="Variant.Outlined" Label="Role" ValueChanged="e => UpdateRole(member.Id, e.Id)">
+                                    @foreach (var role in RolesVM.Roles)
+                                    {
+                                        <MudSelectItem Value="@role"></MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </div>
+                        }
+                        @if(RemoveMembersPermission)
+                        {
                             <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)"
-                                           Class="@GetRemoveIconButtonClass(member)"></MudIconButton>
-                        </div>
-                    }
+                                Class="@GetRemoveIconButtonClass(member)"></MudIconButton>
+                        }
+                    </div>
                 </div>
             </MudListItem>
         }
@@ -42,7 +42,10 @@
     public required string ApiUrl { get; init; }
 
     [Parameter]
-    public required bool IsMembersEditor { get; init; }
+    public required bool ManageRolesPermission { get; init; }
+
+    [Parameter]
+    public required bool RemoveMembersPermission { get; init; }
 
     [Parameter]
     public required IReadOnlyList<TMember> Members { get; set; }

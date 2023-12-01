@@ -23,7 +23,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("organization/{organizationId:guid}")]
-    [Authorize(Policy.OrganizationProjectsEditor)]
+    [Authorize(Policy.OrganizationCreateProjects)]
     public async Task<IActionResult> CreateProject(Guid organizationId, [FromBody] CreateProjectDto model)
     {
         var result = await _mediator.Send(new CreateProjectCommand(organizationId, User.GetUserAuthenticationId(), model));

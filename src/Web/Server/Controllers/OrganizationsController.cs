@@ -1,5 +1,4 @@
 ﻿using Application.Features.Organizations;
-using Application.Features.Projects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -44,7 +43,7 @@ public class OrganizationsController : ControllerBase
     }
 
     [HttpPost("{organizationId:guid}/invitations")]
-    [Authorize(Policy.OrganizationMembersEditor)]
+    [Authorize(Policy.OrganizationInviteMembers)]
     public async Task<IActionResult> CreateOrganizationInvitation(Guid organizationId, [FromBody] CreateOrganizationInvitationDto model)
     {
         var result = await _mediator.Send(new CreateOrganizationInvitationCommand(organizationId, model));
@@ -52,7 +51,7 @@ public class OrganizationsController : ControllerBase
     }
 
     [HttpGet("{organizationId:guid}/invitations")]
-    [Authorize(Policy.OrganizationMembersEditor)]
+    [Authorize(Policy.OrganizationInviteMembers)]
     public async Task<IActionResult> GetOrganizationInvitationsForOrganization(Guid organizationId)
     {
         var result = await _mediator.Send(new GetOrganizationInvitationsQuery(organizationId));
@@ -81,7 +80,7 @@ public class OrganizationsController : ControllerBase
     }
 
     [HttpPost("invitations/{invitationId:guid}/cancel")]
-    [Authorize(Policy.OrganizationMembersEditor)]
+    [Authorize(Policy.OrganizationInviteMembers)]
     public async Task<IActionResult> CancelOrganizationInvitation(Guid invitationId)
     {
         var result = await _mediator.Send(new CancelOrganizationInvitationCommand(invitationId));
@@ -98,7 +97,7 @@ public class OrganizationsController : ControllerBase
     }
 
     [HttpPost("{organizationId:guid}/members/{memberId:guid}/remove")]
-    [Authorize(Policy.OrganizationMembersEditor)]
+    [Authorize(Policy.OrganizationRemoveMembers)]
     public async Task<IActionResult> RemoveOrganizationMember(Guid organizationId, Guid memberId)
     {
         var result = await _mediator.Send(new RemoveOrganizationMemberCommand(organizationId, memberId));
@@ -106,15 +105,15 @@ public class OrganizationsController : ControllerBase
     }
 
     [HttpPost("{organizationId:guid}/members/{memberId:guid}/update-role")]
-    [Authorize(Policy.OrganizationMembersEditor)]
-    public async Task<IActionResult> UpdateMemberRoleOrganizationMember(Guid organizationId, Guid memberId, [FromBody] UpdateMemberRoleDto model)
+    [Authorize(Policy.OrganizationManageRoles)]
+    public async Task<IActionResult> UpdateMemberRole(Guid organizationId, Guid memberId, [FromBody] UpdateMemberRoleDto model)
     {
         var result = await _mediator.Send(new UpdateOrganizationMemberRoleCommand(organizationId, memberId, model));
         return result.ToHttpResult();
     }
 
     [HttpGet("{organizationId:guid}/roles")]
-    [Authorize(Policy.OrganizationMembersEditor)]
+    [Authorize(Policy.OrganizationManageRoles)]
     public async Task<IActionResult> GetOrganizationRoles(Guid organizationId)
     {
         var result = await _mediator.Send(new GetOrganizationRolesQuery(organizationId));
@@ -122,7 +121,7 @@ public class OrganizationsController : ControllerBase
     }
 
     [HttpPost("{organizationId:guid}/roles")]
-    [Authorize(Policy.OrganizationMembersEditor)]
+    [Authorize(Policy.OrganizationManageRoles)]
     public async Task<IActionResult> CreateOrganizationRole(Guid organizationId, [FromBody] CreateRoleDto<OrganizationPermissions> model)
     {
         var result = await _mediator.Send(new CreateOrganizationRoleCommand(organizationId, model));
@@ -130,7 +129,7 @@ public class OrganizationsController : ControllerBase
     }
 
     [HttpPost("{organizationId:guid}/roles/{roleId:guid}/delete")]
-    [Authorize(Policy.OrganizationMembersEditor)]
+    [Authorize(Policy.OrganizationManageRoles)]
     public async Task<IActionResult> DeleteOrganizationRole(Guid organizationId, Guid roleId)
     {
         var result = await _mediator.Send(new DeleteOrganizationRoleCommand(organizationId, roleId));
@@ -138,7 +137,7 @@ public class OrganizationsController : ControllerBase
     }
 
     [HttpPost("{organizationId:guid}/roles/{roleId:guid}/update-name")]
-    [Authorize(Policy.OrganizationMembersEditor)]
+    [Authorize(Policy.OrganizationManageRoles)]
     public async Task<IActionResult> UpdateRoleName(Guid organizationId, Guid roleId, [FromBody] UpdateRoleNameDto model)
     {
         var result = await _mediator.Send(new UpdateOrganizationRoleNameCommand(organizationId, roleId, model));
@@ -146,7 +145,7 @@ public class OrganizationsController : ControllerBase
     }
 
     [HttpPost("{organizationId:guid}/roles/{roleId:guid}/update-permissions")]
-    [Authorize(Policy.OrganizationMembersEditor)]
+    [Authorize(Policy.OrganizationManageRoles)]
     public async Task<IActionResult> UpdateRolePermissions(Guid organizationId, Guid roleId, [FromBody] UpdateRolePermissionsDto<OrganizationPermissions> model)
     {
         var result = await _mediator.Send(new UpdateOrganizationRolePermissionsCommand(organizationId, roleId, model));

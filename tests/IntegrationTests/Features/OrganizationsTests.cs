@@ -400,7 +400,7 @@ public class OrganizationsTests
     [Fact]
     public async Task CreateRole_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(Guid.NewGuid(), new("abc", OrganizationPermissions.Members)));
+        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(Guid.NewGuid(), new("abc", OrganizationPermissions.InviteMembers)));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -411,7 +411,7 @@ public class OrganizationsTests
         var organization = (await _factory.CreateOrganizations())[0];
         var rolesCountBefore = await _fixture.CountAsync<OrganizationRole>();
 
-        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(organization.Id, new("abc", OrganizationPermissions.Members)));
+        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(organization.Id, new("abc", OrganizationPermissions.InviteMembers)));
 
         using (new AssertionScope())
         {
@@ -504,7 +504,7 @@ public class OrganizationsTests
     {
         var (organization, roleName) = await CreateOrganizationWithCustomRole();
         var roleId = organization.Roles.First(x => x.Name == roleName).Id;
-        var newPermissions = OrganizationPermissions.Projects | OrganizationPermissions.Members;
+        var newPermissions = OrganizationPermissions.CreateProjects | OrganizationPermissions.InviteMembers;
 
         var result = await _fixture.SendRequest(new UpdateOrganizationRolePermissionsCommand(organization.Id, roleId, new(newPermissions)));
 
@@ -536,7 +536,7 @@ public class OrganizationsTests
         var user = (await _factory.CreateUsers())[0];
         var organization = Organization.Create("org", user.Id);
         var roleName = "abc";
-        _ = organization.RolesManager.AddRole(roleName, OrganizationPermissions.Projects);
+        _ = organization.RolesManager.AddRole(roleName, OrganizationPermissions.CreateProjects);
 
         await _fixture.SeedDb(db =>
         {

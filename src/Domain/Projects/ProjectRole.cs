@@ -22,7 +22,7 @@ public class ProjectRole : Role<ProjectPermissions>
     {
         return new ProjectRole[]
         {
-            new("Administrator", projectId, ProjectPermissions.Tasks | ProjectPermissions.Members | ProjectPermissions.Workflows, RoleType.Admin),
+            new("Administrator", projectId, EnumHelpers.GetAllFlags<ProjectPermissions>(), RoleType.Admin),
             new("Read-Only", projectId, ProjectPermissions.None, RoleType.ReadOnly),
         };
     }

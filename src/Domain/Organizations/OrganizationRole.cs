@@ -23,7 +23,7 @@ public class OrganizationRole : Role<OrganizationPermissions>
     {
         return new OrganizationRole[]
         {
-            new("Administrator", organizationId, OrganizationPermissions.Projects | OrganizationPermissions.Members, RoleType.Admin),
+            new("Administrator", organizationId, EnumHelpers.GetAllFlags<OrganizationPermissions>(), RoleType.Admin),
             new("Read-Only", organizationId, OrganizationPermissions.None, RoleType.ReadOnly),
         };
     }

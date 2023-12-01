@@ -11,11 +11,11 @@
     <MudTabPanel Text="Members">
         @if (_membersVM is not null)
         {
-            <MembersList Members="@_membersVM.Members" IsMembersEditor="@_isMembersEditor" ApiUrl="@($"organizations/{OrganizationId}/members")" 
+            <MembersList Members="@_membersVM.Members" RemoveMembersPermission="@_removeMembersPermission" ManageRolesPermission="@_manageRolesPermission" ApiUrl="@($"organizations/{OrganizationId}/members")" 
                 MembersUpdated="UpdateMembersVM" RolesVM="@_rolesVM"></MembersList>
         }
     </MudTabPanel>
-    @if (_isMembersEditor)
+    @if (_inviteMembersPermission)
     {
         <MudTabPanel Text="Invitations">
             @if (_invitationsVM is not null)
@@ -44,7 +44,10 @@
                 </MudPaper>
             }
         </MudTabPanel>
-        <MudTabPanel Text="Roles"> 
+    }
+    @if (_manageRolesPermission)
+    {
+        <MudTabPanel Text="Roles">
             <RolesEditor RolesVM="@_rolesVM" TPermissions="OrganizationPermissions" ApiUrl="@($"organizations/{OrganizationId}/roles")" RolesUpdated="UpdateRolesVM"></RolesEditor>
         </MudTabPanel>
     }
@@ -65,16 +68,22 @@
 
     private UserSearchVM? _selectedUserForInvitation;
 
-    private bool _isMembersEditor = false;
+    private bool _inviteMembersPermission = false;
+    private bool _removeMembersPermission = false;
+    private bool _manageRolesPermission = false;
 
     protected override async Task OnInitializedAsync()
     {
         var user = (await AuthenticationState).User;
-        _isMembersEditor = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationMembersEditor)).Succeeded;
+
+        // TODO: Optimize by await all?
+        _inviteMembersPermission = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationInviteMembers)).Succeeded;
+        _removeMembersPermission = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationRemoveMembers)).Succeeded;
+        _manageRolesPermission = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationManageRoles)).Succeeded;
 
         await UpdateMembersVM();
 
-        if(_isMembersEditor)
+        if(_inviteMembersPermission)
         {
             await UpdateInvitationsVM();
             await UpdateRolesVM();

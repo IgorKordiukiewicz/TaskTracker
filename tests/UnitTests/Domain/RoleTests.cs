@@ -31,7 +31,7 @@ public class RoleTests
         using(new AssertionScope())
         {
             result.Length.Should().Be(2);
-            result[0].Permissions.Should().Be(ProjectPermissions.Members | ProjectPermissions.Workflows | ProjectPermissions.Tasks);
+            result[0].Permissions.Should().Be(EnumHelpers.GetAllFlags<ProjectPermissions>());
             result[0].Type.Should().Be(RoleType.Admin);
             result[1].Permissions.Should().Be(ProjectPermissions.None);
             result[1].Type.Should().Be(RoleType.ReadOnly);
@@ -48,7 +48,7 @@ public class RoleTests
         using (new AssertionScope())
         {
             result.Length.Should().Be(2);
-            result[0].Permissions.Should().Be(OrganizationPermissions.Projects | OrganizationPermissions.Members);
+            result[0].Permissions.Should().Be(EnumHelpers.GetAllFlags<OrganizationPermissions>());
             result[0].Type.Should().Be(RoleType.Admin);
             result[1].Permissions.Should().Be(OrganizationPermissions.None);
             result[1].Type.Should().Be(RoleType.ReadOnly);
