@@ -5,7 +5,6 @@ namespace Shared.Authorization;
 
 public static class Policy
 {
-    // TODO: find better name than editor, Manager maybe?
     public const string OrganizationMember = nameof(OrganizationMember);
     public const string OrganizationInviteMembers = nameof(OrganizationInviteMembers);
     public const string OrganizationRemoveMembers = nameof(OrganizationRemoveMembers);

@@ -1,4 +1,5 @@
-﻿@using Web.Client.Common;
+﻿@using Humanizer;
+@using Web.Client.Common;
 @typeparam TPermissions where TPermissions: struct, Enum
 
 @inject RequestHandler _requestHandler
@@ -35,10 +36,11 @@
                     <div class="d-flex gap-2 align-center">
                         @if (role.PermissionsEditEnabled)
                         {
-                            <MudSelect Variant="Variant.Filled" MultiSelection="true" @bind-SelectedValues="@role.PermissionsFlags" AnchorOrigin="Origin.BottomCenter" Label="Permissions">
+                            <MudSelect Variant="Variant.Filled" MultiSelection="true" @bind-SelectedValues="@role.PermissionsFlags" AnchorOrigin="Origin.BottomCenter" Label="Permissions" 
+                                ToStringFunc="x => x.ToString().Humanize(LetterCasing.Title)">
                                 @foreach (var permission in _allPermissionsFlags)
                                 {
-                                    <MudSelectItem Value="@permission"></MudSelectItem>
+                                    <MudSelectItem Value="@permission">@(permission.ToString().Humanize(LetterCasing.Title))</MudSelectItem>
                                 }
                             </MudSelect>
                             <MudButton Variant="Variant.Filled" OnClick="() => CancelPermissionsEdit(role)">Cancel</MudButton>
@@ -47,7 +49,7 @@
                         else
                         {
                             <MudField Variant="Variant.Filled" Label="Permissions" Adornment="Adornment.End" AdornmentIcon="@GetEditPermissionsIcon(role)" OnAdornmentClick="() => StartPermissionsEdit(role)">
-                                @(string.Join(", ", role.PermissionsFlags))
+                                @(string.Join(", ", role.PermissionsFlags.Select(x => x.ToString().Humanize(LetterCasing.Title))))
                             </MudField>
                         }
                     </div>
