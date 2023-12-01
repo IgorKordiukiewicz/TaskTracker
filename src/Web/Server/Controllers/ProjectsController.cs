@@ -46,7 +46,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("{projectId:guid}/members")]
-    [Authorize(Policy.ProjectMembersEditor)]
+    [Authorize(Policy.ProjectAddMembers)]
     public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberDto model)
     {
         var result = await _mediator.Send(new AddProjectMemberCommand(projectId, model));
@@ -62,7 +62,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("{projectId:guid}/members/{memberId:guid}/remove")] // TODO: Use HttpDelete?
-    [Authorize(Policy.ProjectMembersEditor)]
+    [Authorize(Policy.ProjectRemoveMembers)]
     public async Task<IActionResult> RemoveProjectMember(Guid projectId, Guid memberId)
     {
         var result = await _mediator.Send(new RemoveProjectMemberCommand(projectId, memberId));
@@ -70,7 +70,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("{projectId:guid}/members/{memberId:guid}/update-role")]
-    [Authorize(Policy.ProjectMembersEditor)]
+    [Authorize(Policy.ProjectManageRoles)]
     public async Task<IActionResult> UpdateMemberRoleMember(Guid projectId, Guid memberId, [FromBody] UpdateMemberRoleDto model)
     {
         var result = await _mediator.Send(new UpdateProjectMemberRoleCommand(projectId, memberId, model));
@@ -86,7 +86,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpGet("{projectId:guid}/roles")]
-    [Authorize(Policy.ProjectMembersEditor)]
+    [Authorize(Policy.ProjectManageRoles)]
     public async Task<IActionResult> GetProjectRoles(Guid projectId)
     {
         var result = await _mediator.Send(new GetProjectRolesQuery(projectId));
@@ -94,7 +94,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("{projectId:guid}/roles")]
-    [Authorize(Policy.ProjectMembersEditor)]
+    [Authorize(Policy.ProjectManageRoles)]
     public async Task<IActionResult> CreateProjectRole(Guid projectId, [FromBody] CreateRoleDto<ProjectPermissions> model)
     {
         var result = await _mediator.Send(new CreateProjectRoleCommand(projectId, model));
@@ -102,7 +102,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("{projectId:guid}/roles/{roleId:guid}/delete")]
-    [Authorize(Policy.ProjectMembersEditor)]
+    [Authorize(Policy.ProjectManageRoles)]
     public async Task<IActionResult> DeleteProjectRole(Guid projectId, Guid roleId)
     {
         var result = await _mediator.Send(new DeleteProjectRoleCommand(projectId, roleId));
@@ -110,7 +110,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("{projectId:guid}/roles/{roleId:guid}/update-name")]
-    [Authorize(Policy.ProjectMembersEditor)]
+    [Authorize(Policy.ProjectManageRoles)]
     public async Task<IActionResult> UpdateRoleName(Guid projectId, Guid roleId, [FromBody] UpdateRoleNameDto model)
     {
         var result = await _mediator.Send(new UpdateProjectRoleNameCommand(projectId, roleId, model));
@@ -118,7 +118,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost("{projectId:guid}/roles/{roleId:guid}/update-permissions")]
-    [Authorize(Policy.ProjectMembersEditor)]
+    [Authorize(Policy.ProjectManageRoles)]
     public async Task<IActionResult> UpdateRolePermissions(Guid projectId, Guid roleId, [FromBody] UpdateRolePermissionsDto<ProjectPermissions> model)
     {
         var result = await _mediator.Send(new UpdateProjectRolePermissionsCommand(projectId, roleId, model));

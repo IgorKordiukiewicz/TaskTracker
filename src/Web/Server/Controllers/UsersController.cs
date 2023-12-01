@@ -50,7 +50,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("available-for-project/project/{projectId:guid}")]
-    [Authorize(Policy.ProjectMembersEditor)]
+    [Authorize(Policy.ProjectAddMembers)]
     public async Task<IActionResult> GetUsersAvailableForProject(Guid projectId, [FromQuery] Guid organizationId)
     {
         var result = await _mediator.Send(new GetUsersAvailableForProjectQuery(organizationId, projectId));

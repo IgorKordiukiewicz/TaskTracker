@@ -1,4 +1,5 @@
 ﻿@page "/project/{projectId:guid}/members"
+@using Web.Client.Common;
 @using global::Shared.Authorization;
 @using global::Shared.Enums;
 @layout ProjectLayout
@@ -6,10 +7,11 @@
 
 @inject RequestHandler _requestHandler
 @inject IAuthorizationService _authorizationService
+@inject UserDataService _userDataService
 
 <MudTabs Outlined="false" Border="true" ApplyEffectsToContainer="true" Color="Color.Default" Rounded="true" Position="Position.Top" Centered="false">
     <MudTabPanel Text="Members">
-        @if (_usersVM is not null && _isMembersEditor)
+        @if (_usersVM is not null && _addMembersPermission)
         {
             <div class="d-flex gap-2 align-center mb-4">
                 <MudSelect Label="Users" @bind-Value="_selectedUserVM" Variant="Variant.Filled" Disabled="@(!_usersVM.Users.Any())">
@@ -23,16 +25,16 @@
         }
         @if (_membersVM is not null)
         {
-            <MembersList Members="@_membersVM.Members" IsMembersEditor="@_isMembersEditor" ApiUrl="@($"projects/{ProjectId}/members")" 
+            <MembersList Members="@_membersVM.Members" ManageRolesPermission="_manageRolesPermission" RemoveMembersPermission="_removeMembersPermission" ApiUrl="@($"projects/{ProjectId}/members")" 
                 MembersUpdated="UpdateMembersVM" RolesVM="@_rolesVM"></MembersList>
         }
     </MudTabPanel>
-    <MudTabPanel Text="Roles">
-        @if(_isMembersEditor)
-        {
+    @if (_manageRolesPermission)
+    {
+        <MudTabPanel Text="Roles">
             <RolesEditor RolesVM="@_rolesVM" TPermissions="ProjectPermissions" ApiUrl="@($"projects/{ProjectId}/roles")" RolesUpdated="UpdateRolesVM"></RolesEditor>
-        }
-    </MudTabPanel>
+        </MudTabPanel>
+    }
 </MudTabs>
 
 @code {
@@ -42,7 +44,9 @@
     [CascadingParameter]
     public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
-    private bool _isMembersEditor = false;
+    private bool _addMembersPermission = false;
+    private bool _removeMembersPermission = false;
+    private bool _manageRolesPermission = false;
 
     private ProjectMembersVM? _membersVM;
     private UsersSearchVM? _usersVM;
@@ -52,10 +56,12 @@
     protected override async Task OnInitializedAsync()
     {
         var user = (await AuthenticationState).User;
-        _isMembersEditor = (await _authorizationService.AuthorizeAsync(user, Policy.ProjectMembersEditor)).Succeeded;
+        _addMembersPermission = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AddMembers);
+        _removeMembersPermission = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.RemoveMembers);
+        _manageRolesPermission = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.ManageRoles);
 
         await UpdateMembersVM();
-        if(_isMembersEditor)
+        if(_manageRolesPermission)
         {
             await UpdateRolesVM();
         }
@@ -67,7 +73,7 @@
 
         var organizationId = (await _requestHandler.GetAsync<ProjectOrganizationVM>($"projects/{ProjectId}/organization"))?.OrganizationId ?? default;
 
-        if(_isMembersEditor)
+        if(_addMembersPermission)
         {
             var url = $"users/available-for-project/project/{ProjectId}"
             .SetQueryParam("organizationId", organizationId)

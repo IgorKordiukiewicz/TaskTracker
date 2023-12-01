@@ -76,7 +76,6 @@
     {
         var user = (await AuthenticationState).User;
 
-        // TODO: Optimize by await all?
         _inviteMembersPermission = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationInviteMembers)).Succeeded;
         _removeMembersPermission = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationRemoveMembers)).Succeeded;
         _manageRolesPermission = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationManageRoles)).Succeeded;
@@ -86,7 +85,11 @@
         if(_inviteMembersPermission)
         {
             await UpdateInvitationsVM();
-            await UpdateRolesVM();
+        }
+
+        if(_manageRolesPermission)
+        {
+            await UpdateRolesVM();            
         }
     }
 

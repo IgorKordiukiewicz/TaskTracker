@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Shared.Enums;
 using Shared.ViewModels;
 using Web.Client.Components;
 
@@ -45,5 +46,27 @@ public class UserDataService
         {
             SignedOut();
         }
+    }
+
+    public bool HasOrganizationPermissions(Guid orgId, OrganizationPermissions permissions)
+        => HasPermission(orgId, permissions, x => x.PermissionsByOrganization);
+
+    public bool HasProjectPermissions(Guid projectId, ProjectPermissions permissions)
+        => HasPermission(projectId, permissions, x => x.PermissionsByProject);
+
+    private bool HasPermission<TPermissions>(Guid entityId, TPermissions permissions, Func<UserVM, IReadOnlyDictionary<Guid, TPermissions>> permissionsByEntitySelector)
+        where TPermissions : struct, Enum
+    {
+        if(CurrentUserVM is null)
+        {
+            return false;
+        }
+
+        if (!permissionsByEntitySelector(CurrentUserVM).TryGetValue(entityId, out var userPermissions))
+        {
+            return false;
+        }
+
+        return userPermissions.HasFlag(permissions);
     }
 }

@@ -21,7 +21,7 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Policy.ProjectTasksEditor)]
+    [Authorize(Policy.ProjectCreateTasks)]
     public async Task<IActionResult> CreateTask([FromHeader] Guid projectId, [FromBody] CreateTaskDto model)
     {
         var result = await _mediator.Send(new CreateTaskCommand(projectId, model));
@@ -37,7 +37,7 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost("{taskId:guid}/update-status/{newStatusId:guid}")]
-    [Authorize(Policy.ProjectTasksEditor)]
+    [Authorize(Policy.ProjectTransitionTasks)]
     public async Task<IActionResult> UpdateTaskStatus(Guid taskId, Guid newStatusId)
     {
         var result = await _mediator.Send(new UpdateTaskStatusCommand(taskId, newStatusId));
@@ -45,7 +45,7 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost("{taskId:guid}/update-priority")]
-    [Authorize(Policy.ProjectTasksEditor)]
+    [Authorize(Policy.ProjectModifyTasks)]
     public async Task<IActionResult> UpdateTaskPriority(Guid taskId, UpdateTaskPriorityDto model)
     {
         var result = await _mediator.Send(new UpdateTaskPriorityCommand(taskId, model));
@@ -53,7 +53,7 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost("{taskId:guid}/update-assignee")]
-    [Authorize(Policy.ProjectTasksEditor)]
+    [Authorize(Policy.ProjectAssignTasks)]
     public async Task<IActionResult> UpdateTaskAssignee(Guid taskId, UpdateTaskAssigneeDto model)
     {
         var result = await _mediator.Send(new UpdateTaskAssigneeCommand(taskId, model));
@@ -61,7 +61,7 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost("{taskId:guid}/comments")]
-    [Authorize(Policy.ProjectMember)]
+    [Authorize(Policy.ProjectAddComments)]
     public async Task<IActionResult> AddTaskComment(Guid taskId, AddTaskCommentDto model)
     {
         var result = await _mediator.Send(new AddTaskCommentCommand(taskId, User.GetUserAuthenticationId(), model));

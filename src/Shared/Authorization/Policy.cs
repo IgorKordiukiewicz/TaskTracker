@@ -13,10 +13,16 @@ public static class Policy
     public const string OrganizationManageRoles = nameof(OrganizationManageRoles);
 
     public const string ProjectMember = nameof(ProjectMember);
-    public const string ProjectMembersEditor = nameof(ProjectMembersEditor);
-    public const string ProjectTasksEditor = nameof(ProjectTasksEditor);
-    public const string ProjectWorkflowsEditor = nameof(ProjectWorkflowsEditor);
-    public const string ProjectSettingsEditor = nameof(ProjectSettingsEditor);
+    public const string ProjectAddMembers = nameof(ProjectAddMembers);
+    public const string ProjectRemoveMembers = nameof(ProjectRemoveMembers);
+    public const string ProjectCreateTasks = nameof(ProjectCreateTasks);
+    public const string ProjectModifyTasks = nameof(ProjectModifyTasks);
+    public const string ProjectTransitionTasks = nameof(ProjectTransitionTasks);
+    public const string ProjectAssignTasks = nameof(ProjectAssignTasks);
+    public const string ProjectAddComments = nameof(ProjectAddComments);
+    public const string ProjectManageWorkflows = nameof(ProjectManageWorkflows);
+    public const string ProjectManageProject = nameof(ProjectManageProject);
+    public const string ProjectManageRoles = nameof(ProjectManageRoles);
 }
 
 public static class PolicyExtensions
@@ -30,8 +36,15 @@ public static class PolicyExtensions
         options.AddPolicy(Policy.OrganizationManageRoles, policy => policy.Requirements.Add(new OrganizationMemberRequirement(OrganizationPermissions.ManageRoles)));
 
         options.AddPolicy(Policy.ProjectMember, policy => policy.Requirements.Add(new ProjectMemberRequirement()));
-        options.AddPolicy(Policy.ProjectMembersEditor, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.Members)));
-        options.AddPolicy(Policy.ProjectTasksEditor, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.Tasks)));
-        options.AddPolicy(Policy.ProjectWorkflowsEditor, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.Workflows)));
+        options.AddPolicy(Policy.ProjectAddMembers, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.AddMembers)));
+        options.AddPolicy(Policy.ProjectRemoveMembers, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.RemoveMembers)));
+        options.AddPolicy(Policy.ProjectCreateTasks, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.CreateTasks)));
+        options.AddPolicy(Policy.ProjectModifyTasks, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.ModifyTasks)));
+        options.AddPolicy(Policy.ProjectTransitionTasks, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.TransitionTasks)));
+        options.AddPolicy(Policy.ProjectAssignTasks, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.AssignTasks)));
+        options.AddPolicy(Policy.ProjectAddComments, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.AddComments)));
+        options.AddPolicy(Policy.ProjectManageWorkflows, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.ManageWorkflows)));
+        options.AddPolicy(Policy.ProjectManageProject, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.ManageProject)));
+        options.AddPolicy(Policy.ProjectManageRoles, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.ManageRoles)));
     }
 }

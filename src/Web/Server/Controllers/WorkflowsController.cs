@@ -21,7 +21,7 @@ public class WorkflowsController : ControllerBase
     }
 
     [HttpGet("project/{projectId:guid}")]
-    [Authorize(Policy.ProjectWorkflowsEditor)]
+    [Authorize(Policy.ProjectManageWorkflows)]
     public async Task<IActionResult> GetWorkflow(Guid projectId)
     {
         var result = await _mediator.Send(new GetWorkflowForProjectQuery(projectId));
@@ -29,7 +29,7 @@ public class WorkflowsController : ControllerBase
     }
 
     [HttpPost("{workflowId:guid}/statuses")]
-    [Authorize(Policy.ProjectWorkflowsEditor)]
+    [Authorize(Policy.ProjectManageWorkflows)]
     public async Task<IActionResult> AddStatus(Guid workflowId, AddWorkflowStatusDto model)
     {
         var result = await _mediator.Send(new AddWorkflowTaskStatusCommand(workflowId, model));
@@ -37,7 +37,7 @@ public class WorkflowsController : ControllerBase
     }
 
     [HttpGet("{workflowId:guid}/statuses/{statusId:guid}/can-be-deleted")]
-    [Authorize(Policy.ProjectWorkflowsEditor)]
+    [Authorize(Policy.ProjectManageWorkflows)]
     public async Task<IActionResult> CanStatusBeDeleted(Guid workflowId, Guid statusId)
     {
         var result = await _mediator.Send(new CanWorkflowStatusBeDeletedQuery(workflowId, statusId));
@@ -45,7 +45,7 @@ public class WorkflowsController : ControllerBase
     }
 
     [HttpPost("{workflowId:guid}/statuses/{statusId:guid}/delete")]
-    [Authorize(Policy.ProjectWorkflowsEditor)]
+    [Authorize(Policy.ProjectManageWorkflows)]
     public async Task<IActionResult> DeleteStatus(Guid workflowId, Guid statusId)
     {
         var result = await _mediator.Send(new DeleteWorkflowStatusCommand(workflowId, statusId));
@@ -53,7 +53,7 @@ public class WorkflowsController : ControllerBase
     }
 
     [HttpPost("{workflowId:guid}/transitions")]
-    [Authorize(Policy.ProjectWorkflowsEditor)]
+    [Authorize(Policy.ProjectManageWorkflows)]
     public async Task<IActionResult> AddTransition(Guid workflowId, AddWorkflowTransitionDto model)
     {
         var result = await _mediator.Send(new AddWorkflowTransitionCommand(workflowId, model));
@@ -61,7 +61,7 @@ public class WorkflowsController : ControllerBase
     }
 
     [HttpPost("{workflowId:guid}/transitions/delete")]
-    [Authorize(Policy.ProjectWorkflowsEditor)]
+    [Authorize(Policy.ProjectManageWorkflows)]
     public async Task<IActionResult> DeleteTransition(Guid workflowId, DeleteWorkflowTransitionDto model)
     {
         var result = await _mediator.Send(new DeleteWorkflowTransitionCommand(workflowId, model));

@@ -1,6 +1,6 @@
 ﻿@page "/project/{projectId:guid}/workflow"
 @layout ProjectLayout
-@attribute [Authorize(Policy = Policy.ProjectWorkflowsEditor)]
+@attribute [Authorize(Policy = Policy.ProjectManageWorkflows)]
 
 @using Blazor.Diagrams;
 @using Blazor.Diagrams.Components
