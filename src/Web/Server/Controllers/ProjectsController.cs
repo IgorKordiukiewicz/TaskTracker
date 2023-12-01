@@ -71,7 +71,7 @@ public class ProjectsController : ControllerBase
 
     [HttpPost("{projectId:guid}/members/{memberId:guid}/update-role")]
     [Authorize(Policy.ProjectMembersEditor)]
-    public async Task<IActionResult> RemoveProjectMember(Guid projectId, Guid memberId, [FromBody] UpdateMemberRoleDto model)
+    public async Task<IActionResult> UpdateMemberRoleMember(Guid projectId, Guid memberId, [FromBody] UpdateMemberRoleDto model)
     {
         var result = await _mediator.Send(new UpdateProjectMemberRoleCommand(projectId, memberId, model));
         return result.ToHttpResult();
