@@ -37,6 +37,8 @@
     </MudList>
 </MudPaper>
 
+<ConfirmDeleteBox @ref="_confirmDeleteBox"></ConfirmDeleteBox>
+
 @code {
     [Parameter]
     public required string ApiUrl { get; init; }
@@ -56,8 +58,15 @@
     [Parameter]
     public EventCallback MembersUpdated { get; set; }
 
+    private ConfirmDeleteBox _confirmDeleteBox = null!;
+
     private async Task RemoveMember(Guid memberId)
     {
+        if (!await _confirmDeleteBox.Show("Are you sure you want to remove this member?"))
+        {
+            return;
+        }
+
         await _requestHandler.PostAsync(ApiUrl + $"/{memberId}/remove");
         await MembersUpdated.InvokeAsync();
     }

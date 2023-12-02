@@ -1,0 +1,31 @@
+﻿<MudMessageBox @ref="_messageBox" Title="Confirm action">
+    <MessageContent>
+        @_content
+    </MessageContent>
+    <NoButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Dark" Class="mr-2">Cancel</MudButton>
+    </NoButton>
+    <YesButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error">Confirm</MudButton>
+    </YesButton>
+</MudMessageBox>
+
+@code {
+    private MudMessageBox? _messageBox;
+
+    private string _content = string.Empty;
+
+    public async Task<bool> Show(string content)
+    {
+        if(_messageBox is null)
+        {
+            return false;
+        }
+
+        _content = content;
+        StateHasChanged();
+
+        bool? result = await _messageBox.Show();
+        return result ?? false;
+    }
+}

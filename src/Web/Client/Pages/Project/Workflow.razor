@@ -132,6 +132,8 @@
     </MudSelect>
 </Dialog>
 
+<ConfirmDeleteBox @ref="_confirmDeleteBox"></ConfirmDeleteBox>
+
 @code {
     [Parameter]
     public Guid ProjectId { get; init; }
@@ -165,6 +167,8 @@
 
     private TaskStatusNodeModel? _selectedNode = null;
     private (string SourceNode, string TargetNode, bool Bidirectional)? _selectedLink = null;
+
+    private ConfirmDeleteBox _confirmDeleteBox = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -345,7 +349,7 @@
             return;
         }
 
-        if (await _dialogService.ShowMessageBox("Confirm action", $"Are you sure you want to delete the status {name}?", yesText: "Yes", cancelText: "No") is null)
+        if(!await _confirmDeleteBox.Show($"Are you sure you want to delete the status {name}?"))
         {
             return;
         }
@@ -368,7 +372,7 @@
             return;
         }
 
-        if (await _dialogService.ShowMessageBox("Confirm action", $"Are you sure you want to delete the transition from {fromStatusName} to {toStatusName}?", yesText: "Yes", cancelText: "No") is null)
+        if (!await _confirmDeleteBox.Show($"Are you sure you want to delete the transition from {fromStatusName} to {toStatusName}?"))
         {
             return;
         }
