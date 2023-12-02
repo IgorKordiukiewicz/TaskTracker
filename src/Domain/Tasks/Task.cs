@@ -11,7 +11,7 @@ public class Task : Entity, IAggregateRoot
     public int ShortId { get; private set; }
     public Guid ProjectId { get; private set; }
     public string Title { get; private set; } = string.Empty;
-    public string Description { get; private set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public Guid StatusId { get; private set; } = default!;
     public Guid? AssigneeId { get; private set; } = null;
     public TaskPriority Priority { get; private set; } = TaskPriority.Normal;

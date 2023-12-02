@@ -60,6 +60,14 @@ public class TasksController : ControllerBase
         return result.ToHttpResult();
     }
 
+    [HttpPost("{taskId:guid}/update-description")]
+    [Authorize(Policy.ProjectAssignTasks)]
+    public async Task<IActionResult> UpdateTaskDescription(Guid taskId, UpdateTaskDescriptionDto model)
+    {
+        var result = await _mediator.Send(new UpdateTaskDescriptionCommand(taskId, model));
+        return result.ToHttpResult();
+    }
+
     [HttpPost("{taskId:guid}/comments")]
     [Authorize(Policy.ProjectAddComments)]
     public async Task<IActionResult> AddTaskComment(Guid taskId, AddTaskCommentDto model)

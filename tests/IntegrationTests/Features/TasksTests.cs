@@ -282,4 +282,27 @@ public class TasksTests
             (await _fixture.FirstAsync<Task>(x => x.Id == task.Id)).Priority.Should().Be(newPriority);
         }
     }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateDescription_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateTaskDescriptionCommand(Guid.NewGuid(), new("abc")));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateDescription_ShouldSucceed_WhenTaskExists()
+    {
+        var task = (await _factory.CreateTasks())[0];
+        var newDescription = "abab";
+
+        var result = await _fixture.SendRequest(new UpdateTaskDescriptionCommand(task.Id, new(newDescription)));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<Task>(x => x.Id == task.Id)).Description.Should().Be(newDescription);
+        }
+    }
 }

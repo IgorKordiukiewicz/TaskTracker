@@ -138,14 +138,32 @@
                             <MudText Typo="Typo.h6">
                                 Description
                             </MudText>
-                            @if(_modifyTasksPermissions)
+                            @if(_modifyTasksPermissions && !_editDescriptionForm.Visible)
                             {
-                                <MudIconButton Icon="@Icons.Material.Filled.Edit" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="() => _editDescriptionForm.Open()" />
+                            }
+                            else if(_editDescriptionForm.Visible)
+                            {
+                                <div class="d-flex justify-end gap-2">
+                                    <MudButton Variant="Variant.Outlined" OnClick="() => _editDescriptionForm.Close()">
+                                        Cancel
+                                    </MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(!_editDescriptionForm.IsValid())" OnClick="() => UpdateTaskDescription(currentTaskVM.Id)">
+                                        Save
+                                    </MudButton>
+                                </div>
                             }
                         </div>
-                        <MudText Typo="Typo.body1">
-                            @currentTaskVM.Description
-                        </MudText>
+                        @if(_editDescriptionForm.Visible)
+                        {
+                            <MudTextField @bind-Value="_editDescriptionForm.Content" Variant="Variant.Text" AutoGrow></MudTextField>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body1">
+                                @currentTaskVM.Description
+                            </MudText>
+                        }
                     </MudItem>
                     <MudDivider />
                     <MudItem xs="12">
@@ -319,6 +337,14 @@
     }
     private AddCommentForm _addCommentForm = new();
 
+    private class EditDescriptionForm : DialogForm
+    {
+        public string Content { get; set; } = string.Empty;
+
+        public override bool IsValid() => !string.IsNullOrWhiteSpace(Content);
+    }
+    private EditDescriptionForm _editDescriptionForm = new();
+
     private enum DisplayType
     {
         Table,
@@ -336,7 +362,6 @@
     }
     private CreateTaskForm _createTaskForm = new();
 
-    private IEnumerable<TaskStatusDetailedVM> _selectedValues = new List<TaskStatusDetailedVM>();
     private class Filters
     {
         public string Title { get; set; } = string.Empty;
@@ -416,6 +441,20 @@
         await UpdateTasksVM();
     }
 
+    private async Task UpdateTaskDescription(Guid taskId)
+    {
+        if(!_editDescriptionForm.IsValid())
+        {
+            return;            
+        }
+
+        var model = new UpdateTaskDescriptionDto(_editDescriptionForm.Content);
+        await _requestHandler.PostAsync($"tasks/{taskId}/update-description", model, headers: new[] { ("ProjectId", ProjectId.ToString()) });
+
+        await UpdateTasksVM();
+        _editDescriptionForm = new();
+    }
+
     private async Task TaskDropped(MudItemDropInfo<TaskVM> dropItem)
     {
         if(dropItem.Item is null || _taskStatusIdByName is null)
@@ -449,6 +488,7 @@
     {
         _openedTaskId = taskId;
         _addCommentForm = new();
+        _editDescriptionForm = new();
         await UpdateCommentsVM();
     }
 
