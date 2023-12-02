@@ -145,10 +145,10 @@
                             else if(_editDescriptionForm.Visible)
                             {
                                 <div class="d-flex justify-end gap-2">
-                                    <MudButton Variant="Variant.Outlined" OnClick="() => _editDescriptionForm.Close()">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="() => _editDescriptionForm.Close()">
                                         Cancel
                                     </MudButton>
-                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(!_editDescriptionForm.IsValid())" OnClick="() => UpdateTaskDescription(currentTaskVM.Id)">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_editDescriptionForm.IsValid())" OnClick="() => UpdateTaskDescription(currentTaskVM.Id)">
                                         Save
                                     </MudButton>
                                 </div>
@@ -176,17 +176,17 @@
                             {
                                 <MudTextField @bind-Value="_addCommentForm.Content" Variant="Variant.Filled" Label="New comment" Class="mb-1"></MudTextField>
                                 <div class="d-flex justify-end gap-2">
-                                    <MudButton Variant="Variant.Outlined" OnClick="() => _addCommentForm.Close()">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="() => _addCommentForm.Close()">
                                         Cancel
                                     </MudButton>
-                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(!_addCommentForm.IsValid())" OnClick="AddNewComment">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!_addCommentForm.IsValid())" OnClick="AddNewComment">
                                         Add
                                     </MudButton>
                                 </div>
                             }
                             else
                             {
-                                <MudButton Variant="Variant.Outlined" FullWidth="true" Class="mb-4 mt-1" OnClick="() => _addCommentForm.Open()">
+                                <MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true" Class="mb-4 mt-1" OnClick="() => _addCommentForm.Open()">
                                     Add Comment
                                 </MudButton>
                             }
