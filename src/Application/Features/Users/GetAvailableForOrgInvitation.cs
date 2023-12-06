@@ -35,7 +35,7 @@ internal class GetUsersAvailableForOrganizationInvitationHandler : IRequestHandl
             .FirstOrDefaultAsync(x => x.Id == request.OrganizationId);
         if(organization is null)
         {
-            return Result.Fail<UsersSearchVM>(new ApplicationError("Organization with this ID does not exist."));
+            return Result.Fail<UsersSearchVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
         var membersUsers = organization.Members.Select(x => x.UserId);

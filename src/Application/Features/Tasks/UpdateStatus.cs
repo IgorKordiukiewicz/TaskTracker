@@ -31,13 +31,13 @@ internal class UpdateTaskStatusHandler : IRequestHandler<UpdateTaskStatusCommand
         var task = await _taskRepository.GetById(request.TaskId);
         if(task is null)
         {
-            return Result.Fail(new ApplicationError("Task with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Domain.Tasks.Task>(request.TaskId));
         }
 
         var workflow = await _workflowRepository.GetBy(x => x.ProjectId == task.ProjectId);
         if(!workflow!.DoesStatusExist(request.NewStatusId))
         {
-            return Result.Fail(new ApplicationError("Status with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Domain.Workflows.TaskStatus>(request.NewStatusId));
         }
 
         var result = task.UpdateStatus(request.NewStatusId, workflow!);

@@ -30,7 +30,7 @@ internal class UpdateOrganizationMemberRoleHandler : IRequestHandler<UpdateOrgan
         var organization = await _organizationRepository.GetById(request.OrganizationId);
         if (organization is null)
         {
-            return Result.Fail(new ApplicationError("Organization with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
         }
 
         var result = organization.RolesManager.UpdateMemberRole(request.MemberId, request.Model.RoleId, organization.Members);

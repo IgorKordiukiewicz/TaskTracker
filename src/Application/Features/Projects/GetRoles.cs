@@ -1,5 +1,6 @@
 ﻿using Application.Errors;
 using Domain.Common;
+using Domain.Projects;
 using Shared.Enums;
 
 namespace Application.Features.Projects;
@@ -27,7 +28,7 @@ internal class GetProjectRolesHandler : IRequestHandler<GetProjectRolesQuery, Re
     {
         if (!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId))
         {
-            return Result.Fail<RolesVM<ProjectPermissions>>(new ApplicationError("Project with this ID does not exist."));
+            return Result.Fail<RolesVM<ProjectPermissions>>(new NotFoundError<Project>(request.ProjectId));
         }
 
         var roles = await _dbContext.ProjectRoles

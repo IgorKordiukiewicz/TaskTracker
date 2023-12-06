@@ -1,4 +1,5 @@
 ﻿using Application.Errors;
+using Domain.Organizations;
 
 namespace Application.Features.Organizations;
 
@@ -30,7 +31,7 @@ internal class GetOrganizationNavDataHandler : IRequestHandler<GetOrganizationNa
 
         if(navData is null)
         {
-            return Result.Fail<OrganizationNavigationVM>(new ApplicationError("Organization with this ID does not exist."));
+            return Result.Fail<OrganizationNavigationVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
         return Result.Ok(new OrganizationNavigationVM(navData));

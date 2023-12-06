@@ -1,4 +1,5 @@
 ﻿using Application.Errors;
+using Domain.Projects;
 
 namespace Application.Features.Workflows;
 
@@ -31,7 +32,7 @@ internal class CanWorkflowStatusBeDeletedHandler : IRequestHandler<CanWorkflowSt
             .FirstOrDefaultAsync();
         if (projectId == default)
         {
-            return Result.Fail<bool>(new ApplicationError("Workflow with this ID does not exist."));
+            return Result.Fail<bool>(new NotFoundError<Project>($"workflow ID: {request.WorkflowId}"));
         }
 
         var status = await _dbContext.TaskStatuses
@@ -39,7 +40,7 @@ internal class CanWorkflowStatusBeDeletedHandler : IRequestHandler<CanWorkflowSt
             .FirstOrDefaultAsync(x => x.Id == request.StatusId);
         if (status is null)
         {
-            return Result.Fail<bool>(new ApplicationError("Status with this ID does not exist."));
+            return Result.Fail<bool>(new NotFoundError<Domain.Workflows.TaskStatus>(request.StatusId));
         }
 
         var inUse = await _dbContext.Tasks.AnyAsync(x => x.ProjectId == projectId && x.StatusId == request.StatusId);

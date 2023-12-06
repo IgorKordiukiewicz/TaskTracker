@@ -1,4 +1,6 @@
 ﻿using Application.Errors;
+using Domain.Organizations;
+using Domain.Projects;
 
 namespace Application.Features.Users;
 
@@ -31,7 +33,7 @@ internal class GetUsersAvailableForProjectHandler : IRequestHandler<GetUsersAvai
             .FirstOrDefaultAsync();
         if (projectMembersUserIds is null)
         {
-            return Result.Fail<UsersSearchVM>(new ApplicationError("Project with this ID does not exist"));
+            return Result.Fail<UsersSearchVM>(new NotFoundError<Project>(request.ProjectId));
         }
 
         var organizationMembersUserIds = await _dbContext.Organizations
@@ -41,7 +43,7 @@ internal class GetUsersAvailableForProjectHandler : IRequestHandler<GetUsersAvai
             .FirstOrDefaultAsync();
         if(organizationMembersUserIds is null)
         {
-            return Result.Fail<UsersSearchVM>(new ApplicationError("Organization with this ID does not exist"));
+            return Result.Fail<UsersSearchVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
         var usersIds = organizationMembersUserIds.Except(projectMembersUserIds)

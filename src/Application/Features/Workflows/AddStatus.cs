@@ -29,7 +29,7 @@ internal class AddWorkflowTaskStatusHandler : IRequestHandler<AddWorkflowTaskSta
         var workflow = await _workflowRepository.GetById(request.WorkflowId);
         if (workflow is null)
         {
-            return Result.Fail(new ApplicationError("Workflow with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Workflow>(request.WorkflowId));
         }
 
         var result = workflow.AddStatus(request.Model.Name);

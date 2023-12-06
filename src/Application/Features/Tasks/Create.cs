@@ -1,5 +1,6 @@
 ﻿using Application.Data.Repositories;
 using Application.Errors;
+using Domain.Projects;
 using Task = Domain.Tasks.Task;
 
 namespace Application.Features.Tasks;
@@ -32,7 +33,7 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
     {
         if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId))
         {
-            return Result.Fail<Guid>(new ApplicationError("Project with this ID does not exist."));
+            return Result.Fail<Guid>(new NotFoundError<Project>(request.ProjectId));
         }
 
         Guid? assigneeId = null;
@@ -45,7 +46,7 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
                 .Members.SingleOrDefault(x => x.Id == request.Model.AssigneeMemberId);
             if (member is null)
             {
-                return Result.Fail(new ApplicationError("Member with this ID does not exist."));
+                return Result.Fail(new NotFoundError<ProjectMember>(request.Model.AssigneeMemberId.Value));
             }
 
             assigneeId = member.UserId;

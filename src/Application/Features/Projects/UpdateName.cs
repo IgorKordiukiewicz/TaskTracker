@@ -29,7 +29,7 @@ internal class UpdateProjectNameHandler : IRequestHandler<UpdateProjectNameComma
         var project = await _projectRepository.GetById(request.ProjectId);
         if(project is null)
         {
-            return Result.Fail(new ApplicationError("Project with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
         project.Name = request.Model.Name;

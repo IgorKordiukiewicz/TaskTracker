@@ -1,4 +1,5 @@
 ﻿using Application.Errors;
+using Domain.Organizations;
 
 namespace Application.Features.Organizations;
 
@@ -28,7 +29,7 @@ internal class GetOrganizationMembersHandler : IRequestHandler<GetOrganizationMe
             .SingleOrDefaultAsync(x => x.Id == request.OrganizationId);
         if (organization is null)
         {
-            return Result.Fail<OrganizationMembersVM>(new ApplicationError("Organization with this ID does not exist."));
+            return Result.Fail<OrganizationMembersVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
         var members = await _dbContext.Organizations

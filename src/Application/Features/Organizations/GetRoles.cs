@@ -1,5 +1,6 @@
 ﻿using Application.Errors;
 using Domain.Common;
+using Domain.Organizations;
 using Shared.Enums;
 
 namespace Application.Features.Organizations;
@@ -27,7 +28,7 @@ internal class GetOrganizationRolesHandler : IRequestHandler<GetOrganizationRole
     {
         if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
         {
-            return Result.Fail<RolesVM<OrganizationPermissions>>(new ApplicationError("Organization with this ID does not exist."));
+            return Result.Fail<RolesVM<OrganizationPermissions>>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
         var roles = await _dbContext.OrganizationRoles

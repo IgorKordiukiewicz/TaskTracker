@@ -1,4 +1,5 @@
 ﻿using Application.Errors;
+using Domain.Workflows;
 
 namespace Application.Features.Workflows;
 
@@ -30,7 +31,7 @@ internal class GetWorkflowForProjectHandler : IRequestHandler<GetWorkflowForProj
             .SingleOrDefaultAsync(x => x.ProjectId == request.ProjectId);
         if(workflow is null)
         {
-            return Result.Fail<WorkflowVM>(new ApplicationError($"Workflow does not exist for project with ID: {request.ProjectId}."));
+            return Result.Fail<WorkflowVM>(new NotFoundError<Workflow>($"project ID: {request.ProjectId}"));
         }
 
         var usedStatusesIds = _dbContext.Tasks.Select(x => x.StatusId)

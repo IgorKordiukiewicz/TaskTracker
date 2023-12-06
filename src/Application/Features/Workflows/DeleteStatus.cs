@@ -32,7 +32,7 @@ internal class DeleteWorkflowStatusHandler : IRequestHandler<DeleteWorkflowStatu
         var workflow = await _workflowRepository.GetById(request.WorkflowId);
         if(workflow is null)
         {
-            return Result.Fail(new ApplicationError("Workflow with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Workflow>(request.WorkflowId));
         }
 
         // TODO: Move to domain service or sth?

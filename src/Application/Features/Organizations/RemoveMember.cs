@@ -29,7 +29,7 @@ internal class RemoveOrganizationMemberHandler : IRequestHandler<RemoveOrganizat
         var organization = await _organizationRepository.GetById(request.OrganizationId);
         if (organization is null)
         {
-            return Result.Fail(new ApplicationError("Organization with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
         }
 
         var result = organization.RemoveMember(request.MemberId);

@@ -30,7 +30,7 @@ internal class UpdateProjectRoleNameHandler : IRequestHandler<UpdateProjectRoleN
         var project = await _projectRepository.GetById(request.ProjectId);
         if (project is null)
         {
-            return Result.Fail(new ApplicationError("Project with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
         var result = project.RolesManager.UpdateRoleName(request.RoleId, request.Model.Name);

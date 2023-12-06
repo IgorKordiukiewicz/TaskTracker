@@ -28,7 +28,7 @@ internal class CancelOrganizationInvitationHandler : IRequestHandler<CancelOrgan
         var organization = await _organizationRepository.GetBy(x => x.Invitations.Any(xx => xx.Id == request.InvitationId));
         if (organization is null)
         {
-            return Result.Fail(new ApplicationError("Organization with this invitation does not exist."));
+            return Result.Fail(new NotFoundError<Organization>($"invitation ID: {request.InvitationId}"));
         }
 
         var result = organization.CancelInvitation(request.InvitationId);

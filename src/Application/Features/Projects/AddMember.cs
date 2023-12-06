@@ -31,10 +31,10 @@ internal class AddProjectMemberHandler : IRequestHandler<AddProjectMemberCommand
         var project = await _projectRepository.GetById(request.ProjectId);
         if(project is null)
         {
-            return Result.Fail(new ApplicationError("Project with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
-        var isUserAMember = await _dbContext.Organizations // TODO: Should repositories or dbContext be used when querying from other aggregates in  commands?
+        var isUserAMember = await _dbContext.Organizations
             .Include(x => x.Members)
             .AnyAsync(x => x.Id == project.OrganizationId && x.Members.Any(xx => xx.UserId == request.Model.UserId));
         if (!isUserAMember)

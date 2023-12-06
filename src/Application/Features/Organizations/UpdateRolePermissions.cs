@@ -1,6 +1,7 @@
 ﻿using Application.Data.Repositories;
 using Application.Errors;
 using Domain.Organizations;
+using Domain.Projects;
 using Shared.Enums;
 
 namespace Application.Features.Organizations;
@@ -31,7 +32,7 @@ internal class UpdateProjectRolePermissionsHandler : IRequestHandler<UpdateOrgan
         var organization = await _organizationRepository.GetById(request.OrganizationId);
         if (organization is null)
         {
-            return Result.Fail(new ApplicationError("Organization with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
         }
 
         var result = organization.RolesManager.UpdateRolePermissions(request.RoleId, request.Model.Permissions);

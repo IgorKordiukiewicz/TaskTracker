@@ -1,4 +1,5 @@
 ﻿using Application.Errors;
+using Domain.Projects;
 
 namespace Application.Features.Projects;
 
@@ -29,7 +30,7 @@ internal class GetProjectOrganizationHandler : IRequestHandler<GetProjectOrganiz
             .FirstOrDefaultAsync();
         if(organizationId == default)
         {
-            return Result.Fail<ProjectOrganizationVM>(new ApplicationError("Project with this ID does not exist."));
+            return Result.Fail<ProjectOrganizationVM>(new NotFoundError<Project>(request.ProjectId));
         }
 
         return new ProjectOrganizationVM(organizationId);

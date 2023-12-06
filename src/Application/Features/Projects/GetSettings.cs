@@ -1,4 +1,5 @@
 ﻿using Application.Errors;
+using Domain.Projects;
 
 namespace Application.Features.Projects;
 
@@ -25,7 +26,7 @@ internal class GetProjectSettingsHandler : IRequestHandler<GetProjectSettingsQue
     {
         if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId)) 
         {
-            return Result.Fail<ProjectSettingsVM>(new ApplicationError("Project with this ID does not exist."));
+            return Result.Fail<ProjectSettingsVM>(new NotFoundError<Project>(request.ProjectId));
         }
 
         return await _dbContext.Projects

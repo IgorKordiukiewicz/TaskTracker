@@ -29,7 +29,7 @@ internal class UpdateTaskPriorityHandler : IRequestHandler<UpdateTaskPriorityCom
         var task = await _taskRepository.GetById(request.TaskId);
         if(task is null)
         {
-            return Result.Fail(new ApplicationError("Task with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
         task.UpdatePriority(request.Model.Priority);

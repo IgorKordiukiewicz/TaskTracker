@@ -30,7 +30,7 @@ internal class AddWorkflowTransitionHandler : IRequestHandler<AddWorkflowTransit
         var workflow = await _workflowRepository.GetById(request.WorkflowId);
         if (workflow is null)
         {
-            return Result.Fail(new ApplicationError("Workflow with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Workflow>(request.WorkflowId));
         }
 
         var result = workflow.AddTransition(request.Model.FromStatusId, request.Model.ToStatusId);

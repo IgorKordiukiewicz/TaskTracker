@@ -1,6 +1,7 @@
 ﻿using Application.Data.Repositories;
 using Application.Errors;
 using Domain.Organizations;
+using Domain.Users;
 
 namespace Application.Features.Organizations;
 
@@ -30,7 +31,7 @@ internal class CreateOrganizationHandler : IRequestHandler<CreateOrganizationCom
     {
         if(!await _context.Users.AnyAsync(x => x.Id == request.Model.OwnerId))
         {
-            return Result.Fail(new ApplicationError("Owner does not exist"));
+            return Result.Fail(new NotFoundError<User>(request.Model.OwnerId));
         }
 
         var organization = Organization.Create(request.Model.Name, request.Model.OwnerId);

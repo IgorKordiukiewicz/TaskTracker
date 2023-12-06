@@ -35,7 +35,7 @@ internal class AddTaskCommentHandler : IRequestHandler<AddTaskCommentCommand, Re
         var task = await _taskRepository.GetById(request.TaskId);
         if(task is null)
         {
-            return Result.Fail(new ApplicationError("Task with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
         var userId = (await _dbContext.Users

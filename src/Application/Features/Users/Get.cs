@@ -1,4 +1,5 @@
 ﻿using Application.Errors;
+using Domain.Users;
 
 namespace Application.Features.Users;
 
@@ -31,7 +32,7 @@ internal class GetUserHandler : IRequestHandler<GetUserQuery, Result<UserVM>>
 
         if (user is null)
         {
-            return Result.Fail<UserVM>(new ApplicationError("User with this AuthID does not exist."));
+            return Result.Fail<UserVM>(new NotFoundError<User>($"AuthID: {request.AuthenticationId}"));
         }
 
         var permissionsByOrganization = await _dbContext.Organizations

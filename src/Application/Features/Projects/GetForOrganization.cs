@@ -1,4 +1,6 @@
 ﻿using Application.Errors;
+using Domain.Organizations;
+using Domain.Projects;
 
 namespace Application.Features.Projects;
 
@@ -26,7 +28,7 @@ internal class GetProjectsForOrganizationHandler : IRequestHandler<GetProjectsFo
     {
         if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
         {
-            return Result.Fail<ProjectsVM>(new ApplicationError("Organization with this ID does not exist."));
+            return Result.Fail<ProjectsVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
         var userId = (await _dbContext.Users

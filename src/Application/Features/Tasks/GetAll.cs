@@ -1,4 +1,5 @@
 ﻿using Application.Errors;
+using Domain.Workflows;
 
 namespace Application.Features.Tasks;
 
@@ -32,7 +33,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
 
         if(workflow is null)
         {
-            return Result.Fail<TasksVM>(new ApplicationError("Workflow with this ID does not exist."));
+            return Result.Fail<TasksVM>(new NotFoundError<Workflow>($"Project ID: {request.ProjectId}"));
         }
 
         var statusesById = workflow.Statuses.ToDictionary(x => x.Id, x => x);

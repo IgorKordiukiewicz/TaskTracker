@@ -1,4 +1,5 @@
-﻿using FluentResults;
+﻿using Application.Errors;
+using FluentResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Server.Extensions;
@@ -32,6 +33,7 @@ public static class ResultExtensions
         var error = errors.FirstOrDefault();
         return error switch
         {
+            { } e when e.GetType().IsGenericType && e.GetType().GetGenericTypeDefinition() == typeof(NotFoundError<>) => new NotFoundObjectResult(error.Message),
             Error => new BadRequestObjectResult(error.Message),
             _ => new StatusCodeResult(500)
         };

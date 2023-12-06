@@ -1,4 +1,5 @@
 ﻿using Application.Errors;
+using Domain.Organizations;
 
 namespace Application.Features.Organizations;
 
@@ -25,7 +26,7 @@ internal class GetOrganizationInvitationsHandler : IRequestHandler<GetOrganizati
     {
         if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
         {
-            return Result.Fail<OrganizationInvitationsVM>(new ApplicationError("Organization with this ID does not exist."));
+            return Result.Fail<OrganizationInvitationsVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
         var invitations = await _dbContext.OrganizationInvitations.Where(x => x.OrganizationId == request.OrganizationId)

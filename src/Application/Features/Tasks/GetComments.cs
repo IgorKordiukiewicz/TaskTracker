@@ -25,7 +25,7 @@ internal class GetTaskCommentsHandler : IRequestHandler<GetTaskCommentsQuery, Re
     {
         if(!await _dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId)) 
         {
-            return Result.Fail<TaskCommentsVM>(new ApplicationError("Task with this ID does not exist."));
+            return Result.Fail<TaskCommentsVM>(new NotFoundError<Domain.Tasks.Task>(request.TaskId));
         }
 
         var comments = await _dbContext.TaskComments

@@ -1,4 +1,5 @@
 ﻿using Application.Errors;
+using Domain.Projects;
 
 namespace Application.Features.Projects;
 
@@ -25,7 +26,7 @@ internal class GetProjectNavDataHandler : IRequestHandler<GetProjectNavDataQuery
     {
         if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId))
         {
-            return Result.Fail<ProjectNavigationVM>(new ApplicationError("Project with this ID does not exist."));
+            return Result.Fail<ProjectNavigationVM>(new NotFoundError<Project>(request.ProjectId));
         }
 
         var navData = await _dbContext.Projects

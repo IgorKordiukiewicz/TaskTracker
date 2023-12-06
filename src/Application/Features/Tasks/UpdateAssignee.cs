@@ -1,5 +1,6 @@
 ﻿using Application.Data.Repositories;
 using Application.Errors;
+using Domain.Projects;
 using Task = Domain.Tasks.Task;
 
 namespace Application.Features.Tasks;
@@ -31,7 +32,7 @@ internal class UpdateTaskAssigneeHandler : IRequestHandler<UpdateTaskAssigneeCom
         var task = await _taskRepository.GetById(request.TaskId);
         if(task is null)
         {
-            return Result.Fail(new ApplicationError("Task with this ID does not exist."));
+            return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
         if(request.Model.MemberId is not null)
@@ -43,7 +44,7 @@ internal class UpdateTaskAssigneeHandler : IRequestHandler<UpdateTaskAssigneeCom
                 .Members.SingleOrDefault(x => x.Id == request.Model.MemberId);
             if (member is null)
             {
-                return Result.Fail(new ApplicationError("Member with this ID does not exist."));
+                return Result.Fail(new NotFoundError<ProjectMember>(request.Model.MemberId.Value));
             }
 
             task.UpdateAssignee(member.UserId); // TODO: Store ref to UserId or MemberId ?

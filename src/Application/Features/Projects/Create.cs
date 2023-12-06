@@ -1,5 +1,6 @@
 ﻿using Application.Data.Repositories;
 using Application.Errors;
+using Domain.Organizations;
 using Domain.Projects;
 using Domain.Workflows;
 
@@ -34,7 +35,7 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
     {
         if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
         {
-            return Result.Fail<Guid>(new ApplicationError("Organization with this ID does not exist."));
+            return Result.Fail<Guid>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
         if(await _projectRepository.Exists(x => x.OrganizationId == request.OrganizationId && x.Name == request.Model.Name))
