@@ -132,4 +132,12 @@ public class ProjectsController : ControllerBase
         var result = await _mediator.Send(new GetProjectSettingsQuery(projectId));
         return result.ToHttpResult();
     }
+
+    [HttpPost("{projectId:guid}/update-name")]
+    [Authorize(Policy.ProjectManageProject)]
+    public async Task<IActionResult> UpdateProjectName(Guid projectId, [FromBody] UpdateProjectNameDto model)
+    {
+        var result = await _mediator.Send(new UpdateProjectNameCommand(projectId, model));
+        return result.ToHttpResult();
+    }
 }

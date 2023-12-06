@@ -8,7 +8,7 @@ namespace Domain.Projects;
 
 public class Project : Entity, IAggregateRoot
 {
-    public string Name { get; private set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
     public Guid OrganizationId { get; private set; }
 
     private readonly List<ProjectMember> _members = new();
@@ -65,7 +65,4 @@ public class Project : Entity, IAggregateRoot
         _members.Remove(member);
         return Result.Ok();
     }
-
-    // RemoveRole: check if is used by any member and don't remove default role,
-    // Add interface to ProjectMember & OrganizationMember: IHasRole and then RolesService/Manager can accept a list of IHasRole objects to check whether any use a given role ?
 }

@@ -414,6 +414,29 @@ public class ProjectsTests
         }
     }
 
+    [Fact]
+    public async Task UpdateProjectName_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateProjectNameCommand(Guid.NewGuid(), new("abc")));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UpdateProjectName_ShouldReturnSettings_WhenProjectExists()
+    {
+        var project = (await _factory.CreateProjects())[0];
+        var newName = project.Name + "A";
+
+        var result = await _fixture.SendRequest(new UpdateProjectNameCommand(project.Id, new(newName)));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<Project>(x => x.Id == project.Id)).Name.Should().Be(newName);
+        }
+    }
+
     private async Task<(Project Project, string RoleName)> CreateProjectWithCustomRole()
     {
         var organization = (await _factory.CreateOrganizations())[0];

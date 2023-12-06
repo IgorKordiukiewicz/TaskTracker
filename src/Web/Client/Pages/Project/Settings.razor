@@ -10,7 +10,7 @@
 {
     <MudPaper Class="pa-6 d-flex flex-column gap-4">
         <div class="d-flex gap-2 align-center">
-            <MudTextField Variant="Variant.Text" @bind-Value="_nameEditValue" ReadOnly="@(!_nameEditEnabled)" Adornment="Adornment.End" 
+            <MudTextField Variant="Variant.Text" @bind-Value="_nameEditValue" ReadOnly="@(!_nameEditEnabled)" Adornment="Adornment.End" Label="Name"
                 AdornmentIcon="@(_nameEditEnabled ? string.Empty : @Icons.Material.Filled.Edit)" OnAdornmentClick="StartNameEdit" />
             @if (_nameEditEnabled)
             {
@@ -62,7 +62,11 @@
 
     private async Task UpdateName()
     {
-        // TODO
+        var model = new UpdateProjectNameDto(_nameEditValue);
+        await _requestHandler.PostAsync($"projects/{ProjectId}/update-name", model);
+
         CancelNameEdit();
+        await UpdateSettingsVM();
+        await Layout.SetProjectId(ProjectId); // Call it to update the breadcrumbs
     }
 }
