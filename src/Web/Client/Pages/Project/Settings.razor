@@ -1,0 +1,68 @@
+﻿@page "/project/{projectId:guid}/settings"
+@layout ProjectLayout
+@attribute [Authorize(Policy = Policy.ProjectManageProject)]
+
+@using global::Shared.Authorization;
+
+@inject RequestHandler _requestHandler
+
+@if (_settingsVM is not null)
+{
+    <MudPaper Class="pa-6 d-flex flex-column gap-4">
+        <div class="d-flex gap-2 align-center">
+            <MudTextField Variant="Variant.Text" @bind-Value="_nameEditValue" ReadOnly="@(!_nameEditEnabled)" Adornment="Adornment.End" 
+                AdornmentIcon="@(_nameEditEnabled ? string.Empty : @Icons.Material.Filled.Edit)" OnAdornmentClick="StartNameEdit" />
+            @if (_nameEditEnabled)
+            {
+                <MudButton Variant="Variant.Filled" OnClick="CancelNameEdit">Cancel</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="UpdateName" Disabled="@(_settingsVM.Name == _nameEditValue)">Save</MudButton>
+            }
+        </div>
+    </MudPaper>
+}
+
+@code {
+    [Parameter]
+    public Guid ProjectId { get; init; }
+
+    [CascadingParameter]
+    public ProjectLayout Layout { get; set; } = null!;
+
+    private bool _nameEditEnabled = false;
+    private string _nameEditValue = string.Empty;
+
+    private ProjectSettingsVM? _settingsVM;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Layout.SetProjectId(ProjectId);
+
+        await UpdateSettingsVM();
+    }
+
+    private async Task UpdateSettingsVM()
+    {
+        _settingsVM = await _requestHandler.GetAsync<ProjectSettingsVM>($"projects/{ProjectId}/settings");
+        if(_settingsVM is not null)
+        {
+            _nameEditValue = _settingsVM!.Name;
+        }
+    }
+
+    private void StartNameEdit()
+    {
+        _nameEditEnabled = true;
+    }
+
+    private void CancelNameEdit()
+    {
+        _nameEditEnabled = false;
+        _nameEditValue = _settingsVM!.Name;
+    }
+
+    private async Task UpdateName()
+    {
+        // TODO
+        CancelNameEdit();
+    }
+}

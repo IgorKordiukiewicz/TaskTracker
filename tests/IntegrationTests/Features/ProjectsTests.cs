@@ -6,6 +6,7 @@ using Domain.Projects;
 using Domain.Users;
 using Shared.Enums;
 using Shared.ViewModels;
+using Web.Client.Pages.Organization;
 
 namespace IntegrationTests.Features;
 
@@ -388,6 +389,28 @@ public class ProjectsTests
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.FirstAsync<ProjectRole>(x => x.Id == roleId)).Permissions.Should().Be(newPermissions);
+        }
+    }
+
+    [Fact]
+    public async Task GetProjectSettings_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetProjectSettingsQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetProjectSettings_ShouldReturnSettings_WhenProjectExists()
+    {
+        var project = (await _factory.CreateProjects())[0];
+
+        var result = await _fixture.SendRequest(new GetProjectSettingsQuery(project.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().Be(new ProjectSettingsVM(project.Name));
         }
     }
 

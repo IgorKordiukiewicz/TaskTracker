@@ -17,6 +17,9 @@
                 <AuthorizeView Policy="@Policy.ProjectManageWorkflows" Context=childContext>
                     <MudNavLink Href="@GetPageRoute("workflow")" Icon="@Icons.Material.Filled.Route">Workflow</MudNavLink>
                 </AuthorizeView>
+                <AuthorizeView Policy="@Policy.ProjectManageProject" Context=childContext>
+                    <MudNavLink Href="@GetPageRoute("settings")" Icon="@Icons.Material.Filled.Settings">Settings</MudNavLink>
+                </AuthorizeView>
             </MudNavMenu>
         </MudDrawer>
         @Body

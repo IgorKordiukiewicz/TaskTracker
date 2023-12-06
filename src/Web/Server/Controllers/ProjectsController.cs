@@ -124,4 +124,12 @@ public class ProjectsController : ControllerBase
         var result = await _mediator.Send(new UpdateProjectRolePermissionsCommand(projectId, roleId, model));
         return result.ToHttpResult();
     }
+
+    [HttpGet("{projectId:guid}/settings")]
+    [Authorize(Policy.ProjectManageProject)]
+    public async Task<IActionResult> GetProjectSettings(Guid projectId)
+    {
+        var result = await _mediator.Send(new GetProjectSettingsQuery(projectId));
+        return result.ToHttpResult();
+    }
 }
