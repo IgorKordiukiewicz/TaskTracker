@@ -26,8 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Application\Application.csproj" />
     <ProjectReference Include="..\..\src\Domain\Domain.csproj" />
     <ProjectReference Include="..\..\src\Web\Client\Web.Client.csproj" />
+    <ProjectReference Include="..\..\src\Web\Server\Web.Server.csproj" />
   </ItemGroup>
 
 </Project>
