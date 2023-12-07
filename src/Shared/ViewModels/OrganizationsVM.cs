@@ -13,7 +13,7 @@ public record OrganizationForUserVM
     public required string Name { get; init; }
 }
 
-public record UserOrganizationInvitations(IReadOnlyList<UserOrganizationInvitationVM> Invitations);
+public record UserOrganizationInvitationsVM(IReadOnlyList<UserOrganizationInvitationVM> Invitations);
 public record UserOrganizationInvitationVM(Guid Id, string OrganizationName);
 
 

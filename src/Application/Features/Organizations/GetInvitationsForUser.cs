@@ -3,7 +3,7 @@ using Shared.Enums;
 
 namespace Application.Features.Organizations;
 
-public record GetOrganizationInvitationsForUserQuery(string UserAuthenticationId) : IRequest<Result<UserOrganizationInvitations>>;
+public record GetOrganizationInvitationsForUserQuery(string UserAuthenticationId) : IRequest<Result<UserOrganizationInvitationsVM>>;
 
 internal class GetOrganizationInvitationsForUserQueryValidator : AbstractValidator<GetOrganizationInvitationsForUserQuery>
 {
@@ -13,7 +13,7 @@ internal class GetOrganizationInvitationsForUserQueryValidator : AbstractValidat
     }
 }
 
-internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrganizationInvitationsForUserQuery, Result<UserOrganizationInvitations>>
+internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrganizationInvitationsForUserQuery, Result<UserOrganizationInvitationsVM>>
 {
     private readonly AppDbContext _dbContext;
 
@@ -22,14 +22,14 @@ internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrg
         _dbContext = dbContext;
     }
 
-    public async Task<Result<UserOrganizationInvitations>> Handle(GetOrganizationInvitationsForUserQuery request, CancellationToken cancellationToken)
+    public async Task<Result<UserOrganizationInvitationsVM>> Handle(GetOrganizationInvitationsForUserQuery request, CancellationToken cancellationToken)
     {
         var user = await _dbContext.Users
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.AuthenticationId == request.UserAuthenticationId);
         if(user is null)
         {
-            return Result.Fail<UserOrganizationInvitations>(new NotFoundError<User>($"AuthID: {request.UserAuthenticationId}"));
+            return Result.Fail<UserOrganizationInvitationsVM>(new NotFoundError<User>($"AuthID: {request.UserAuthenticationId}"));
         }
 
         var invitations = await _dbContext.OrganizationInvitations
@@ -40,6 +40,6 @@ internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrg
             (invitation, organization) => new UserOrganizationInvitationVM(invitation.Id, organization.Name))
             .ToListAsync();
 
-        return Result.Ok(new UserOrganizationInvitations(invitations));
+        return Result.Ok(new UserOrganizationInvitationsVM(invitations));
     }
 }

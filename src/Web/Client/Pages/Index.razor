@@ -28,7 +28,7 @@
 }
 
 @code {
-    private UserOrganizationInvitations? _invitations;
+    private UserOrganizationInvitationsVM? _invitationsVM;
     private OrganizationsForUserVM? _organizationsVM;
 
     protected override async Task OnInitializedAsync()
@@ -44,13 +44,13 @@
 
     private async Task OpenInvitationsDialog()
     {
-        if(_invitations is null)
+        if(_invitationsVM is null)
         {
             return;
         }
 
         var parameters = new DialogParameters();
-        parameters.Add("Invitations", _invitations.Invitations.ToList());
+        parameters.Add("Invitations", _invitationsVM.Invitations.ToList());
         parameters.Add("RequestHandler", _requestHandler);
 
         var options = new DialogOptions
@@ -72,11 +72,11 @@
     private async Task UpdateViewModels()
     {
         _organizationsVM = await _requestHandler.GetAsync<OrganizationsForUserVM>("organizations/user");
-        _invitations = await _requestHandler.GetAsync<UserOrganizationInvitations>("organizations/invitations/user");
+        _invitationsVM = await _requestHandler.GetAsync<UserOrganizationInvitationsVM>("organizations/invitations/user");
     }
 
     private bool HasOrganizationInvitations() 
-        => _invitations is not null && _invitations.Invitations.Any();
+        => _invitationsVM is not null && _invitationsVM.Invitations.Any();
 
     private string GetOrganizationInvitationsIcon() 
         => HasOrganizationInvitations() ? @Icons.Material.Filled.NotificationsActive : Icons.Material.Filled.NotificationsNone;
