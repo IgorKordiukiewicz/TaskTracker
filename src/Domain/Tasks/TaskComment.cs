@@ -1,6 +1,4 @@
-﻿using Domain.Common;
-
-namespace Domain.Tasks;
+﻿namespace Domain.Tasks;
 
 public class TaskComment : Entity
 {

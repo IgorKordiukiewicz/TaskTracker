@@ -1,6 +1,4 @@
-global using Xunit;
+global using AutoFixture;
 global using FluentAssertions;
 global using FluentAssertions.Execution;
-global using Moq;
-global using AutoFixture;
-global using NSubstitute;
+global using Xunit;

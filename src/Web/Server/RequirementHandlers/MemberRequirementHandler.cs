@@ -1,7 +1,5 @@
 ﻿using Application.Data;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Web.Server.Extensions;
 
 namespace Web.Server.RequirementHandlers;
 

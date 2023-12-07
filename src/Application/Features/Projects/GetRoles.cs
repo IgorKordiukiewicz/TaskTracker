@@ -1,6 +1,4 @@
-﻿using Application.Errors;
-using Domain.Common;
-using Domain.Projects;
+﻿using Domain.Projects;
 using Shared.Enums;
 
 namespace Application.Features.Projects;

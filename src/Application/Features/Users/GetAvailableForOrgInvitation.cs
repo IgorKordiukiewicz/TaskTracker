@@ -1,5 +1,4 @@
-﻿using Application.Errors;
-using Domain.Organizations;
+﻿using Domain.Organizations;
 using Shared.Enums;
 
 namespace Application.Features.Users;

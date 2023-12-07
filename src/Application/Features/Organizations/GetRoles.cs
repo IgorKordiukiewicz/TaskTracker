@@ -1,6 +1,4 @@
-﻿using Application.Errors;
-using Domain.Common;
-using Domain.Organizations;
+﻿using Domain.Organizations;
 using Shared.Enums;
 
 namespace Application.Features.Organizations;

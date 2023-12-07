@@ -1,6 +1,4 @@
-﻿using FluentResults;
-
-namespace Domain.Errors;
+﻿namespace Domain.Errors;
 
 public class DomainError : Error
 {

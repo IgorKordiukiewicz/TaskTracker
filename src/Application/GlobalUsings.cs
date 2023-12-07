@@ -5,3 +5,5 @@ global using Microsoft.EntityFrameworkCore;
 global using Application.Data;
 global using Shared.ViewModels;
 global using Shared.Dtos;
+global using Application.Errors;
+global using Application.Data.Repositories;

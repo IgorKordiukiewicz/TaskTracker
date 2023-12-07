@@ -1,6 +1,5 @@
 ﻿using Application.Data;
 using Microsoft.EntityFrameworkCore;
-using Shared.Authorization;
 
 namespace Web.Server.RequirementHandlers;
 

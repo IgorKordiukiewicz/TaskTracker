@@ -1,8 +1,4 @@
-﻿using Domain.Common;
-using Domain.Errors;
-using FluentResults;
-
-namespace Domain.Workflows;
+﻿namespace Domain.Workflows;
 
 public class Workflow : Entity, IAggregateRoot
 {

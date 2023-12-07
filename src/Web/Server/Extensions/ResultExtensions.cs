@@ -1,6 +1,5 @@
 ﻿using Application.Errors;
 using FluentResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Server.Extensions;
 

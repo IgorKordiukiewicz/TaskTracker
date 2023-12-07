@@ -1,11 +1,4 @@
 ﻿using Application.Features.Organizations;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Shared.Authorization;
-using Shared.Dtos;
-using Shared.Enums;
-using Web.Server.Extensions;
 
 namespace Web.Server.Controllers;
 

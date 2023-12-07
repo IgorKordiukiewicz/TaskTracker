@@ -1,7 +1,4 @@
-﻿using Domain.Errors;
-using FluentResults;
-
-namespace Domain.Common;
+﻿namespace Domain.Common;
 
 public interface IHasRole
 {

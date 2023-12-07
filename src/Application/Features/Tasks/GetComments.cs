@@ -1,6 +1,4 @@
-﻿using Application.Errors;
-
-namespace Application.Features.Tasks;
+﻿namespace Application.Features.Tasks;
 
 public record GetTaskCommentsQuery(Guid TaskId) : IRequest<Result<TaskCommentsVM>>;
 

@@ -1,5 +1,4 @@
-﻿using Application.Errors;
-using Domain.Users;
+﻿using Domain.Users;
 
 namespace Application.Features.Users;
 

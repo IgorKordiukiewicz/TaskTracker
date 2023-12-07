@@ -1,6 +1,4 @@
-﻿using Application.Errors;
-using Domain.Organizations;
-using Domain.Projects;
+﻿using Domain.Organizations;
 
 namespace Application.Features.Projects;
 

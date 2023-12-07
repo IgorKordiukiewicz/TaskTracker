@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Shared.Authorization;
 using Web.Server.RequirementHandlers;
 
 namespace Web.Server.Extensions;

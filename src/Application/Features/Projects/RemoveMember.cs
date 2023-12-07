@@ -1,6 +1,4 @@
-﻿using Application.Data.Repositories;
-using Application.Errors;
-using Domain.Projects;
+﻿using Domain.Projects;
 
 namespace Application.Features.Projects;
 

@@ -2,8 +2,6 @@
 @layout ProjectLayout
 @attribute [Authorize(Policy = Policy.ProjectManageProject)]
 
-@using global::Shared.Authorization;
-
 @inject RequestHandler _requestHandler
 
 @if (_settingsVM is not null)

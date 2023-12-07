@@ -1,6 +1,4 @@
-﻿using Domain.Common;
-
-namespace Domain.Projects;
+﻿namespace Domain.Projects;
 
 public class ProjectMember : Entity, IHasRole
 {

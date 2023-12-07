@@ -1,6 +1,4 @@
-﻿using Domain.Common;
-
-namespace Domain.Users;
+﻿namespace Domain.Users;
 
 public class User : Entity, IAggregateRoot
 {

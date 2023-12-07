@@ -1,6 +1,4 @@
-﻿using Application.Data.Repositories;
-using Application.Errors;
-using Domain.Organizations;
+﻿using Domain.Organizations;
 
 namespace Application.Features.Organizations;
 

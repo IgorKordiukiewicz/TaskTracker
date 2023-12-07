@@ -1,11 +1,5 @@
-using Web.Server;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Application;
 using Serilog;
-using System.Security.Claims;
-using Web.Server.RequirementHandlers;
-using Microsoft.AspNetCore.Authorization;
-using Web.Server.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

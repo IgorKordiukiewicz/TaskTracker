@@ -1,7 +1,4 @@
-﻿using Domain.Common;
-
-namespace Domain.Organizations;
-
+﻿namespace Domain.Organizations;
 
 public class OrganizationMember : Entity, IHasRole
 {

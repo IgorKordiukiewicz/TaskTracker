@@ -1,8 +1,4 @@
-﻿using Domain.Common;
-using Domain.Errors;
-using Domain.Organizations;
-using FluentResults;
-using Shared.Enums;
+﻿using Shared.Enums;
 
 namespace Domain.Projects;
 

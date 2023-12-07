@@ -1,10 +1,4 @@
 ﻿using Application.Features.Workflows;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Shared.Authorization;
-using Shared.Dtos;
-using Web.Server.Extensions;
 
 namespace Web.Server.Controllers;
 
