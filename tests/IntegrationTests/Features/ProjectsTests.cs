@@ -153,7 +153,15 @@ public class ProjectsTests
     }
 
     [Fact]
-    public async Task GetMembers_ShouldReturnProjectMembers()
+    public async Task GetMembers_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetProjectMembersQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetMembers_ShouldReturnProjectMembers_WhenProjectExists()
     {
         var project = (await _factory.CreateProjects())[0];
         var user = await _fixture.FirstAsync<User>();

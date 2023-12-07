@@ -1,4 +1,6 @@
-﻿namespace Application.Features.Projects;
+﻿using Domain.Projects;
+
+namespace Application.Features.Projects;
 
 public record GetProjectMembersQuery(Guid ProjectId) : IRequest<Result<ProjectMembersVM>>;
 
@@ -21,6 +23,11 @@ internal class GetProjectMembersHandler : IRequestHandler<GetProjectMembersQuery
 
     public async Task<Result<ProjectMembersVM>> Handle(GetProjectMembersQuery request, CancellationToken cancellationToken)
     {
+        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId))
+        {
+            return Result.Fail<ProjectMembersVM>(new NotFoundError<Project>(request.ProjectId));
+        }
+
         var members = await _dbContext.Projects
             .Include(x => x.Members)
             .Where(x => x.Id == request.ProjectId)
