@@ -3,7 +3,6 @@
 @using Web.Client.Common;
 
 @inject NavigationManager _navigationManager
-@inject SignOutSessionStateManager _signOutManager
 @inject UserDataService _userDataService
 
 <AuthorizeView>
@@ -39,9 +38,8 @@
         await _userDataService.OnSignIn();
     }
 
-    private async Task BeginSignOut(MouseEventArgs args)
+    private void BeginSignOut()
     {
-        await _signOutManager.SetSignOutState();
-        _navigationManager.NavigateTo("authentication/logout");
+        _navigationManager.NavigateToLogout("authentication/logout");
     }
 }
