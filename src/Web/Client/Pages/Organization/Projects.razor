@@ -9,31 +9,17 @@
 
 @if (_projectsVM is not null)
 {
-    <MudGrid>
-        @if(_createProjectsPermission)
-        {
-            <MudItem lg="3" sm="6">
-                <MudPaper Class="d-flex flex-column align-center justify-center project-card" onclick="@(() => _createProjectForm.Open())">
-                    <MudText Align="Align.Center">
-                        Create a new project
-                    </MudText>
-                    <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Large" />
-                </MudPaper>
-            </MudItem>
-        }
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _createProjectForm.Open()" Class="mb-4 mt-4">Create project</MudButton>
+    <div class="d-flex flex-column gap-4">
         @foreach (var project in _projectsVM.Projects)
         {
-            <MudItem lg="3" sm="6">
-                <MudCard Class="project-card" onclick="@(() => SelectProject(project.Id))">
-                    <MudCardContent>
-                        <MudText Typo="Typo.h6">
-                            @project.Name
-                        </MudText>
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
+            <MudPaper Class="project-card" onclick="@(() => SelectProject(project.Id))">
+                <MudText Typo="Typo.h6">
+                    @project.Name
+                </MudText>
+            </MudPaper>
         }
-    </MudGrid>
+    </div>
 }
 
 <Dialog Title="Create a new project" Form="_createProjectForm" OnConfirm="CreateProject">

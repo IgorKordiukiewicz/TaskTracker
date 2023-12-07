@@ -6,7 +6,7 @@
 @inject IDialogService _dialogService
 @inject HierarchyNavigationService _hierarchyNavigationService
 
-@if(_organizations is not null)
+@if(_organizationsVM is not null)
 {
     <div class="d-flex align-center">
         <MudText Typo="Typo.h5">
@@ -15,25 +15,21 @@
         <MudIconButton Icon="@GetOrganizationInvitationsIcon()" Disabled="@(!HasOrganizationInvitations())" OnClick="OpenInvitationsDialog"></MudIconButton>
     </div>
     <MudDivider Class="mb-4 mt-1" />
-    <MudGrid>
-        @foreach (var organization in _organizations.Organizations)
+    <div class="d-flex flex-column gap-4">
+        @foreach (var organization in _organizationsVM.Organizations)
         {
-            <MudItem lg="3" sm="6">
-                <MudCard onclick="@(() => SelectOrganization(organization.Id))" Class="organization-card">
-                    <MudCardContent>
-                        <MudText Typo="Typo.h6">
-                            @organization.Name
-                        </MudText>
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
+            <MudPaper Class="organization-card" onclick="@(() => SelectOrganization(organization.Id))">
+                <MudText Typo="Typo.h6">
+                    @organization.Name
+                </MudText>
+            </MudPaper>
         }
-    </MudGrid>
+    </div>
 }
 
 @code {
     private UserOrganizationInvitations? _invitations;
-    private OrganizationsForUserVM? _organizations;
+    private OrganizationsForUserVM? _organizationsVM;
 
     protected override async Task OnInitializedAsync()
     {
@@ -75,7 +71,7 @@
 
     private async Task UpdateViewModels()
     {
-        _organizations = await _requestHandler.GetAsync<OrganizationsForUserVM>("organizations/user");
+        _organizationsVM = await _requestHandler.GetAsync<OrganizationsForUserVM>("organizations/user");
         _invitations = await _requestHandler.GetAsync<UserOrganizationInvitations>("organizations/invitations/user");
     }
 

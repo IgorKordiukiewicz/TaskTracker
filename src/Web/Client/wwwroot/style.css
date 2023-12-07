@@ -40,8 +40,9 @@ html, body, #app, .max-height {
 }
 
 .organization-card, .project-card {
-    height: 200px;
+    width: 100%;
     cursor: pointer;
+    padding: 1.5rem;
 }
 
 .diagram-container {
