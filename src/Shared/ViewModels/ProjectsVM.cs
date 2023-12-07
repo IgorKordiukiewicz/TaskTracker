@@ -7,3 +7,7 @@ public record ProjectVM
     public required Guid Id { get; init; }
     public required string Name { get; init; }
 }
+
+public record ProjectOrganizationVM(Guid OrganizationId);
+
+public record ProjectSettingsVM(string Name);
