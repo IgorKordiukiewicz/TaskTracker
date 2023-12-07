@@ -4,9 +4,6 @@ using System.Linq.Expressions;
 
 namespace Application.Data.Repositories;
 
-// TODO: Add some common class for repositories since much of the code is almost the same?
-// E.g. Repository<User> that accepts a list of dependent properties selectors (e.g. x => x.Members) (for Update)
-// and static factory that returns those repositories for each AggregateRoot type
 public class UserRepository : IRepository<User>
 {
     private readonly AppDbContext _dbContext;

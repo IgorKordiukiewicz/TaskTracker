@@ -53,7 +53,7 @@ public class ProjectsController : ControllerBase
         return result.ToHttpResult();
     }
 
-    [HttpPost("{projectId:guid}/members/{memberId:guid}/remove")] // TODO: Use HttpDelete?
+    [HttpPost("{projectId:guid}/members/{memberId:guid}/remove")]
     [Authorize(Policy.ProjectRemoveMembers)]
     public async Task<IActionResult> RemoveProjectMember(Guid projectId, Guid memberId)
     {

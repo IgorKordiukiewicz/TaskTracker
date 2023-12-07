@@ -374,7 +374,6 @@ public class OrganizationsTests
     public async Task GetRoles_ShouldReturnRoles_WhenOrganizationExists()
     {
         var organization = (await _factory.CreateOrganizations())[0];
-        // TODO: create 1 custom role
 
         var expectedRoles = new List<RoleVM<OrganizationPermissions>>();
         foreach(var role in organization.Roles)

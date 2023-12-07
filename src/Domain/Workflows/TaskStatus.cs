@@ -7,7 +7,6 @@ public class TaskStatus : Entity
     public bool Initial { get; private set; } = false;
 
     public int DisplayOrder { get; private set; }
-    // TODO: Add color
 
     private TaskStatus(Guid id, string name, int displayOrder, bool initial = false)
         : base(id)

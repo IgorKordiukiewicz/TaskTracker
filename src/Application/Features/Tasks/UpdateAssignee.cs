@@ -45,7 +45,7 @@ internal class UpdateTaskAssigneeHandler : IRequestHandler<UpdateTaskAssigneeCom
                 return Result.Fail(new NotFoundError<ProjectMember>(request.Model.MemberId.Value));
             }
 
-            task.UpdateAssignee(member.UserId); // TODO: Store ref to UserId or MemberId ?
+            task.UpdateAssignee(member.UserId);
         }
         else
         {

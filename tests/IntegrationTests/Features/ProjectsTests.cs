@@ -259,7 +259,6 @@ public class ProjectsTests
     public async Task GetRoles_ShouldReturnRoles_WhenProjectExists()
     {
         var project = (await _factory.CreateProjects())[0];
-        // TODO: create 1 custom role
 
         var expectedRoles = new List<RoleVM<ProjectPermissions>>();
         foreach (var role in project.Roles)
