@@ -50,10 +50,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await Layout.SetOrganizationId(OrganizationId);
+
         var user = (await AuthenticationState).User;
         _createProjectsPermission = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationCreateProjects)).Succeeded;
-
-        await Layout.SetOrganizationId(OrganizationId);
 
         await UpdateProjectsList();
     }

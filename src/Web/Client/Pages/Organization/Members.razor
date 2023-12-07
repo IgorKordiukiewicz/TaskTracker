@@ -56,9 +56,10 @@
     public Guid OrganizationId { get; init; }
 
     [CascadingParameter]
-    public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
+    public OrganizationLayout Layout { get; set; } = null!;
 
-    // TODO: Assign Layout.OrganizationId here too?
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
     private OrganizationMembersVM? _membersVM;
     private OrganizationInvitationsVM? _invitationsVM;
@@ -72,6 +73,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await Layout.SetOrganizationId(OrganizationId);
+
         var user = (await AuthenticationState).User;
 
         _inviteMembersPermission = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationInviteMembers)).Succeeded;
