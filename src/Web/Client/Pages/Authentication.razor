@@ -33,7 +33,7 @@
         var isRegistered = await _requestHandler.GetAsync<bool>($"users/{userAuthId}/is-registered");
         if(isRegistered)
         {
-            await _userDataService.OnSignIn();
+            await _userDataService.UpdateUserData();
             return;
         }
 

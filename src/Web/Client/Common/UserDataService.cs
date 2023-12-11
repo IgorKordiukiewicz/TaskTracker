@@ -22,7 +22,7 @@ public class UserDataService
     public event Action? SignedIn;
     public event Action? SignedOut;
 
-    public async Task OnSignIn()
+    public async Task UpdateUserData()
     {
         var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var isAuthenticated = state.User.Identity?.IsAuthenticated ?? false;
