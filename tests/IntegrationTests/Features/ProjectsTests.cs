@@ -4,6 +4,7 @@ using Domain.Common;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Users;
+using Domain.Workflows;
 using Shared.Enums;
 using Shared.ViewModels;
 using Web.Client.Pages.Organization;
@@ -441,6 +442,32 @@ public class ProjectsTests
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.FirstAsync<Project>(x => x.Id == project.Id)).Name.Should().Be(newName);
+        }
+    }
+
+    [Fact]
+    public async Task DeleteProject_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new DeleteProjectCommand(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task DeleteProject_ShouldSucceedAndMarkRequiredRootsAsDeleted_WhenProjectExists()
+    {
+        var task = (await _factory.CreateTasks())[0];
+        var project = await _fixture.FirstAsync<Project>(x => x.Id == task.ProjectId);
+        var workflowId = await _fixture.FirstAsync<Workflow>(x => x.ProjectId == project.Id);
+
+        var result = await _fixture.SendRequest(new DeleteProjectCommand(project.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<Project>(x => x.Id == project.Id)).Should().Be(0);
+            (await _fixture.CountAsync<Domain.Tasks.Task>(x => x.Id == task.Id)).Should().Be(0);
+            (await _fixture.CountAsync<Workflow>(x => x.Id == workflowId.Id)).Should().Be(0);
         }
     }
 

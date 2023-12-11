@@ -13,6 +13,9 @@ public class HierarchyNavigationService
 
     public event Action? Updated;
 
+    public Guid? OrganizationId => _organization?.Id;
+    public Guid? ProjectId => _project?.Id;
+
     public HierarchyNavigationService(RequestHandler requestHandler)
     {
         _requestHandler = requestHandler;

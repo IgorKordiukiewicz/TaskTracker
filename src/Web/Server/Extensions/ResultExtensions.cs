@@ -1,4 +1,5 @@
 ﻿using Application.Errors;
+using Domain.Errors;
 using FluentResults;
 
 namespace Web.Server.Extensions;
@@ -33,7 +34,9 @@ public static class ResultExtensions
         return error switch
         {
             { } e when e.GetType().IsGenericType && e.GetType().GetGenericTypeDefinition() == typeof(NotFoundError<>) => new NotFoundObjectResult(error.Message),
-            Error => new BadRequestObjectResult(error.Message),
+            ApplicationError => new BadRequestObjectResult(error.Message),
+            DomainError => new BadRequestObjectResult(error.Message),
+            Error => new StatusCodeResult(500),
             _ => new StatusCodeResult(500)
         };
     }

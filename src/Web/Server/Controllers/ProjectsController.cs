@@ -132,4 +132,12 @@ public class ProjectsController : ControllerBase
         var result = await _mediator.Send(new UpdateProjectNameCommand(projectId, model));
         return result.ToHttpResult();
     }
+
+    [HttpPost("{projectId:guid}/delete")]
+    [Authorize(Policy.ProjectManageProject)]
+    public async Task<IActionResult> DeleteProject(Guid projectId)
+    {
+        var result = await _mediator.Send(new DeleteProjectCommand(projectId));
+        return result.ToHttpResult();
+    }
 }
