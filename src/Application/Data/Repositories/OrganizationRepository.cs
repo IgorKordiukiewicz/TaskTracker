@@ -43,10 +43,4 @@ public class OrganizationRepository : IRepository<Organization>
         await _dbContext.AddRemoveChildEntities(entity.Roles);
         await _dbContext.SaveChangesAsync();
     }
-
-    public async Task Delete(Organization entity)
-    {
-        _dbContext.Organizations.Remove(entity);
-        await _dbContext.SaveChangesAsync();
-    }
 }

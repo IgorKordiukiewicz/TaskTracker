@@ -39,10 +39,4 @@ public class ProjectRepository : IRepository<Project>
         await _dbContext.AddRemoveChildEntities(entity.Roles);
         await _dbContext.SaveChangesAsync();
     }
-
-    public async Task Delete(Project entity)
-    {
-        _dbContext.Projects.Remove(entity);
-        await _dbContext.SaveChangesAsync();
-    }
 }

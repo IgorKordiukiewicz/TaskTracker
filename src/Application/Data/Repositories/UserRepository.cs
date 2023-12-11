@@ -33,10 +33,4 @@ public class UserRepository : IRepository<User>
     {
         await _dbContext.SaveChangesAsync();
     }
-
-    public async Task Delete(User entity)
-    {
-        _dbContext.Users.Remove(entity);
-        await _dbContext.SaveChangesAsync();
-    }
 }

@@ -19,12 +19,6 @@ public class WorkflowRepository : IRepository<Workflow>
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task Delete(Workflow entity)
-    {
-        _dbContext.Workflows.Remove(entity);
-        await _dbContext.SaveChangesAsync();
-    }
-
     public async Task<bool> Exists(Expression<Func<Workflow, bool>> predicate)
         => await _dbContext.Workflows
         .AnyAsync(predicate);

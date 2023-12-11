@@ -17,12 +17,6 @@ public class TaskRepository : IRepository<Domain.Tasks.Task>
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task Delete(Domain.Tasks.Task entity)
-    {
-        _dbContext.Tasks.Remove(entity);
-        await _dbContext.SaveChangesAsync();
-    }
-
     public async Task<bool> Exists(Expression<Func<Domain.Tasks.Task, bool>> predicate)
         => await _dbContext.Tasks
         .Include(x => x.Comments)
