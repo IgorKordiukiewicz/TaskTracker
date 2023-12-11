@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Application.Data.Configurations;
 
-internal class OrganizationRoleConfiguration : IEntityTypeConfiguration<OrganizationRole>
+internal class OrganizationRoleConfiguration : BaseEntityTypeConfiguration<OrganizationRole>
 {
-    public void Configure(EntityTypeBuilder<OrganizationRole> builder)
+    public override void Configure(EntityTypeBuilder<OrganizationRole> builder)
     {
         builder.HasKey(x => x.Id);
+
+        base.Configure(builder);
     }
 }

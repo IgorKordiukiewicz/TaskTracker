@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Application.Data.Configurations;
 
-internal class TaskStatusTransitionConfiguration : IEntityTypeConfiguration<TaskStatusTransition>
+internal class TaskStatusTransitionConfiguration : BaseEntityTypeConfiguration<TaskStatusTransition>
 {
-    public void Configure(EntityTypeBuilder<TaskStatusTransition> builder)
+    public override void Configure(EntityTypeBuilder<TaskStatusTransition> builder)
     {
         builder.HasKey(x => new { x.FromStatusId, x.ToStatusId });
+
+        base.Configure(builder);
     }
 }

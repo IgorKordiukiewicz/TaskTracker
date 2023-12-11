@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Application.Data.Configurations;
 
-internal class TaskConfiguration : IEntityTypeConfiguration<Domain.Tasks.Task>
+internal class TaskConfiguration : BaseEntityTypeConfiguration<Domain.Tasks.Task>
 {
-    public void Configure(EntityTypeBuilder<Domain.Tasks.Task> builder)
+    public override void Configure(EntityTypeBuilder<Domain.Tasks.Task> builder)
     {
         builder.HasKey(x => x.Id);
 
@@ -30,5 +30,7 @@ internal class TaskConfiguration : IEntityTypeConfiguration<Domain.Tasks.Task>
             .HasForeignKey(x => x.AssigneeId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
+
+        base.Configure(builder);
     }
 }

@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Application.Data.Configurations;
 
-internal class UserConfiguration : IEntityTypeConfiguration<User>
+internal class UserConfiguration : BaseEntityTypeConfiguration<User>
 {
-    public void Configure(EntityTypeBuilder<User> builder)
+    public override void Configure(EntityTypeBuilder<User> builder)
     {
         builder.HasKey(x => x.Id);
 
@@ -28,5 +28,7 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasIndex(x => x.AuthenticationId)
             .IsUnique();
+
+        base.Configure(builder);
     }
 }

@@ -2,10 +2,12 @@
 
 namespace Application.Data.Configurations;
 
-internal class TaskStatusConfiguration : IEntityTypeConfiguration<Domain.Workflows.TaskStatus>
+internal class TaskStatusConfiguration : BaseEntityTypeConfiguration<Domain.Workflows.TaskStatus>
 {
-    public void Configure(EntityTypeBuilder<Domain.Workflows.TaskStatus> builder)
+    public override void Configure(EntityTypeBuilder<Domain.Workflows.TaskStatus> builder)
     {
         builder.HasKey(x => x.Id);
+
+        base.Configure(builder);
     }
 }

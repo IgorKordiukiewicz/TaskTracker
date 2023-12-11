@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Application.Data.Configurations;
 
-internal class OrganizationMemberConfiguration : IEntityTypeConfiguration<OrganizationMember>
+internal class OrganizationMemberConfiguration : BaseEntityTypeConfiguration<OrganizationMember>
 {
-    public void Configure(EntityTypeBuilder<OrganizationMember> builder)
+    public override void Configure(EntityTypeBuilder<OrganizationMember> builder)
     {
         builder.HasKey(x => x.Id);
 
@@ -14,5 +14,7 @@ internal class OrganizationMemberConfiguration : IEntityTypeConfiguration<Organi
             .WithMany()
             .HasForeignKey(xx => xx.UserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        base.Configure(builder);
     }
 }

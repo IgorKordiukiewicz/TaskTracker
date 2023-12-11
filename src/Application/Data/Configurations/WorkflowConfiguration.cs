@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Application.Data.Configurations;
 
-internal class WorkflowConfiguration : IEntityTypeConfiguration<Workflow>
+internal class WorkflowConfiguration : BaseEntityTypeConfiguration<Workflow>
 {
-    public void Configure(EntityTypeBuilder<Workflow> builder)
+    public override void Configure(EntityTypeBuilder<Workflow> builder)
     {
         builder.HasKey(x => x.Id);
 
@@ -19,5 +19,7 @@ internal class WorkflowConfiguration : IEntityTypeConfiguration<Workflow>
 
         builder.HasMany(x => x.Transitions)
             .WithOne();
+
+        base.Configure(builder);
     }
 }

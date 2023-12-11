@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Application.Data.Configurations;
 
-internal class ProjectConfiguration : IEntityTypeConfiguration<Project>
+internal class ProjectConfiguration : BaseEntityTypeConfiguration<Project>
 {
-    public void Configure(EntityTypeBuilder<Project> builder)
+    public override void Configure(EntityTypeBuilder<Project> builder)
     {
         builder.HasKey(x => x.Id);
 
@@ -28,5 +28,7 @@ internal class ProjectConfiguration : IEntityTypeConfiguration<Project>
             .WithOne()
             .HasForeignKey(x => x.ProjectId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        base.Configure(builder);
     }
 }
