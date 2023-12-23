@@ -17,8 +17,8 @@ public class Task : Entity, IAggregateRoot
     private readonly List<TaskComment> _comments = new();
     public IReadOnlyList<TaskComment> Comments => _comments.AsReadOnly();
 
-    private readonly List<TaskActivity> _acitivites = new();
-    public IReadOnlyList<TaskActivity> Activities => _acitivites.AsReadOnly();
+    private readonly List<TaskActivity> _activities = new();
+    public IReadOnlyList<TaskActivity> Activities => _activities.AsReadOnly();
 
     private Task(Guid id)
         : base(id)
@@ -43,7 +43,7 @@ public class Task : Entity, IAggregateRoot
 
     public void UpdateDescription(string description)
     {
-        _acitivites.Add(new(Id, TaskProperty.Description, Description, description));
+        _activities.Add(new(Id, TaskProperty.Description, Description, description));
         Description = description;
     }
 
@@ -54,26 +54,26 @@ public class Task : Entity, IAggregateRoot
             return Result.Fail(new DomainError($"Invalid status transition"));
         }
 
-        _acitivites.Add(new(Id, TaskProperty.Status, StatusId.ToString(), newStatusId.ToString()));
+        _activities.Add(new(Id, TaskProperty.Status, StatusId.ToString(), newStatusId.ToString()));
         StatusId = newStatusId;
         return Result.Ok();
     }
 
     public void UpdateAssignee(Guid newAssigneeId)
     {
-        _acitivites.Add(new(Id, TaskProperty.Assignee, AssigneeId.ToString(), newAssigneeId.ToString()));
+        _activities.Add(new(Id, TaskProperty.Assignee, AssigneeId?.ToString(), newAssigneeId.ToString()));
         AssigneeId = newAssigneeId;
     }
 
     public void Unassign()
     {
-        _acitivites.Add(new(Id, TaskProperty.Assignee, AssigneeId.ToString()));
+        _activities.Add(new(Id, TaskProperty.Assignee, AssigneeId.ToString()));
         AssigneeId = null;
     }
 
     public void UpdatePriority(TaskPriority newPriority)
     {
-        _acitivites.Add(new(Id, TaskProperty.Priority, Priority.ToString(), newPriority.ToString()));
+        _activities.Add(new(Id, TaskProperty.Priority, Priority.ToString(), newPriority.ToString()));
         Priority = newPriority;
     }
 

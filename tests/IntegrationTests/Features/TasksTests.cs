@@ -305,4 +305,53 @@ public class TasksTests
             (await _fixture.FirstAsync<Task>(x => x.Id == task.Id)).Description.Should().Be(newDescription);
         }
     }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GetActivities_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetTaskActivitiesQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GetActivities_ShouldReturnActivities_WhenTaskExists()
+    {
+        var workflow = (await _factory.CreateWorkflows())[0];
+        var user = await _fixture.FirstAsync<User>();
+        var task = Task.Create(1, workflow.ProjectId, "title", "desc", workflow.Statuses.First(x => x.Initial).Id);
+
+        var transition = workflow.Transitions.First(x => x.FromStatusId == task.StatusId);
+        var oldStatus = workflow.Statuses.First(x => x.Id == task.StatusId);
+        var newStatus = workflow.Statuses.First(x => x.Id == transition.ToStatusId);
+
+        task.UpdateAssignee(user.Id);
+        task.Unassign();
+        task.UpdateStatus(newStatus.Id, workflow);
+
+        await _fixture.SeedDb(db =>
+        {
+            db.Tasks.Add(task);
+        });
+
+        var result = await _fixture.SendRequest(new GetTaskActivitiesQuery(task.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+
+            var activities = result.Value.Activities;
+            activities.Should().HaveCount(3);
+            AssertActivities(activities[0], TaskProperty.Status, oldStatus.Name, newStatus.Name);
+            AssertActivities(activities[1], TaskProperty.Assignee, user.FullName, null);
+            AssertActivities(activities[2], TaskProperty.Assignee, null, user.FullName);
+            
+            static void AssertActivities(TaskActivityVM activity, TaskProperty expectedProperty, string? expectedOldValue, string? expectedNewValue)
+            {
+                activity.Property.Should().Be(expectedProperty);
+                activity.OldValue.Should().Be(expectedOldValue);
+                activity.NewValue.Should().Be(expectedNewValue);
+            }
+        }
+    }
 }
