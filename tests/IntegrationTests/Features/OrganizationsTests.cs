@@ -324,19 +324,24 @@ public class OrganizationsTests
             db.AddRange(user1, user2, user3, user4);
         });
 
-        var expectedResult = new OrganizationInvitationsVM(new List<OrganizationInvitationVM>()
-        {
-            new(acceptedInvitation.Value.Id, user2.Email, OrganizationInvitationState.Accepted),
-            new(declinedInvitation.Value.Id, user3.Email, OrganizationInvitationState.Declined),
-            new(pendingInvitation.Value.Id, user4.Email, OrganizationInvitationState.Pending),
-        }, 1);
-
         var result = await _fixture.SendRequest(new GetOrganizationInvitationsQuery(organization.Id, new()));
 
         using(new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(expectedResult);
+
+            var invitations = result.Value.Invitations;
+            invitations.Should().HaveCount(3);
+            AssertInvitationVM(invitations[0], pendingInvitation.Value.Id, user4.Email, OrganizationInvitationState.Pending);
+            AssertInvitationVM(invitations[1], declinedInvitation.Value.Id, user3.Email, OrganizationInvitationState.Declined);
+            AssertInvitationVM(invitations[2], acceptedInvitation.Value.Id, user2.Email, OrganizationInvitationState.Accepted);
+
+            static void AssertInvitationVM(OrganizationInvitationVM invitation, Guid expectedId, string expectedEmail, OrganizationInvitationState expectedState)
+            {
+                invitation.Id.Should().Be(expectedId);
+                invitation.UserEmail.Should().Be(expectedEmail);
+                invitation.State.Should().Be(expectedState);
+            }
         }
     }
 

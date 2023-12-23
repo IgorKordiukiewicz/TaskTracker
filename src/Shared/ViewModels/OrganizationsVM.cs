@@ -3,7 +3,7 @@
 namespace Shared.ViewModels;
 
 public record OrganizationInvitationsVM(IReadOnlyList<OrganizationInvitationVM> Invitations, int TotalPagesCount);
-public record OrganizationInvitationVM(Guid Id, string UserEmail, OrganizationInvitationState State);
+public record OrganizationInvitationVM(Guid Id, string UserEmail, OrganizationInvitationState State, DateTime CreatedAt, DateTime? FinalizedAt);
 
 public record OrganizationsForUserVM(IReadOnlyList<OrganizationForUserVM> Organizations);
 

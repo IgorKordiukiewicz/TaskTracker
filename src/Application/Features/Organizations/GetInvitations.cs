@@ -29,17 +29,21 @@ internal class GetOrganizationInvitationsHandler : IRequestHandler<GetOrganizati
             return Result.Fail<OrganizationInvitationsVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
-        var query = _dbContext.OrganizationInvitations.Where(x => x.OrganizationId == request.OrganizationId)
+        var query = _dbContext.OrganizationInvitations
+            .AsNoTracking()
+            .Where(x => x.OrganizationId == request.OrganizationId)
             .Join(_dbContext.Users,
             invitation => invitation.UserId,
             user => user.Id,
-            (invitation, user) => new OrganizationInvitationVM(invitation.Id, user.Email, invitation.State));
+            (invitation, user) => new { Invitation = invitation, User = user });
 
         var totalPagesCount = request.Pagination.GetPagesCount(await query.CountAsync());
 
         var invitations = await query
+            .OrderByDescending(x => x.Invitation.CreatedAt)
             .Skip(request.Pagination.Offset)
             .Take(request.Pagination.ItemsPerPage)
+            .Select(x => new OrganizationInvitationVM(x.Invitation.Id, x.User.Email, x.Invitation.State, x.Invitation.CreatedAt, x.Invitation.FinalizedAt))
             .ToListAsync();
 
         return Result.Ok(new OrganizationInvitationsVM(invitations, totalPagesCount));
