@@ -299,7 +299,7 @@ public class OrganizationsTests
     [Fact]
     public async Task GetInvitations_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new GetOrganizationInvitationsQuery(Guid.NewGuid()));
+        var result = await _fixture.SendRequest(new GetOrganizationInvitationsQuery(Guid.NewGuid(), new()));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -329,9 +329,9 @@ public class OrganizationsTests
             new(acceptedInvitation.Value.Id, user2.Email, OrganizationInvitationState.Accepted),
             new(declinedInvitation.Value.Id, user3.Email, OrganizationInvitationState.Declined),
             new(pendingInvitation.Value.Id, user4.Email, OrganizationInvitationState.Pending),
-        });
+        }, 1);
 
-        var result = await _fixture.SendRequest(new GetOrganizationInvitationsQuery(organization.Id));
+        var result = await _fixture.SendRequest(new GetOrganizationInvitationsQuery(organization.Id, new()));
 
         using(new AssertionScope())
         {

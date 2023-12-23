@@ -2,13 +2,14 @@
 
 namespace Application.Features.Organizations;
 
-public record GetOrganizationInvitationsQuery(Guid OrganizationId) : IRequest<Result<OrganizationInvitationsVM>>;
+public record GetOrganizationInvitationsQuery(Guid OrganizationId, Pagination Pagination) : IRequest<Result<OrganizationInvitationsVM>>;
 
 internal class GetOrganizationInvitationsQueryValidator : AbstractValidator<GetOrganizationInvitationsQuery>
 {
     public GetOrganizationInvitationsQueryValidator()
     {
         RuleFor(x => x.OrganizationId).NotEmpty();
+        RuleFor(x => x.Pagination).SetValidator(new PaginationValidator());
     }
 }
 
@@ -28,13 +29,19 @@ internal class GetOrganizationInvitationsHandler : IRequestHandler<GetOrganizati
             return Result.Fail<OrganizationInvitationsVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
-        var invitations = await _dbContext.OrganizationInvitations.Where(x => x.OrganizationId == request.OrganizationId)
+        var query = _dbContext.OrganizationInvitations.Where(x => x.OrganizationId == request.OrganizationId)
             .Join(_dbContext.Users,
             invitation => invitation.UserId,
             user => user.Id,
-            (invitation, user) => new OrganizationInvitationVM(invitation.Id, user.Email, invitation.State))
+            (invitation, user) => new OrganizationInvitationVM(invitation.Id, user.Email, invitation.State));
+
+        var totalPagesCount = request.Pagination.GetPagesCount(await query.CountAsync());
+
+        var invitations = await query
+            .Skip(request.Pagination.Offset)
+            .Take(request.Pagination.ItemsPerPage)
             .ToListAsync();
 
-        return Result.Ok(new OrganizationInvitationsVM(invitations));
+        return Result.Ok(new OrganizationInvitationsVM(invitations, totalPagesCount));
     }
 }

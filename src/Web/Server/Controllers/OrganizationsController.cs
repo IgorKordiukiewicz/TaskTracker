@@ -45,9 +45,9 @@ public class OrganizationsController : ControllerBase
 
     [HttpGet("{organizationId:guid}/invitations")]
     [Authorize(Policy.OrganizationInviteMembers)]
-    public async Task<IActionResult> GetOrganizationInvitationsForOrganization(Guid organizationId)
+    public async Task<IActionResult> GetOrganizationInvitationsForOrganization(Guid organizationId, [FromQuery] Pagination pagination)
     {
-        var result = await _mediator.Send(new GetOrganizationInvitationsQuery(organizationId));
+        var result = await _mediator.Send(new GetOrganizationInvitationsQuery(organizationId, pagination));
         return result.ToHttpResult();
     }
 
