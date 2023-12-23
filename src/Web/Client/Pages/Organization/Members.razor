@@ -34,7 +34,19 @@
                                     <div class="d-flex gap-1 show-on-hover-parent align-center">
                                         <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => CancelInvitation(invitation.Id)"
                                                        Class="@(invitation.State == OrganizationInvitationState.Pending ? "show-on-hover" : "invisible")"></MudIconButton>
-                                        <MudChip Variant="Variant.Filled" Color="@GetInvitationStateColor(invitation.State)">@invitation.State.ToString()</MudChip>
+                                        @if(invitation.FinalizedAt is not null)
+                                        {
+                                            <MudTooltip Text="@(invitation.FinalizedAt.Value.ToString("g"))">
+                                                <MudChip Variant="Variant.Filled" Color="@GetInvitationStateColor(invitation.State)">@invitation.State.ToString()</MudChip>
+                                            </MudTooltip>
+                                        }
+                                        else
+                                        {
+                                            <MudChip Variant="Variant.Filled" Color="@GetInvitationStateColor(invitation.State)">@invitation.State.ToString()</MudChip>
+                                        }
+                                        <MudText Typo="Typo.subtitle2">
+                                            @(invitation.CreatedAt.ToShortDateString())
+                                        </MudText>
                                     </div>
                                 </div>
                             </MudListItem>
