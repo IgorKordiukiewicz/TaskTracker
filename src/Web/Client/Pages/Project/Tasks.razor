@@ -138,7 +138,7 @@
                             </MudText>
                             @if(_modifyTasksPermissions && !_editDescriptionForm.Visible)
                             {
-                                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="() => _editDescriptionForm.Open()" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="() => { _editDescriptionForm.Open(); _editDescriptionForm.Content = currentTaskVM.Description; }" />
                             }
                             else if(_editDescriptionForm.Visible)
                             {
