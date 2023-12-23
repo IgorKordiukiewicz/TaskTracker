@@ -59,6 +59,7 @@ public class TaskTests
         {
             result.IsSuccess.Should().BeTrue();
             task.StatusId.Should().Be(availableStatusId);
+            task.Activities.Any(x => x.Property == TaskProperty.Status).Should().BeTrue();
         }
     }
 
@@ -70,7 +71,11 @@ public class TaskTests
 
         task.UpdateAssignee(assigneeId);
 
-        task.AssigneeId.Should().Be(assigneeId);
+        using(new AssertionScope())
+        {
+            task.AssigneeId.Should().Be(assigneeId);
+            task.Activities.Any(x => x.Property == TaskProperty.Assignee).Should().BeTrue();
+        }
     }
 
     [Fact] 
@@ -86,6 +91,7 @@ public class TaskTests
         {
             task.AssigneeId.Should().BeNull();
             task.AssigneeId.Should().NotBe(assigneeIdBefore.ToString());
+            task.Activities.Count(x => x.Property == TaskProperty.Assignee).Should().Be(2);
         }
     }
 
@@ -98,7 +104,26 @@ public class TaskTests
 
         task.UpdatePriority(newPriority);
 
-        task.Priority.Should().Be(newPriority);
+        using(new AssertionScope())
+        {
+            task.Priority.Should().Be(newPriority);
+            task.Activities.Any(x => x.Property == TaskProperty.Priority).Should().BeTrue();
+        }
+    }
+
+    [Fact]
+    public void UpdateDescription_ShouldUpdateDescription()
+    {
+        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
+        var newDescription = task.Description + "A";
+
+        task.UpdateDescription(newDescription);
+
+        using(new AssertionScope())
+        {
+            task.Description.Should().Be(newDescription);
+            task.Activities.Any(x => x.Property == TaskProperty.Description).Should().BeTrue();
+        }
     }
         
 

@@ -30,7 +30,7 @@ internal class UpdateTaskDescriptionHandler : IRequestHandler<UpdateTaskDescript
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
-        task.Description = request.Model.Description;
+        task.UpdateDescription(request.Model.Description);
         await _taskRepository.Update(task);
 
         return Result.Ok();
