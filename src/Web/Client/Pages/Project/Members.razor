@@ -10,15 +10,18 @@
     <MudTabPanel Text="Members">
         @if (_usersVM is not null && _addMembersPermission)
         {
-            <div class="d-flex gap-2 align-center mb-4">
-                <MudSelect Label="Users" @bind-Value="_selectedUserVM" Variant="Variant.Filled" Disabled="@(!_usersVM.Users.Any())">
-                    @foreach (var user in _usersVM.Users)
-                    {
-                        <MudSelectItem Value="@user">@user.Email</MudSelectItem>
-                    }
-                </MudSelect>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 50%;" Disabled="@(_selectedUserVM is null)" OnClick="() => AddMember(_selectedUserVM!.Id)">Add</MudButton>
-            </div>
+            <MudPaper>
+                <div class="d-flex gap-2 align-end px-3 py-2">
+                    <MudSelect Label="Users" @bind-Value="_selectedUserVM" Variant="Variant.Filled" Disabled="@(!_usersVM.Users.Any())">
+                        @foreach (var user in _usersVM.Users)
+                        {
+                            <MudSelectItem Value="@user">@user.Email</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 56px; width: 100px;" Disabled="@(_selectedUserVM is null)" OnClick="() => AddMember(_selectedUserVM!.Id)">Add</MudButton>
+                </div>
+                <MudDivider Class="mt-2"/>
+            </MudPaper>
         }
         @if (_membersVM is not null)
         {
