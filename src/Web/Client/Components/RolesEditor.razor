@@ -65,7 +65,9 @@
     <MudSelect Label="Permissions" Variant="Variant.Outlined" MultiSelection="true" T="TPermissions" @bind-SelectedValues="@_createRoleForm.PermissionsFlags" AnchorOrigin="Origin.BottomCenter">
         @foreach (var permission in _allPermissionsFlags)
         {
-            <MudSelectItem Value="@permission"></MudSelectItem>
+            <MudSelectItem Value="@permission">
+                @(permission.ToString().Humanize(LetterCasing.Title))
+            </MudSelectItem>
         }
     </MudSelect>
 </Dialog>
