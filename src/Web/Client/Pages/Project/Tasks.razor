@@ -373,7 +373,6 @@
     {
         await Layout.SetProjectId(ProjectId);
 
-        var user = (await AuthenticationState).User;
         // TODO: Refactor
         _createTasksPermissions = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.CreateTasks);
         _modifyTasksPermissions = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.ModifyTasks);

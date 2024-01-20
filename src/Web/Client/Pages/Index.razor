@@ -5,14 +5,20 @@
 @inject RequestHandler _requestHandler
 @inject IDialogService _dialogService
 @inject HierarchyNavigationService _hierarchyNavigationService
+@inject UserDataService _userDataService
 
 @if(_organizationsVM is not null)
 {
-    <div class="d-flex align-center">
-        <MudText Typo="Typo.h5">
-            Organizations
-        </MudText>
-        <MudIconButton Icon="@GetOrganizationInvitationsIcon()" Disabled="@(!HasOrganizationInvitations())" OnClick="OpenInvitationsDialog"></MudIconButton>
+    <div class="d-flex align-center justify-space-between">
+        <div class="d-flex align-center">
+            <MudText Typo="Typo.h5">
+                Organizations
+            </MudText>
+            <MudIconButton Icon="@GetOrganizationInvitationsIcon()" Disabled="@(!HasOrganizationInvitations())" OnClick="OpenInvitationsDialog"></MudIconButton>
+        </div>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _createOrganizationForm.Open()">
+            Create Organization
+        </MudButton>
     </div>
     <MudDivider Class="mb-4 mt-1" />
     <div class="d-flex flex-column gap-4">
@@ -27,9 +33,21 @@
     </div>
 }
 
+<Dialog Title="Create a new organization" Form="_createOrganizationForm" OnConfirm="CreateOrganization">
+    <MudTextField @bind-Value="@_createOrganizationForm.Name" Label="Name" Required="true" Variant="Variant.Filled" />
+</Dialog>
+
 @code {
     private UserOrganizationInvitationsVM? _invitationsVM;
     private OrganizationsForUserVM? _organizationsVM;
+
+    private class CreateOrganizationForm : DialogForm
+    {
+        public string Name { get; set; } = string.Empty;
+
+        public override bool IsValid() => !string.IsNullOrWhiteSpace(Name);
+    }
+    private CreateOrganizationForm _createOrganizationForm = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -73,6 +91,29 @@
     {
         _organizationsVM = await _requestHandler.GetAsync<OrganizationsForUserVM>("organizations/user");
         _invitationsVM = await _requestHandler.GetAsync<UserOrganizationInvitationsVM>("organizations/invitations/user");
+    }
+
+    private async Task CreateOrganization()
+    {
+        if(!_createOrganizationForm.IsValid())
+        {
+            return;
+        }
+
+        var userId = _userDataService.CurrentUserVM?.Id;
+        if(userId is null)
+        {
+            return;
+        }
+
+        var model = new CreateOrganizationDto(_createOrganizationForm.Name, userId.Value);
+        var result = await _requestHandler.PostWithResultAsync($"organizations", model);
+        if(result)
+        {
+            await _userDataService.UpdateUserData();
+            await UpdateViewModels();
+            _createOrganizationForm = new();
+        }
     }
 
     private bool HasOrganizationInvitations() 

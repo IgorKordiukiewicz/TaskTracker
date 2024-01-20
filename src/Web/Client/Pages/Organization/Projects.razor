@@ -78,13 +78,11 @@
 
         var model = new CreateProjectDto(_createProjectForm.Name);
         var result = await _requestHandler.PostWithResultAsync($"projects/organization/{OrganizationId}", model);
-
         if(result)
         {
             await _userDataService.UpdateUserData();
             await UpdateProjectsList();
             _createProjectForm = new();
-        }
-        
+        }  
     }
 }
