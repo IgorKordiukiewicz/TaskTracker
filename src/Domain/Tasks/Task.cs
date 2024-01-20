@@ -26,7 +26,6 @@ public class Task : Entity, IAggregateRoot
 
     }
 
-    // TODO: Remove unnecessary factory methods
     public static Task Create(int shortId, Guid projectId, string title, string description, Guid statusId, Guid? assigneeId = null, TaskPriority priority = TaskPriority.Normal)
     {
         return new(Guid.NewGuid())

@@ -8,17 +8,11 @@ public class TaskStatus : Entity
 
     public int DisplayOrder { get; private set; }
 
-    private TaskStatus(Guid id, string name, int displayOrder, bool initial = false)
+    public TaskStatus(Guid id, string name, int displayOrder, bool initial = false)
         : base(id)
     {
         Name = name;
         Initial = initial;
         DisplayOrder = displayOrder;
-    }
-
-    // TODO: Ctor instead of factory method
-    public static TaskStatus Create(Guid id, string name, int displayOrder, bool initial = false)
-    {
-        return new TaskStatus(id, name, displayOrder, initial);
     }
 }

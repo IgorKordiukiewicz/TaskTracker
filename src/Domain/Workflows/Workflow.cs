@@ -23,9 +23,9 @@ public class Workflow : Entity, IAggregateRoot
         var doneId = Guid.NewGuid();
 
         var workflow = new Workflow(projectId);
-        workflow._statuses.Add(TaskStatus.Create(toDoId, "ToDo", 0, true));
-        workflow._statuses.Add(TaskStatus.Create(inProgressId, "In Progress", 1));
-        workflow._statuses.Add(TaskStatus.Create(doneId, "Done", 2));
+        workflow._statuses.Add(new TaskStatus(toDoId, "ToDo", 0, true));
+        workflow._statuses.Add(new TaskStatus(inProgressId, "In Progress", 1));
+        workflow._statuses.Add(new TaskStatus(doneId, "Done", 2));
 
         workflow._transitions.Add(new TaskStatusTransition(toDoId, inProgressId));
         workflow._transitions.Add(new TaskStatusTransition(inProgressId, toDoId));
@@ -50,7 +50,7 @@ public class Workflow : Entity, IAggregateRoot
 
         var displayOrder = _statuses.MaxBy(x => x.DisplayOrder)!.DisplayOrder + 1;
 
-        _statuses.Add(TaskStatus.Create(Guid.NewGuid(), name, displayOrder));
+        _statuses.Add(new TaskStatus(Guid.NewGuid(), name, displayOrder));
 
         return Result.Ok();
     }

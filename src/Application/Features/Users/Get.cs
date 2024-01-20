@@ -2,7 +2,6 @@
 
 namespace Application.Features.Users;
 
-// TODO: Rename to GetUserAuthData or GetUserMembershipData or sth
 public record GetUserQuery(string AuthenticationId) : IRequest<Result<UserVM>>;
 
 internal class GetUserQueryValidator : AbstractValidator<GetUserQuery>

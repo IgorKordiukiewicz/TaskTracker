@@ -33,7 +33,6 @@ internal class DeleteWorkflowStatusHandler : IRequestHandler<DeleteWorkflowStatu
             return Result.Fail(new NotFoundError<Workflow>(request.WorkflowId));
         }
 
-        // TODO: Move to domain service or sth?
         if(await _dbContext.Tasks.AnyAsync(x => x.ProjectId == workflow.ProjectId && x.StatusId == request.StatusId))
         {
             return Result.Fail(new DomainError("Status in use can't be deleted."));

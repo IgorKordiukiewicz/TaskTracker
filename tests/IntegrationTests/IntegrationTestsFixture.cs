@@ -18,7 +18,6 @@ public class TestDateTimeProvider : IDateTimeProvider
 
 public class IntegrationTestsFixture : IDisposable
 {
-    private readonly HttpClient _httpClient = new();
     private readonly IServiceProvider _services;
     private readonly string _connectionString = "Server=(localdb)\\mssqllocaldb;Database=TaskTrackerDbTests;Trusted_Connection=True"; // TODO: Store it somewhere else?
 
@@ -40,7 +39,6 @@ public class IntegrationTestsFixture : IDisposable
             builder.UseEnvironment("Development");
         });
 
-        _httpClient = appFactory.CreateClient();
         _services = appFactory.Services;
     }
 

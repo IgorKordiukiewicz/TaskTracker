@@ -1,5 +1,4 @@
 ﻿using Application.Data;
-using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 
 namespace Web.Server.RequirementHandlers;
@@ -18,7 +17,6 @@ public abstract class MemberRequirementHandler<TAuthorizationRequirement> : Auth
         _idKey = idKey;
     }
 
-    // TODO: Add caching to improve performance? (currently 10-15ms)
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, TAuthorizationRequirement requirement)
     {
         var entityId = GetEntityId(_contextAccessor.HttpContext);
