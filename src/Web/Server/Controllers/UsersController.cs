@@ -35,17 +35,17 @@ public class UsersController : ControllerBase
         return result.ToHttpResult(201);
     }
 
-    [HttpGet("available-for-invitation/organization/{organizationId:guid}")]
+    [HttpGet("available-for-invitation")]
     [Authorize(Policy.OrganizationInviteMembers)]
-    public async Task<IActionResult> GetUsersNotInOrganization(Guid organizationId, [FromQuery] string searchValue) // TODO: OrganizationId from query?
+    public async Task<IActionResult> GetUsersNotInOrganization([FromQuery] string searchValue, [FromQuery] Guid organizationId)
     {
         var result = await _mediator.Send(new GetUsersAvailableForOrganizationInvitationQuery(organizationId, searchValue));
         return result.ToHttpResult();
     }
 
-    [HttpGet("available-for-project/project/{projectId:guid}")]
+    [HttpGet("available-for-project")]
     [Authorize(Policy.ProjectAddMembers)]
-    public async Task<IActionResult> GetUsersAvailableForProject(Guid projectId, [FromQuery] Guid organizationId)
+    public async Task<IActionResult> GetUsersAvailableForProject([FromQuery] Guid projectId, [FromQuery] Guid organizationId)
     {
         var result = await _mediator.Send(new GetUsersAvailableForProjectQuery(organizationId, projectId));
         return result.ToHttpResult();

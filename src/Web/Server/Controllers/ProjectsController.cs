@@ -26,7 +26,7 @@ public class ProjectsController : ControllerBase
     [Authorize(Policy.OrganizationMember)]
     public async Task<IActionResult> GetProjects(Guid organizationId)
     {
-        var result = await _mediator.Send(new GetProjectsForOrganizationQuery(organizationId, User.GetUserAuthenticationId())); // TODO: rename to GetProjectsForUser ?, and api: projects/?organizationId
+        var result = await _mediator.Send(new GetProjectsForOrganizationQuery(organizationId, User.GetUserAuthenticationId()));
         return result.ToHttpResult();
     }
 

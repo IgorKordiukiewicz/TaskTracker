@@ -80,9 +80,10 @@
 
         if(_addMembersPermission)
         {
-            var url = $"users/available-for-project/project/{ProjectId}"
-            .SetQueryParam("organizationId", organizationId)
-            .ToString();
+            var url = "users/available-for-project"
+                .SetQueryParam("projectId", ProjectId)
+                .SetQueryParam("organizationId", organizationId)
+                .ToString();
             _usersVM = await _requestHandler.GetAsync<UsersSearchVM>(url);
         }
     }

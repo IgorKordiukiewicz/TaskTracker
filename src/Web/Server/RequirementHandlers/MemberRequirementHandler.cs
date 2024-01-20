@@ -1,4 +1,5 @@
 ﻿using Application.Data;
+using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 
 namespace Web.Server.RequirementHandlers;
@@ -70,6 +71,12 @@ public abstract class MemberRequirementHandler<TAuthorizationRequirement> : Auth
         if (Guid.TryParse(headerValue, out var headerId))
         {
             return headerId;
+        }
+
+        var paramValue = httpContext.Request.Query[_idKey].FirstOrDefault() ?? string.Empty;
+        if (Guid.TryParse(paramValue, out var paramId))
+        {
+            return paramId;
         }
 
         return default;

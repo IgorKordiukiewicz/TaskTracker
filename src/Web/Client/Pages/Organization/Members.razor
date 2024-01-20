@@ -140,8 +140,9 @@
             return Enumerable.Empty<UserSearchVM>();
         }
 
-        var url = $"users/available-for-invitation/organization/{OrganizationId}"
+        var url = $"users/available-for-invitation"
             .SetQueryParam("searchValue", value)
+            .SetQueryParam("organizationId", OrganizationId)
             .ToString();
         var users = await _requestHandler.GetAsync<UsersSearchVM>(url);
         return users?.Users ?? Enumerable.Empty<UserSearchVM>();

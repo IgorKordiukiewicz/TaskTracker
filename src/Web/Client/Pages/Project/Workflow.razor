@@ -144,7 +144,6 @@
     private WorkflowVM? _workflowVM;
     private Dictionary<string, Guid>? _statusIdByName;
 
-    // TODO: Move forms to a separate file/folder and add unit tests for them?
     private class AddStatusForm : DialogForm
     {
         public string Name { get; set; } = string.Empty;
@@ -221,7 +220,8 @@
         (string FromStatus, string ToStatus)? newTransition = null,
         (string FromStatus, string ToStatus)? deletedTransition = null)
     {
-        _workflowVM = await _requestHandler.GetAsync<WorkflowVM>($"workflows/project/{ProjectId}");
+        var url = "workflows".SetQueryParam("projectId", ProjectId).ToString();
+        _workflowVM = await _requestHandler.GetAsync<WorkflowVM>(url);
         if(_workflowVM is null)
         {
             return;

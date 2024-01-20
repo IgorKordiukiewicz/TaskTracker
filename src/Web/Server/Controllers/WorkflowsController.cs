@@ -14,9 +14,9 @@ public class WorkflowsController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet("project/{projectId:guid}")]
+    [HttpGet]
     [Authorize(Policy.ProjectManageWorkflows)]
-    public async Task<IActionResult> GetWorkflow(Guid projectId)
+    public async Task<IActionResult> GetWorkflow([FromQuery] Guid projectId)
     {
         var result = await _mediator.Send(new GetWorkflowForProjectQuery(projectId));
         return result.ToHttpResult();
