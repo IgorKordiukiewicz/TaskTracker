@@ -9,6 +9,7 @@ Task/issue tracker made with ASP.NET Core & Blazor WASM.
 * MediatR
 * Domain Driven Design (DDD)
 * Vertical Slice Architecture
+* CQRS
 ### Features
 * Organizations & Projects
 * Tasks
