@@ -3,20 +3,22 @@ using Shared.Enums;
 
 namespace Shared.Authorization;
 
-public class OrganizationMemberRequirement : IAuthorizationRequirement
+public abstract class MemberRequirement<TPermissions> : IAuthorizationRequirement
+    where TPermissions : struct, Enum
 {
-    public OrganizationPermissions? Permissions { get; set; }
+    public TPermissions? Permissions { get; set; }
+}
 
+public class OrganizationMemberRequirement : MemberRequirement<OrganizationPermissions>
+{
     public OrganizationMemberRequirement(OrganizationPermissions? permissions = null)
     {
         Permissions = permissions;
     }
 }
 
-public class ProjectMemberRequirement : IAuthorizationRequirement
+public class ProjectMemberRequirement : MemberRequirement<ProjectPermissions>
 {
-    public ProjectPermissions? Permissions { get; set; }
-
     public ProjectMemberRequirement(ProjectPermissions? permissions = null)
     {
         Permissions = permissions;
