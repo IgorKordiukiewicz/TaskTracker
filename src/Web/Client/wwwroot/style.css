@@ -81,4 +81,10 @@ html, body, #app, .max-height {
     100% {
         transform: rotate(360deg);
     }
-} 
+}
+
+.task-details-popup {
+    width: 640px;
+    overflow-y: auto;
+    max-height: 80vh;
+}

@@ -65,7 +65,7 @@
             </MudGrid>
         </MudPaper>
         <MudOverlay Visible="@(_openedTaskId is not null)" DarkBackground="true">
-            <MudPaper Class="pa-6" Style="width: 640px;">
+            <MudPaper Class="task-details-popup pa-6">
                 @{
                     var currentTaskVM = _tasksVM.Tasks.Single(x => x.Id == _openedTaskId);
                 }
@@ -195,7 +195,7 @@
                                 @foreach (var comment in _commentsVM.Comments)
                                 {
                                     <div>
-                                        <div class="d-flex mb-1 align-center justify-space-between">
+                                        <div class="d-flex mb-2 align-center justify-space-between">
                                             <div class="d-flex align-center gap-2">
                                                 <UserAvatar Name="@comment.AuthorName" />
                                                 <MudText Style="font-weight: bold;">@comment.AuthorName</MudText>

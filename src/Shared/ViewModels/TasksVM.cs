@@ -21,3 +21,6 @@ public record TaskStatusDetailedVM(Guid Id, string Name, int DisplayOrder) : Tas
 
 public record TaskCommentsVM(IReadOnlyList<TaskCommentVM> Comments);
 public record TaskCommentVM(string Content, string AuthorName, DateTime CreatedAt);
+
+public record TaskActivitiesVM(IReadOnlyList<TaskActivityVM> Activities);
+public record TaskActivityVM(TaskProperty Property, string? OldValue, string? NewValue, DateTime OccurredAt);

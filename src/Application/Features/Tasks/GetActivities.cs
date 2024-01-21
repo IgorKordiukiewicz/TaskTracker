@@ -3,9 +3,6 @@ using Shared.Enums;
 
 namespace Application.Features.Tasks;
 
-public record TaskActivitiesVM(IReadOnlyList<TaskActivityVM> Activities);
-public record TaskActivityVM(TaskProperty Property, string? OldValue, string? NewValue, DateTime OccurredAt);
-
 public record GetTaskActivitiesQuery(Guid TaskId) : IRequest<Result<TaskActivitiesVM>>;
 
 internal class GetTaskActivitiesQueryValidator : AbstractValidator<GetTaskActivitiesQuery>
