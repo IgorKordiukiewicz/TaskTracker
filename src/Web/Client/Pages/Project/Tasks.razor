@@ -64,188 +64,9 @@
                 }
             </MudGrid>
         </MudPaper>
-        <MudOverlay Visible="@(_openedTaskId is not null)" DarkBackground="true">
-            <MudPaper Class="task-details-popup pa-6">
-                @{
-                    var currentTaskVM = _tasksVM.Tasks.Single(x => x.Id == _openedTaskId);
-                }
-                <div class="d-flex justify-space-between align-center mb-4">
-                    <MudText Typo="Typo.h4">
-                        @($"#{currentTaskVM.ShortId} {@currentTaskVM.Title}")
-                    </MudText>
-                    <MudIconButton Icon="@Icons.Material.Filled.Close" OnClick="CloseTaskDetailsPopup" />
-                </div>
-                <MudGrid>
-                    <MudDivider />
-                    <MudItem md="12">
-                        @if(_transitionTasksPermissions)
-                        {
-                            <MudSelect T="TaskStatusVM" Value="@currentTaskVM.Status" ValueChanged="e => UpdateTaskStatus(currentTaskVM.Id, e.Id)"
-                                       ToStringFunc="@(x => x.Name)" Label="Status" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-                                @foreach (var status in currentTaskVM.PossibleNextStatuses)
-                                {
-                                    <MudSelectItem Value="@status"></MudSelectItem>
-                                }
-                            </MudSelect>
-                        }
-                        else
-                        {
-                            <MudField Variant="Variant.Filled" Label="Status">
-                                @currentTaskVM.Status.Name
-                            </MudField>
-                        }
-                        @if(_modifyTasksPermissions)
-                        {
-                            <MudSelect T="TaskPriority" Value="@currentTaskVM.Priority" ValueChanged="e => UpdateTaskPriority(currentTaskVM.Id, e)"
-                                       Label="Priority" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-                                @foreach (var priority in Enum.GetValues<TaskPriority>())
-                                {
-                                    <MudSelectItem Value="@priority"></MudSelectItem>
-                                }
-                            </MudSelect>
-                        }
-                        else
-                        {
-                            <MudField Variant="Variant.Filled" Label="Priority">
-                                @currentTaskVM.Priority
-                            </MudField>
-                        }                    
-                        @if (_membersVM is not null)
-                        {
-                            @if(_assignTasksPermissions)
-                            {
-                                <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(currentTaskVM.AssigneeId)" ValueChanged="e => UpdateTaskAssignee(currentTaskVM.Id, e.Id)"
-                                       ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-                                @foreach (var member in GetPossibleAssignees(currentTaskVM.AssigneeId))
-                                {
-                                    <MudSelectItem Value="@member"></MudSelectItem>
-                                }
-                                </MudSelect>
-                            }
-                            else
-                            {
-                                <MudField Variant="Variant.Filled" Label="Assignee">
-                                    @(GetCurrentAssigneeVM(currentTaskVM.AssigneeId)?.Name ?? string.Empty)
-                                </MudField>
-                            }
-                        }
-                    </MudItem>
-                    <MudDivider />
-                    <MudItem xs="12">
-                        <div class="d-flex justify-space-between align-center">
-                            <MudText Typo="Typo.h6">
-                                Description
-                            </MudText>
-                            @if(_modifyTasksPermissions && !_editDescriptionForm.Visible)
-                            {
-                                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="() => { _editDescriptionForm.Open(); _editDescriptionForm.Content = currentTaskVM.Description; }" />
-                            }
-                            else if(_editDescriptionForm.Visible)
-                            {
-                                <div class="d-flex justify-end gap-2">
-                                    <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="() => _editDescriptionForm.Close()">
-                                        Cancel
-                                    </MudButton>
-                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_editDescriptionForm.IsValid())" OnClick="() => UpdateTaskDescription(currentTaskVM.Id)">
-                                        Save
-                                    </MudButton>
-                                </div>
-                            }
-                        </div>
-                        @if(_editDescriptionForm.Visible)
-                        {
-                            <MudTextField @bind-Value="_editDescriptionForm.Content" Variant="Variant.Filled" Label="Enter description" AutoGrow></MudTextField>
-                        }
-                        else
-                        {
-                            <MudText Typo="Typo.body1">
-                                @currentTaskVM.Description
-                            </MudText>
-                        }
-                    </MudItem>
-                    <MudDivider />
-                    <MudItem xs="12">
-                        <div class="d-flex align-center justify-space-between">
-                            <MudText Typo="Typo.h6">
-                                Comments
-                            </MudText>
-                            <ExpandButton @ref="_commentsExpandButton" VisibilityToggled="StateHasChanged" />
-                        </div>
-                        @if (_commentsVM is not null && _commentsExpandButton.Visible)
-                        {
-                            @if (_addCommentsPermissions)
-                            {
-                                if (_addCommentForm.Visible)
-                                {
-                                    <MudTextField @bind-Value="_addCommentForm.Content" Variant="Variant.Filled" Label="New comment" Class="mb-1"></MudTextField>
-                                    <div class="d-flex justify-end gap-2">
-                                        <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="() => _addCommentForm.Close()">
-                                            Cancel
-                                        </MudButton>
-                                        <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!_addCommentForm.IsValid())" OnClick="AddNewComment">
-                                            Add
-                                        </MudButton>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true" Class="mb-4 mt-1" OnClick="() => _addCommentForm.Open()">
-                                        Add Comment
-                                    </MudButton>
-                                }
-                            }
-                            <div class="d-flex flex-column gap-4">
-                                @foreach (var comment in _commentsVM.Comments)
-                                {
-                                    <div>
-                                        <div class="d-flex mb-2 align-center justify-space-between">
-                                            <div class="d-flex align-center gap-2">
-                                                <UserAvatar Name="@comment.AuthorName" />
-                                                <MudText Style="font-weight: bold;">@comment.AuthorName</MudText>
-                                            </div>
-                                            <MudText Typo="Typo.caption">@comment.CreatedAt.GetHumanReadableTimeDifference(DateTime.Now)</MudText>
-                                        </div>
-                                        <div class="pa-2 comment-text">
-                                            <MudText>
-                                                @comment.Content
-                                            </MudText>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        }
-                    </MudItem>
-                    <MudDivider />
-                    <MudItem xs="12">
-                        <div class="d-flex align-center justify-space-between">
-                            <MudText Typo="Typo.h6">
-                                Activities
-                            </MudText>
-                            <ExpandButton @ref="_activitiesExpandButton" VisibilityToggled="StateHasChanged" />
-                        </div>
-                        @if (_activitiesVM is not null && _activitiesExpandButton.Visible)
-                        {
-                            <div class="d-flex flex-column gap-4">
-                                @foreach(var activity in _activitiesVM.Activities)
-                                {
-                                    <div class="d-flex align-center gap-2">
-                                        <!--<UserAvatar Name="" /> TODO? -->
-                                        <div class="d-flex flex-column gap-1">
-                                            <MudText>
-                                                @GetActivityText(activity)
-                                            </MudText>
-                                            <MudText Typo="Typo.caption">
-                                                @activity.OccurredAt.GetHumanReadableTimeDifference(DateTime.Now)
-                                            </MudText>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        }
-                    </MudItem>
-                </MudGrid>
-            </MudPaper>
-        </MudOverlay>
+        <TaskDetailsPopup @ref="_taskDetailsPopup" ProjectId="ProjectId" TaskUpdated="UpdateTasksVM" MembersVM="_membersVM"
+            ModifyTasksPermissions="_modifyTasksPermissions" TransitionTasksPermissions="_transitionTasksPermissions" 
+            AddCommentsPermissions="_addCommentsPermissions" AssignTasksPermissions="_assignTasksPermissions"></TaskDetailsPopup>
         @if(GetDisplayType() == DisplayType.Table)
         {
             <MudTable Items="@_tasks" Hover="true" RowClass="clickable" OnRowClick="(TableRowClickEventArgs<TaskVM> args) => OpenTaskDetailsPopup(args.Item.Id)" Bordered="true">
@@ -268,7 +89,7 @@
                     <MudTd DataLabel="Title">@context.Title</MudTd>
                     <MudTd DataLabel="Status">@context.Status.Name</MudTd>
                     <MudTd DataLabel="Priority">@context.Priority</MudTd>
-                    <MudTd DataLabel="Assignee">@(GetCurrentAssigneeVM(context.AssigneeId)?.Name ?? "-")</MudTd>
+                    <MudTd DataLabel="Assignee">@(_membersVM.GetCurrentAssigneeVM(context.AssigneeId)?.Name ?? "-")</MudTd>
                 </RowTemplate>
                 <PagerContent>
                     <MudTablePager HorizontalAlignment="HorizontalAlignment.End" />
@@ -320,9 +141,9 @@
     </MudSelect>
     @if (_membersVM is not null)
     {
-        <MudSelect T="ProjectMemberVM" Value="@GetCurrentAssigneeVM(_createTaskForm.Assignee?.UserId)" ValueChanged="e => { _createTaskForm.Assignee = e; }"
+        <MudSelect T="ProjectMemberVM" Value="@_membersVM.GetCurrentAssigneeVM(_createTaskForm.Assignee?.UserId)" ValueChanged="e => { _createTaskForm.Assignee = e; }"
                    ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-            @foreach (var member in GetPossibleAssignees(_createTaskForm.Assignee?.UserId))
+            @foreach (var member in _membersVM.GetPossibleAssignees(_createTaskForm.Assignee?.UserId))
             {
                 <MudSelectItem Value="@member"></MudSelectItem>
             }
@@ -356,27 +177,9 @@
     private ProjectMembersVM? _membersVM;
     private Dictionary<Guid, string> _memberNameById = new();
 
+    private TaskDetailsPopup? _taskDetailsPopup;
+
     private Guid? _openedTaskId = null;
-    private TaskCommentsVM? _commentsVM = null;
-    private TaskActivitiesVM? _activitiesVM = null;
-    private ExpandButton _activitiesExpandButton = null!;
-    private ExpandButton _commentsExpandButton = null!;
-
-    private class AddCommentForm : DialogForm
-    {
-        public string Content { get; set; } = string.Empty;
-
-        public override bool IsValid() => !string.IsNullOrWhiteSpace(Content);
-    }
-    private AddCommentForm _addCommentForm = new();
-
-    private class EditDescriptionForm : DialogForm
-    {
-        public string Content { get; set; } = string.Empty;
-
-        public override bool IsValid() => !string.IsNullOrWhiteSpace(Content);
-    }
-    private EditDescriptionForm _editDescriptionForm = new();
 
     private enum DisplayType
     {
@@ -445,51 +248,28 @@
             .ToList();
     }
 
+    private async Task OpenTaskDetailsPopup(Guid taskId)
+    {
+        if(_taskDetailsPopup is null)
+        {
+            return;
+        }
+
+        var taskVM = _tasksVM!.Tasks.Single(x => x.Id == taskId);
+        await _taskDetailsPopup.Open(taskVM);
+    }
+
     private async Task UpdateTasksVM()
     {
-        _tasksVM = await _requestHandler.GetAsync<TasksVM>("tasks", new[] { ("ProjectId", ProjectId.ToString() )});
-        if (_openedTaskId is not null)
+        _tasksVM = await _requestHandler.GetAsync<TasksVM>("tasks", new[] { ("ProjectId", ProjectId.ToString()) }); // TODO: Optimize it, don't fetch all tasks again
+        if(_taskDetailsPopup?.Visible ?? false)
         {
-            await UpdateActivitiesVM();
+            _taskDetailsPopup!.Update(_tasksVM!.Tasks.Single(x => x.Id == _taskDetailsPopup.CurrentTaskId));
         }
 
         _taskStatusIdByName = _tasksVM?.AllTaskStatuses
             .ToDictionary(x => x.Name, x => x.Id);
         FilterTasks();
-    }
-
-    private async Task UpdateTaskStatus(Guid taskId, Guid newStatusId)
-    {
-        await _requestHandler.PostAsync($"tasks/{taskId}/update-status/{newStatusId}", headers: new[] { ("ProjectId", ProjectId.ToString()) });
-        await UpdateTasksVM(); // TODO: Optimize it, don't fetch all tasks again
-    }
-
-    private async Task UpdateTaskPriority(Guid taskId, TaskPriority newPriority)
-    {
-        var model = new UpdateTaskPriorityDto(newPriority);
-        await _requestHandler.PostAsync($"tasks/{taskId}/update-priority", model, headers: new[] { ("ProjectId", ProjectId.ToString()) });
-        await UpdateTasksVM();
-    }
-
-    private async Task UpdateTaskAssignee(Guid taskId, Guid memberId)
-    {
-        var model = new UpdateTaskAssigneeDto(memberId != Guid.Empty ? memberId : null);
-        await _requestHandler.PostAsync($"tasks/{taskId}/update-assignee", model, headers: new[] { ("ProjectId", ProjectId.ToString()) });
-        await UpdateTasksVM();
-    }
-
-    private async Task UpdateTaskDescription(Guid taskId)
-    {
-        if(!_editDescriptionForm.IsValid())
-        {
-            return;            
-        }
-
-        var model = new UpdateTaskDescriptionDto(_editDescriptionForm.Content);
-        await _requestHandler.PostAsync($"tasks/{taskId}/update-description", model, headers: new[] { ("ProjectId", ProjectId.ToString()) });
-
-        await UpdateTasksVM();
-        _editDescriptionForm = new();
     }
 
     private async Task TaskDropped(MudItemDropInfo<TaskVM> dropItem)
@@ -499,7 +279,8 @@
             return;
         }
 
-        await UpdateTaskStatus(dropItem.Item.Id, _taskStatusIdByName[dropItem.DropzoneIdentifier]);
+        // TODO: Add services for interacting with api?
+        await _taskDetailsPopup.UpdateTaskStatus(dropItem.Item.Id, _taskStatusIdByName[dropItem.DropzoneIdentifier]);
     }
 
     private async Task CreateTask()
@@ -521,82 +302,9 @@
         _createTaskForm = new();
     }
 
-    private async Task OpenTaskDetailsPopup(Guid taskId)
-    {
-        _openedTaskId = taskId;
-
-        _addCommentForm = new();
-        _editDescriptionForm = new();
-
-        await UpdateCommentsVM();
-        await UpdateActivitiesVM();
-    }
-
-    private void CloseTaskDetailsPopup()
-    {
-        _openedTaskId = null;
-        _activitiesExpandButton.Reset();
-        _commentsExpandButton.Reset();
-    }
-
-    private async Task AddNewComment()
-    {
-        if (!_addCommentForm.IsValid())
-        {
-            return;
-        }
-
-        var model = new AddTaskCommentDto(_addCommentForm.Content);
-        await _requestHandler.PostAsync($"tasks/{_openedTaskId}/comments", model, new[] { ("ProjectId", ProjectId.ToString()) });
-
-        await UpdateCommentsVM();
-        _addCommentForm = new();
-    }
-
-    private async Task UpdateCommentsVM()
-    {
-        _commentsVM = await _requestHandler.GetAsync<TaskCommentsVM>($"tasks/{_openedTaskId}/comments", new[] { ("ProjectId", ProjectId.ToString()) });
-    }
-
-    private async Task UpdateActivitiesVM()
-    {
-        _activitiesVM = await _requestHandler.GetAsync<TaskActivitiesVM>($"tasks/{_openedTaskId}/activities", new[] { ("ProjectId", ProjectId.ToString()) });
-    }
-
-    private ProjectMemberVM? GetCurrentAssigneeVM(Guid? assigneeId)
-    {
-        return _membersVM!.Members.FirstOrDefault(x => x.UserId == assigneeId) ?? null;
-    }
-
-    private IEnumerable<ProjectMemberVM> GetPossibleAssignees(Guid? assigneeId)
-    {
-        if (assigneeId is not null && assigneeId != Guid.Empty)
-        {
-            return _membersVM!.Members.Where(x => x.UserId != assigneeId.Value).Append(new(Guid.Empty, Guid.Empty, "-", Guid.Empty)).Reverse();
-        }
-        else
-        {
-            return _membersVM!.Members;
-        }
-    }
-
     private IEnumerable<ProjectMemberVM> GetAssigneesForFilters()
     {
         var currentUserMember = _membersVM!.Members.First(x => x.UserId == _userDataService.CurrentUserVM!.Id);
         return new ProjectMemberVM[] { new(Guid.Empty, Guid.Empty, "-", Guid.Empty), new(currentUserMember.Id, currentUserMember.UserId, "@me", currentUserMember.RoleId) }.Concat(_membersVM.Members);
-    }
-
-    private string GetActivityText(TaskActivityVM activity)
-    {
-        // TODO: Display properties as bolded
-        return activity.Property switch
-        {
-            TaskProperty.Description => "Updated description.",
-            TaskProperty.Status => $"Changed status from {activity.OldValue} to {activity.NewValue}.",
-            TaskProperty.Assignee => activity.NewValue is null ? $"Unassigned {activity.OldValue}." 
-                : (activity.OldValue is null ? $"Assigned {activity.NewValue}." : $"Changed assignee from {activity.OldValue} to {activity.NewValue}."),
-            TaskProperty.Priority => $"Changed priority from {activity.OldValue} to {activity.NewValue}.",
-            _ => "Unrecognizable activity."
-        };
     }
 }
