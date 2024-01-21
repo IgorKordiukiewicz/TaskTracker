@@ -218,9 +218,9 @@
                             <MudText Typo="Typo.h6">
                                 Activities
                             </MudText>
-                            <MudIconButton Icon="@(_activitesVisible ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)" OnClick="() => _activitesVisible = !_activitesVisible" />
+                            <ExpandButton @ref="_activitiesExpandButton" VisibilityToggled="StateHasChanged" />
                         </div>
-                        @if(_activitiesVM is not null && _activitesVisible)
+                        @if (_activitiesVM is not null && _activitiesExpandButton.Visible)
                         {
                             <div class="d-flex flex-column gap-4">
                                 @foreach(var activity in _activitiesVM.Activities)
@@ -356,7 +356,7 @@
     private Guid? _openedTaskId = null;
     private TaskCommentsVM? _commentsVM = null;
     private TaskActivitiesVM? _activitiesVM = null;
-    private bool _activitesVisible = false;
+    private ExpandButton _activitiesExpandButton = null!;
 
     private class AddCommentForm : DialogForm
     {
@@ -531,7 +531,7 @@
     private void CloseTaskDetailsPopup()
     {
         _openedTaskId = null;
-        _activitesVisible = false;
+        _activitiesExpandButton.Reset();
     }
 
     private async Task AddNewComment()
