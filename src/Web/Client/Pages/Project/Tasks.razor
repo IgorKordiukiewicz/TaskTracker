@@ -165,32 +165,35 @@
                     </MudItem>
                     <MudDivider />
                     <MudItem xs="12">
-                        <MudText Typo="Typo.h6">
-                            Comments
-                        </MudText>
-                        @if(_addCommentsPermissions)
+                        <div class="d-flex align-center justify-space-between">
+                            <MudText Typo="Typo.h6">
+                                Comments
+                            </MudText>
+                            <ExpandButton @ref="_commentsExpandButton" VisibilityToggled="StateHasChanged" />
+                        </div>
+                        @if (_commentsVM is not null && _commentsExpandButton.Visible)
                         {
-                            if (_addCommentForm.Visible)
+                            @if (_addCommentsPermissions)
                             {
-                                <MudTextField @bind-Value="_addCommentForm.Content" Variant="Variant.Filled" Label="New comment" Class="mb-1"></MudTextField>
-                                <div class="d-flex justify-end gap-2">
-                                    <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="() => _addCommentForm.Close()">
-                                        Cancel
+                                if (_addCommentForm.Visible)
+                                {
+                                    <MudTextField @bind-Value="_addCommentForm.Content" Variant="Variant.Filled" Label="New comment" Class="mb-1"></MudTextField>
+                                    <div class="d-flex justify-end gap-2">
+                                        <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="() => _addCommentForm.Close()">
+                                            Cancel
+                                        </MudButton>
+                                        <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!_addCommentForm.IsValid())" OnClick="AddNewComment">
+                                            Add
+                                        </MudButton>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true" Class="mb-4 mt-1" OnClick="() => _addCommentForm.Open()">
+                                        Add Comment
                                     </MudButton>
-                                    <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!_addCommentForm.IsValid())" OnClick="AddNewComment">
-                                        Add
-                                    </MudButton>
-                                </div>
+                                }
                             }
-                            else
-                            {
-                                <MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true" Class="mb-4 mt-1" OnClick="() => _addCommentForm.Open()">
-                                    Add Comment
-                                </MudButton>
-                            }
-                        }
-                        @if (_commentsVM is not null)
-                        {
                             <div class="d-flex flex-column gap-4">
                                 @foreach (var comment in _commentsVM.Comments)
                                 {
@@ -357,6 +360,7 @@
     private TaskCommentsVM? _commentsVM = null;
     private TaskActivitiesVM? _activitiesVM = null;
     private ExpandButton _activitiesExpandButton = null!;
+    private ExpandButton _commentsExpandButton = null!;
 
     private class AddCommentForm : DialogForm
     {
@@ -532,6 +536,7 @@
     {
         _openedTaskId = null;
         _activitiesExpandButton.Reset();
+        _commentsExpandButton.Reset();
     }
 
     private async Task AddNewComment()
