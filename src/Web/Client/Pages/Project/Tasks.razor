@@ -212,6 +212,34 @@
                             </div>
                         }
                     </MudItem>
+                    <MudDivider />
+                    <MudItem xs="12">
+                        <div class="d-flex align-center justify-space-between">
+                            <MudText Typo="Typo.h6">
+                                Activities
+                            </MudText>
+                            <MudIconButton Icon="@(_activitesVisible ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)" OnClick="() => _activitesVisible = !_activitesVisible" />
+                        </div>
+                        @if(_activitiesVM is not null && _activitesVisible)
+                        {
+                            <div class="d-flex flex-column gap-4">
+                                @foreach(var activity in _activitiesVM.Activities)
+                                {
+                                    <div class="d-flex align-center gap-2">
+                                        <!--<UserAvatar Name="" /> TODO? -->
+                                        <div class="d-flex flex-column gap-1">
+                                            <MudText>
+                                                @GetActivityText(activity)
+                                            </MudText>
+                                            <MudText Typo="Typo.caption">
+                                                @activity.OccurredAt.GetHumanReadableTimeDifference(DateTime.Now)
+                                            </MudText>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </MudItem>
                 </MudGrid>
             </MudPaper>
         </MudOverlay>
@@ -327,6 +355,9 @@
 
     private Guid? _openedTaskId = null;
     private TaskCommentsVM? _commentsVM = null;
+    private TaskActivitiesVM? _activitiesVM = null;
+    private bool _activitesVisible = false;
+
     private class AddCommentForm : DialogForm
     {
         public string Content { get; set; } = string.Empty;
@@ -413,6 +444,11 @@
     private async Task UpdateTasksVM()
     {
         _tasksVM = await _requestHandler.GetAsync<TasksVM>("tasks", new[] { ("ProjectId", ProjectId.ToString() )});
+        if (_openedTaskId is not null)
+        {
+            await UpdateActivitiesVM();
+        }
+
         _taskStatusIdByName = _tasksVM?.AllTaskStatuses
             .ToDictionary(x => x.Name, x => x.Id);
         FilterTasks();
@@ -484,14 +520,18 @@
     private async Task OpenTaskDetailsPopup(Guid taskId)
     {
         _openedTaskId = taskId;
+
         _addCommentForm = new();
         _editDescriptionForm = new();
+
         await UpdateCommentsVM();
+        await UpdateActivitiesVM();
     }
 
     private void CloseTaskDetailsPopup()
     {
         _openedTaskId = null;
+        _activitesVisible = false;
     }
 
     private async Task AddNewComment()
@@ -511,6 +551,11 @@
     private async Task UpdateCommentsVM()
     {
         _commentsVM = await _requestHandler.GetAsync<TaskCommentsVM>($"tasks/{_openedTaskId}/comments", new[] { ("ProjectId", ProjectId.ToString()) });
+    }
+
+    private async Task UpdateActivitiesVM()
+    {
+        _activitiesVM = await _requestHandler.GetAsync<TaskActivitiesVM>($"tasks/{_openedTaskId}/activities", new[] { ("ProjectId", ProjectId.ToString()) });
     }
 
     private ProjectMemberVM? GetCurrentAssigneeVM(Guid? assigneeId)
@@ -534,5 +579,19 @@
     {
         var currentUserMember = _membersVM!.Members.First(x => x.UserId == _userDataService.CurrentUserVM!.Id);
         return new ProjectMemberVM[] { new(Guid.Empty, Guid.Empty, "-", Guid.Empty), new(currentUserMember.Id, currentUserMember.UserId, "@me", currentUserMember.RoleId) }.Concat(_membersVM.Members);
+    }
+
+    private string GetActivityText(TaskActivityVM activity)
+    {
+        // TODO: Display properties as bolded
+        return activity.Property switch
+        {
+            TaskProperty.Description => "Updated description.",
+            TaskProperty.Status => $"Changed status from {activity.OldValue} to {activity.NewValue}.",
+            TaskProperty.Assignee => activity.NewValue is null ? $"Unassigned {activity.OldValue}." 
+                : (activity.OldValue is null ? $"Assigned {activity.NewValue}." : $"Changed assignee from {activity.OldValue} to {activity.NewValue}."),
+            TaskProperty.Priority => $"Changed priority from {activity.OldValue} to {activity.NewValue}.",
+            _ => "Unrecognizable activity."
+        };
     }
 }
