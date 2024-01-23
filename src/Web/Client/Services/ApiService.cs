@@ -15,8 +15,8 @@ public record Headers(IEnumerable<(string Name, string Value)> Values)
 
 public abstract class ApiService
 {
-    protected readonly HttpClient _httpClient;
-    protected readonly ISnackbar _snackbar;
+    private readonly HttpClient _httpClient;
+    private readonly ISnackbar _snackbar;
 
     public ApiService(HttpClient httpClient, ISnackbar snackbar)
     {
@@ -25,7 +25,28 @@ public abstract class ApiService
         _snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
     }
 
-    protected HttpRequestMessage CreateRequestMessage(HttpMethod method, string url, Headers? headers = null)
+    protected async Task<TResponse?> Get<TResponse>(string url, Headers? headers = null)
+        where TResponse : class
+    {
+        var requestMessage = CreateRequestMessage(HttpMethod.Get, url, headers);
+        return await GetResponseContent<TResponse>(await _httpClient.SendAsync(requestMessage));
+    }
+
+    protected async Task<bool> Post<TBody>(string url, TBody? body, Headers? headers = null)
+        where TBody : class
+    {
+        var requestMessage = CreateRequestMessage(HttpMethod.Post, url, headers);
+        if(body is not null)
+        {
+            SetRequestMessageContent(requestMessage, body);
+        }
+        return await GetPostResponseResult(await _httpClient.SendAsync(requestMessage));
+    }
+
+    protected async Task<bool> Post(string url, Headers? headers = null)
+        => await Post(url, (object?)null, headers);
+
+    private HttpRequestMessage CreateRequestMessage(HttpMethod method, string url, Headers? headers = null)
     {
         var message = new HttpRequestMessage()
         {
@@ -44,7 +65,7 @@ public abstract class ApiService
         return message;
     }
 
-    protected async Task<TResponse?> GetResponseContent<TResponse>(HttpResponseMessage response)
+    private async Task<TResponse?> GetResponseContent<TResponse>(HttpResponseMessage response)
     {
         if (response.IsSuccessStatusCode)
         {
@@ -57,7 +78,7 @@ public abstract class ApiService
         }
     }
 
-    protected async Task<bool> GetPostResponseResult(HttpResponseMessage response)
+    private async Task<bool> GetPostResponseResult(HttpResponseMessage response)
     {
         if (response.IsSuccessStatusCode)
         {
@@ -70,7 +91,7 @@ public abstract class ApiService
         }
     }
 
-    protected static void SetRequestMessageContent<TBody>(HttpRequestMessage message, TBody? body)
+    private static void SetRequestMessageContent<TBody>(HttpRequestMessage message, TBody? body)
         where TBody : class
     {
         if (body is null)

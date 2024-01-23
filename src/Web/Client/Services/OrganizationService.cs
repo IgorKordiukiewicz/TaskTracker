@@ -15,10 +15,7 @@ public class OrganizationService : ApiService
     }
 
     public async Task<OrganizationMembersVM?> GetMembers(Guid organizationId)
-    {
-        var requestMessage = CreateRequestMessage(HttpMethod.Get, $"organizations/{organizationId}/members");
-        return await GetResponseContent<OrganizationMembersVM>(await _httpClient.SendAsync(requestMessage));
-    }
+        => await Get<OrganizationMembersVM>($"organizations/{organizationId}/members");
 
     public async Task<OrganizationInvitationsVM?> GetInvitations(Guid organizationId, Pagination pagination)
     {
@@ -26,15 +23,11 @@ public class OrganizationService : ApiService
             .SetQueryParam("pageNumber", pagination.PageNumber)
             .SetQueryParam("itemsPerPage", pagination.ItemsPerPage)
             .ToString();
-        var requestMessage = CreateRequestMessage(HttpMethod.Get, url);
-        return await GetResponseContent<OrganizationInvitationsVM>(await _httpClient.SendAsync(requestMessage));
+        return await Get<OrganizationInvitationsVM>(url);
     }
 
     public async Task<RolesVM<OrganizationPermissions>?> GetRoles(Guid organizationId)
-    {
-        var requestMessage = CreateRequestMessage(HttpMethod.Get, $"organizations/{organizationId}/roles");
-        return await GetResponseContent<RolesVM<OrganizationPermissions>>(await _httpClient.SendAsync(requestMessage));
-    }
+        => await Get<RolesVM<OrganizationPermissions>>($"organizations/{organizationId}/roles");
 
     public async Task<UsersSearchVM?> GetUsersAvailableForInvitation(Guid organizationId, string searchValue)
     {
@@ -42,52 +35,28 @@ public class OrganizationService : ApiService
             .SetQueryParam("searchValue", searchValue)
             .SetQueryParam("organizationId", organizationId)
             .ToString();
-        var requestMessage = CreateRequestMessage(HttpMethod.Get, url);
-        return await GetResponseContent<UsersSearchVM>(await _httpClient.SendAsync(requestMessage));
+        return await Get<UsersSearchVM>(url);
     }
 
     public async Task<bool> Create(CreateOrganizationDto model)
-    {
-        var requestMessage = CreateRequestMessage(HttpMethod.Post, "organizations");
-        SetRequestMessageContent(requestMessage, model);
-        return await GetPostResponseResult(await _httpClient.SendAsync(requestMessage));
-    }
+        => await Post("organizations", model);
 
     public async Task<bool> SendInvitation(Guid organizationId, CreateOrganizationInvitationDto model)
-    {
-        var requestMessage = CreateRequestMessage(HttpMethod.Post, $"organizations/{organizationId}/invitations");
-        SetRequestMessageContent(requestMessage, model);
-        return await GetPostResponseResult(await _httpClient.SendAsync(requestMessage));
-    }
+        => await Post($"organizations/{organizationId}/invitations", model);
 
     public async Task<bool> CancelInvitation(Guid organizationId, Guid invitationId)
-    {
-        var requestMessage = CreateRequestMessage(HttpMethod.Post, $"organizations/invitations/{invitationId}/cancel", 
-            Headers.From(("OrganizationId", organizationId.ToString())));
-        return await GetPostResponseResult(await _httpClient.SendAsync(requestMessage));
-    }
+        => await Post($"organizations/invitations/{invitationId}/cancel", 
+            headers: Headers.From(("OrganizationId", organizationId.ToString())));
 
     public async Task<bool> AcceptInvitation(Guid invitationId)
-    {
-        var requestMessage = CreateRequestMessage(HttpMethod.Post, $"organizations/invitations/{invitationId}/accept");
-        return await GetPostResponseResult(await _httpClient.SendAsync(requestMessage));
-    }
+        => await Post($"organizations/invitations/{invitationId}/accept");
 
     public async Task<bool> DeclineInvitation(Guid invitationId)
-    {
-        var requestMessage = CreateRequestMessage(HttpMethod.Post, $"organizations/invitations/{invitationId}/decline");
-        return await GetPostResponseResult(await _httpClient.SendAsync(requestMessage));
-    }
+        => await Post($"organizations/invitations/{invitationId}/decline");
 
     public async Task<OrganizationsForUserVM?> GetForUser()
-    {
-        var requestMessage = CreateRequestMessage(HttpMethod.Get, $"organizations/user");
-        return await GetResponseContent<OrganizationsForUserVM>(await _httpClient.SendAsync(requestMessage));
-    }
+        => await Get<OrganizationsForUserVM>("organizations/user");
 
     public async Task<UserOrganizationInvitationsVM?> GetInvitationsForUser()
-    {
-        var requestMessage = CreateRequestMessage(HttpMethod.Get, $"organizations/invitations/user");
-        return await GetResponseContent<UserOrganizationInvitationsVM>(await _httpClient.SendAsync(requestMessage));
-    }
+        => await Get<UserOrganizationInvitationsVM>("organizations/invitations/user");
 }

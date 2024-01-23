@@ -5,6 +5,7 @@
 @attribute [Authorize]
 
 @inject RequestHandler _requestHandler
+@inject ProjectService _projectService
 @inject UserDataService _userDataService
 @inject IAuthorizationService _authorizationService
 
@@ -219,7 +220,7 @@
         _addCommentsPermissions = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AddComments);
 
         await UpdateTasksVM();
-        _membersVM = await _requestHandler.GetAsync<ProjectMembersVM>($"projects/{ProjectId}/members");
+        _membersVM = await _projectService.GetMembers(ProjectId);
         if(_membersVM is not null)
         {
             _memberNameById = _membersVM.Members.ToDictionary(k => k.Id, v => v.Name);
@@ -274,12 +275,11 @@
 
     private async Task TaskDropped(MudItemDropInfo<TaskVM> dropItem)
     {
-        if(dropItem.Item is null || _taskStatusIdByName is null)
+        if(dropItem.Item is null || _taskStatusIdByName is null || _taskDetailsPopup is null)
         {
             return;
         }
 
-        // TODO: Add services for interacting with api?
         await _taskDetailsPopup.UpdateTaskStatus(dropItem.Item.Id, _taskStatusIdByName[dropItem.DropzoneIdentifier]);
     }
 
@@ -305,6 +305,9 @@
     private IEnumerable<ProjectMemberVM> GetAssigneesForFilters()
     {
         var currentUserMember = _membersVM!.Members.First(x => x.UserId == _userDataService.CurrentUserVM!.Id);
-        return new ProjectMemberVM[] { new(Guid.Empty, Guid.Empty, "-", Guid.Empty), new(currentUserMember.Id, currentUserMember.UserId, "@me", currentUserMember.RoleId) }.Concat(_membersVM.Members);
+        return new ProjectMemberVM[] { 
+            new(Guid.Empty, Guid.Empty, "-", Guid.Empty), 
+            new(currentUserMember.Id, currentUserMember.UserId, "@me", currentUserMember.RoleId) }
+            .Concat(_membersVM.Members);
     }
 }

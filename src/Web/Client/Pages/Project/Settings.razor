@@ -2,7 +2,7 @@
 @layout ProjectLayout
 @attribute [Authorize(Policy = Policy.ProjectManageProject)]
 
-@inject RequestHandler _requestHandler
+@inject ProjectService _projectService
 @inject HierarchyNavigationService _hierarchyNavigationService
 @inject NavigationManager _navManager
 
@@ -50,7 +50,7 @@
 
     private async Task UpdateSettingsVM()
     {
-        _settingsVM = await _requestHandler.GetAsync<ProjectSettingsVM>($"projects/{ProjectId}/settings");
+        _settingsVM = await _projectService.GetSettings(ProjectId);
         if(_settingsVM is not null)
         {
             _nameEditValue = _settingsVM!.Name;
@@ -71,7 +71,7 @@
     private async Task UpdateName()
     {
         var model = new UpdateProjectNameDto(_nameEditValue);
-        await _requestHandler.PostAsync($"projects/{ProjectId}/update-name", model);
+        _ = await _projectService.UpdateName(ProjectId, model);
 
         CancelNameEdit();
         await UpdateSettingsVM();
@@ -85,7 +85,7 @@
             return;
         }
 
-        var result = await _requestHandler.PostWithResultAsync($"projects/{ProjectId}/delete");
+        var result = await _projectService.Delete(ProjectId);
         if(result)
         {
             var orgId = _hierarchyNavigationService.OrganizationId!;

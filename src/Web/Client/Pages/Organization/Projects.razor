@@ -4,7 +4,7 @@
 @attribute [Authorize]
 
 @inject NavigationManager _navManager
-@inject RequestHandler _requestHandler
+@inject ProjectService _projectService
 @inject IAuthorizationService _authorizationService
 @inject UserDataService _userDataService
 
@@ -61,7 +61,7 @@
 
     private async Task UpdateProjectsList()
     {
-        _projectsVM = await _requestHandler.GetAsync<ProjectsVM>($"projects/organization/{OrganizationId}/user");
+        _projectsVM = await _projectService.GetForOrganizationUser(OrganizationId);
     }
 
     private void SelectProject(Guid projectId)
@@ -77,7 +77,7 @@
         }
 
         var model = new CreateProjectDto(_createProjectForm.Name);
-        var result = await _requestHandler.PostWithResultAsync($"projects/organization/{OrganizationId}", model);
+        var result = await _projectService.Create(OrganizationId, model);
         if(result)
         {
             await _userDataService.UpdateUserData();
