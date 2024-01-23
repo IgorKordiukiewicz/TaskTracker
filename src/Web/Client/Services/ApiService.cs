@@ -26,7 +26,6 @@ public abstract class ApiService
     }
 
     protected async Task<TResponse?> Get<TResponse>(string url, Headers? headers = null)
-        where TResponse : class
     {
         var requestMessage = CreateRequestMessage(HttpMethod.Get, url, headers);
         return await GetResponseContent<TResponse>(await _httpClient.SendAsync(requestMessage));

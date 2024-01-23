@@ -23,6 +23,7 @@ builder.Services.AddHttpClient("ServerAPI",
 builder.Services.AddScoped<RequestHandler>();
 builder.Services.AddScoped<UserDataService>();
 builder.Services.AddScoped<OrganizationsService>();
+builder.Services.AddScoped<WorkflowsService>();
 builder.Services.AddScoped<ProjectsService>();
 builder.Services.AddScoped<HierarchyNavigationService>();
 builder.Services.AddBlazoredLocalStorage();

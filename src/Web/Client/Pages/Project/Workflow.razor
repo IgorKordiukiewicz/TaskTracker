@@ -21,7 +21,7 @@
 @using static Web.Client.Components.TaskStatusNode;
 
 @inject ISnackbar _snackbar
-@inject RequestHandler _requestHandler
+@inject WorkflowsService _workflowsService
 @inject IDialogService _dialogService
 @inject ILocalStorageService _localStorage
 
@@ -220,8 +220,7 @@
         (string FromStatus, string ToStatus)? newTransition = null,
         (string FromStatus, string ToStatus)? deletedTransition = null)
     {
-        var url = "workflows".SetQueryParam("projectId", ProjectId).ToString();
-        _workflowVM = await _requestHandler.GetAsync<WorkflowVM>(url);
+        _workflowVM = await _workflowsService.Get(ProjectId);
         if(_workflowVM is null)
         {
             return;
@@ -263,7 +262,7 @@
         }
 
         var model = new AddWorkflowStatusDto(_addStatusForm.Name);
-        var success = await _requestHandler.PostWithResultAsync($"workflows/{_workflowVM.Id}/statuses", model, new[] { ("ProjectId", ProjectId.ToString()) });
+        var success = await _workflowsService.AddStatus(_workflowVM.Id, ProjectId, model);
 
         if(success)
         {
@@ -275,7 +274,7 @@
 
     private async Task AddTransition()
     {
-        if (!_addTransitionForm.IsValid() || _statusIdByName is null)
+        if (!_addTransitionForm.IsValid() || _statusIdByName is null || _workflowVM is null)
         {
             return;
         }
@@ -283,7 +282,7 @@
         var fromStatusId = _statusIdByName[_addTransitionForm.FromStatus];
         var toStatusId = _statusIdByName[_addTransitionForm.ToStatus];
         var model = new AddWorkflowTransitionDto(fromStatusId, toStatusId);
-        var success = await _requestHandler.PostWithResultAsync($"workflows/{_workflowVM!.Id}/transitions", model, new[] { ("ProjectId", ProjectId.ToString()) });
+        var success = await _workflowsService.AddTransition(_workflowVM.Id, ProjectId, model);
 
         if (success)
         {
@@ -337,7 +336,7 @@
     private async Task<bool> CanStatusBeDeleted(string name)
     {
         var statusId = _statusIdByName![name];
-        return await _requestHandler.GetAsync<bool>($"workflows/{_workflowVM!.Id}/statuses/{statusId}/can-be-deleted", new[] { ("ProjectId", ProjectId.ToString()) });
+        return (await _workflowsService.CanStatusBeDeleted(_workflowVM!.Id, statusId, ProjectId)) ?? false;
     }
 
     private async Task DeleteStatus(string name)
@@ -353,8 +352,7 @@
         }
 
         var statusId = _statusIdByName[name];
-        var success = await _requestHandler.PostWithResultAsync($"workflows/{_workflowVM!.Id}/statuses/{statusId}/delete", 
-            headers: new[] { ("ProjectId", ProjectId.ToString()) });
+        var success = await _workflowsService.DeleteStatus(_workflowVM!.Id, statusId, ProjectId);
 
         if (success)
         {
@@ -378,8 +376,7 @@
         var fromStatusId = _statusIdByName[fromStatusName];
         var toStatusId = _statusIdByName[toStatusName];
         var model = new DeleteWorkflowTransitionDto(fromStatusId, toStatusId);
-        var success = await _requestHandler.PostWithResultAsync($"workflows/{_workflowVM!.Id}/transitions/delete", model,
-            headers: new[] { ("ProjectId", ProjectId.ToString()) });
+        var success = await _workflowsService.DeleteTransition(_workflowVM!.Id, ProjectId, model);
 
         if(success)
         {
