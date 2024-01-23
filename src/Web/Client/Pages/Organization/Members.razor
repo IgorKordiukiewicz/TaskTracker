@@ -3,7 +3,7 @@
 @layout OrganizationLayout
 @attribute [Authorize]
 
-@inject OrganizationService _organizationService
+@inject OrganizationsService _organizationsService
 @inject IAuthorizationService _authorizationService
 
 <MudTabs Outlined="false" Border="true" ApplyEffectsToContainer="true" Color="Color.Default" Rounded="true" Position="Position.Top" Centered="false">
@@ -117,18 +117,18 @@
     // TODO: Delete the UpdateVM methods?
     private async Task UpdateMembersVM()
     {
-        _membersVM = await _organizationService.GetMembers(OrganizationId);
+        _membersVM = await _organizationsService.GetMembers(OrganizationId);
     }
 
     private async Task UpdateInvitationsVM(int pageNumber = 1)
     {
         _invitationsPagination.PageNumber = pageNumber;
-        _invitationsVM = await _organizationService.GetInvitations(OrganizationId, _invitationsPagination);
+        _invitationsVM = await _organizationsService.GetInvitations(OrganizationId, _invitationsPagination);
     }
 
     private async Task UpdateRolesVM()
     {
-        _rolesVM = await _organizationService.GetRoles(OrganizationId);
+        _rolesVM = await _organizationsService.GetRoles(OrganizationId);
     }
 
     private async Task<IEnumerable<UserSearchVM>> SearchUsers(string value)
@@ -138,7 +138,7 @@
             return Enumerable.Empty<UserSearchVM>();
         }
 
-        var users = await _organizationService.GetUsersAvailableForInvitation(OrganizationId, value);
+        var users = await _organizationsService.GetUsersAvailableForInvitation(OrganizationId, value);
         return users?.Users ?? Enumerable.Empty<UserSearchVM>();
     }
 
@@ -150,7 +150,7 @@
         }
 
         var model = new CreateOrganizationInvitationDto(_selectedUserForInvitation.Id);
-        _ = _organizationService.SendInvitation(OrganizationId, model);
+        _ = _organizationsService.SendInvitation(OrganizationId, model);
 
         _selectedUserForInvitation = null;
 
@@ -159,7 +159,7 @@
 
     private async Task CancelInvitation(Guid invitationId)
     {
-        _ = await _organizationService.CancelInvitation(OrganizationId, invitationId);
+        _ = await _organizationsService.CancelInvitation(OrganizationId, invitationId);
         await UpdateInvitationsVM();
     }
 

@@ -6,9 +6,9 @@ using Shared.ViewModels;
 
 namespace Web.Client.Services;
 
-public class ProjectService : ApiService
+public class ProjectsService : ApiService
 {
-    public ProjectService(HttpClient httpClient, ISnackbar snackbar) 
+    public ProjectsService(HttpClient httpClient, ISnackbar snackbar) 
         : base(httpClient, snackbar)
     {
     }

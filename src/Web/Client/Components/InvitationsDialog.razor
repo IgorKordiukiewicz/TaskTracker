@@ -30,7 +30,7 @@
     public List<UserOrganizationInvitationVM> Invitations { get; set; } = null!;
 
     [Parameter]
-    public OrganizationService OrganizationService { get; set; } = null!;
+    public OrganizationsService OrganizationService { get; set; } = null!;
 
     public bool AnyInvitationHandled { get; private set; } = false;
 

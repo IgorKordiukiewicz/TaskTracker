@@ -5,7 +5,7 @@
 @attribute [Authorize]
 
 @inject RequestHandler _requestHandler
-@inject ProjectService _projectService
+@inject ProjectsService _projectsService
 @inject UserDataService _userDataService
 @inject IAuthorizationService _authorizationService
 
@@ -220,7 +220,7 @@
         _addCommentsPermissions = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AddComments);
 
         await UpdateTasksVM();
-        _membersVM = await _projectService.GetMembers(ProjectId);
+        _membersVM = await _projectsService.GetMembers(ProjectId);
         if(_membersVM is not null)
         {
             _memberNameById = _membersVM.Members.ToDictionary(k => k.Id, v => v.Name);

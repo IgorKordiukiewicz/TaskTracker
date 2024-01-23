@@ -2,7 +2,7 @@
 @layout ProjectLayout
 @attribute [Authorize]
 
-@inject ProjectService _projectService
+@inject ProjectsService _projectsService
 @inject IAuthorizationService _authorizationService
 @inject UserDataService _userDataService
 
@@ -74,25 +74,25 @@
 
     private async Task UpdateMembersVM()
     {
-        _membersVM = await _projectService.GetMembers(ProjectId);
+        _membersVM = await _projectsService.GetMembers(ProjectId);
 
-        var organizationId = (await _projectService.GetOrganization(ProjectId))?.OrganizationId ?? default;
+        var organizationId = (await _projectsService.GetOrganization(ProjectId))?.OrganizationId ?? default;
 
         if(_addMembersPermission)
         {
-            _usersVM = await _projectService.GetAvailableUsers(ProjectId, organizationId);
+            _usersVM = await _projectsService.GetAvailableUsers(ProjectId, organizationId);
         }
     }
 
     private async Task UpdateRolesVM()
     {
-        _rolesVM = await _projectService.GetRoles(ProjectId);
+        _rolesVM = await _projectsService.GetRoles(ProjectId);
     }
 
     private async Task AddMember(Guid userId)
     {
         var model = new AddProjectMemberDto(userId);
-        _ = await _projectService.AddMember(ProjectId, model);
+        _ = await _projectsService.AddMember(ProjectId, model);
 
         _selectedUserVM = null;
         await UpdateMembersVM();

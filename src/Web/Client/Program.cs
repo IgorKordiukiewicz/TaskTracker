@@ -22,8 +22,8 @@ builder.Services.AddHttpClient("ServerAPI",
 // TODO: Extract to a separate class
 builder.Services.AddScoped<RequestHandler>();
 builder.Services.AddScoped<UserDataService>();
-builder.Services.AddScoped<OrganizationService>();
-builder.Services.AddScoped<ProjectService>();
+builder.Services.AddScoped<OrganizationsService>();
+builder.Services.AddScoped<ProjectsService>();
 builder.Services.AddScoped<HierarchyNavigationService>();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ServerAPI"));
