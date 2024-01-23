@@ -74,7 +74,7 @@
         }
     }
 
-    private HttpRequestMessage CreateRequestMessage(HttpMethod method, string url, Headers? headers)
+    private HttpRequestMessage CreateRequestMessage(HttpMethod method, string url, Headers? headers = null)
     {
         var message = new HttpRequestMessage()
         {

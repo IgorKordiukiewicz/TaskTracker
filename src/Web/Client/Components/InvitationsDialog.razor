@@ -30,19 +30,19 @@
     public List<UserOrganizationInvitationVM> Invitations { get; set; } = null!;
 
     [Parameter]
-    public RequestHandler RequestHandler { get; set; } = null!;
+    public OrganizationService OrganizationService { get; set; } = null!;
 
     public bool AnyInvitationHandled { get; private set; } = false;
 
     private async Task AcceptInvitation(Guid invitationId)
     {
-        await RequestHandler.PostAsync($"organizations/invitations/{invitationId}/accept");
+        await OrganizationService.AcceptInvitation(invitationId);
         HandleInvitation(invitationId);
     }
 
     private async Task DeclineInvitation(Guid invitationId)
     {
-        await RequestHandler.PostAsync($"organizations/invitations/{invitationId}/decline");
+        await OrganizationService.DeclineInvitation(invitationId);
         HandleInvitation(invitationId);
     }
 

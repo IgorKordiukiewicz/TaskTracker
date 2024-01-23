@@ -9,6 +9,7 @@ using Blazored.LocalStorage;
 using Web.Client.RequirementHandlers;
 using Microsoft.AspNetCore.Authorization;
 using Shared.Authorization;
+using Web.Client.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -18,8 +19,10 @@ builder.Services.AddHttpClient("ServerAPI",
     client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
     .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 
+// TODO: Extract to a separate class
 builder.Services.AddScoped<RequestHandler>();
 builder.Services.AddScoped<UserDataService>();
+builder.Services.AddScoped<OrganizationService>();
 builder.Services.AddScoped<HierarchyNavigationService>();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ServerAPI"));

@@ -2,7 +2,7 @@
 @attribute [Authorize]
 
 @inject NavigationManager _navManager
-@inject RequestHandler _requestHandler
+@inject OrganizationService _organizationService
 @inject IDialogService _dialogService
 @inject HierarchyNavigationService _hierarchyNavigationService
 @inject UserDataService _userDataService
@@ -69,7 +69,7 @@
 
         var parameters = new DialogParameters();
         parameters.Add("Invitations", _invitationsVM.Invitations.ToList());
-        parameters.Add("RequestHandler", _requestHandler);
+        parameters.Add("OrganizationService", _organizationService);
 
         var options = new DialogOptions
         {
@@ -89,8 +89,8 @@
 
     private async Task UpdateViewModels()
     {
-        _organizationsVM = await _requestHandler.GetAsync<OrganizationsForUserVM>("organizations/user");
-        _invitationsVM = await _requestHandler.GetAsync<UserOrganizationInvitationsVM>("organizations/invitations/user");
+        _organizationsVM = await _organizationService.GetForUser();
+        _invitationsVM = await _organizationService.GetInvitationsForUser();
     }
 
     private async Task CreateOrganization()
@@ -107,7 +107,7 @@
         }
 
         var model = new CreateOrganizationDto(_createOrganizationForm.Name, userId.Value);
-        var result = await _requestHandler.PostWithResultAsync($"organizations", model);
+        var result = await _organizationService.Create(model);
         if(result)
         {
             await _userDataService.UpdateUserData();

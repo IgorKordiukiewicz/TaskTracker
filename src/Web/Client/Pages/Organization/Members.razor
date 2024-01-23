@@ -1,8 +1,9 @@
 ﻿@page "/org/{organizationId:guid}/members"
+@using Web.Client.Services;
 @layout OrganizationLayout
 @attribute [Authorize]
 
-@inject RequestHandler _requestHandler
+@inject OrganizationService _organizationService
 @inject IAuthorizationService _authorizationService
 
 <MudTabs Outlined="false" Border="true" ApplyEffectsToContainer="true" Color="Color.Default" Rounded="true" Position="Position.Top" Centered="false">
@@ -113,24 +114,21 @@
         }
     }
 
+    // TODO: Delete the UpdateVM methods?
     private async Task UpdateMembersVM()
     {
-        _membersVM = await _requestHandler.GetAsync<OrganizationMembersVM>($"organizations/{OrganizationId}/members");
+        _membersVM = await _organizationService.GetMembers(OrganizationId);
     }
 
     private async Task UpdateInvitationsVM(int pageNumber = 1)
     {
         _invitationsPagination.PageNumber = pageNumber;
-        var url = $"organizations/{OrganizationId}/invitations"
-            .SetQueryParam("pageNumber", _invitationsPagination.PageNumber)
-            .SetQueryParam("itemsPerPage", _invitationsPagination.ItemsPerPage)
-            .ToString();
-        _invitationsVM = await _requestHandler.GetAsync<OrganizationInvitationsVM>(url);
+        _invitationsVM = await _organizationService.GetInvitations(OrganizationId, _invitationsPagination);
     }
 
     private async Task UpdateRolesVM()
     {
-        _rolesVM = await _requestHandler.GetAsync<RolesVM<OrganizationPermissions>>($"organizations/{OrganizationId}/roles");
+        _rolesVM = await _organizationService.GetRoles(OrganizationId);
     }
 
     private async Task<IEnumerable<UserSearchVM>> SearchUsers(string value)
@@ -140,11 +138,7 @@
             return Enumerable.Empty<UserSearchVM>();
         }
 
-        var url = $"users/available-for-invitation"
-            .SetQueryParam("searchValue", value)
-            .SetQueryParam("organizationId", OrganizationId)
-            .ToString();
-        var users = await _requestHandler.GetAsync<UsersSearchVM>(url);
+        var users = await _organizationService.GetUsersAvailableForInvitation(OrganizationId, value);
         return users?.Users ?? Enumerable.Empty<UserSearchVM>();
     }
 
@@ -156,7 +150,7 @@
         }
 
         var model = new CreateOrganizationInvitationDto(_selectedUserForInvitation.Id);
-        await _requestHandler.PostAsync($"organizations/{OrganizationId}/invitations", model);
+        _ = _organizationService.SendInvitation(OrganizationId, model);
 
         _selectedUserForInvitation = null;
 
@@ -165,8 +159,7 @@
 
     private async Task CancelInvitation(Guid invitationId)
     {
-        await _requestHandler.PostAsync($"organizations/invitations/{invitationId}/cancel", 
-            headers: new[] { ("OrganizationId", OrganizationId.ToString()) });
+        _ = await _organizationService.CancelInvitation(OrganizationId, invitationId);
         await UpdateInvitationsVM();
     }
 
