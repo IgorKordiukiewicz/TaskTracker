@@ -2,14 +2,14 @@
 
 namespace Application.Features.Tasks;
 
-public record UpdateTaskStatusCommand(Guid TaskId, Guid NewStatusId) : IRequest<Result>;
+public record UpdateTaskStatusCommand(Guid TaskId, UpdateTaskStatusDto Model) : IRequest<Result>;
 
 internal class UpdateTaskStatusCommandValidator : AbstractValidator<UpdateTaskStatusCommand>
 {
     public UpdateTaskStatusCommandValidator()
     {
         RuleFor(x => x.TaskId).NotEmpty();
-        RuleFor(x => x.NewStatusId).NotEmpty();
+        RuleFor(x => x.Model.StatusId).NotEmpty();
     }
 }
 
@@ -33,12 +33,12 @@ internal class UpdateTaskStatusHandler : IRequestHandler<UpdateTaskStatusCommand
         }
 
         var workflow = await _workflowRepository.GetBy(x => x.ProjectId == task.ProjectId);
-        if(!workflow!.DoesStatusExist(request.NewStatusId))
+        if(!workflow!.DoesStatusExist(request.Model.StatusId))
         {
-            return Result.Fail(new NotFoundError<Domain.Workflows.TaskStatus>(request.NewStatusId));
+            return Result.Fail(new NotFoundError<Domain.Workflows.TaskStatus>(request.Model.StatusId));
         }
 
-        var result = task.UpdateStatus(request.NewStatusId, workflow!);
+        var result = task.UpdateStatus(request.Model.StatusId, workflow!);
         if(result.IsFailed)
         {
             return Result.Fail(result.Errors);

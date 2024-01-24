@@ -262,7 +262,8 @@
 
     public async Task UpdateTaskStatus(Guid taskId, Guid newStatusId)
     {
-        _ = await _tasksService.UpdateStatus(ProjectId, _taskVM!.Id, newStatusId); // TODO: Use dto instead of sending statusId in route
+        var model = new UpdateTaskStatusDto(newStatusId);
+        _ = await _tasksService.UpdateStatus(ProjectId, _taskVM!.Id, model);
 
         await TaskUpdated.InvokeAsync();
         await UpdateActivitiesVM();

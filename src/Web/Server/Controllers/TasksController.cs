@@ -30,11 +30,11 @@ public class TasksController : ControllerBase
         return result.ToHttpResult();
     }
 
-    [HttpPost("{taskId:guid}/update-status/{newStatusId:guid}")]
+    [HttpPost("{taskId:guid}/update-status")]
     [Authorize(Policy.ProjectTransitionTasks)]
-    public async Task<IActionResult> UpdateTaskStatus(Guid taskId, Guid newStatusId)
+    public async Task<IActionResult> UpdateTaskStatus(Guid taskId, UpdateTaskStatusDto model)
     {
-        var result = await _mediator.Send(new UpdateTaskStatusCommand(taskId, newStatusId));
+        var result = await _mediator.Send(new UpdateTaskStatusCommand(taskId, model));
         return result.ToHttpResult();
     }
 

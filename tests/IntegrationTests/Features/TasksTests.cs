@@ -113,7 +113,7 @@ public class TasksTests
     [Fact]
     public async System.Threading.Tasks.Task UpdateStatus_ShouldFail_WhenTaskDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new UpdateTaskStatusCommand(Guid.NewGuid(), Guid.NewGuid()));
+        var result = await _fixture.SendRequest(new UpdateTaskStatusCommand(Guid.NewGuid(), new(Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -123,7 +123,7 @@ public class TasksTests
     {
         var task = (await _factory.CreateTasks())[0];
 
-        var result = await _fixture.SendRequest(new UpdateTaskStatusCommand(task.Id, Guid.NewGuid()));
+        var result = await _fixture.SendRequest(new UpdateTaskStatusCommand(task.Id, new(Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -136,7 +136,7 @@ public class TasksTests
         var initialStatus = await _fixture.FirstAsync<TaskStatus>(x => x.Initial);
         var newStatusId = (await _fixture.FirstAsync<TaskStatusTransition>(x => x.FromStatusId == initialStatus.Id)).ToStatusId;
 
-        var result = await _fixture.SendRequest(new UpdateTaskStatusCommand(task.Id, newStatusId));
+        var result = await _fixture.SendRequest(new UpdateTaskStatusCommand(task.Id, new(newStatusId)));
 
         using(new AssertionScope())
         {

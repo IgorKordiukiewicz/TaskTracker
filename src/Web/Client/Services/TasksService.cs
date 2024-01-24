@@ -22,8 +22,8 @@ public class TasksService : ApiService
     public async Task<TaskActivitiesVM?> GetActivities(Guid projectId, Guid taskId)
         => await Get<TaskActivitiesVM>($"tasks/{taskId}/activities", ProjectIdHeader(projectId));
 
-    public async Task<bool> UpdateStatus(Guid projectId, Guid taskId, Guid newStatusId)
-        => await Post($"tasks/{taskId}/update-status/{newStatusId}", ProjectIdHeader(projectId));
+    public async Task<bool> UpdateStatus(Guid projectId, Guid taskId, UpdateTaskStatusDto model)
+        => await Post($"tasks/{taskId}/update-status", model,  ProjectIdHeader(projectId));
 
     public async Task<bool> UpdatePriority(Guid projectId, Guid taskId, UpdateTaskPriorityDto model)
         => await Post($"tasks/{taskId}/update-priority", model, ProjectIdHeader(projectId));
