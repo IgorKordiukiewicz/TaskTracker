@@ -8,6 +8,9 @@ builder.Host.UseSerilog((context, services, configuration) =>
     configuration.WriteTo.File("log.txt", rollingInterval: RollingInterval.Month, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning);
 });
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddAuth(builder.Configuration);
 
@@ -22,6 +25,9 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
+
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 else
 {

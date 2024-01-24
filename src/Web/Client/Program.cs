@@ -18,7 +18,6 @@ builder.Services.AddHttpClient("ServerAPI",
     client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
     .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 
-// TODO: Extract to a separate class
 builder.Services.AddScoped<UserDataService>();
 builder.Services.AddScoped<HierarchyNavigationService>();
 builder.Services.AddScoped<OrganizationsService>();
