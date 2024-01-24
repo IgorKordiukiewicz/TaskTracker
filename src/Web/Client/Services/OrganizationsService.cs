@@ -59,4 +59,22 @@ public class OrganizationsService : ApiService
 
     public async Task<UserOrganizationInvitationsVM?> GetInvitationsForUser()
         => await Get<UserOrganizationInvitationsVM>("organizations/invitations/user");
+
+    public async Task<bool> RemoveMember(Guid organizationId, Guid memberId)
+        => await Post($"organizations/{organizationId}/members/{memberId}/remove");
+
+    public async Task<bool> UpdateMemberRole(Guid organizationId, Guid memberId, UpdateMemberRoleDto model)
+        => await Post($"organizations/{organizationId}/members/{memberId}/update-role", model);
+
+    public async Task<bool> UpdateRoleName(Guid organizationId, Guid roleId, UpdateRoleNameDto model)
+        => await Post($"organizations/{organizationId}/roles/{roleId}/update-name", model);
+
+    public async Task<bool> UpdateRolePermissions(Guid organizationId, Guid roleId, UpdateRolePermissionsDto<OrganizationPermissions> model)
+        => await Post($"organizations/{organizationId}/roles/{roleId}/update-permissions", model);
+
+    public async Task<bool> CreateRole(Guid organizationId, CreateRoleDto<OrganizationPermissions> model)
+        => await Post($"organizations/{organizationId}/roles", model);
+
+    public async Task<bool> DeleteRole(Guid organizationId, Guid roleId)
+        => await Post($"organizations/{organizationId}/roles/{roleId}/delete");
 }

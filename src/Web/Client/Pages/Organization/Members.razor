@@ -10,8 +10,11 @@
     <MudTabPanel Text="Members">
         @if (_membersVM is not null)
         {
-            <MembersList Members="@_membersVM.Members" RemoveMembersPermission="@_removeMembersPermission" ManageRolesPermission="@_manageRolesPermission" ApiUrl="@($"organizations/{OrganizationId}/members")" 
-                MembersUpdated="UpdateMembersVM" RolesVM="@_rolesVM"></MembersList>
+            <MembersList Members="@_membersVM.Members" RemoveMembersPermission="@_removeMembersPermission" ManageRolesPermission="@_manageRolesPermission" 
+                MembersUpdated="UpdateMembersVM" RolesVM="@_rolesVM"
+                UpdateRoleFunc="async (memberId, model) => await _organizationsService.UpdateMemberRole(OrganizationId, memberId, model)"
+                RemoveMemberFunc="async (memberId) => await _organizationsService.RemoveMember(OrganizationId, memberId)"
+            ></MembersList>
         }
     </MudTabPanel>
     @if (_inviteMembersPermission)
@@ -64,7 +67,11 @@
     @if (_manageRolesPermission)
     {
         <MudTabPanel Text="Roles">
-            <RolesEditor RolesVM="@_rolesVM" TPermissions="OrganizationPermissions" ApiUrl="@($"organizations/{OrganizationId}/roles")" RolesUpdated="UpdateRolesVM"></RolesEditor>
+            <RolesEditor RolesVM="@_rolesVM" TPermissions="OrganizationPermissions" RolesUpdated="UpdateRolesVM"
+                UpdateNameFunc="async (roleId, model) => await _organizationsService.UpdateRoleName(OrganizationId, roleId, model)"
+                UpdatePermissionsFunc="async (roleId, model) => await _organizationsService.UpdateRolePermissions(OrganizationId, roleId, model)"
+                CreateFunc="async (model) => await _organizationsService.CreateRole(OrganizationId, model)"
+                DeleteFunc="async (roleId) => await _organizationsService.DeleteRole(OrganizationId, roleId)"></RolesEditor>
         </MudTabPanel>
     }
 </MudTabs>

@@ -1,6 +1,5 @@
 ﻿@typeparam TMember where TMember : IMemberVM
 @typeparam TPermissions where TPermissions: struct, Enum
-@inject RequestHandler _requestHandler
 
 <MudPaper>
     <MudList>
@@ -41,9 +40,6 @@
 
 @code {
     [Parameter]
-    public required string ApiUrl { get; init; }
-
-    [Parameter]
     public required bool ManageRolesPermission { get; init; }
 
     [Parameter]
@@ -54,6 +50,12 @@
 
     [Parameter]
     public required RolesVM<TPermissions>? RolesVM { get; set; }
+
+    [Parameter]
+    public required Func<Guid, UpdateMemberRoleDto, Task> UpdateRoleFunc { get; set; }
+
+    [Parameter]
+    public required Func<Guid, Task> RemoveMemberFunc { get; set; }
 
     [Parameter]
     public EventCallback MembersUpdated { get; set; }
@@ -67,14 +69,14 @@
             return;
         }
 
-        await _requestHandler.PostAsync(ApiUrl + $"/{memberId}/remove");
+        await RemoveMemberFunc(memberId);
         await MembersUpdated.InvokeAsync();
     }
 
     private async Task UpdateRole(Guid memberId, Guid newRoleId)
     {
         var model = new UpdateMemberRoleDto(newRoleId);
-        await _requestHandler.PostAsync(ApiUrl + $"/{memberId}/update-role", model);
+        await UpdateRoleFunc(memberId, model);
         await MembersUpdated.InvokeAsync();
     }
 

@@ -37,6 +37,9 @@ public class ProjectsService : ApiService
     public async Task<bool> AddMember(Guid projectId, AddProjectMemberDto model)
         => await Post($"projects/{projectId}/members", model);
 
+    public async Task<bool> RemoveMember(Guid projectId, Guid memberId)
+        => await Post($"projects/{projectId}/members/{memberId}/remove");
+
     public async Task<ProjectOrganizationVM?> GetOrganization(Guid projectId)
         => await Get<ProjectOrganizationVM>($"projects/{projectId}/organization");
 
@@ -48,4 +51,19 @@ public class ProjectsService : ApiService
 
     public async Task<bool> Delete(Guid projectId)
         => await Post($"projects/{projectId}/delete");
+
+    public async Task<bool> UpdateMemberRole(Guid projectId, Guid memberId, UpdateMemberRoleDto model)
+        => await Post($"projects/{projectId}/members/{memberId}/update-role", model);
+
+    public async Task<bool> UpdateRoleName(Guid projectId, Guid roleId, UpdateRoleNameDto model)
+        => await Post($"projects/{projectId}/roles/{roleId}/update-name", model);
+
+    public async Task<bool> UpdateRolePermissions(Guid projectId, Guid roleId, UpdateRolePermissionsDto<ProjectPermissions> model)
+        => await Post($"projects/{projectId}/roles/{roleId}/update-permissions", model);
+
+    public async Task<bool> CreateRole(Guid projectId, CreateRoleDto<ProjectPermissions> model)
+        => await Post($"projects/{projectId}/roles", model);
+
+    public async Task<bool> DeleteRole(Guid projectId, Guid roleId)
+        => await Post($"projects/{projectId}/roles/{roleId}/delete");
 }

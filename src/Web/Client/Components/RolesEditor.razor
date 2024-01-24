@@ -2,8 +2,6 @@
 @using Web.Client.Common;
 @typeparam TPermissions where TPermissions: struct, Enum
 
-@inject RequestHandler _requestHandler
-
 @if(RolesVM is not null)
 {
     <MudPaper Class="pa-4">
@@ -76,10 +74,19 @@
 
 @code {
     [Parameter]
-    public required string ApiUrl { get; init; }
+    public EventCallback RolesUpdated { get; set; }
 
     [Parameter]
-    public EventCallback RolesUpdated { get; set; }
+    public required Func<Guid, UpdateRoleNameDto, Task> UpdateNameFunc { get; set; }
+
+    [Parameter]
+    public required Func<Guid, UpdateRolePermissionsDto<TPermissions>, Task> UpdatePermissionsFunc { get; set; }
+
+    [Parameter]
+    public required Func<CreateRoleDto<TPermissions>, Task> CreateFunc { get; set; }
+
+    [Parameter]
+    public required Func<Guid, Task> DeleteFunc { get; set; }
 
     [Parameter]
     public required RolesVM<TPermissions>? RolesVM { get; set; }
@@ -163,7 +170,7 @@
     private async Task UpdateName(RoleData role)
     {
         var model = new UpdateRoleNameDto(role.NameEditValue);
-        await _requestHandler.PostAsync(ApiUrl + $"/{role.RoleVM.Id}/update-name", model);
+        await UpdateNameFunc(role.RoleVM.Id, model);
 
         CancelNameEdit(role);
         await UpdateRolesVM();
@@ -185,7 +192,7 @@
         var permissions = CreatePermissionsFromList(role.PermissionsFlags);
         var model = new UpdateRolePermissionsDto<TPermissions>(permissions);
 
-        await _requestHandler.PostAsync(ApiUrl + $"/{role.RoleVM.Id}/update-permissions", model);
+        await UpdatePermissionsFunc(role.RoleVM.Id, model);
         await UpdateRolesVM();
     }
 
@@ -199,7 +206,7 @@
         var permissions = CreatePermissionsFromList(_createRoleForm.PermissionsFlags);
         var model = new CreateRoleDto<TPermissions>(_createRoleForm.Name, permissions);
 
-        await _requestHandler.PostAsync(ApiUrl, model);
+        await CreateFunc(model);
         await UpdateRolesVM();
         _createRoleForm = new();
     }
@@ -211,7 +218,7 @@
             return;
         }
 
-        await _requestHandler.PostAsync(ApiUrl + $"/{roleId}/delete");
+        await DeleteFunc(roleId);
         await UpdateRolesVM();
     }
 

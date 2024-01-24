@@ -25,14 +25,22 @@
         }
         @if (_membersVM is not null)
         {
-            <MembersList Members="@_membersVM.Members" ManageRolesPermission="_manageRolesPermission" RemoveMembersPermission="_removeMembersPermission" ApiUrl="@($"projects/{ProjectId}/members")" 
-                MembersUpdated="UpdateMembersVM" RolesVM="@_rolesVM"></MembersList>
+            <MembersList Members="@_membersVM.Members" ManageRolesPermission="_manageRolesPermission" RemoveMembersPermission="_removeMembersPermission" 
+                MembersUpdated="UpdateMembersVM" RolesVM="@_rolesVM" 
+                UpdateRoleFunc="async (memberId, model) => await _projectsService.UpdateMemberRole(ProjectId, memberId, model)"
+                RemoveMemberFunc="async (memberId) => await _projectsService.RemoveMember(ProjectId, memberId)"
+            ></MembersList>
         }
     </MudTabPanel>
     @if (_manageRolesPermission)
     {
         <MudTabPanel Text="Roles">
-            <RolesEditor RolesVM="@_rolesVM" TPermissions="ProjectPermissions" ApiUrl="@($"projects/{ProjectId}/roles")" RolesUpdated="UpdateRolesVM"></RolesEditor>
+            <RolesEditor RolesVM="@_rolesVM" TPermissions="ProjectPermissions" RolesUpdated="UpdateRolesVM"
+                UpdateNameFunc="async (roleId, model) => await _projectsService.UpdateRoleName(ProjectId, roleId, model)"
+                UpdatePermissionsFunc="async (roleId, model) => await _projectsService.UpdateRolePermissions(ProjectId, roleId, model)"
+                CreateFunc="async (model) => await _projectsService.CreateRole(ProjectId, model)"
+                DeleteFunc="async (roleId) => await _projectsService.DeleteRole(ProjectId, roleId)"
+            ></RolesEditor>
         </MudTabPanel>
     }
 </MudTabs>
