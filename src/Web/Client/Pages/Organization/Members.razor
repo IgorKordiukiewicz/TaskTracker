@@ -4,6 +4,7 @@
 @attribute [Authorize]
 
 @inject OrganizationsService _organizationsService
+@inject UsersService _usersService
 @inject IAuthorizationService _authorizationService
 
 <MudTabs Outlined="false" Border="true" ApplyEffectsToContainer="true" Color="Color.Default" Rounded="true" Position="Position.Top" Centered="false">
@@ -145,7 +146,7 @@
             return Enumerable.Empty<UserSearchVM>();
         }
 
-        var users = await _organizationsService.GetUsersAvailableForInvitation(OrganizationId, value);
+        var users = await _usersService.GetAvailableForInvitation(OrganizationId, value);
         return users?.Users ?? Enumerable.Empty<UserSearchVM>();
     }
 

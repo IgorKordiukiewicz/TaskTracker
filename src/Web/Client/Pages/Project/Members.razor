@@ -3,6 +3,7 @@
 @attribute [Authorize]
 
 @inject ProjectsService _projectsService
+@inject UsersService _usersService
 @inject IAuthorizationService _authorizationService
 @inject UserDataService _userDataService
 
@@ -88,7 +89,7 @@
 
         if(_addMembersPermission)
         {
-            _usersVM = await _projectsService.GetAvailableUsers(ProjectId, organizationId);
+            _usersVM = await _usersService.GetAvailableForProject(ProjectId, organizationId);
         }
     }
 

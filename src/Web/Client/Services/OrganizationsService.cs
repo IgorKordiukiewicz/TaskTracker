@@ -29,15 +29,6 @@ public class OrganizationsService : ApiService
     public async Task<RolesVM<OrganizationPermissions>?> GetRoles(Guid organizationId)
         => await Get<RolesVM<OrganizationPermissions>>($"organizations/{organizationId}/roles");
 
-    public async Task<UsersSearchVM?> GetUsersAvailableForInvitation(Guid organizationId, string searchValue)
-    {
-        var url = $"users/available-for-invitation"
-            .SetQueryParam("searchValue", searchValue)
-            .SetQueryParam("organizationId", organizationId)
-            .ToString();
-        return await Get<UsersSearchVM>(url);
-    }
-
     public async Task<bool> Create(CreateOrganizationDto model)
         => await Post("organizations", model);
 

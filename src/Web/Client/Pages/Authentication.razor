@@ -8,7 +8,7 @@
 @inject NavigationManager _navigationManager
 @inject IConfiguration _configuration
 @inject AuthenticationStateProvider _authenticationStateProvider
-@inject RequestHandler _requestHandler
+@inject UsersService _usersService
 @inject UserDataService _userDataService
 
 <RemoteAuthenticatorView Action="@Action" OnLogInSucceeded="OnLogIn" OnLogOutSucceeded="OnLogOut">
@@ -30,7 +30,7 @@
     {
         var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var userAuthId = state.User.Claims.First(x => x.Type == "sub").Value;
-        var isRegistered = await _requestHandler.GetAsync<bool>($"users/{userAuthId}/is-registered");
+        var isRegistered = await _usersService.IsRegistered(userAuthId);
         if(isRegistered)
         {
             await _userDataService.UpdateUserData();

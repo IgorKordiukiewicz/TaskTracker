@@ -3,17 +3,18 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Shared.Enums;
 using Shared.ViewModels;
 using Web.Client.Components;
+using Web.Client.Services;
 
 namespace Web.Client.Common;
 
 public class UserDataService
 {
-    private readonly RequestHandler _requestHandler;
+    private readonly UsersService _usersService;
     private readonly AuthenticationStateProvider _authenticationStateProvider;
 
-    public UserDataService(RequestHandler requestHandler, AuthenticationStateProvider authenticationStateProvider)
+    public UserDataService(UsersService usersService, AuthenticationStateProvider authenticationStateProvider)
     {
-        _requestHandler = requestHandler;
+        _usersService = usersService;
         _authenticationStateProvider = authenticationStateProvider;
     }
 
@@ -29,7 +30,7 @@ public class UserDataService
         if (isAuthenticated)
         {
             var userAuthId = state.User.Claims.First(x => x.Type == "sub").Value;
-            CurrentUserVM = await _requestHandler.GetAsync<UserVM>($"users/{userAuthId}/data");
+            CurrentUserVM = await _usersService.Get(userAuthId);
             
             if(SignedIn is not null)
             {

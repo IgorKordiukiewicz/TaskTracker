@@ -3,7 +3,7 @@
 
 @inject AuthenticationStateProvider _authenticationStateProvider
 @inject NavigationManager _navigationManager
-@inject RequestHandler _requestHandler
+@inject UsersService _usersService
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -32,7 +32,7 @@
         var userAuthid = state.User.Claims.First(x => x.Type == "sub").Value;
         var email = state.User.Identity?.Name ?? string.Empty;
         var model = new UserRegistrationDto(userAuthid, email, _firstName, _lastName);
-        var result = await _requestHandler.PostWithResultAsync("users/register", model);
+        var result = await _usersService.Register(model);
         if(result)
         {
             _navigationManager.NavigateTo("/", true);

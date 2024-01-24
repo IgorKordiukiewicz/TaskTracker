@@ -19,15 +19,6 @@ public class ProjectsService : ApiService
     public async Task<bool> Create(Guid organizationId, CreateProjectDto model)
         => await Post($"projects/organization/{organizationId}", model);
 
-    public async Task<UsersSearchVM?> GetAvailableUsers(Guid projectId, Guid organizationId)
-    {
-        var url = "users/available-for-project"
-                .SetQueryParam("projectId", projectId)
-                .SetQueryParam("organizationId", organizationId)
-                .ToString();
-        return await Get<UsersSearchVM>(url);
-    }
-
     public async Task<RolesVM<ProjectPermissions>?> GetRoles(Guid projectId)
         => await Get<RolesVM<ProjectPermissions>>($"projects/{projectId}/roles");
 
