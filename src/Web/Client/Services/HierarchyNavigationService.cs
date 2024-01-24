@@ -1,9 +1,8 @@
 ﻿using MudBlazor;
 using Shared.ViewModels;
 using Web.Client.Components;
-using Web.Client.Services;
 
-namespace Web.Client.Common;
+namespace Web.Client.Services;
 
 public class HierarchyNavigationService
 {
@@ -41,7 +40,7 @@ public class HierarchyNavigationService
         var navData = await _organizationsService.GetNavData(organizationId);
         _organization = navData?.Organization;
 
-        if(Updated is not null)
+        if (Updated is not null)
         {
             Updated();
         }
@@ -68,7 +67,7 @@ public class HierarchyNavigationService
             result.Add(new(_organization.Name, href: $"/org/{_organization.Id}/"));
         }
 
-        if(_project is not null)
+        if (_project is not null)
         {
             result.Add(new(_project.Name, href: $"project/{_project.Id}/"));
         }

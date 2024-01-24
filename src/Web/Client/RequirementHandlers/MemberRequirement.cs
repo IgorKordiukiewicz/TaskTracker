@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Shared.Authorization;
 using Shared.Enums;
 using Shared.ViewModels;
-using Web.Client.Common;
+using Web.Client.Services;
 
 namespace Web.Client.RequirementHandlers;
 

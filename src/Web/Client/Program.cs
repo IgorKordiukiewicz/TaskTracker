@@ -4,7 +4,6 @@ using MudBlazor.Services;
 using Web.Client;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Web.Client.Components;
-using Web.Client.Common;
 using Blazored.LocalStorage;
 using Web.Client.RequirementHandlers;
 using Microsoft.AspNetCore.Authorization;

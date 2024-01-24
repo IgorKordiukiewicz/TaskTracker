@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Shared.Enums;
 using Shared.ViewModels;
 using Web.Client.Components;
-using Web.Client.Services;
 
-namespace Web.Client.Common;
+namespace Web.Client.Services;
 
 public class UserDataService
 {
@@ -31,8 +30,8 @@ public class UserDataService
         {
             var userAuthId = state.User.Claims.First(x => x.Type == "sub").Value;
             CurrentUserVM = await _usersService.Get(userAuthId);
-            
-            if(SignedIn is not null)
+
+            if (SignedIn is not null)
             {
                 SignedIn();
             }
@@ -43,7 +42,7 @@ public class UserDataService
     {
         CurrentUserVM = null;
 
-        if(SignedOut is not null)
+        if (SignedOut is not null)
         {
             SignedOut();
         }
@@ -58,7 +57,7 @@ public class UserDataService
     private bool HasPermission<TPermissions>(Guid entityId, TPermissions permissions, Func<UserVM, IReadOnlyDictionary<Guid, TPermissions>> permissionsByEntitySelector)
         where TPermissions : struct, Enum
     {
-        if(CurrentUserVM is null)
+        if (CurrentUserVM is null)
         {
             return false;
         }
