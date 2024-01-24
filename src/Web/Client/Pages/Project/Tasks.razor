@@ -4,7 +4,7 @@
 @layout ProjectLayout
 @attribute [Authorize]
 
-@inject RequestHandler _requestHandler
+@inject TasksService _tasksService
 @inject ProjectsService _projectsService
 @inject UserDataService _userDataService
 @inject IAuthorizationService _authorizationService
@@ -262,7 +262,7 @@
 
     private async Task UpdateTasksVM()
     {
-        _tasksVM = await _requestHandler.GetAsync<TasksVM>("tasks", new[] { ("ProjectId", ProjectId.ToString()) }); // TODO: Optimize it, don't fetch all tasks again
+        _tasksVM = await _tasksService.GetList(ProjectId); // TODO: Optimize it, don't fetch all tasks again
         if(_taskDetailsPopup?.Visible ?? false)
         {
             _taskDetailsPopup!.Update(_tasksVM!.Tasks.Single(x => x.Id == _taskDetailsPopup.CurrentTaskId));
@@ -297,7 +297,7 @@
             Priority = _createTaskForm.Priority,
             AssigneeMemberId = _createTaskForm.Assignee?.Id
         };
-        await _requestHandler.PostAsync("tasks", model, new[] { ("ProjectId", ProjectId.ToString()) });
+        await _tasksService.Create(ProjectId, model);
         await UpdateTasksVM();
         _createTaskForm = new();
     }

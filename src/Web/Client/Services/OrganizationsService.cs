@@ -68,4 +68,7 @@ public class OrganizationsService : ApiService
 
     public async Task<bool> DeleteRole(Guid organizationId, Guid roleId)
         => await Post($"organizations/{organizationId}/roles/{roleId}/delete");
+
+    public async Task<OrganizationNavigationVM?> GetNavData(Guid organizationId)
+        => await Get<OrganizationNavigationVM>($"organizations/{organizationId}/nav-data");
 }

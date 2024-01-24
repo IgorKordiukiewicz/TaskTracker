@@ -20,13 +20,13 @@ builder.Services.AddHttpClient("ServerAPI",
     .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 
 // TODO: Extract to a separate class
-builder.Services.AddScoped<RequestHandler>();
 builder.Services.AddScoped<UserDataService>();
+builder.Services.AddScoped<HierarchyNavigationService>();
 builder.Services.AddScoped<OrganizationsService>();
 builder.Services.AddScoped<WorkflowsService>();
 builder.Services.AddScoped<ProjectsService>();
 builder.Services.AddScoped<UsersService>();
-builder.Services.AddScoped<HierarchyNavigationService>();
+builder.Services.AddScoped<TasksService>();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ServerAPI"));
 

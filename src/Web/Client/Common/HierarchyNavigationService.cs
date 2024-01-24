@@ -1,6 +1,7 @@
 ﻿using MudBlazor;
 using Shared.ViewModels;
 using Web.Client.Components;
+using Web.Client.Services;
 
 namespace Web.Client.Common;
 
@@ -9,16 +10,18 @@ public class HierarchyNavigationService
     private NavigationItemVM? _organization = null;
     private NavigationItemVM? _project = null;
 
-    private readonly RequestHandler _requestHandler;
+    private readonly OrganizationsService _organizationsService;
+    private readonly ProjectsService _projectsService;
 
     public event Action? Updated;
 
     public Guid? OrganizationId => _organization?.Id;
     public Guid? ProjectId => _project?.Id;
 
-    public HierarchyNavigationService(RequestHandler requestHandler)
+    public HierarchyNavigationService(OrganizationsService organizationsService, ProjectsService projectsService)
     {
-        _requestHandler = requestHandler;
+        _organizationsService = organizationsService;
+        _projectsService = projectsService;
     }
 
     public void OpenIndexPage()
@@ -35,7 +38,7 @@ public class HierarchyNavigationService
     public async Task OpenOrganizationPage(Guid organizationId)
     {
         _project = null;
-        var navData = await _requestHandler.GetAsync<OrganizationNavigationVM>($"organizations/{organizationId}/nav-data");
+        var navData = await _organizationsService.GetNavData(organizationId);
         _organization = navData?.Organization;
 
         if(Updated is not null)
@@ -46,7 +49,7 @@ public class HierarchyNavigationService
 
     public async Task OpenProjectPage(Guid projectId)
     {
-        var navData = await _requestHandler.GetAsync<ProjectNavigationVM>($"projects/{projectId}/nav-data");
+        var navData = await _projectsService.GetNavData(projectId);
         _project = navData?.Project;
         _organization = navData?.Organization;
 

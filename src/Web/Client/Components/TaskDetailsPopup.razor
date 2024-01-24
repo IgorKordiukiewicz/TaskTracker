@@ -1,4 +1,4 @@
-﻿@inject RequestHandler _requestHandler
+﻿@inject TasksService _tasksService
 
 <MudOverlay Visible="@Visible" DarkBackground="true">
     <MudPaper Class="task-details-popup pa-6">
@@ -252,17 +252,17 @@
 
     private async Task UpdateCommentsVM()
     {
-        _commentsVM = await _requestHandler.GetAsync<TaskCommentsVM>($"tasks/{_taskVM!.Id}/comments", new[] { ("ProjectId", ProjectId.ToString()) });
+        _commentsVM = await _tasksService.GetComments(ProjectId, _taskVM!.Id);
     }
 
     private async Task UpdateActivitiesVM()
     {
-        _activitiesVM = await _requestHandler.GetAsync<TaskActivitiesVM>($"tasks/{_taskVM!.Id}/activities", new[] { ("ProjectId", ProjectId.ToString()) });
+        _activitiesVM = await _tasksService.GetActivities(ProjectId, _taskVM!.Id);
     }
 
     public async Task UpdateTaskStatus(Guid taskId, Guid newStatusId)
     {
-        await _requestHandler.PostAsync($"tasks/{taskId}/update-status/{newStatusId}", headers: new[] { ("ProjectId", ProjectId.ToString()) });
+        _ = await _tasksService.UpdateStatus(ProjectId, _taskVM!.Id, newStatusId); // TODO: Use dto instead of sending statusId in route
 
         await TaskUpdated.InvokeAsync();
         await UpdateActivitiesVM();
@@ -271,7 +271,7 @@
     private async Task UpdateTaskPriority(Guid taskId, TaskPriority newPriority)
     {
         var model = new UpdateTaskPriorityDto(newPriority);
-        await _requestHandler.PostAsync($"tasks/{taskId}/update-priority", model, headers: new[] { ("ProjectId", ProjectId.ToString()) });
+        _ = await _tasksService.UpdatePriority(ProjectId, _taskVM!.Id, model);
 
         await TaskUpdated.InvokeAsync();
         await UpdateActivitiesVM();
@@ -280,7 +280,7 @@
     private async Task UpdateTaskAssignee(Guid taskId, Guid memberId)
     {
         var model = new UpdateTaskAssigneeDto(memberId != Guid.Empty ? memberId : null);
-        await _requestHandler.PostAsync($"tasks/{taskId}/update-assignee", model, headers: new[] { ("ProjectId", ProjectId.ToString()) });
+        _ = await _tasksService.UpdateAssignee(ProjectId, _taskVM!.Id, model);
 
         await TaskUpdated.InvokeAsync();
         await UpdateActivitiesVM();
@@ -294,7 +294,7 @@
         }
 
         var model = new UpdateTaskDescriptionDto(_editDescriptionForm.Content);
-        await _requestHandler.PostAsync($"tasks/{taskId}/update-description", model, headers: new[] { ("ProjectId", ProjectId.ToString()) });
+        _ = await _tasksService.UpdateDescription(ProjectId, _taskVM!.Id, model);
 
         await TaskUpdated.InvokeAsync();
         await UpdateActivitiesVM();
@@ -309,7 +309,7 @@
         }
 
         var model = new AddTaskCommentDto(_addCommentForm.Content);
-        await _requestHandler.PostAsync($"tasks/{_taskVM!.Id}/comments", model, new[] { ("ProjectId", ProjectId.ToString()) });
+        _ = await _tasksService.AddComment(ProjectId, _taskVM!.Id, model);
 
         await UpdateCommentsVM();
         _addCommentForm = new();
