@@ -36,6 +36,11 @@ public class HierarchyNavigationService
 
     public async Task OpenOrganizationPage(Guid organizationId)
     {
+        if(OrganizationId == organizationId && ProjectId is null) // Only ignore when going from org page to org page, not when from org's project page to org page.
+        {
+            return;
+        }
+
         _project = null;
         var navData = await _organizationsService.GetNavData(organizationId);
         _organization = navData?.Organization;
@@ -48,6 +53,11 @@ public class HierarchyNavigationService
 
     public async Task OpenProjectPage(Guid projectId)
     {
+        if(ProjectId == projectId)
+        {
+            return;
+        }
+
         var navData = await _projectsService.GetNavData(projectId);
         _project = navData?.Project;
         _organization = navData?.Organization;
