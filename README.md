@@ -17,6 +17,7 @@ Task/issue tracker made with ASP.NET Core & Blazor WASM.
   * Priorities
   * Assignees
   * Comments
+  * Activity History
 * Custom task status workflows
 * Custom members roles
 * Organization membership invitations
