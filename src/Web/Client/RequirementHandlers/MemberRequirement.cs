@@ -43,8 +43,12 @@ public abstract class MemberRequirementHandler<TAuthorizationRequirement, TPermi
 
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, MemberRequirement<TPermissions> requirement)
     {
+        if (_userDataService.CurrentUserVM is null)
+        {
+            await _userDataService.UpdateUserData();
+        }
         var currentUser = _userDataService.CurrentUserVM;
-        if (currentUser is null)
+        if(currentUser is null)
         {
             context.Fail();
             return;
