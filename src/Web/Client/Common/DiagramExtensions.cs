@@ -33,7 +33,8 @@ public static class DiagramExtensions
 
             var node = diagram.Nodes.Add(new TaskStatusNodeModel(position: position)
             {
-                Name = status.Name.ToUpper()
+                Name = status.Name.ToUpper(),
+                Initial = status.Initial
             });
             nodeByStatusId.Add(status.Id, node);
         }

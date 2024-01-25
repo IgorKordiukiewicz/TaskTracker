@@ -7,6 +7,12 @@
     <MudText Typo="Typo.h6" Align="Align.Center" Style="font-weight: bold; color: white;">
         @Node.Name
     </MudText>
+    @if(Node.Initial)
+    {
+        <MudText Typo="Typo.caption" Align="Align.Center" Style="position: absolute; top: 80%; left: 50%; transform: translate(-50%, -50%)">
+            Initial
+        </MudText>
+    }
 
     @foreach(var port in Node.Ports)
     {
