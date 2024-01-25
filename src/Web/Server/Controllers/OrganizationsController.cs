@@ -59,7 +59,7 @@ public class OrganizationsController : ControllerBase
     /// <param name="organizationId"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpGet("{organizationId:guid}/nav-data")]
-    [ProducesResponseType(typeof(OrganizationsForUserVM), 200)]
+    [ProducesResponseType(typeof(OrganizationNavigationVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetOrganizationNavData(Guid organizationId)
     {
@@ -68,7 +68,7 @@ public class OrganizationsController : ControllerBase
     }
 
     /// <summary>
-    /// Create a invitation to organization for given user.
+    /// Create a invitation to organization for a given user.
     /// </summary>
     /// <param name="organizationId"></param>
     /// <param name="model"></param>
@@ -83,7 +83,7 @@ public class OrganizationsController : ControllerBase
     }
 
     /// <summary>
-    /// Get all invitations of organization.
+    /// Get all invitations of an  organization.
     /// </summary>
     /// <param name="organizationId"></param>
     /// <param name="pagination"></param>
@@ -138,7 +138,7 @@ public class OrganizationsController : ControllerBase
     }
 
     /// <summary>
-    /// Cancel organization invitaion (by organization member).
+    /// Cancel organization invitation (by organization member).
     /// </summary>
     /// <param name="invitationId"></param>
     /// <response code="404">Organization with given invitation not found.</response> 
@@ -152,7 +152,7 @@ public class OrganizationsController : ControllerBase
     }
 
     /// <summary>
-    /// Get members of organization.
+    /// Get members of an organization.
     /// </summary>
     /// <param name="organizationId"></param>
     /// <response code="404">Organization not found.</response> 
@@ -167,7 +167,7 @@ public class OrganizationsController : ControllerBase
     }
 
     /// <summary>
-    /// Remove member from organization.
+    /// Remove member from an organization.
     /// </summary>
     /// <param name="organizationId"></param>
     /// <param name="memberId"></param>
@@ -182,7 +182,7 @@ public class OrganizationsController : ControllerBase
     }
 
     /// <summary>
-    /// Update role of organization's member.
+    /// Update role of an organization member.
     /// </summary>
     /// <param name="organizationId"></param>
     /// <param name="memberId"></param>
@@ -198,7 +198,7 @@ public class OrganizationsController : ControllerBase
     }
 
     /// <summary>
-    /// Get roles of organization.
+    /// Get a list of roles for an organization.
     /// </summary>
     /// <param name="organizationId"></param>
     /// <response code="404">Organization not found.</response> 
@@ -228,7 +228,7 @@ public class OrganizationsController : ControllerBase
     }
 
     /// <summary>
-    /// Delete a organization role.
+    /// Delete an organization role.
     /// </summary>
     /// <param name="organizationId"></param>
     /// <param name="roleId"></param>
@@ -243,7 +243,7 @@ public class OrganizationsController : ControllerBase
     }
 
     /// <summary>
-    /// Update name of a organization role.
+    /// Update name of an organization role.
     /// </summary>
     /// <param name="organizationId"></param>
     /// <param name="roleId"></param>
@@ -259,7 +259,7 @@ public class OrganizationsController : ControllerBase
     }
 
     /// <summary>
-    /// Update permissions of a organization role.
+    /// Update permissions of an organization role.
     /// </summary>
     /// <param name="organizationId"></param>
     /// <param name="roleId"></param>
