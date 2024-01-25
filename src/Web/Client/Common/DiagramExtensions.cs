@@ -20,9 +20,9 @@ public static class DiagramExtensions
         {
             var nameUpper = status.Name.ToUpper();
             Point position;
-            if(savedLayout is not null)
+            if(savedLayout?.PositionByNodeName.TryGetValue(nameUpper, out var savedPosition) ?? false)
             {
-                var (x, y) = savedLayout.PositionByNodeName[nameUpper];
+                var (x, y) = savedPosition;
                 position = new Point(x, y);
             }
             else
