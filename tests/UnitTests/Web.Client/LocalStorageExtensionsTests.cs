@@ -53,7 +53,7 @@ public class FakeLocalStorageService : ILocalStorageService
 
 public class LocalStorageExtensionsTests
 {
-    private FakeLocalStorageService _localStorage = new();
+    private readonly FakeLocalStorageService _localStorage = new();
 
     [Fact]
     public async Task GetDiagramLayout_ShouldReturnNull_WhenNoLayoutWasSaved()
