@@ -74,12 +74,12 @@ public class HierarchyNavigationService
 
         if (_organization is not null)
         {
-            result.Add(new(_organization.Name, href: $"/org/{_organization.Id}/"));
+            result.Add(new(_organization.Name, href: $"/org/{_organization.Id}/projects"));
         }
 
         if (_project is not null)
         {
-            result.Add(new(_project.Name, href: $"project/{_project.Id}/"));
+            result.Add(new(_project.Name, href: $"project/{_project.Id}/tasks/table"));
         }
 
         return result;
