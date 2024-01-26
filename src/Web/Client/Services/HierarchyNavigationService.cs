@@ -1,6 +1,5 @@
 ﻿using MudBlazor;
 using Shared.ViewModels;
-using Web.Client.Components;
 
 namespace Web.Client.Services;
 

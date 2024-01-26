@@ -1,13 +1,12 @@
+using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
-using Web.Client;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-using Web.Client.Components;
-using Blazored.LocalStorage;
-using Web.Client.RequirementHandlers;
-using Microsoft.AspNetCore.Authorization;
 using Shared.Authorization;
+using Web.Client;
+using Web.Client.RequirementHandlers;
 using Web.Client.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);

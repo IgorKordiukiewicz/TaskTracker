@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using Shared.Enums;
 using Shared.ViewModels;
-using Web.Client.Components;
 
 namespace Web.Client.Services;
 
