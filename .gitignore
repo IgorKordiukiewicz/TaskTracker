@@ -5,6 +5,8 @@ project.lock.json
 *.pyc
 nupkg/
 
+global.json
+
 # Visual Studio Code
 .vscode
 
