@@ -216,4 +216,31 @@ public class WorkflowTests
             workflow.Transitions.Count.Should().Be(transitionsCountBefore - 1);
         }
     }
+
+    [Fact]
+    public void ChangeInitialStatus_ShouldFail_WhenStatusDoesNotExist()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+
+        var result = workflow.ChangeInitialStatus(Guid.NewGuid());
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ChangeInitialStatus_ShouldChangeInitialStatus_WhenStatusExists()
+    {
+        var workflow = Workflow.Create(Guid.NewGuid());
+        var initialStatus = workflow.Statuses.First(x => x.Initial);
+        var newInitialStatus = workflow.Statuses.First(x => x.Id != initialStatus.Id);
+
+        var result = workflow.ChangeInitialStatus(newInitialStatus.Id);
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            initialStatus.Initial.Should().BeFalse();
+            newInitialStatus.Initial.Should().BeTrue();
+        }
+    }
 }

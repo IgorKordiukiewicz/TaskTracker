@@ -237,4 +237,29 @@ public class WorkflowsTests
             (await _fixture.CountAsync<TaskStatusTransition>()).Should().Be(transitionsCountBefore - 1);
         }
     }
+
+    [Fact]
+    public async System.Threading.Tasks.Task ChangeInitialStatus_ShouldFail_WhenWorkflowDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new ChangeInitialWorkflowStatusCommand(Guid.NewGuid(), new(Guid.NewGuid())));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task ChangeInitialStatus_ShouldUpdateStatusesInitialFlags_WhenWorkflowExists()
+    {
+        var workflow = (await _factory.CreateWorkflows())[0];
+        var initialStatusId = workflow.Statuses.First(x => x.Initial).Id;
+        var newInitialStatusId = workflow.Statuses.First(x => x.Id != initialStatusId).Id;
+
+        var result = await _fixture.SendRequest(new ChangeInitialWorkflowStatusCommand(workflow.Id, new(newInitialStatusId)));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<TaskStatus>(x => x.Id == initialStatusId)).Initial.Should().BeFalse();
+            (await _fixture.FirstAsync<TaskStatus>(x => x.Id == newInitialStatusId)).Initial.Should().BeTrue();
+        }
+    }
 }

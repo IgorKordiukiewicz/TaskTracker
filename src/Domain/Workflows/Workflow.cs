@@ -102,6 +102,21 @@ public class Workflow : Entity, IAggregateRoot
         return Result.Ok();
     }
 
+    public Result ChangeInitialStatus(Guid statusId)
+    {
+        var status = _statuses.SingleOrDefault(x => x.Id == statusId);
+        if(status is null)
+        {
+            return Result.Fail(new DomainError("Status with this ID does not exist."));
+        }
+
+        var oldInitialStatus = _statuses.Single(x => x.Initial);
+        oldInitialStatus.Initial = false;
+        status.Initial = true;
+
+        return Result.Ok();
+    }
+
     private bool DoesTransitionExist(Guid fromStatusId, Guid toStatusId)
         => _transitions.Any(x => x.FromStatusId == fromStatusId && x.ToStatusId == toStatusId);
 }

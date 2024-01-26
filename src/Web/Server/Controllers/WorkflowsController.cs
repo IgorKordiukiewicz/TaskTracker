@@ -115,4 +115,19 @@ public class WorkflowsController : ControllerBase
         var result = await _mediator.Send(new DeleteWorkflowTransitionCommand(workflowId, model));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Change a workflow's initial status.
+    /// </summary>
+    /// <param name="workflowId"></param>
+    /// <param name="model"></param>
+    /// <response code="404">Workflow not found.</response>
+    [HttpPost("{workflowId:guid}/change-initial-status")]
+    [Authorize(Policy.ProjectManageWorkflows)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> ChangeInitialStatus(Guid workflowId, ChangeInitialWorkflowStatusDto model)
+    {
+        var result = await _mediator.Send(new ChangeInitialWorkflowStatusCommand(workflowId, model));
+        return result.ToHttpResult();
+    }
 }
