@@ -39,6 +39,11 @@
                 </MudButton>
                 @if(_selectedNode is not null)
                 {
+                    @if(!_selectedNode.Initial)
+                    {
+                        <MudDivider />
+                        <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="() => ChangeInitialStatus(_selectedNode.Name)">Make Initial</MudButton>
+                    }
                     <MudDivider />
                     <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" OnClick="() => DeleteStatus(_selectedNode.Name)">Delete Status</MudButton>
                 }
@@ -383,6 +388,27 @@
             _selectedLink = null;
             await UpdateWorkflowVM(deletedTransition: (fromStatusName, toStatusName));
         }
+    }
+
+    private async Task ChangeInitialStatus(string statusName)
+    {
+        if (_statusIdByName is null)
+        {
+            return;
+        }
+
+        var statusId = _statusIdByName[statusName];
+        var model = new ChangeInitialWorkflowStatusDto(statusId);
+        var success = await _workflowsService.ChangeInitialStatus(_workflowVM!.Id, ProjectId, model);
+
+        var previousInitialNode = (_diagram.Nodes.First(x => (x as TaskStatusNodeModel)!.Initial) as TaskStatusNodeModel)!;
+        previousInitialNode.Initial = false;
+        previousInitialNode.Refresh();
+
+        _selectedNode!.Initial = true;
+        _selectedNode!.Refresh();
+
+        await UpdateWorkflowVM();
     }
 
     private async Task SaveDiagramLayout()

@@ -35,6 +35,9 @@ public class WorkflowsService : ApiService
     public async Task<bool> DeleteTransition(Guid workflowId, Guid projectId, DeleteWorkflowTransitionDto model)
         => await Post($"workflows/{workflowId}/transitions/delete", model, ProjectIdHeader(projectId));
 
+    public async Task<bool> ChangeInitialStatus(Guid workflowId, Guid projectId, ChangeInitialWorkflowStatusDto model)
+        => await Post($"workflows/{workflowId}/change-initial-status", model, ProjectIdHeader(projectId));
+
     private static Headers ProjectIdHeader(Guid projectId)
         => Headers.From(("ProjectId", projectId.ToString()));
 }

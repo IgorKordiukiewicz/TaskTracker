@@ -1,9 +1,6 @@
 ﻿using Domain.Workflows;
-using System.Data;
 
 namespace Application.Features.Workflows;
-
-public record ChangeInitialWorkflowStatusDto(Guid StatusId);
 
 public record ChangeInitialWorkflowStatusCommand(Guid WorkflowId, ChangeInitialWorkflowStatusDto Model) : IRequest<Result>;
 
