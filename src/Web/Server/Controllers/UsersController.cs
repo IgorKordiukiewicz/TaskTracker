@@ -93,4 +93,19 @@ public class UsersController : ControllerBase
         var result = await _mediator.Send(new GetUsersAvailableForProjectQuery(organizationId, projectId));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Update a user's first and last name.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="model"></param>
+    /// <response code="404">User not found.</response> 
+    [HttpPost("{userId:guid}/update-name")]
+    [Authorize(Policy.UserSelf)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> UpdateUserName(Guid userId, [FromBody] UpdateUserNameDto model)
+    {
+        var result = await _mediator.Send(new UpdateUserNameCommand(userId, model));
+        return result.ToHttpResult();
+    }
 }

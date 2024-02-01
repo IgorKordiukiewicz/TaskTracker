@@ -24,4 +24,10 @@ public class User : Entity, IAggregateRoot
             LastName = lastName
         };
     }
+
+    public void UpdateName(string firstName, string lastName)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+    }
 }

@@ -24,3 +24,7 @@ public class ProjectMemberRequirement : MemberRequirement<ProjectPermissions>
         Permissions = permissions;
     }
 }
+
+public class UserSelfRequirement : IAuthorizationRequirement
+{
+}

@@ -50,7 +50,9 @@ internal class GetUserHandler : IRequestHandler<GetUserQuery, Result<UserVM>>
         return Result.Ok(new UserVM
         {
             Id = user.Id,
-            Name = user.FullName,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            FullName = user.FullName,
             Email = user.Email,
             PermissionsByOrganization = permissionsByOrganization,
             PermissionsByProject = permissionsByProject

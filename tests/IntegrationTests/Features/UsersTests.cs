@@ -46,7 +46,9 @@ public class UsersTests
             {
                 Id = user.Id,
                 Email = user.Email,
-                Name = user.FullName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                FullName = user.FullName,
                 PermissionsByOrganization = new Dictionary<Guid, OrganizationPermissions>(),
                 PermissionsByProject = new Dictionary<Guid, ProjectPermissions>()
             });
@@ -189,6 +191,32 @@ public class UsersTests
                     Email = "user1"
                 }
             });
+        }
+    }
+
+    [Fact]
+    public async Task UpdateUserName_ShouldFail_WhenUserWithGivenAuthIdDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateUserNameCommand(Guid.NewGuid(), new("first", "last")));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UpdateUserName_ShouldUpdateFirstAndLastName_WhenUserWithGivenAuthIdExists()
+    {
+        var user = (await _factory.CreateUsers())[0];
+        var newFirstName = user.FirstName + "A";
+        var newLastName = user.LastName + "A";
+
+        var result = await _fixture.SendRequest(new UpdateUserNameCommand(user.Id, new(newFirstName, newLastName)));
+
+        using(new AssertionScope()) 
+        {
+            result.IsSuccess.Should().BeTrue();
+            var updatedUser = await _fixture.FirstAsync<User>(x => x.Id == user.Id);
+            updatedUser.FirstName.Should().Be(newFirstName);
+            updatedUser.LastName.Should().Be(newLastName);
         }
     }
 }

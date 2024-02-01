@@ -1,8 +1,14 @@
-﻿<MudAvatar Color="Color.Primary">@Initials</MudAvatar>
+﻿<MudAvatar Color="Color.Primary" onclick="@(async () => await OnClick.InvokeAsync())" Style="@(Clickable ? "cursor: pointer;" : string.Empty)">@Initials</MudAvatar>
 
 @code {
     [Parameter]
     public required string Name { get; init; }
+
+    [Parameter]
+    public bool Clickable { get; set; } = false;
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
 
     private string Initials => string.Concat(Name.Split(' ').Select(x => x[0]));
 }

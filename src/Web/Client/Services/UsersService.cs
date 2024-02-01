@@ -37,4 +37,7 @@ public class UsersService : ApiService
                 .ToString();
         return await Get<UsersSearchVM>(url);
     }
+
+    public async Task<bool> UpdateName(Guid userId, UpdateUserNameDto model)
+        => await Post($"users/{userId}/update-name", model);
 }

@@ -9,21 +9,13 @@
     <Authorized>
         @if (_userDataService.CurrentUserVM is not null)
         {
-            <MudMenu TransformOrigin="Origin.TopCenter" AnchorOrigin="Origin.BottomCenter">
-                <ActivatorContent>
-                    <UserAvatar Name="@_userDataService.CurrentUserVM.Name" />
-                </ActivatorContent>
-                <ChildContent>
-                    <MudMenuItem>Settings</MudMenuItem> <!-- TODO -->
-                    <MudMenuItem OnClick="BeginSignOut">Sign Out</MudMenuItem>
-                </ChildContent>
-            </MudMenu>
+            <UserAvatar Name="@_userDataService.CurrentUserVM.FullName" Clickable="true" OnClick="() => { _userSettingsPopup?.Open(); }"></UserAvatar>
+            <UserSettingsPopup @ref="_userSettingsPopup" SignOutClicked="BeginSignOut"></UserSettingsPopup>
         }
         else
         {
             <a href="#" @onclick="BeginSignOut">Sign Out</a>
         }
-        
     </Authorized>
     <NotAuthorized>
         <a href="authentication/login">Sign In</a>
@@ -31,6 +23,8 @@
 </AuthorizeView>
 
 @code {
+    UserSettingsPopup? _userSettingsPopup;
+
     protected override async Task OnInitializedAsync()
     {
         _userDataService.SignedIn += () => StateHasChanged();

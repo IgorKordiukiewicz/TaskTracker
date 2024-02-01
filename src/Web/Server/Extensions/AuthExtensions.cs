@@ -21,6 +21,7 @@ public static class AuthExtensions
         services.AddAuthorization(options => options.AddPolicies());
         services.AddScoped<IAuthorizationHandler, OrganizationMemberRequirementHandler>();
         services.AddScoped<IAuthorizationHandler, ProjectMemberRequirementHandler>();
+        services.AddScoped<IAuthorizationHandler, UserSelfRequirementHandler>();
 
         return services;
     }
