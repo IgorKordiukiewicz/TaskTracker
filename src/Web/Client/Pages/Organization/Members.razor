@@ -158,7 +158,7 @@
         }
 
         var model = new CreateOrganizationInvitationDto(_selectedUserForInvitation.Id);
-        _ = _organizationsService.SendInvitation(OrganizationId, model);
+        _ = await _organizationsService.SendInvitation(OrganizationId, model);
 
         _selectedUserForInvitation = null;
 
