@@ -45,7 +45,7 @@
                         <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="() => ChangeInitialStatus(_selectedNode.Name)">Make Initial</MudButton>
                     }
                     <MudDivider />
-                    <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" OnClick="() => DeleteStatus(_selectedNode.Name)">Delete Status</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" OnClick="() => DeleteStatus(_selectedNode.Name)" Disabled="!CanStatusBeDeleted(_selectedNode.Name)">Delete Status</MudButton>
                 }
                 @if(_selectedLink is not null)
                 {
@@ -338,10 +338,10 @@
         _snackbar.Add("This status can't be deleted!", Severity.Warning);
     }
 
-    private async Task<bool> CanStatusBeDeleted(string name)
+    private bool CanStatusBeDeleted(string name)
     {
         var statusId = _statusIdByName![name];
-        return (await _workflowsService.CanStatusBeDeleted(_workflowVM!.Id, statusId, ProjectId)) ?? false;
+        return _workflowVM!.Statuses.First(x => x.Id == statusId).CanBeDeleted;
     }
 
     private async Task DeleteStatus(string name)
