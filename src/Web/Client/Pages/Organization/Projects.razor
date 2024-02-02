@@ -10,17 +10,29 @@
 
 @if (_projectsVM is not null)
 {
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _createProjectForm.Open()" Class="mb-4 mt-4">Create project</MudButton>
-    <div class="d-flex flex-column gap-4">
-        @foreach (var project in _projectsVM.Projects)
-        {
-            <MudPaper Class="project-card" onclick="@(() => SelectProject(project.Id))">
-                <MudText Typo="Typo.h6">
-                    @project.Name
-                </MudText>
-            </MudPaper>
-        }
-    </div>
+    @if (_createProjectsPermission)
+    {
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _createProjectForm.Open()" Class="mb-4 mt-4">Create project</MudButton>
+    }
+    @if(_projectsVM.Projects.Any())
+    {
+        <div class="d-flex flex-column gap-4">
+            @foreach (var project in _projectsVM.Projects)
+            {
+                <MudPaper Class="project-card" onclick="@(() => SelectProject(project.Id))">
+                    <MudText Typo="Typo.h6">
+                        @project.Name
+                    </MudText>
+                </MudPaper>
+            }
+        </div>
+    }
+    else
+    {
+        <MudText>
+            You have not been added to any projects yet.
+        </MudText>
+    }
 }
 
 <Dialog Title="Create a new project" Form="_createProjectForm" OnConfirm="CreateProject">
