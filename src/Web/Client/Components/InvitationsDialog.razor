@@ -3,21 +3,20 @@
         @for(int i = 0; i < Invitations.Count; ++i)
         {
             var invitation = Invitations[i];
-            <div class="d-flex align-center" style="width: 100%;">
+            <div class="d-flex align-center @(i == Invitations.Count - 1 ? "mb-4" : string.Empty)" style="width: 100%;">
                 <MudText>
                     @invitation.OrganizationName
                 </MudText>
                 <span style="width: 100px;" />
                 <div class="d-flex gap-2">
-                    <MudIconButton Variant="Variant.Outlined" Color="Color.Success" OnClick="() => AcceptInvitation(invitation.Id)" Icon="@Icons.Material.Filled.Check" />
-                    <MudIconButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeclineInvitation(invitation.Id)" Icon="@Icons.Material.Filled.Clear" />
+                    <MudIconButton Variant="Variant.Filled" Color="Color.Success" OnClick="() => AcceptInvitation(invitation.Id)" Icon="@Icons.Material.Filled.Check" />
+                    <MudIconButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => DeclineInvitation(invitation.Id)" Icon="@Icons.Material.Filled.Clear" />
                 </div>
             </div>
             @if(i < Invitations.Count - 1)
             {
                 <MudDivider Class="my-2" />
             }
-            
         }
     </DialogContent>
 </MudDialog>
