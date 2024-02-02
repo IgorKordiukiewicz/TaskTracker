@@ -85,7 +85,26 @@
                     <MudTd DataLabel="Title">@context.Title</MudTd>
                     <MudTd DataLabel="Status">@context.Status.Name</MudTd>
                     <MudTd DataLabel="Priority">@context.Priority</MudTd>
-                    <MudTd DataLabel="Assignee">@(_membersVM.GetCurrentAssigneeVM(context.AssigneeId)?.Name ?? "-")</MudTd>
+                    <MudTd DataLabel="Assignee">
+                        @{
+                            var currentAssignee = _membersVM.GetCurrentAssigneeVM(context.AssigneeId);
+                        }
+                        @if(currentAssignee is not null)
+                        {
+                            <div class="d-flex align-center gap-2">
+                                <UserAvatar Name="@currentAssignee.Name" Size="Size.Small"></UserAvatar>
+                                <text>
+                                    @currentAssignee.Name
+                                </text>
+                            </div>
+                        }
+                        else
+                        {
+                            <text>
+                                -
+                            </text>
+                        }
+                    </MudTd>
                 </RowTemplate>
                 <PagerContent>
                     <MudTablePager HorizontalAlignment="HorizontalAlignment.End" />

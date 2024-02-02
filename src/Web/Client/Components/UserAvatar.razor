@@ -1,4 +1,4 @@
-﻿<MudAvatar Color="Color.Primary" onclick="@(async () => await OnClick.InvokeAsync())" Style="@(Clickable ? "cursor: pointer;" : string.Empty)">@Initials</MudAvatar>
+﻿<MudAvatar Color="Color.Primary" onclick="@(async () => await OnClick.InvokeAsync())" Style="@(Clickable ? "cursor: pointer;" : string.Empty)" Size="@Size">@Initials</MudAvatar>
 
 @code {
     [Parameter]
@@ -6,6 +6,9 @@
 
     [Parameter]
     public bool Clickable { get; set; } = false;
+
+    [Parameter]
+    public Size Size { get; set; } = Size.Medium;
 
     [Parameter]
     public EventCallback OnClick { get; set; }
