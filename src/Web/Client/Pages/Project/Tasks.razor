@@ -13,7 +13,7 @@
 {
     <div class="d-flex flex-column max-height">
         <MudPaper Class="mb-2" Style="width: 100%;">
-            <MudGrid Class="d-flex align-end  pa-3" Spacing="1">
+            <MudGrid Class="d-flex align-end pa-3" Spacing="1">
                 <MudItem lg="3" xs="12">
                     <MudTextField T="string" @bind-Value="_filters.Title" Label="Title" Variant="Variant.Filled" AdornmentIcon="@Icons.Material.Filled.Search" Adornment="Adornment.Start" Class="flex-grow-1" FullWidth="true"></MudTextField>
                 </MudItem>
@@ -44,25 +44,20 @@
                         }
                     </MudSelect>
                 </MudItem>
-                <MudItem lg="1" xs="4">
+                <MudItem lg="3" xs="12" Class="d-flex gap-2 align-center">
                     <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Clear" Style="height: 55px;" FullWidth="true" OnClick="() => { _filters = new(); FilterTasks(); }">
-                        Clear
-                    </MudButton>
-                </MudItem>
-                <MudItem lg="1" xs="4">
+                            Clear
+                        </MudButton>
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Search" Style="height: 55px;" FullWidth="true" OnClick="() => FilterTasks()">
-                    Search
-                </MudButton>
-                </MudItem>
-                <!--TODO: use d-flex instead of column layout?-->
-                @if (_createTasksPermissions)
-                {
-                    <MudItem lg="1" xs="4">
+                        Search
+                    </MudButton>
+                    @if (_createTasksPermissions)
+                    {
                         <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="() => _createTaskForm.Open()" Style="height: 55px;" StartIcon="@Icons.Material.Filled.AddTask" FullWidth="true">
                             Create
                         </MudButton>
-                    </MudItem>
-                }
+                    }
+                </MudItem>
             </MudGrid>
         </MudPaper>
         <TaskDetailsPopup @ref="_taskDetailsPopup" ProjectId="ProjectId" TaskUpdated="UpdateTasksVM" MembersVM="_membersVM"
