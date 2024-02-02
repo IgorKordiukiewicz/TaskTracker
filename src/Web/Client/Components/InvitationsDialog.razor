@@ -1,4 +1,6 @@
-﻿<MudDialog>
+﻿@inject UserDataService _userDataService
+
+<MudDialog>
     <DialogContent>
         @for(int i = 0; i < Invitations.Count; ++i)
         {
@@ -37,6 +39,7 @@
     {
         await OrganizationService.AcceptInvitation(invitationId);
         HandleInvitation(invitationId);
+        await _userDataService.UpdateUserData(); // Call to update cached user's permissions
     }
 
     private async Task DeclineInvitation(Guid invitationId)
