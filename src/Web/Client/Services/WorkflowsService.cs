@@ -26,9 +26,6 @@ public class WorkflowsService : ApiService
     public async Task<bool> AddTransition(Guid workflowId, Guid projectId, AddWorkflowTransitionDto model)
         => await Post($"workflows/{workflowId}/transitions", model, ProjectIdHeader(projectId));
 
-    public async Task<bool?> CanStatusBeDeleted(Guid workflowId, Guid statusId, Guid projectId)
-        => await Get<bool>($"workflows/{workflowId}/statuses/{statusId}/can-be-deleted", ProjectIdHeader(projectId));
-
     public async Task<bool> DeleteStatus(Guid workflowId, Guid statusId, Guid projectId)
         => await Post($"workflows/{workflowId}/statuses/{statusId}/delete", ProjectIdHeader(projectId));
 

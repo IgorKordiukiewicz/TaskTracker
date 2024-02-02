@@ -56,22 +56,6 @@ public class WorkflowsController : ControllerBase
     }
 
     /// <summary>
-    /// Check whether status can be deleted.
-    /// </summary>
-    /// <param name="workflowId"></param>
-    /// <param name="statusId"></param>
-    /// <response code="404">Workflow or status not found.</response>
-    [HttpGet("{workflowId:guid}/statuses/{statusId:guid}/can-be-deleted")]
-    [Authorize(Policy.ProjectManageWorkflows)]
-    [ProducesResponseType(typeof(bool), 200)]
-    [ProducesResponseType(404)]
-    public async Task<IActionResult> CanStatusBeDeleted(Guid workflowId, Guid statusId)
-    {
-        var result = await _mediator.Send(new CanWorkflowStatusBeDeletedQuery(workflowId, statusId));
-        return result.ToHttpResult();
-    }
-
-    /// <summary>
     /// Delete a workflow status.
     /// </summary>
     /// <param name="workflowId"></param>
