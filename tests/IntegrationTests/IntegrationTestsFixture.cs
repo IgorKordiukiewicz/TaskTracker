@@ -1,12 +1,12 @@
 ﻿using Application.Common;
 using Application.Data;
-using Domain.Common;
-using FluentAssertions.Common;
+using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
 using System.Linq.Expressions;
 
 namespace IntegrationTests;
@@ -21,6 +21,8 @@ public class IntegrationTestsFixture : IDisposable
     private readonly IServiceProvider _services;
     private readonly string _connectionString = "Server=(localdb)\\mssqllocaldb;Database=TaskTrackerDbTests;Trusted_Connection=True"; // TODO: Store it somewhere else?
 
+    public IBackgroundJobClient BackgroundJobClientMock { get; } = Substitute.For<IBackgroundJobClient>();
+
     public IntegrationTestsFixture()
     {
         var appFactory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
@@ -34,12 +36,21 @@ public class IntegrationTestsFixture : IDisposable
                 services.AddDbContext<AppDbContext>(options => options.UseSqlServer(_connectionString));
 
                 services.AddScoped<IDateTimeProvider, TestDateTimeProvider>();
+                services.AddScoped<IBackgroundJobClient>(serviceProvider => BackgroundJobClientMock);
             });
 
             builder.UseEnvironment("Development");
         });
 
         _services = appFactory.Services;
+    }
+
+    public async Task ExecuteOnService<T>(Func<T, Task> action) 
+        where T : notnull
+    {
+        using var scope = _services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<T>();
+        await action(service);
     }
 
     public void ResetDb()

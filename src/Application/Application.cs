@@ -33,6 +33,8 @@ public static class Application
         services.AddScoped<IRepository<Domain.Tasks.Task>, TaskRepository>();
         services.AddScoped<IRepository<Workflow>, WorkflowRepository>();
 
+        services.AddScoped<IJobsService, JobsService>();
+
         services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 
         return services;

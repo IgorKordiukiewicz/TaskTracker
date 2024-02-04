@@ -1,4 +1,6 @@
-﻿using Domain.Organizations;
+﻿using Application.Common;
+using Domain.Organizations;
+using Hangfire;
 
 namespace Application.Features.Organizations;
 
@@ -16,10 +18,14 @@ internal class RemoveOrganizationMemberCommandValidator : AbstractValidator<Remo
 internal class RemoveOrganizationMemberHandler : IRequestHandler<RemoveOrganizationMemberCommand, Result>
 {
     private readonly IRepository<Organization> _organizationRepository;
+    private readonly IBackgroundJobClient _jobClient;
+    private readonly IJobsService _jobsService;
 
-    public RemoveOrganizationMemberHandler(IRepository<Organization> organizationRepository)
+    public RemoveOrganizationMemberHandler(IRepository<Organization> organizationRepository, IBackgroundJobClient jobClient, IJobsService jobsService)
     {
         _organizationRepository = organizationRepository;
+        _jobClient = jobClient;
+        _jobsService = jobsService;
     }
 
     public async Task<Result> Handle(RemoveOrganizationMemberCommand request, CancellationToken cancellationToken)
@@ -30,6 +36,8 @@ internal class RemoveOrganizationMemberHandler : IRequestHandler<RemoveOrganizat
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
         }
 
+        var userId = organization.Members.FirstOrDefault(x => x.Id == request.MemberId)?.UserId;
+
         var result = organization.RemoveMember(request.MemberId);
         if (result.IsFailed)
         {
@@ -37,6 +45,8 @@ internal class RemoveOrganizationMemberHandler : IRequestHandler<RemoveOrganizat
         }
 
         await _organizationRepository.Update(organization);
+
+        _jobClient.Enqueue(() => _jobsService.RemoveUserFromOrganizationProjects(userId!.Value, request.OrganizationId));
 
         return Result.Ok();
     }
