@@ -188,18 +188,27 @@ public class ProjectsTests
     }
 
     [Fact]
-    public async Task RemoveMember_ShuldRemoveMember_WhenProjectExists()
+    public async Task RemoveMember_ShuldRemoveMemberAndUnassignThemFromAllTasks_WhenProjectExists()
     {
-        var project = (await _factory.CreateProjects())[0];
+        var task = (await _factory.CreateTasks())[0];
+        var project = await _fixture.FirstAsync<Project>();
+        var member = await _fixture.FirstAsync<ProjectMember>();
+        task.UpdateAssignee(member.UserId);
+
+        await _fixture.SeedDb(db =>
+        {
+            db.Tasks.Update(task);
+        });
 
         var membersBefore = await _fixture.CountAsync<ProjectMember>();
 
-        var result = await _fixture.SendRequest(new RemoveProjectMemberCommand(project.Id, project.Members[0].Id));
+        var result = await _fixture.SendRequest(new RemoveProjectMemberCommand(project.Id, member.Id));
 
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<ProjectMember>()).Should().Be(membersBefore - 1);
+            (await _fixture.FirstAsync<Domain.Tasks.Task>(x => x.Id == task.Id)).AssigneeId.Should().BeNull();
         }
     }
 
