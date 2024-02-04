@@ -84,7 +84,16 @@
                     <MudTd DataLabel="ID">@context.ShortId</MudTd>
                     <MudTd DataLabel="Title">@context.Title</MudTd>
                     <MudTd DataLabel="Status">@context.Status.Name</MudTd>
-                    <MudTd DataLabel="Priority">@context.Priority</MudTd>
+                    <MudTd DataLabel="Priority">
+                        <div class="d-flex align-center gap-2">
+                            <MudAvatar Size="Size.Small" Variant="Variant.Filled" Color="@GetPriorityColor(context.Priority)">
+                                <MudIcon Icon="@GetPriorityIcon(@context.Priority)" Size="Size.Small" />
+                            </MudAvatar>
+                            <text>
+                                @context.Priority
+                            </text>
+                        </div>
+                    </MudTd>
                     <MudTd DataLabel="Assignee">
                         @{
                             var currentAssignee = _membersVM.GetCurrentAssigneeVM(context.AssigneeId);
@@ -322,4 +331,24 @@
             new(currentUserMember.Id, currentUserMember.UserId, "@me", currentUserMember.RoleId) }
             .Concat(_membersVM.Members);
     }
+
+    private string GetPriorityIcon(TaskPriority priority)
+        => priority switch
+        {
+            TaskPriority.Urgent => Icons.Material.Filled.KeyboardDoubleArrowUp,
+            TaskPriority.High => Icons.Material.Filled.KeyboardArrowUp,
+            TaskPriority.Normal => Icons.Material.Filled.DragHandle,
+            TaskPriority.Low => Icons.Material.Filled.KeyboardArrowDown,
+            _ => string.Empty
+        };
+
+    private Color GetPriorityColor(TaskPriority priority)
+        => priority switch
+        {
+            TaskPriority.Urgent => Color.Error,
+            TaskPriority.High => Color.Warning,
+            TaskPriority.Normal => Color.Info,
+            TaskPriority.Low => Color.Success,
+            _ => Color.Info
+        };
 }
