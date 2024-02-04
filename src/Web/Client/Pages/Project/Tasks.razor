@@ -143,7 +143,17 @@
                     <MudPaper Class="pa-4 my-4">
                         <div class="d-flex align-center justify-space-between">
                             @context.Title
-                            <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="() => OpenTaskDetailsPopup(context.Id)" />
+                            <div class="d-flex align-center gap-2">
+                                @if(context.AssigneeId is not null)
+                                {
+                                    var currentAssignee = _membersVM.GetCurrentAssigneeVM(context.AssigneeId);
+                                    <UserAvatar Name="@currentAssignee!.Name" Size="Size.Small"></UserAvatar>
+                                }
+                                <MudAvatar Size="Size.Small" Variant="Variant.Filled" Color="@GetPriorityColor(context.Priority)">
+                                <MudIcon Icon="@GetPriorityIcon(@context.Priority)" Size="Size.Small" />
+                                </MudAvatar>
+                                <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="() => OpenTaskDetailsPopup(context.Id)" />
+                            </div>
                         </div>
                     </MudPaper>
                 </ItemRenderer>
