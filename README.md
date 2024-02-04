@@ -23,6 +23,6 @@ Task/issue tracker made with ASP.NET Core & Blazor WASM.
 * Organization membership invitations
 ### Screenshots
 ![image](https://github.com/IgorKordiukiewicz/TaskTracker/assets/25117425/98db5d40-e3c7-4ce6-b524-64beb2b07748)
-![chrome_7dg9NuGxrJ](https://github.com/IgorKordiukiewicz/TaskTracker/assets/25117425/96743b33-2137-4850-8a0d-30b55b20b43d)
+![chrome_aN5ySj5VF6](https://github.com/IgorKordiukiewicz/TaskTracker/assets/25117425/1a13be25-357b-463c-9459-487b4f4409fc)
 ![chrome_WkwWXKawVP](https://github.com/IgorKordiukiewicz/SpaceHub/assets/25117425/0daf51c6-ecad-4ea8-8b3a-a10ff2c5f386)
 ![chrome_bHR5krmUsz](https://github.com/IgorKordiukiewicz/SpaceHub/assets/25117425/8f39e6e7-4ad5-4f66-9321-51b2a2e7926e)
