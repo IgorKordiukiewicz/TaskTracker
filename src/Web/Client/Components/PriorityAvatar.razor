@@ -1,0 +1,28 @@
+﻿<MudAvatar Size="Size.Small" Variant="Variant.Filled" Color="@PriorityColor">
+    <MudIcon Icon="@PriorityIcon" Size="Size.Small" />
+</MudAvatar>
+
+@code {
+    [Parameter]
+    public required TaskPriority Priority { get; init; }
+
+    private string PriorityIcon
+        => Priority switch
+        {
+            TaskPriority.Urgent => Icons.Material.Filled.KeyboardDoubleArrowUp,
+            TaskPriority.High => Icons.Material.Filled.KeyboardArrowUp,
+            TaskPriority.Normal => Icons.Material.Filled.DragHandle,
+            TaskPriority.Low => Icons.Material.Filled.KeyboardArrowDown,
+            _ => string.Empty
+        };
+
+    private Color PriorityColor
+        => Priority switch
+        {
+            TaskPriority.Urgent => Color.Error,
+            TaskPriority.High => Color.Warning,
+            TaskPriority.Normal => Color.Info,
+            TaskPriority.Low => Color.Success,
+            _ => Color.Info
+        };
+}

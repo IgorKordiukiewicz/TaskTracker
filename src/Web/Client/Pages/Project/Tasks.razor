@@ -86,9 +86,7 @@
                     <MudTd DataLabel="Status">@context.Status.Name</MudTd>
                     <MudTd DataLabel="Priority">
                         <div class="d-flex align-center gap-2">
-                            <MudAvatar Size="Size.Small" Variant="Variant.Filled" Color="@GetPriorityColor(context.Priority)">
-                                <MudIcon Icon="@GetPriorityIcon(@context.Priority)" Size="Size.Small" />
-                            </MudAvatar>
+                            <PriorityAvatar Priority="@context.Priority" />
                             <text>
                                 @context.Priority
                             </text>
@@ -149,9 +147,7 @@
                                     var currentAssignee = _membersVM.GetCurrentAssigneeVM(context.AssigneeId);
                                     <UserAvatar Name="@currentAssignee!.Name" Size="Size.Small"></UserAvatar>
                                 }
-                                <MudAvatar Size="Size.Small" Variant="Variant.Filled" Color="@GetPriorityColor(context.Priority)">
-                                <MudIcon Icon="@GetPriorityIcon(@context.Priority)" Size="Size.Small" />
-                                </MudAvatar>
+                                <PriorityAvatar Priority="@context.Priority" />
                                 <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="() => OpenTaskDetailsPopup(context.Id)" />
                             </div>
                         </div>
@@ -341,24 +337,4 @@
             new(currentUserMember.Id, currentUserMember.UserId, "@me", currentUserMember.RoleId) }
             .Concat(_membersVM.Members);
     }
-
-    private string GetPriorityIcon(TaskPriority priority)
-        => priority switch
-        {
-            TaskPriority.Urgent => Icons.Material.Filled.KeyboardDoubleArrowUp,
-            TaskPriority.High => Icons.Material.Filled.KeyboardArrowUp,
-            TaskPriority.Normal => Icons.Material.Filled.DragHandle,
-            TaskPriority.Low => Icons.Material.Filled.KeyboardArrowDown,
-            _ => string.Empty
-        };
-
-    private Color GetPriorityColor(TaskPriority priority)
-        => priority switch
-        {
-            TaskPriority.Urgent => Color.Error,
-            TaskPriority.High => Color.Warning,
-            TaskPriority.Normal => Color.Info,
-            TaskPriority.Low => Color.Success,
-            _ => Color.Info
-        };
 }
