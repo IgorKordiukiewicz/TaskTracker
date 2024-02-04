@@ -145,9 +145,9 @@
                                 @if(context.AssigneeId is not null)
                                 {
                                     var currentAssignee = _membersVM.GetCurrentAssigneeVM(context.AssigneeId);
-                                    <UserAvatar Name="@currentAssignee!.Name" Size="Size.Small"></UserAvatar>
+                                    <UserAvatar Name="@currentAssignee!.Name" Size="Size.Small" Tooltip="true"></UserAvatar>
                                 }
-                                <PriorityAvatar Priority="@context.Priority" />
+                                <PriorityAvatar Priority="@context.Priority" Tooltip="true" />
                                 <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="() => OpenTaskDetailsPopup(context.Id)" />
                             </div>
                         </div>

@@ -1,4 +1,9 @@
-﻿<MudAvatar Color="Color.Primary" onclick="@(async () => await OnClick.InvokeAsync())" Style="@(Clickable ? "cursor: pointer;" : string.Empty)" Size="@Size">@Initials</MudAvatar>
+﻿<MudTooltip ShowOnFocus="@Tooltip" ShowOnHover="@Tooltip" Text="@Name">
+    <MudAvatar Color="Color.Primary" onclick="@(async () => await OnClick.InvokeAsync())"
+               Style="@(Clickable ? "cursor: pointer;" : string.Empty)" Size="@Size">
+        @Initials
+    </MudAvatar>
+</MudTooltip>
 
 @code {
     [Parameter]
@@ -9,6 +14,9 @@
 
     [Parameter]
     public Size Size { get; set; } = Size.Medium;
+
+    [Parameter]
+    public bool Tooltip { get; set; } = false;
 
     [Parameter]
     public EventCallback OnClick { get; set; }
