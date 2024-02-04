@@ -22,7 +22,7 @@ Task/issue tracker made with ASP.NET Core & Blazor WASM.
 * Custom members roles
 * Organization membership invitations
 ### Screenshots
-![chrome_MaMXtyEJuX](https://github.com/IgorKordiukiewicz/SpaceHub/assets/25117425/5d64ca13-8cdf-42d9-b10b-18ae0fcba53a)
-![chrome_m43X2VoD0J](https://github.com/IgorKordiukiewicz/SpaceHub/assets/25117425/72c5aee3-cc78-4890-8480-4a9fb221701f)
+![image](https://github.com/IgorKordiukiewicz/TaskTracker/assets/25117425/98db5d40-e3c7-4ce6-b524-64beb2b07748)
+![chrome_7dg9NuGxrJ](https://github.com/IgorKordiukiewicz/TaskTracker/assets/25117425/96743b33-2137-4850-8a0d-30b55b20b43d)
 ![chrome_WkwWXKawVP](https://github.com/IgorKordiukiewicz/SpaceHub/assets/25117425/0daf51c6-ecad-4ea8-8b3a-a10ff2c5f386)
 ![chrome_bHR5krmUsz](https://github.com/IgorKordiukiewicz/SpaceHub/assets/25117425/8f39e6e7-4ad5-4f66-9321-51b2a2e7926e)
