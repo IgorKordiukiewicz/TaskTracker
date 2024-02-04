@@ -34,9 +34,9 @@ public static class ResultExtensions
         return error switch
         {
             { } e when e.GetType().IsGenericType && e.GetType().GetGenericTypeDefinition() == typeof(NotFoundError<>) => new NotFoundObjectResult(error.Message),
+            InternalError => new StatusCodeResult(500),
             ApplicationError => new BadRequestObjectResult(error.Message),
             DomainError => new BadRequestObjectResult(error.Message),
-            Error => new StatusCodeResult(500),
             _ => new StatusCodeResult(500)
         };
     }

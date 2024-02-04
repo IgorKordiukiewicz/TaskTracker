@@ -48,7 +48,7 @@ internal class DeleteProjectHandler : IRequestHandler<DeleteProjectCommand, Resu
         }
         catch(Exception ex)
         {
-            return Result.Fail(new Error("SQL Transaction failure").CausedBy(ex));
+            return Result.Fail(new InternalError("SQL Transaction failure").CausedBy(ex));
         }
 
         return Result.Ok();
