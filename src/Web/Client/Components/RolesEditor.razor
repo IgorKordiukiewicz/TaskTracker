@@ -60,7 +60,7 @@
 
 <Dialog Title="Create a new role" Form="_createRoleForm" OnConfirm="CreateRole" >
     <MudTextField @bind-Value="@_createRoleForm.Name" Label="Name" Required="true" Variant="Variant.Filled" />
-    <MudSelect Label="Permissions" Variant="Variant.Outlined" MultiSelection="true" T="TPermissions" @bind-SelectedValues="@_createRoleForm.PermissionsFlags" AnchorOrigin="Origin.BottomCenter">
+    <MudSelect Label="Permissions" Variant="Variant.Filled" MultiSelection="true" T="TPermissions" @bind-SelectedValues="@_createRoleForm.PermissionsFlags" AnchorOrigin="Origin.BottomCenter">
         @foreach (var permission in _allPermissionsFlags)
         {
             <MudSelectItem Value="@permission">
