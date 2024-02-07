@@ -15,7 +15,7 @@
         <MudPaper Class="mb-2" Style="width: 100%;">
             <MudGrid Class="d-flex align-end pa-3" Spacing="1">
                 <MudItem lg="3" xs="12">
-                    <MudTextField T="string" @bind-Value="_filters.Title" Label="Title" Variant="Variant.Filled" AdornmentIcon="@Icons.Material.Filled.Search" Adornment="Adornment.Start" Class="flex-grow-1" FullWidth="true"></MudTextField>
+                    <MudTextField T="string" @bind-Value="_filters.Title" Label="Title" Variant="Variant.Filled" Class="flex-grow-1" FullWidth="true"></MudTextField>
                 </MudItem>
                 <MudItem lg="2" xs="12">
                     <MudSelect Label="Status" Variant="Variant.Filled" MultiSelection="true" SelectAll="true" SelectAllText="All" @bind-SelectedValues="_filters.Statuses"
