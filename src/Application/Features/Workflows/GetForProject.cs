@@ -1,4 +1,5 @@
 ﻿using Domain.Workflows;
+using Shared.Enums;
 
 namespace Application.Features.Workflows;
 
@@ -44,7 +45,8 @@ internal class GetWorkflowForProjectHandler : IRequestHandler<GetWorkflowForProj
                 Name = x.Name,
                 Initial = x.Initial,
                 DisplayOrder = x.DisplayOrder,
-                CanBeDeleted = !usedStatusesIds.Contains(x.Id) && !x.Initial
+                DeletionEligibility = x.Initial ? TaskStatusDeletionEligibility.Initial : 
+                    (usedStatusesIds.Contains(x.Id) ? TaskStatusDeletionEligibility.InUse : TaskStatusDeletionEligibility.Eligible)
             }).ToList();
 
         var transitions = workflow.Transitions.Select(x =>

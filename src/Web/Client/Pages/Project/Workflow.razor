@@ -39,13 +39,16 @@
                 </MudButton>
                 @if(_selectedNode is not null)
                 {
+                    var canStatusBeDeleted = CanStatusBeDeleted(_selectedNode.Name);
                     @if(!_selectedNode.Initial)
                     {
                         <MudDivider />
                         <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="() => ChangeInitialStatus(_selectedNode.Name)">Make Initial</MudButton>
                     }
                     <MudDivider />
-                    <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" OnClick="() => DeleteStatus(_selectedNode.Name)" Disabled="!CanStatusBeDeleted(_selectedNode.Name)">Delete Status</MudButton>
+                    <MudTooltip ShowOnHover="!canStatusBeDeleted" ShowOnFocus="!canStatusBeDeleted" Text="@DisableStatusDeletionTooltipText(_selectedNode.Name)" id="status-delete-button-tooltip">
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" Style="width: 100%;" OnClick="() => DeleteStatus(_selectedNode.Name)" Disabled="!canStatusBeDeleted">Delete Status</MudButton>
+                    </MudTooltip>
                 }
                 @if(_selectedLink is not null)
                 {
@@ -341,7 +344,18 @@
     private bool CanStatusBeDeleted(string name)
     {
         var statusId = _statusIdByName![name];
-        return _workflowVM!.Statuses.First(x => x.Id == statusId).CanBeDeleted;
+        return _workflowVM!.Statuses.First(x => x.Id == statusId).DeletionEligibility == TaskStatusDeletionEligibility.Eligible;
+    }
+
+    private string DisableStatusDeletionTooltipText(string name)
+    {
+        var statusId = _statusIdByName![name];
+        return _workflowVM!.Statuses.First(x => x.Id == statusId).DeletionEligibility switch
+        {
+            TaskStatusDeletionEligibility.Initial => "Initial status can't be deleted.",
+            TaskStatusDeletionEligibility.InUse => "Status in use can't be deleted.",
+            _ => string.Empty
+        };
     }
 
     private async Task DeleteStatus(string name)

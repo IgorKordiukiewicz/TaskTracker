@@ -88,3 +88,7 @@ html, body, #app, .max-height {
     overflow-y: auto;
     max-height: 80vh;
 }
+
+#status-delete-button-tooltip.mud-tooltip-root {
+    width: 100%;
+}
