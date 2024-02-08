@@ -25,3 +25,6 @@ public record UserSearchVM
     public required Guid Id { get; init; }
     public required string Email { get; init; }
 }
+
+public record UsersPresentationDataVM(IReadOnlyList<UserPresentationDataVM> Data);
+public record UserPresentationDataVM(Guid UserId, string AvatarColor);

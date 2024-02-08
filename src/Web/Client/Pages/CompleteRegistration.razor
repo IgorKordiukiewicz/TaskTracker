@@ -31,7 +31,8 @@
         var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var userAuthid = state.User.Claims.First(x => x.Type == "sub").Value;
         var email = state.User.Identity?.Name ?? string.Empty;
-        var model = new UserRegistrationDto(userAuthid, email, _firstName, _lastName);
+        var avatarColor = AvatarColorGenerator.Generate();
+        var model = new UserRegistrationDto(userAuthid, email, _firstName, _lastName, avatarColor);
         var result = await _usersService.Register(model);
         if(result)
         {

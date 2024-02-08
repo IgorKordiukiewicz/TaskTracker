@@ -99,7 +99,7 @@
                         @if(currentAssignee is not null)
                         {
                             <div class="d-flex align-center gap-2">
-                                <UserAvatar Name="@currentAssignee.Name" Size="Size.Small"></UserAvatar>
+                                <UserAvatar Name="@currentAssignee.Name" UserId="@currentAssignee.UserId" Size="Size.Small"></UserAvatar>
                                 <text>
                                     @currentAssignee.Name
                                 </text>
@@ -145,7 +145,7 @@
                                 @if(context.AssigneeId is not null)
                                 {
                                     var currentAssignee = _membersVM.GetCurrentAssigneeVM(context.AssigneeId);
-                                    <UserAvatar Name="@currentAssignee!.Name" Size="Size.Small" Tooltip="true"></UserAvatar>
+                                    <UserAvatar Name="@currentAssignee!.Name" UserId="@currentAssignee.UserId" Size="Size.Small" Tooltip="true"></UserAvatar>
                                 }
                                 <PriorityAvatar Priority="@context.Priority" Tooltip="true" />
                                 <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="() => OpenTaskDetailsPopup(context.Id)" />

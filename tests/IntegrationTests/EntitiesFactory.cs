@@ -1,4 +1,5 @@
-﻿using Domain.Organizations;
+﻿using Application.Data.Models;
+using Domain.Organizations;
 using Domain.Projects;
 using Domain.Users;
 using Domain.Workflows;
@@ -19,9 +20,16 @@ public class EntitiesFactory
     {
         var users = CreateEntities(count, i => User.Create($"authId{DateTime.Now.Ticks}{i}", $"user{i}", "firstName", "lastName"));
 
+        var usersPresentationData = users.Select(x => new UserPresentationData()
+        {
+            UserId = x.Id,
+            AvatarColor = "#000000"
+        });
+
         await _fixture.SeedDb(db =>
         {
             db.AddRange(users);  
+            db.AddRange(usersPresentationData);
         });
 
         return users;

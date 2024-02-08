@@ -1,4 +1,5 @@
-﻿using Domain.Common;
+﻿using Application.Data.Models;
+using Domain.Common;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Tasks;
@@ -28,6 +29,8 @@ public class AppDbContext : DbContext
     public DbSet<Domain.Workflows.TaskStatus> TaskStatuses { get; set; }
     public DbSet<TaskStatusTransition> TaskStatusTransitions { get; set; }
     public DbSet<Workflow> Workflows { get; set; }
+
+    public DbSet<UserPresentationData> UsersPresentationData { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) 
         : base(options)

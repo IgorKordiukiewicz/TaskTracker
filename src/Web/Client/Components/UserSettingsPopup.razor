@@ -6,7 +6,7 @@
         <div class="d-flex flex-column">
             <div class="d-flex align-top justify-space-between">
                 <div class="d-flex gap-3 align-center">
-                    <UserAvatar Name="@_userDataService.CurrentUserVM!.FullName" />
+                    <UserAvatar Name="@_userDataService.CurrentUserVM!.FullName" UserId="@_userDataService.CurrentUserVM!.Id" />
                     <div class="d-flex flex-column">
                         <MudText Typo="Typo.subtitle1">
                             @_userDataService.CurrentUserVM.FullName

@@ -1,4 +1,5 @@
-﻿using Application.Features.Users;
+﻿using Application.Data.Models;
+using Application.Features.Users;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Users;
@@ -88,25 +89,28 @@ public class UsersTests
     {
         var user = (await _factory.CreateUsers())[0];
 
-        var result = await _fixture.SendRequest(new RegisterUserCommand(new(user.AuthenticationId, "email", "firstName", "lastName")));
+        var result = await _fixture.SendRequest(new RegisterUserCommand(new(user.AuthenticationId, "email", "firstName", "lastName", "#000000")));
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public async Task RegisterUser_ShouldAddNewUser_WhenUserIsNotRegistered()
+    public async Task RegisterUser_ShouldAddNewUserAndUserPresentationData_WhenUserIsNotRegistered()
     {
         var newUserAuthId = "999";
         await _factory.CreateUsers();
+        var avatarColor = "#000000";
 
-        var result = await _fixture.SendRequest(new RegisterUserCommand(new(newUserAuthId, "email", "firstName", "lastName")));
+        var result = await _fixture.SendRequest(new RegisterUserCommand(new(newUserAuthId, "email", "firstName", "lastName", avatarColor)));
 
         using(new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
             var users = await _fixture.GetAsync<User>();
             users.Count.Should().Be(2);
-            users.First(x => x.AuthenticationId == newUserAuthId).Should().NotBeNull();
+            var newUser = users.First(x => x.AuthenticationId == newUserAuthId);
+            newUser.Should().NotBeNull();
+            (await _fixture.FirstAsync<UserPresentationData>(x => x.UserId == newUser.Id)).AvatarColor.Should().Be(avatarColor);
         }
     }
 

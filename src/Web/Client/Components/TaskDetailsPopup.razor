@@ -130,7 +130,7 @@
                             <div>
                                 <div class="d-flex mb-2 align-center justify-space-between">
                                     <div class="d-flex align-center gap-2">
-                                        <UserAvatar Name="@comment.AuthorName" />
+                                        <UserAvatar Name="@comment.AuthorName" UserId="@comment.AuthorId" />
                                         <MudText Style="font-weight: bold;">@comment.AuthorName</MudText>
                                     </div>
                                     <MudText Typo="Typo.caption">@comment.CreatedAt.GetHumanReadableTimeDifference(DateTime.Now)</MudText>

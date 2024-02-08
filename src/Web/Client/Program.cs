@@ -24,6 +24,8 @@ builder.Services.AddScoped<WorkflowsService>();
 builder.Services.AddScoped<ProjectsService>();
 builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<TasksService>();
+builder.Services.AddScoped<UsersPresentationService>();
+
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ServerAPI"));
 

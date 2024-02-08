@@ -108,4 +108,20 @@ public class UsersController : ControllerBase
         var result = await _mediator.Send(new UpdateUserNameCommand(userId, model));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Get presentation data of all users.
+    /// </summary>
+    /// <remarks>
+    /// Only returns data of users that the current user can see.
+    /// </remarks>
+    /// <response code="404">User not found.</response> 
+    [HttpGet("presentation")]
+    [Authorize]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetAllUsersPresentationData()
+    {
+        var result = await _mediator.Send(new GetAllUsersPresentationDataQuery(User.GetUserAuthenticationId()));
+        return result.ToHttpResult();
+    }
 }

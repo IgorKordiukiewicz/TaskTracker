@@ -40,4 +40,7 @@ public class UsersService : ApiService
 
     public async Task<bool> UpdateName(Guid userId, UpdateUserNameDto model)
         => await Post($"users/{userId}/update-name", model);
+
+    public async Task<UsersPresentationDataVM?> GetAllPresentationData()
+        => await Get<UsersPresentationDataVM>("users/presentation");
 }

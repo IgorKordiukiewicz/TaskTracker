@@ -12,16 +12,19 @@ internal class RegisterUserCommandValidator : AbstractValidator<RegisterUserComm
         RuleFor(x => x.Model.Email).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Model.FirstName).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Model.LastName).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.Model.AvatarColor).NotEmpty();
     }
 }
 
 internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result>
 {
     private readonly IRepository<User> _userRepository;
+    private readonly AppDbContext _dbContext;
 
-    public RegisterUserHandler(IRepository<User> userRepository)
+    public RegisterUserHandler(IRepository<User> userRepository, AppDbContext dbContext)
     {
         _userRepository = userRepository;
+        _dbContext = dbContext;
     }
 
     public async Task<Result> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -33,8 +36,26 @@ internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result
 
         var user = User.Create(request.Model.AuthenticationId, request.Model.Email, request.Model.FirstName, request.Model.LastName);
 
-        await _userRepository.Add(user);
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
+        try
+        {
+            await _userRepository.Add(user);
+
+            _dbContext.UsersPresentationData.Add(new()
+            {
+                UserId = user.Id,
+                AvatarColor = request.Model.AvatarColor
+            });
+            await _dbContext.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+        }
+        catch(Exception ex)
+        {
+            return Result.Fail(new InternalError("SQL Transaction failure").CausedBy(ex));
+        }
+        
         return Result.Ok();
     }
 }

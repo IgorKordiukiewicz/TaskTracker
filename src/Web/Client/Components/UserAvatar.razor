@@ -1,6 +1,8 @@
-﻿<MudTooltip ShowOnFocus="@Tooltip" ShowOnHover="@Tooltip" Text="@Name">
-    <MudAvatar Color="Color.Primary" onclick="@(async () => await OnClick.InvokeAsync())"
-               Style="@(Clickable ? "cursor: pointer;" : string.Empty)" Size="@Size">
+﻿@inject UsersPresentationService _usersPresentationService
+
+<MudTooltip ShowOnFocus="@Tooltip" ShowOnHover="@Tooltip" Text="@Name">
+    <MudAvatar onclick="@(async () => await OnClick.InvokeAsync())"
+               Style="@($"background-color: {_color};" + (Clickable ? "cursor: pointer;" : string.Empty))" Size="@Size">
         @Initials
     </MudAvatar>
 </MudTooltip>
@@ -8,6 +10,9 @@
 @code {
     [Parameter]
     public required string Name { get; init; }
+
+    [Parameter]
+    public required Guid UserId { get; set; }
 
     [Parameter]
     public bool Clickable { get; set; } = false;
@@ -22,4 +27,11 @@
     public EventCallback OnClick { get; set; }
 
     private string Initials => string.Concat(Name.Split(' ').Select(x => x[0]));
+
+    private string _color = "#000000";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _color = await _usersPresentationService.GetUserAvatarColor(UserId);
+    }
 }

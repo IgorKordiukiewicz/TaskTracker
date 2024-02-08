@@ -9,7 +9,7 @@
     <Authorized>
         @if (_userDataService.CurrentUserVM is not null)
         {
-            <UserAvatar Name="@_userDataService.CurrentUserVM.FullName" Clickable="true" OnClick="() => { _userSettingsPopup?.Open(); }"></UserAvatar>
+            <UserAvatar Name="@_userDataService.CurrentUserVM.FullName" UserId="@_userDataService.CurrentUserVM.Id" Clickable="true" OnClick="() => { _userSettingsPopup?.Open(); }"></UserAvatar>
             <UserSettingsPopup @ref="_userSettingsPopup" SignOutClicked="BeginSignOut"></UserSettingsPopup>
         }
         else
