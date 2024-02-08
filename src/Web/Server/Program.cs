@@ -1,5 +1,6 @@
 using Application;
 using Hangfire;
+using Infrastructure;
 using Serilog;
 using System.Reflection;
 
@@ -21,7 +22,8 @@ builder.Services.AddHangfire(configuration => configuration
     .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
 builder.Services.AddHangfireServer();
 
-builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddAuth(builder.Configuration);
 
 builder.Services.AddControllersWithViews();

@@ -1,9 +1,5 @@
 ﻿using Application.Behaviors;
 using Application.Common;
-using Domain.Organizations;
-using Domain.Projects;
-using Domain.Users;
-using Domain.Workflows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -12,7 +8,7 @@ namespace Application;
 
 public static class Application
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         var assembly = Assembly.GetExecutingAssembly();
 
@@ -23,15 +19,7 @@ public static class Application
         // Order matters; error logging has to be registered before validation,
         // otherwise error logging will not get called if validation returns failure
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ErrorLoggingBehavior<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-
-        services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-
-        services.AddScoped<IRepository<User>, UserRepository>();
-        services.AddScoped<IRepository<Organization>, OrganizationRepository>();
-        services.AddScoped<IRepository<Project>, ProjectRepository>();
-        services.AddScoped<IRepository<Domain.Tasks.Task>, TaskRepository>();
-        services.AddScoped<IRepository<Workflow>, WorkflowRepository>();
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));  
 
         services.AddScoped<IJobsService, JobsService>();
 
