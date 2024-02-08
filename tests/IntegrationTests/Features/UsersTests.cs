@@ -1,4 +1,4 @@
-﻿using Application.Data.Models;
+﻿using Infrastructure.Models;
 using Application.Features.Users;
 using Domain.Organizations;
 using Domain.Projects;

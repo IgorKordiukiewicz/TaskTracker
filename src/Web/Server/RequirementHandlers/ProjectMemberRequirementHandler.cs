@@ -1,4 +1,4 @@
-﻿using Application.Data;
+﻿using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace Web.Server.RequirementHandlers;

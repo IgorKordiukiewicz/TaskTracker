@@ -1,5 +1,5 @@
 ﻿using Application.Common;
-using Application.Data;
+using Infrastructure;
 using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
