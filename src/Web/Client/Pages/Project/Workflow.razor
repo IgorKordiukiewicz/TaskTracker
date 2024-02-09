@@ -20,9 +20,9 @@
 @using Web.Client.Diagrams;
 @using static Web.Client.Components.TaskStatusNode;
 
-@inject ISnackbar _snackbar
-@inject WorkflowsService _workflowsService
-@inject ILocalStorageService _localStorage
+@inject ISnackbar Snackbar
+@inject WorkflowsService WorkflowsService
+@inject ILocalStorageService LocalStorage
 
 @if(_workflowVM is not null)
 {
@@ -184,7 +184,7 @@
             return;
         }
 
-        _snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
 
         var options = new BlazorDiagramOptions
         {
@@ -207,7 +207,7 @@
         _diagram.GetBehavior<KeyboardShortcutsBehavior>()?.RemoveShortcut("Delete", false, false, false);
         _diagram.SelectionChanged += OnSelectionChanged;
 
-        var savedLayout = await _localStorage.GetDiagramLayout(ProjectId);
+        var savedLayout = await LocalStorage.GetDiagramLayout(ProjectId);
         _diagram.InitializeStatusNodes(_workflowVM.Statuses, savedLayout, out var nodeByStatusId);
         _diagram.InitializeTransitionLinks(_workflowVM.Transitions, nodeByStatusId);
 
@@ -227,7 +227,7 @@
         (string FromStatus, string ToStatus)? newTransition = null,
         (string FromStatus, string ToStatus)? deletedTransition = null)
     {
-        _workflowVM = await _workflowsService.Get(ProjectId);
+        _workflowVM = await WorkflowsService.Get(ProjectId);
         if(_workflowVM is null)
         {
             return;
@@ -266,7 +266,7 @@
         }
 
         var model = new AddWorkflowStatusDto(_addStatusForm.Name);
-        var success = await _workflowsService.AddStatus(_workflowVM.Id, ProjectId, model);
+        var success = await WorkflowsService.AddStatus(_workflowVM.Id, ProjectId, model);
 
         if(success)
         {
@@ -286,7 +286,7 @@
         var fromStatusId = _statusIdByName[_addTransitionForm.FromStatus];
         var toStatusId = _statusIdByName[_addTransitionForm.ToStatus];
         var model = new AddWorkflowTransitionDto(fromStatusId, toStatusId);
-        var success = await _workflowsService.AddTransition(_workflowVM.Id, ProjectId, model);
+        var success = await WorkflowsService.AddTransition(_workflowVM.Id, ProjectId, model);
 
         if (success)
         {
@@ -355,7 +355,7 @@
         }
 
         var statusId = _statusIdByName[name];
-        var success = await _workflowsService.DeleteStatus(_workflowVM!.Id, statusId, ProjectId);
+        var success = await WorkflowsService.DeleteStatus(_workflowVM!.Id, statusId, ProjectId);
 
         if (success)
         {
@@ -379,7 +379,7 @@
         var fromStatusId = _statusIdByName[fromStatusName];
         var toStatusId = _statusIdByName[toStatusName];
         var model = new DeleteWorkflowTransitionDto(fromStatusId, toStatusId);
-        var success = await _workflowsService.DeleteTransition(_workflowVM!.Id, ProjectId, model);
+        var success = await WorkflowsService.DeleteTransition(_workflowVM!.Id, ProjectId, model);
 
         if(success)
         {
@@ -397,7 +397,7 @@
 
         var statusId = _statusIdByName[statusName];
         var model = new ChangeInitialWorkflowStatusDto(statusId);
-        _ = await _workflowsService.ChangeInitialStatus(_workflowVM!.Id, ProjectId, model);
+        _ = await WorkflowsService.ChangeInitialStatus(_workflowVM!.Id, ProjectId, model);
 
         var previousInitialNode = (_diagram.Nodes.First(x => (x as TaskStatusNodeModel)!.Initial) as TaskStatusNodeModel)!;
         previousInitialNode.Initial = false;
@@ -411,6 +411,6 @@
 
     private async Task SaveDiagramLayout()
     {
-        await _localStorage.SaveDiagramLayout(_diagram, ProjectId);
+        await LocalStorage.SaveDiagramLayout(_diagram, ProjectId);
     }
 }

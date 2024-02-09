@@ -1,4 +1,4 @@
-﻿@inject TasksService _tasksService
+﻿@inject TasksService TasksService
 
 <MudOverlay Visible="@Visible" DarkBackground="true">
     <MudPaper Class="task-details-popup pa-6">
@@ -252,18 +252,18 @@
 
     private async Task UpdateCommentsVM()
     {
-        _commentsVM = await _tasksService.GetComments(ProjectId, _taskVM!.Id);
+        _commentsVM = await TasksService.GetComments(ProjectId, _taskVM!.Id);
     }
 
     private async Task UpdateActivitiesVM()
     {
-        _activitiesVM = await _tasksService.GetActivities(ProjectId, _taskVM!.Id);
+        _activitiesVM = await TasksService.GetActivities(ProjectId, _taskVM!.Id);
     }
 
     public async Task UpdateTaskStatus(Guid taskId, Guid newStatusId)
     {
         var model = new UpdateTaskStatusDto(newStatusId);
-        _ = await _tasksService.UpdateStatus(ProjectId, _taskVM!.Id, model);
+        _ = await TasksService.UpdateStatus(ProjectId, _taskVM!.Id, model);
 
         await TaskUpdated.InvokeAsync();
         await UpdateActivitiesVM();
@@ -272,7 +272,7 @@
     private async Task UpdateTaskPriority(Guid taskId, TaskPriority newPriority)
     {
         var model = new UpdateTaskPriorityDto(newPriority);
-        _ = await _tasksService.UpdatePriority(ProjectId, _taskVM!.Id, model);
+        _ = await TasksService.UpdatePriority(ProjectId, _taskVM!.Id, model);
 
         await TaskUpdated.InvokeAsync();
         await UpdateActivitiesVM();
@@ -281,7 +281,7 @@
     private async Task UpdateTaskAssignee(Guid taskId, Guid memberId)
     {
         var model = new UpdateTaskAssigneeDto(memberId != Guid.Empty ? memberId : null);
-        _ = await _tasksService.UpdateAssignee(ProjectId, _taskVM!.Id, model);
+        _ = await TasksService.UpdateAssignee(ProjectId, _taskVM!.Id, model);
 
         await TaskUpdated.InvokeAsync();
         await UpdateActivitiesVM();
@@ -295,7 +295,7 @@
         }
 
         var model = new UpdateTaskDescriptionDto(_editDescriptionForm.Content);
-        _ = await _tasksService.UpdateDescription(ProjectId, _taskVM!.Id, model);
+        _ = await TasksService.UpdateDescription(ProjectId, _taskVM!.Id, model);
 
         await TaskUpdated.InvokeAsync();
         await UpdateActivitiesVM();
@@ -310,7 +310,7 @@
         }
 
         var model = new AddTaskCommentDto(_addCommentForm.Content);
-        _ = await _tasksService.AddComment(ProjectId, _taskVM!.Id, model);
+        _ = await TasksService.AddComment(ProjectId, _taskVM!.Id, model);
 
         await UpdateCommentsVM();
         _addCommentForm = new();

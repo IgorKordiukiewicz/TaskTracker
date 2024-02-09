@@ -2,14 +2,14 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using Web.Client.Common;
 
-@inject NavigationManager _navigationManager
-@inject UserDataService _userDataService
+@inject NavigationManager NavigationManager
+@inject UserDataService UserDataService
 
 <AuthorizeView>
     <Authorized>
-        @if (_userDataService.CurrentUserVM is not null)
+        @if (UserDataService.CurrentUserVM is not null)
         {
-            <UserAvatar Name="@_userDataService.CurrentUserVM.FullName" UserId="@_userDataService.CurrentUserVM.Id" Clickable="true" OnClick="() => { _userSettingsPopup?.Open(); }"></UserAvatar>
+            <UserAvatar Name="@UserDataService.CurrentUserVM.FullName" UserId="@UserDataService.CurrentUserVM.Id" Clickable="true" OnClick="() => { _userSettingsPopup?.Open(); }"></UserAvatar>
             <UserSettingsPopup @ref="_userSettingsPopup" SignOutClicked="BeginSignOut"></UserSettingsPopup>
         }
         else
@@ -27,13 +27,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _userDataService.SignedIn += StateHasChanged;
-        _userDataService.SignedOut += StateHasChanged;
-        await _userDataService.UpdateUserData();
+        UserDataService.SignedIn += StateHasChanged;
+        UserDataService.SignedOut += StateHasChanged;
+        await UserDataService.UpdateUserData();
     }
 
     private void BeginSignOut()
     {
-        _navigationManager.NavigateToLogout("authentication/logout");
+        NavigationManager.NavigateToLogout("authentication/logout");
     }
 }

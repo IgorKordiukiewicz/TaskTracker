@@ -2,9 +2,9 @@
 @layout ProjectLayout
 @attribute [Authorize(Policy = Policy.ProjectManageProject)]
 
-@inject ProjectsService _projectsService
-@inject HierarchyNavigationService _hierarchyNavigationService
-@inject NavigationManager _navManager
+@inject ProjectsService ProjectsService
+@inject HierarchyNavigationService HierarchyNavigationService
+@inject NavigationManager NavManager
 
 @if (_settingsVM is not null)
 {
@@ -50,7 +50,7 @@
 
     private async Task UpdateSettingsVM()
     {
-        _settingsVM = await _projectsService.GetSettings(ProjectId);
+        _settingsVM = await ProjectsService.GetSettings(ProjectId);
         if(_settingsVM is not null)
         {
             _nameEditValue = _settingsVM!.Name;
@@ -71,7 +71,7 @@
     private async Task UpdateName()
     {
         var model = new UpdateProjectNameDto(_nameEditValue);
-        _ = await _projectsService.UpdateName(ProjectId, model);
+        _ = await ProjectsService.UpdateName(ProjectId, model);
 
         CancelNameEdit();
         await UpdateSettingsVM();
@@ -85,11 +85,11 @@
             return;
         }
 
-        var result = await _projectsService.Delete(ProjectId);
+        var result = await ProjectsService.Delete(ProjectId);
         if(result)
         {
-            var orgId = _hierarchyNavigationService.OrganizationId!;
-            _navManager.NavigateTo($"org/{orgId}");
+            var orgId = HierarchyNavigationService.OrganizationId!;
+            NavManager.NavigateTo($"org/{orgId}");
         }
     }
 }

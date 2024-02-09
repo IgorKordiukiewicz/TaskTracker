@@ -1,18 +1,18 @@
-﻿@inject UserDataService _userDataService
-@inject UsersService _usersService
+﻿@inject UserDataService UserDataService
+@inject UsersService UsersService
 
 <MudOverlay @bind-Visible="_visible" DarkBackground="true" AutoClose="false" Class="d-flex align-center justify-end">
     <MudPaper style="height: 100vh; width: 400px; border-radius: 0;" Class="d-flex flex-column justify-space-between pa-4">
         <div class="d-flex flex-column">
             <div class="d-flex align-top justify-space-between">
                 <div class="d-flex gap-3 align-center">
-                    <UserAvatar Name="@_userDataService.CurrentUserVM!.FullName" UserId="@_userDataService.CurrentUserVM!.Id" />
+                    <UserAvatar Name="@UserDataService.CurrentUserVM!.FullName" UserId="@UserDataService.CurrentUserVM!.Id" />
                     <div class="d-flex flex-column">
                         <MudText Typo="Typo.subtitle1">
-                            @_userDataService.CurrentUserVM.FullName
+                            @UserDataService.CurrentUserVM.FullName
                         </MudText>
                         <MudText Typo="Typo.subtitle2">
-                            @_userDataService.CurrentUserVM.Email
+                            @UserDataService.CurrentUserVM.Email
                         </MudText>
                     </div>
 
@@ -63,7 +63,7 @@
 
     public void Open()
     {
-        if(_userDataService.CurrentUserVM is null)
+        if(UserDataService.CurrentUserVM is null)
         {
             return;
         }
@@ -80,22 +80,22 @@
 
     private async Task UpdateUserName()
     {
-        if(_userDataService.CurrentUserVM is null || !_nameEditForm.IsValid())
+        if(UserDataService.CurrentUserVM is null || !_nameEditForm.IsValid())
         {
             return;
         }
 
         var model = new UpdateUserNameDto(_nameEditForm.FirstName, _nameEditForm.LastName);
-        _ = await _usersService.UpdateName(_userDataService.CurrentUserVM.Id, model);
+        _ = await UsersService.UpdateName(UserDataService.CurrentUserVM.Id, model);
 
-        await _userDataService.UpdateUserData();
+        await UserDataService.UpdateUserData();
         _nameEditForm = new();
         InitNameEditForm();
     }
 
     private void InitNameEditForm()
     {
-        _nameEditForm.FirstName = _userDataService.CurrentUserVM!.FirstName;
-        _nameEditForm.LastName = _userDataService.CurrentUserVM!.LastName;
+        _nameEditForm.FirstName = UserDataService.CurrentUserVM!.FirstName;
+        _nameEditForm.LastName = UserDataService.CurrentUserVM!.LastName;
     }
 }

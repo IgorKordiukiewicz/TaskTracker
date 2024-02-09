@@ -3,10 +3,10 @@
 @layout OrganizationLayout 
 @attribute [Authorize]
 
-@inject NavigationManager _navManager
-@inject ProjectsService _projectsService
-@inject IAuthorizationService _authorizationService
-@inject UserDataService _userDataService
+@inject NavigationManager NavManager
+@inject ProjectsService ProjectsService
+@inject IAuthorizationService AuthorizationService
+@inject UserDataService UserDataService
 
 @if (_projectsVM is not null)
 {
@@ -66,19 +66,19 @@
         await Layout.SetOrganizationId(OrganizationId);
 
         var user = (await AuthenticationState).User;
-        _createProjectsPermission = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationCreateProjects)).Succeeded;
+        _createProjectsPermission = (await AuthorizationService.AuthorizeAsync(user, Policy.OrganizationCreateProjects)).Succeeded;
 
         await UpdateProjectsList();
     }
 
     private async Task UpdateProjectsList()
     {
-        _projectsVM = await _projectsService.GetForOrganizationUser(OrganizationId);
+        _projectsVM = await ProjectsService.GetForOrganizationUser(OrganizationId);
     }
 
     private void SelectProject(Guid projectId)
     {
-        _navManager.NavigateTo($"/project/{projectId}/tasks/table");
+        NavManager.NavigateTo($"/project/{projectId}/tasks/table");
     }
 
     private async Task CreateProject()
@@ -89,10 +89,10 @@
         }
 
         var model = new CreateProjectDto(_createProjectForm.Name);
-        var result = await _projectsService.Create(OrganizationId, model);
+        var result = await ProjectsService.Create(OrganizationId, model);
         if(result)
         {
-            await _userDataService.UpdateUserData();
+            await UserDataService.UpdateUserData();
             await UpdateProjectsList();
             _createProjectForm = new();
         }  

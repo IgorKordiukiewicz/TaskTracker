@@ -3,9 +3,9 @@
 @layout OrganizationLayout
 @attribute [Authorize]
 
-@inject OrganizationsService _organizationsService
-@inject UsersService _usersService
-@inject IAuthorizationService _authorizationService
+@inject OrganizationsService OrganizationsService
+@inject UsersService UsersService
+@inject IAuthorizationService AuthorizationService
 
 <MudTabs Outlined="false" Border="true" ApplyEffectsToContainer="true" Color="Color.Default" Rounded="true" Position="Position.Top" Centered="false">
     <MudTabPanel Text="Members">
@@ -13,8 +13,8 @@
         {
             <MembersList Members="@_membersVM.Members" RemoveMembersPermission="@_removeMembersPermission" ManageRolesPermission="@_manageRolesPermission" 
                 MembersUpdated="UpdateMembersVM" RolesVM="@_rolesVM"
-                UpdateRoleFunc="async (memberId, model) => await _organizationsService.UpdateMemberRole(OrganizationId, memberId, model)"
-                RemoveMemberFunc="async (memberId) => await _organizationsService.RemoveMember(OrganizationId, memberId)"
+                UpdateRoleFunc="async (memberId, model) => await OrganizationsService.UpdateMemberRole(OrganizationId, memberId, model)"
+                RemoveMemberFunc="async (memberId) => await OrganizationsService.RemoveMember(OrganizationId, memberId)"
             ></MembersList>
         }
     </MudTabPanel>
@@ -69,10 +69,10 @@
     {
         <MudTabPanel Text="Roles">
             <RolesEditor RolesVM="@_rolesVM" TPermissions="OrganizationPermissions" RolesUpdated="UpdateRolesVM"
-                UpdateNameFunc="async (roleId, model) => await _organizationsService.UpdateRoleName(OrganizationId, roleId, model)"
-                UpdatePermissionsFunc="async (roleId, model) => await _organizationsService.UpdateRolePermissions(OrganizationId, roleId, model)"
-                CreateFunc="async (model) => await _organizationsService.CreateRole(OrganizationId, model)"
-                DeleteFunc="async (roleId) => await _organizationsService.DeleteRole(OrganizationId, roleId)"></RolesEditor>
+                UpdateNameFunc="async (roleId, model) => await OrganizationsService.UpdateRoleName(OrganizationId, roleId, model)"
+                UpdatePermissionsFunc="async (roleId, model) => await OrganizationsService.UpdateRolePermissions(OrganizationId, roleId, model)"
+                CreateFunc="async (model) => await OrganizationsService.CreateRole(OrganizationId, model)"
+                DeleteFunc="async (roleId) => await OrganizationsService.DeleteRole(OrganizationId, roleId)"></RolesEditor>
         </MudTabPanel>
     }
 </MudTabs>
@@ -105,9 +105,9 @@
 
         var user = (await AuthenticationState).User;
 
-        _inviteMembersPermission = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationInviteMembers)).Succeeded;
-        _removeMembersPermission = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationRemoveMembers)).Succeeded;
-        _manageRolesPermission = (await _authorizationService.AuthorizeAsync(user, Policy.OrganizationManageRoles)).Succeeded;
+        _inviteMembersPermission = (await AuthorizationService.AuthorizeAsync(user, Policy.OrganizationInviteMembers)).Succeeded;
+        _removeMembersPermission = (await AuthorizationService.AuthorizeAsync(user, Policy.OrganizationRemoveMembers)).Succeeded;
+        _manageRolesPermission = (await AuthorizationService.AuthorizeAsync(user, Policy.OrganizationManageRoles)).Succeeded;
 
         await UpdateMembersVM();
 
@@ -125,18 +125,18 @@
     // TODO: Delete the UpdateVM methods?
     private async Task UpdateMembersVM()
     {
-        _membersVM = await _organizationsService.GetMembers(OrganizationId);
+        _membersVM = await OrganizationsService.GetMembers(OrganizationId);
     }
 
     private async Task UpdateInvitationsVM(int pageNumber = 1)
     {
         _invitationsPagination.PageNumber = pageNumber;
-        _invitationsVM = await _organizationsService.GetInvitations(OrganizationId, _invitationsPagination);
+        _invitationsVM = await OrganizationsService.GetInvitations(OrganizationId, _invitationsPagination);
     }
 
     private async Task UpdateRolesVM()
     {
-        _rolesVM = await _organizationsService.GetRoles(OrganizationId);
+        _rolesVM = await OrganizationsService.GetRoles(OrganizationId);
     }
 
     private async Task<IEnumerable<UserSearchVM>> SearchUsers(string value)
@@ -146,7 +146,7 @@
             return Enumerable.Empty<UserSearchVM>();
         }
 
-        var users = await _usersService.GetAvailableForInvitation(OrganizationId, value);
+        var users = await UsersService.GetAvailableForInvitation(OrganizationId, value);
         return users?.Users ?? Enumerable.Empty<UserSearchVM>();
     }
 
@@ -158,7 +158,7 @@
         }
 
         var model = new CreateOrganizationInvitationDto(_selectedUserForInvitation.Id);
-        _ = await _organizationsService.SendInvitation(OrganizationId, model);
+        _ = await OrganizationsService.SendInvitation(OrganizationId, model);
 
         _selectedUserForInvitation = null;
 
@@ -167,7 +167,7 @@
 
     private async Task CancelInvitation(Guid invitationId)
     {
-        _ = await _organizationsService.CancelInvitation(OrganizationId, invitationId);
+        _ = await OrganizationsService.CancelInvitation(OrganizationId, invitationId);
         await UpdateInvitationsVM();
     }
 

@@ -4,10 +4,9 @@
 @layout ProjectLayout
 @attribute [Authorize]
 
-@inject TasksService _tasksService
-@inject ProjectsService _projectsService
-@inject UserDataService _userDataService
-@inject IAuthorizationService _authorizationService
+@inject TasksService TasksService
+@inject ProjectsService ProjectsService
+@inject UserDataService UserDataService
 
 @if(_tasksVM is not null && _membersVM is not null)
 {
@@ -239,14 +238,14 @@
         await Layout.SetProjectId(ProjectId);
 
         // TODO: Refactor
-        _createTasksPermissions = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.CreateTasks);
-        _modifyTasksPermissions = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.ModifyTasks);
-        _transitionTasksPermissions = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.TransitionTasks);
-        _assignTasksPermissions = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AssignTasks);
-        _addCommentsPermissions = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AddComments);
+        _createTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.CreateTasks);
+        _modifyTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.ModifyTasks);
+        _transitionTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.TransitionTasks);
+        _assignTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AssignTasks);
+        _addCommentsPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AddComments);
 
         await UpdateTasksVM();
-        _membersVM = await _projectsService.GetMembers(ProjectId);
+        _membersVM = await ProjectsService.GetMembers(ProjectId);
     }
 
     private DisplayType GetDisplayType() => (DisplayTypeStr?.ToLower() ?? string.Empty) switch
@@ -284,7 +283,7 @@
 
     private async Task UpdateTasksVM()
     {
-        _tasksVM = await _tasksService.GetList(ProjectId); // TODO: Optimize it, don't fetch all tasks again
+        _tasksVM = await TasksService.GetList(ProjectId); // TODO: Optimize it, don't fetch all tasks again
         if(_taskDetailsPopup?.Visible ?? false)
         {
             _taskDetailsPopup!.Update(_tasksVM!.Tasks.Single(x => x.Id == _taskDetailsPopup.CurrentTaskId));
@@ -319,14 +318,14 @@
             Priority = _createTaskForm.Priority,
             AssigneeMemberId = _createTaskForm.Assignee?.Id
         };
-        await _tasksService.Create(ProjectId, model);
+        await TasksService.Create(ProjectId, model);
         await UpdateTasksVM();
         _createTaskForm = new();
     }
 
     private IEnumerable<ProjectMemberVM> GetAssigneesForFilters()
     {
-        var currentUserMember = _membersVM!.Members.First(x => x.UserId == _userDataService.CurrentUserVM!.Id);
+        var currentUserMember = _membersVM!.Members.First(x => x.UserId == UserDataService.CurrentUserVM!.Id);
         return new ProjectMemberVM[] { 
             new(Guid.Empty, Guid.Empty, "-", Guid.Empty), 
             new(currentUserMember.Id, currentUserMember.UserId, "@me", currentUserMember.RoleId) }

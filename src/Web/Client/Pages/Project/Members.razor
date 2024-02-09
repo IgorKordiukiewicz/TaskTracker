@@ -2,10 +2,10 @@
 @layout ProjectLayout
 @attribute [Authorize]
 
-@inject ProjectsService _projectsService
-@inject UsersService _usersService
-@inject IAuthorizationService _authorizationService
-@inject UserDataService _userDataService
+@inject ProjectsService ProjectsService
+@inject UsersService UsersService
+@inject IAuthorizationService AuthorizationService
+@inject UserDataService UserDataService
 
 <MudTabs Outlined="false" Border="true" ApplyEffectsToContainer="true" Color="Color.Default" Rounded="true" Position="Position.Top" Centered="false">
     <MudTabPanel Text="Members">
@@ -28,8 +28,8 @@
         {
             <MembersList Members="@_membersVM.Members" ManageRolesPermission="_manageRolesPermission" RemoveMembersPermission="_removeMembersPermission" 
                 MembersUpdated="UpdateMembersVM" RolesVM="@_rolesVM" 
-                UpdateRoleFunc="async (memberId, model) => await _projectsService.UpdateMemberRole(ProjectId, memberId, model)"
-                RemoveMemberFunc="async (memberId) => await _projectsService.RemoveMember(ProjectId, memberId)"
+                UpdateRoleFunc="async (memberId, model) => await ProjectsService.UpdateMemberRole(ProjectId, memberId, model)"
+                RemoveMemberFunc="async (memberId) => await ProjectsService.RemoveMember(ProjectId, memberId)"
             ></MembersList>
         }
     </MudTabPanel>
@@ -37,10 +37,10 @@
     {
         <MudTabPanel Text="Roles">
             <RolesEditor RolesVM="@_rolesVM" TPermissions="ProjectPermissions" RolesUpdated="UpdateRolesVM"
-                UpdateNameFunc="async (roleId, model) => await _projectsService.UpdateRoleName(ProjectId, roleId, model)"
-                UpdatePermissionsFunc="async (roleId, model) => await _projectsService.UpdateRolePermissions(ProjectId, roleId, model)"
-                CreateFunc="async (model) => await _projectsService.CreateRole(ProjectId, model)"
-                DeleteFunc="async (roleId) => await _projectsService.DeleteRole(ProjectId, roleId)"
+                UpdateNameFunc="async (roleId, model) => await ProjectsService.UpdateRoleName(ProjectId, roleId, model)"
+                UpdatePermissionsFunc="async (roleId, model) => await ProjectsService.UpdateRolePermissions(ProjectId, roleId, model)"
+                CreateFunc="async (model) => await ProjectsService.CreateRole(ProjectId, model)"
+                DeleteFunc="async (roleId) => await ProjectsService.DeleteRole(ProjectId, roleId)"
             ></RolesEditor>
         </MudTabPanel>
     }
@@ -69,9 +69,9 @@
     {
         await Layout.SetProjectId(ProjectId);
         
-        _addMembersPermission = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AddMembers);
-        _removeMembersPermission = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.RemoveMembers);
-        _manageRolesPermission = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.ManageRoles);
+        _addMembersPermission = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AddMembers);
+        _removeMembersPermission = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.RemoveMembers);
+        _manageRolesPermission = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.ManageRoles);
 
         await UpdateMembersVM();
         if(_manageRolesPermission)
@@ -82,25 +82,25 @@
 
     private async Task UpdateMembersVM()
     {
-        _membersVM = await _projectsService.GetMembers(ProjectId);
+        _membersVM = await ProjectsService.GetMembers(ProjectId);
 
-        var organizationId = (await _projectsService.GetOrganization(ProjectId))?.OrganizationId ?? default;
+        var organizationId = (await ProjectsService.GetOrganization(ProjectId))?.OrganizationId ?? default;
 
         if(_addMembersPermission)
         {
-            _usersVM = await _usersService.GetAvailableForProject(ProjectId, organizationId);
+            _usersVM = await UsersService.GetAvailableForProject(ProjectId, organizationId);
         }
     }
 
     private async Task UpdateRolesVM()
     {
-        _rolesVM = await _projectsService.GetRoles(ProjectId);
+        _rolesVM = await ProjectsService.GetRoles(ProjectId);
     }
 
     private async Task AddMember(Guid userId)
     {
         var model = new AddProjectMemberDto(userId);
-        _ = await _projectsService.AddMember(ProjectId, model);
+        _ = await ProjectsService.AddMember(ProjectId, model);
 
         _selectedUserVM = null;
         await UpdateMembersVM();

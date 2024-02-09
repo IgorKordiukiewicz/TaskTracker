@@ -11,12 +11,12 @@ namespace Web.Client.Common;
 public static class DiagramExtensions
 {
     public static void InitializeStatusNodes(this BlazorDiagram diagram, 
-        IReadOnlyList<WorkflowTaskStatusVM> Statuses, WorkflowDiagramLayout? savedLayout, out Dictionary<Guid, TaskStatusNodeModel> nodeByStatusId)
+        IReadOnlyList<WorkflowTaskStatusVM> statuses, WorkflowDiagramLayout? savedLayout, out Dictionary<Guid, TaskStatusNodeModel> nodeByStatusId)
     {
         var currentPositionX = 50;
         nodeByStatusId = new Dictionary<Guid, TaskStatusNodeModel>();
 
-        foreach (var status in Statuses)
+        foreach (var status in statuses)
         {
             var nameUpper = status.Name.ToUpper();
             Point position;
@@ -41,10 +41,10 @@ public static class DiagramExtensions
     }
 
     public static void InitializeTransitionLinks(this BlazorDiagram diagram, 
-        IReadOnlyList<WorkflowTaskStatusTransitionVM> Transitions, IReadOnlyDictionary<Guid, TaskStatusNodeModel> nodeByStatusId)
+        IReadOnlyList<WorkflowTaskStatusTransitionVM> transitions, IReadOnlyDictionary<Guid, TaskStatusNodeModel> nodeByStatusId)
     {
-        var linkCreatedByTransitionId = Transitions.ToDictionary(k => (k.FromStatusId, k.ToStatusId), v => false);
-        foreach (var transition in Transitions)
+        var linkCreatedByTransitionId = transitions.ToDictionary(k => (k.FromStatusId, k.ToStatusId), v => false);
+        foreach (var transition in transitions)
         {
             var transitionKey = transition.GetTransitionKey();
             if (linkCreatedByTransitionId[transitionKey])

@@ -5,19 +5,19 @@
 @using System.Text.Json;
 @using System.Text;
 
-@inject NavigationManager _navigationManager
-@inject IConfiguration _configuration
-@inject AuthenticationStateProvider _authenticationStateProvider
-@inject UsersService _usersService
-@inject UserDataService _userDataService
+@inject NavigationManager NavigationManager
+@inject IConfiguration Configuration
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UsersService UsersService
+@inject UserDataService UserDataService
 
 <RemoteAuthenticatorView Action="@Action" OnLogInSucceeded="OnLogIn" OnLogOutSucceeded="OnLogOut">
     <LogOut>
         @{
-            var authority = (string)_configuration["Auth0:Authority"];
-            var clientId = (string)_configuration["Auth0:ClientId"];
+            var authority = (string)Configuration["Auth0:Authority"];
+            var clientId = (string)Configuration["Auth0:ClientId"];
 
-            _navigationManager.NavigateTo($"{authority}/v2/logout?client_id={clientId}");
+            NavigationManager.NavigateTo($"{authority}/v2/logout?client_id={clientId}");
         }
     </LogOut>
 </RemoteAuthenticatorView>
@@ -28,20 +28,20 @@
 
     private async Task OnLogIn(RemoteAuthenticationState _)
     {
-        var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var userAuthId = state.User.Claims.First(x => x.Type == "sub").Value;
-        var isRegistered = await _usersService.IsRegistered(userAuthId);
+        var isRegistered = await UsersService.IsRegistered(userAuthId);
         if(isRegistered)
         {
-            await _userDataService.UpdateUserData();
+            await UserDataService.UpdateUserData();
             return;
         }
 
-        _navigationManager.NavigateTo("complete-registration", true);
+        NavigationManager.NavigateTo("complete-registration", true);
     }
 
     private void OnLogOut(RemoteAuthenticationState _)
     {
-        _userDataService.OnSignOut();
+        UserDataService.OnSignOut();
     }
 }

@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @layout MainLayout
 
-@inject HierarchyNavigationService _hierarchyNavigationService
+@inject HierarchyNavigationService HierarchyNavigationService
 
 <AuthorizeView Policy="@Policy.ProjectMember">
     <CascadingValue Value="this">
@@ -31,7 +31,7 @@
     public async Task SetProjectId(Guid projectId)
     {
         ProjectId = projectId;
-        await _hierarchyNavigationService.OpenProjectPage(ProjectId);
+        await HierarchyNavigationService.OpenProjectPage(ProjectId);
     }
 
     private string GetPageRoute(string page)

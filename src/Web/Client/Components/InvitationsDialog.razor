@@ -1,4 +1,4 @@
-﻿@inject UserDataService _userDataService
+﻿@inject UserDataService UserDataService
 
 <MudDialog>
     <DialogContent>
@@ -39,7 +39,7 @@
     {
         await OrganizationService.AcceptInvitation(invitationId);
         HandleInvitation(invitationId);
-        await _userDataService.UpdateUserData(); // Call to update cached user's permissions
+        await UserDataService.UpdateUserData(); // Call to update cached user's permissions
     }
 
     private async Task DeclineInvitation(Guid invitationId)

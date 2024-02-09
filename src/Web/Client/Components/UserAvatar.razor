@@ -1,4 +1,4 @@
-﻿@inject UsersPresentationService _usersPresentationService
+﻿@inject UsersPresentationService UsersPresentationService
 
 <MudTooltip ShowOnFocus="@Tooltip" ShowOnHover="@Tooltip" Text="@Name">
     <MudAvatar onclick="@(async () => await OnClick.InvokeAsync())"
@@ -32,6 +32,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _color = await _usersPresentationService.GetUserAvatarColor(UserId);
+        _color = await UsersPresentationService.GetUserAvatarColor(UserId);
     }
 }

@@ -1,11 +1,11 @@
 ﻿@page "/"
 @attribute [Authorize]
 
-@inject NavigationManager _navManager
-@inject OrganizationsService _organizationsService
-@inject IDialogService _dialogService
-@inject HierarchyNavigationService _hierarchyNavigationService
-@inject UserDataService _userDataService
+@inject NavigationManager NavManager
+@inject OrganizationsService OrganizationsService
+@inject IDialogService DialogService
+@inject HierarchyNavigationService HierarchyNavigationService
+@inject UserDataService UserDataService
 
 @if(_organizationsVM is not null)
 {
@@ -51,13 +51,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _hierarchyNavigationService.OpenIndexPage();
+        HierarchyNavigationService.OpenIndexPage();
         await UpdateViewModels();
     }
 
     private void SelectOrganization(Guid organizationId)
     {
-        _navManager.NavigateTo($"/org/{organizationId}/projects");
+        NavManager.NavigateTo($"/org/{organizationId}/projects");
     }
 
     private async Task OpenInvitationsDialog()
@@ -70,7 +70,7 @@
         var parameters = new DialogParameters
         {
             { "Invitations", _invitationsVM.Invitations.ToList() },
-            { "OrganizationService", _organizationsService }
+            { "OrganizationService", OrganizationsService }
         };
 
         var options = new DialogOptions
@@ -79,7 +79,7 @@
             MaxWidth = MaxWidth.Small,
         };
 
-        var dialogRef = await _dialogService.ShowAsync<InvitationsDialog>("Invitations", parameters, options);
+        var dialogRef = await DialogService.ShowAsync<InvitationsDialog>("Invitations", parameters, options);
         var dialog = (dialogRef.Dialog as InvitationsDialog)!;
         _ = await dialogRef.Result;
 
@@ -91,8 +91,8 @@
 
     private async Task UpdateViewModels()
     {
-        _organizationsVM = await _organizationsService.GetForUser();
-        _invitationsVM = await _organizationsService.GetInvitationsForUser();
+        _organizationsVM = await OrganizationsService.GetForUser();
+        _invitationsVM = await OrganizationsService.GetInvitationsForUser();
     }
 
     private async Task CreateOrganization()
@@ -102,17 +102,17 @@
             return;
         }
 
-        var userId = _userDataService.CurrentUserVM?.Id;
+        var userId = UserDataService.CurrentUserVM?.Id;
         if(userId is null)
         {
             return;
         }
 
         var model = new CreateOrganizationDto(_createOrganizationForm.Name, userId.Value);
-        var result = await _organizationsService.Create(model);
+        var result = await OrganizationsService.Create(model);
         if(result)
         {
-            await _userDataService.UpdateUserData();
+            await UserDataService.UpdateUserData();
             await UpdateViewModels();
             _createOrganizationForm = new();
         }

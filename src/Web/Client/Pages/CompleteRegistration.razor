@@ -1,9 +1,9 @@
 ﻿@page "/complete-registration"
 @layout EmptyLayout
 
-@inject AuthenticationStateProvider _authenticationStateProvider
-@inject NavigationManager _navigationManager
-@inject UsersService _usersService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject UsersService UsersService
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -28,15 +28,15 @@
 
     private async Task OnCompleteRegistration()
     {
-        var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var userAuthid = state.User.Claims.First(x => x.Type == "sub").Value;
         var email = state.User.Identity?.Name ?? string.Empty;
         var avatarColor = AvatarColorGenerator.Generate();
         var model = new UserRegistrationDto(userAuthid, email, _firstName, _lastName, avatarColor);
-        var result = await _usersService.Register(model);
+        var result = await UsersService.Register(model);
         if(result)
         {
-            _navigationManager.NavigateTo("/", true);
+            NavigationManager.NavigateTo("/", true);
         }
     }
 
