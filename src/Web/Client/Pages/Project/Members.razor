@@ -56,9 +56,9 @@
     [CascadingParameter]
     public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
-    private bool _addMembersPermission = false;
-    private bool _removeMembersPermission = false;
-    private bool _manageRolesPermission = false;
+    private bool _addMembersPermission;
+    private bool _removeMembersPermission;
+    private bool _manageRolesPermission;
 
     private ProjectMembersVM? _membersVM;
     private UsersSearchVM? _usersVM;

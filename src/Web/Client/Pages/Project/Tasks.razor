@@ -194,11 +194,11 @@
     [CascadingParameter]
     public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
-    private bool _createTasksPermissions = false;
-    private bool _modifyTasksPermissions = false;
-    private bool _transitionTasksPermissions = false;
-    private bool _assignTasksPermissions = false;
-    private bool _addCommentsPermissions = false;
+    private bool _createTasksPermissions;
+    private bool _modifyTasksPermissions;
+    private bool _transitionTasksPermissions;
+    private bool _assignTasksPermissions;
+    private bool _addCommentsPermissions;
 
     private TasksVM? _tasksVM;
     private Dictionary<string, Guid>? _taskStatusIdByName = new();
@@ -219,7 +219,7 @@
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public TaskPriority Priority { get; set; } = TaskPriority.Normal;
-        public ProjectMemberVM? Assignee { get; set; } = null;
+        public ProjectMemberVM? Assignee { get; set; }
 
         public override bool IsValid() => !string.IsNullOrWhiteSpace(Title);
     }

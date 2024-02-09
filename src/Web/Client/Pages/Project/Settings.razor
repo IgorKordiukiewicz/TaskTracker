@@ -34,7 +34,7 @@
     [CascadingParameter]
     public ProjectLayout Layout { get; set; } = null!;
 
-    private bool _nameEditEnabled = false;
+    private bool _nameEditEnabled;
     private string _nameEditValue = string.Empty;
 
     private ProjectSettingsVM? _settingsVM;

@@ -49,7 +49,7 @@
     [CascadingParameter]
     public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
-    private bool _createProjectsPermission = false;
+    private bool _createProjectsPermission;
 
     private ProjectsVM? _projectsVM;
 

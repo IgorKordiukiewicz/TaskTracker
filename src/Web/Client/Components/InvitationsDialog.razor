@@ -33,7 +33,7 @@
     [Parameter]
     public OrganizationsService OrganizationService { get; set; } = null!;
 
-    public bool AnyInvitationHandled { get; private set; } = false;
+    public bool AnyInvitationHandled { get; private set; }
 
     private async Task AcceptInvitation(Guid invitationId)
     {

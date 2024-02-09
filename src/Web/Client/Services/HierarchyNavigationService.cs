@@ -5,8 +5,8 @@ namespace Web.Client.Services;
 
 public class HierarchyNavigationService
 {
-    private NavigationItemVM? _organization = null;
-    private NavigationItemVM? _project = null;
+    private NavigationItemVM? _organization;
+    private NavigationItemVM? _project;
 
     private readonly OrganizationsService _organizationsService;
     private readonly ProjectsService _projectsService;

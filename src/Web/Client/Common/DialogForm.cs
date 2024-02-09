@@ -2,7 +2,7 @@
 
 public abstract class DialogForm
 {
-    public bool Visible { get; set; } = false;
+    public bool Visible { get; set; }
 
     public void Open() => Visible = true;
     public void Close() => Visible = false;
