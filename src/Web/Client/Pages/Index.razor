@@ -14,9 +14,9 @@
             <MudText Typo="Typo.h5">
                 Organizations
             </MudText>
-            <MudIconButton Icon="@GetOrganizationInvitationsIcon()" Disabled="@(!HasOrganizationInvitations())" OnClick="OpenInvitationsDialog"></MudIconButton>
+            <MudIconButton Icon="@GetOrganizationInvitationsIcon()" Disabled="@(!HasOrganizationInvitations())" OnClick="@OpenInvitationsDialog"></MudIconButton>
         </div>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _createOrganizationForm.Open()">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _createOrganizationForm.Open())">
             Create Organization
         </MudButton>
     </div>
@@ -67,9 +67,11 @@
             return;
         }
 
-        var parameters = new DialogParameters();
-        parameters.Add("Invitations", _invitationsVM.Invitations.ToList());
-        parameters.Add("OrganizationService", _organizationsService);
+        var parameters = new DialogParameters
+        {
+            { "Invitations", _invitationsVM.Invitations.ToList() },
+            { "OrganizationService", _organizationsService }
+        };
 
         var options = new DialogOptions
         {
@@ -79,7 +81,7 @@
 
         var dialogRef = await _dialogService.ShowAsync<InvitationsDialog>("Invitations", parameters, options);
         var dialog = (dialogRef.Dialog as InvitationsDialog)!;
-        var result = await dialogRef.Result;
+        _ = await dialogRef.Result;
 
         if(dialog.AnyInvitationHandled)
         {

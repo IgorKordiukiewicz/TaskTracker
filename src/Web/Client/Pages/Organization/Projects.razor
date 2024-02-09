@@ -12,7 +12,7 @@
 {
     @if (_createProjectsPermission)
     {
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _createProjectForm.Open()" Class="mb-4 mt-4">Create project</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _createProjectForm.Open())" Class="mb-4 mt-4">Create project</MudButton>
     }
     @if(_projectsVM.Projects.Any())
     {

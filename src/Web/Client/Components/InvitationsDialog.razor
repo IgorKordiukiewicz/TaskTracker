@@ -9,10 +9,10 @@
                 <MudText>
                     @invitation.OrganizationName
                 </MudText>
-                <span style="width: 100px;" />
+                <span style="width: 100px;"></span>
                 <div class="d-flex gap-2">
-                    <MudIconButton Variant="Variant.Filled" Color="Color.Success" OnClick="() => AcceptInvitation(invitation.Id)" Icon="@Icons.Material.Filled.Check" />
-                    <MudIconButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => DeclineInvitation(invitation.Id)" Icon="@Icons.Material.Filled.Clear" />
+                    <MudIconButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => AcceptInvitation(invitation.Id))" Icon="@Icons.Material.Filled.Check" />
+                    <MudIconButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(() => DeclineInvitation(invitation.Id))" Icon="@Icons.Material.Filled.Clear" />
                 </div>
             </div>
             @if(i < Invitations.Count - 1)

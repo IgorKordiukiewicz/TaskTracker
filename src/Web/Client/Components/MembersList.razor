@@ -26,7 +26,7 @@
                         }
                         @if(RemoveMembersPermission)
                         {
-                            <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="() => RemoveMember(member.Id)"
+                            <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="@(() => RemoveMember(member.Id))"
                                 Class="@GetRemoveIconButtonClass(member)"></MudIconButton>
                         }
                     </div>

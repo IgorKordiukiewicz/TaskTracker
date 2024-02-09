@@ -2,7 +2,7 @@
 @inject UsersService _usersService
 
 <MudOverlay @bind-Visible="_visible" DarkBackground="true" AutoClose="false" Class="d-flex align-center justify-end">
-    <MudPaper style="height: 100vh; width: 400px; border-radius: 0px;" Class="d-flex flex-column justify-space-between pa-4">
+    <MudPaper style="height: 100vh; width: 400px; border-radius: 0;" Class="d-flex flex-column justify-space-between pa-4">
         <div class="d-flex flex-column">
             <div class="d-flex align-top justify-space-between">
                 <div class="d-flex gap-3 align-center">
@@ -24,7 +24,7 @@
                     <MudText Typo="Typo.h5">
                         Profile
                     </MudText>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="() => { _nameEditForm.Open(); }" Style="@(_nameEditForm.Visible ? "visibility: hidden;" : string.Empty)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => { _nameEditForm.Open(); })" Style="@(_nameEditForm.Visible ? "visibility: hidden;" : string.Empty)" />
                 </div>
                 <MudDivider />
                 <MudTextField T="string" Label="First Name" Variant="Variant.Filled" Disabled="!_nameEditForm.Visible" @bind-Value="_nameEditForm.FirstName" />
@@ -32,14 +32,14 @@
                 @if (_nameEditForm.Visible)
                 {
                     <div class="d-flex gap-2 justify-end mt-2">
-                        <MudButton Variant="Variant.Filled" OnClick="() => { _nameEditForm.Close(); }">Cancel</MudButton>
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="!_nameEditForm.IsValid()" OnClick="UpdateUserName">Save</MudButton>
+                        <MudButton Variant="Variant.Filled" OnClick="@(() => { _nameEditForm.Close(); })">Cancel</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="!_nameEditForm.IsValid()" OnClick="@UpdateUserName">Save</MudButton>
                     </div>
                 }
             </div>
 
         </div>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="async () => { Close(); await SignOutClicked.InvokeAsync(); }">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => { Close(); await SignOutClicked.InvokeAsync(); })">
             Sign Out
         </MudButton>
     </MudPaper>

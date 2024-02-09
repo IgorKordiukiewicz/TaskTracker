@@ -14,13 +14,13 @@
                 AdornmentIcon="@(_nameEditEnabled ? string.Empty : @Icons.Material.Filled.Edit)" OnAdornmentClick="StartNameEdit" />
             @if (_nameEditEnabled)
             {
-                <MudButton Variant="Variant.Filled" OnClick="CancelNameEdit" Style="height: 56px; width: 100px;">Cancel</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="UpdateName"  Style="height: 56px; width: 100px;" Disabled="@(_settingsVM.Name == _nameEditValue)">Save</MudButton>
+                <MudButton Variant="Variant.Filled" OnClick="@CancelNameEdit" Style="height: 56px; width: 100px;">Cancel</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@UpdateName"  Style="height: 56px; width: 100px;" Disabled="@(_settingsVM.Name == _nameEditValue)">Save</MudButton>
             }
         </div>
         <MudDivider />
         <div>
-            <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" OnClick="DeleteProject">Delete Project</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" OnClick="@DeleteProject">Delete Project</MudButton>
         </div>
     </MudPaper>
 }

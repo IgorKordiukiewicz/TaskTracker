@@ -27,8 +27,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _userDataService.SignedIn += () => StateHasChanged();
-        _userDataService.SignedOut += () => StateHasChanged();
+        _userDataService.SignedIn += StateHasChanged;
+        _userDataService.SignedOut += StateHasChanged;
         await _userDataService.UpdateUserData();
     }
 

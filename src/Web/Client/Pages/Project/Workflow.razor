@@ -22,7 +22,6 @@
 
 @inject ISnackbar _snackbar
 @inject WorkflowsService _workflowsService
-@inject IDialogService _dialogService
 @inject ILocalStorageService _localStorage
 
 @if(_workflowVM is not null)
@@ -30,10 +29,10 @@
     <MudGrid Class="mt-2">
         <MudItem md="2">
             <div class="d-flex flex-column gap-2">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addStatusForm.Open()" FullWidth="true">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _addStatusForm.Open())" FullWidth="true">
                     Add Status
                 </MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => _addTransitionForm.Open()" FullWidth="true" 
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _addTransitionForm.Open())" FullWidth="true" 
                     Disabled="@(!_workflowVM.GetAvailableFromStatuses().Any())">
                     Add Transition
                 </MudButton>
@@ -43,11 +42,11 @@
                     @if(!_selectedNode.Initial)
                     {
                         <MudDivider />
-                        <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="() => ChangeInitialStatus(_selectedNode.Name)">Make Initial</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="@(() => ChangeInitialStatus(_selectedNode.Name))">Make Initial</MudButton>
                     }
                     <MudDivider />
                     <MudTooltip ShowOnHover="!canStatusBeDeleted" ShowOnFocus="!canStatusBeDeleted" Text="@DisableStatusDeletionTooltipText(_selectedNode.Name)" id="status-delete-button-tooltip">
-                        <MudButton Variant="Variant.Filled" Color="Color.Error" Style="width: 100%;" OnClick="() => DeleteStatus(_selectedNode.Name)" Disabled="!canStatusBeDeleted">Delete Status</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" Style="width: 100%;" OnClick="@(() => DeleteStatus(_selectedNode.Name))" Disabled="!canStatusBeDeleted">Delete Status</MudButton>
                     </MudTooltip>
                 }
                 @if(_selectedLink is not null)
@@ -56,7 +55,7 @@
                     if(_selectedLink.Value.Bidirectional)
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" 
-                            OnClick="() => DeleteTransition(_selectedLink.Value.SourceNode, _selectedLink.Value.TargetNode)">
+                            OnClick="@(() => DeleteTransition(_selectedLink.Value.SourceNode, _selectedLink.Value.TargetNode))">
                             <div class="d-flex flex-column">
                                 <MudText Typo="Typo.button">
                                     Delete Transition
@@ -74,7 +73,7 @@
                             </div>
                         </MudButton>
                         <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" 
-                            OnClick="() => DeleteTransition(_selectedLink.Value.TargetNode, _selectedLink.Value.SourceNode)">
+                            OnClick="@(() => DeleteTransition(_selectedLink.Value.TargetNode, _selectedLink.Value.SourceNode))">
                             <div class="d-flex flex-column">
                                 <MudText Typo="Typo.button">
                                     Delete Transition
@@ -95,7 +94,7 @@
                     else
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true" 
-                            OnClick="() => DeleteTransition(_selectedLink.Value.SourceNode, _selectedLink.Value.TargetNode)">
+                            OnClick="@(() => DeleteTransition(_selectedLink.Value.SourceNode, _selectedLink.Value.TargetNode))">
                             Delete Transition
                         </MudButton>
                     }
@@ -256,10 +255,7 @@
             _diagram.DeleteTransitionLink(deletedTransition.Value);
         }
 
-        if(_diagram is not null)
-        {
-            await SaveDiagramLayout();
-        }
+        await SaveDiagramLayout();
     }
 
     private async Task AddStatus()
@@ -315,15 +311,8 @@
                 var sourceNodeName = (link.Source.Model as TaskStatusNodeModel)!.Name;
                 var targetNodeName = (link.Target.Model as TaskStatusNodeModel)!.Name;
                 var bidirectional = link.IsBidirectional();
-                var reverseNodes = bidirectional ? false : link.SourceMarker == LinkMarker.Arrow;
-                if(reverseNodes)
-                {
-                    _selectedLink = (targetNodeName, sourceNodeName, bidirectional);
-                }
-                else
-                {
-                    _selectedLink = (sourceNodeName, targetNodeName, bidirectional);
-                }
+                var reverseNodes = !bidirectional && link.SourceMarker == LinkMarker.Arrow;
+                _selectedLink = reverseNodes ? (targetNodeName, sourceNodeName, bidirectional) : (sourceNodeName, targetNodeName, bidirectional);
                 _selectedNode = null;
             }
         }
@@ -334,11 +323,6 @@
         }
 
         StateHasChanged();
-    }
-
-    private void ShowStatusCantBeDeletedMessage()
-    {
-        _snackbar.Add("This status can't be deleted!", Severity.Warning);
     }
 
     private bool CanStatusBeDeleted(string name)
@@ -413,7 +397,7 @@
 
         var statusId = _statusIdByName[statusName];
         var model = new ChangeInitialWorkflowStatusDto(statusId);
-        var success = await _workflowsService.ChangeInitialStatus(_workflowVM!.Id, ProjectId, model);
+        _ = await _workflowsService.ChangeInitialStatus(_workflowVM!.Id, ProjectId, model);
 
         var previousInitialNode = (_diagram.Nodes.First(x => (x as TaskStatusNodeModel)!.Initial) as TaskStatusNodeModel)!;
         previousInitialNode.Initial = false;

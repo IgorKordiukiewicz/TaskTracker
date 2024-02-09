@@ -45,15 +45,15 @@
                     </MudSelect>
                 </MudItem>
                 <MudItem lg="3" xs="12" Class="d-flex gap-2 align-center">
-                    <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Clear" Style="height: 55px;" FullWidth="true" OnClick="() => { _filters = new(); FilterTasks(); }">
+                    <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Clear" Style="height: 55px;" FullWidth="true" OnClick="@(() => { _filters = new(); FilterTasks(); })">
                             Clear
                         </MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Search" Style="height: 55px;" FullWidth="true" OnClick="() => FilterTasks()">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Search" Style="height: 55px;" FullWidth="true" OnClick="@FilterTasks">
                         Search
                     </MudButton>
                     @if (_createTasksPermissions)
                     {
-                        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="() => _createTaskForm.Open()" Style="height: 55px;" StartIcon="@Icons.Material.Filled.AddTask" FullWidth="true">
+                        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="@(() => _createTaskForm.Open())" Style="height: 55px;" StartIcon="@Icons.Material.Filled.AddTask" FullWidth="true">
                             Create
                         </MudButton>
                     }
@@ -148,7 +148,7 @@
                                     <UserAvatar Name="@currentAssignee!.Name" UserId="@currentAssignee.UserId" Size="Size.Small" Tooltip="true"></UserAvatar>
                                 }
                                 <PriorityAvatar Priority="@context.Priority" Tooltip="true" />
-                                <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="() => OpenTaskDetailsPopup(context.Id)" />
+                                <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="@(() => OpenTaskDetailsPopup(context.Id))" />
                             </div>
                         </div>
                     </MudPaper>
@@ -205,7 +205,6 @@
     private IEnumerable<TaskVM>? _tasks;
 
     private ProjectMembersVM? _membersVM;
-    private Dictionary<Guid, string> _memberNameById = new();
 
     private TaskDetailsPopup? _taskDetailsPopup;
 
@@ -248,10 +247,6 @@
 
         await UpdateTasksVM();
         _membersVM = await _projectsService.GetMembers(ProjectId);
-        if(_membersVM is not null)
-        {
-            _memberNameById = _membersVM.Members.ToDictionary(k => k.Id, v => v.Name);
-        }
     }
 
     private DisplayType GetDisplayType() => (DisplayTypeStr?.ToLower() ?? string.Empty) switch
@@ -269,10 +264,10 @@
         var priorities = _filters.Priorities.ToHashSet();
 
         _tasks = _tasksVM!.Tasks.Where(x => 
-            (!string.IsNullOrWhiteSpace(titleLower) ? x.Title.ToLower().Contains(titleLower) : true)
-            && (statuses.Any() ? statuses.Contains(x.Status.Id) : true)
-            && (assignees.Any() ? assignees.Contains(x.AssigneeId.GetValueOrDefault()) : true)
-            && (priorities.Any() ? priorities.Contains(x.Priority) : true))
+            (string.IsNullOrWhiteSpace(titleLower) || x.Title.ToLower().Contains(titleLower))
+            && (!statuses.Any() || statuses.Contains(x.Status.Id))
+            && (!assignees.Any() || assignees.Contains(x.AssigneeId.GetValueOrDefault()))
+            && (!priorities.Any() || priorities.Contains(x.Priority)))
             .ToList();
     }
 

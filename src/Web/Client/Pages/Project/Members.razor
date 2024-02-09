@@ -19,7 +19,7 @@
                             <MudSelectItem Value="@user">@user.Email</MudSelectItem>
                         }
                     </MudSelect>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 56px; width: 100px;" Disabled="@(_selectedUserVM is null)" OnClick="() => AddMember(_selectedUserVM!.Id)">Add</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 56px; width: 100px;" Disabled="@(_selectedUserVM is null)" OnClick="@(() => AddMember(_selectedUserVM!.Id))">Add</MudButton>
                 </div>
                 <MudDivider Class="mt-2"/>
             </MudPaper>
@@ -68,8 +68,7 @@
     protected override async Task OnInitializedAsync()
     {
         await Layout.SetProjectId(ProjectId);
-
-        var user = (await AuthenticationState).User;
+        
         _addMembersPermission = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AddMembers);
         _removeMembersPermission = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.RemoveMembers);
         _manageRolesPermission = _userDataService.HasProjectPermissions(ProjectId, ProjectPermissions.ManageRoles);

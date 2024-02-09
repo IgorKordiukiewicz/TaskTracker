@@ -15,7 +15,7 @@
         </MudText>
         <MudTextField T="string" Label="First Name" Required="true" Variant="Variant.Outlined" @bind-Value="_firstName" />
         <MudTextField T="string" Label="Last Name" Required="true" Variant="Variant.Outlined" @bind-Value="_lastName" />
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Disabled="@(!IsValid())" OnClick="OnCompleteRegistration">Continue</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Disabled="@(!IsValid())" OnClick="@OnCompleteRegistration">Continue</MudButton>
     </MudPaper>
 </div>
 

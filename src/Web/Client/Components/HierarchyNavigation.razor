@@ -6,6 +6,6 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
-        _hierarchyNavigationService.Updated += () => StateHasChanged();
+        _hierarchyNavigationService.Updated += StateHasChanged;
     }
 }
