@@ -1,5 +1,4 @@
 ﻿using Blazor.Diagrams;
-using Blazor.Diagrams.Core;
 using Blazor.Diagrams.Core.Geometry;
 using Blazor.Diagrams.Core.Models;
 using Blazor.Diagrams.Core.Models.Base;
@@ -11,7 +10,7 @@ namespace Web.Client.Common;
 public static class DiagramExtensions
 {
     public static void InitializeStatusNodes(this BlazorDiagram diagram, 
-        IReadOnlyList<WorkflowTaskStatusVM> statuses, WorkflowDiagramLayout? savedLayout, out Dictionary<Guid, TaskStatusNodeModel> nodeByStatusId)
+        IEnumerable<WorkflowTaskStatusVM> statuses, WorkflowDiagramLayout? savedLayout, out Dictionary<Guid, TaskStatusNodeModel> nodeByStatusId)
     {
         var currentPositionX = 50;
         nodeByStatusId = new Dictionary<Guid, TaskStatusNodeModel>();
@@ -43,7 +42,7 @@ public static class DiagramExtensions
     public static void InitializeTransitionLinks(this BlazorDiagram diagram, 
         IReadOnlyList<WorkflowTaskStatusTransitionVM> transitions, IReadOnlyDictionary<Guid, TaskStatusNodeModel> nodeByStatusId)
     {
-        var linkCreatedByTransitionId = transitions.ToDictionary(k => (k.FromStatusId, k.ToStatusId), v => false);
+        var linkCreatedByTransitionId = transitions.ToDictionary(k => (k.FromStatusId, k.ToStatusId), _ => false);
         foreach (var transition in transitions)
         {
             var transitionKey = transition.GetTransitionKey();

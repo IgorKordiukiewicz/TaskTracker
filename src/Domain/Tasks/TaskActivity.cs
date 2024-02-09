@@ -4,11 +4,11 @@ namespace Domain.Tasks;
 
 public class TaskActivity : ValueObject
 {
-    public Guid TaskId { get; set; }
-    public TaskProperty Property { get; set; }
-    public string? OldValue { get; set; }
-    public string? NewValue { get; set; }
-    public DateTime OccurredAt { get; set; }
+    public Guid TaskId { get; init; }
+    public TaskProperty Property { get; init; }
+    public string? OldValue { get; init; }
+    public string? NewValue { get; init; }
+    public DateTime OccurredAt { get; init; }
 
     public TaskActivity(Guid taskId, TaskProperty property, string? oldValue = null, string? newValue = null)
     {

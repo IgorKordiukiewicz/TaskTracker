@@ -38,7 +38,7 @@ internal class UpdateTaskStatusHandler : IRequestHandler<UpdateTaskStatusCommand
             return Result.Fail(new NotFoundError<Domain.Workflows.TaskStatus>(request.Model.StatusId));
         }
 
-        var result = task.UpdateStatus(request.Model.StatusId, workflow!);
+        var result = task.UpdateStatus(request.Model.StatusId, workflow);
         if(result.IsFailed)
         {
             return Result.Fail(result.Errors);

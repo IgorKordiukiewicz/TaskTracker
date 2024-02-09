@@ -1,5 +1,4 @@
 ﻿using Blazor.Diagrams.Core.Models;
-using Blazor.Diagrams.Core.PathGenerators;
 
 namespace Web.Client.Diagrams;
 

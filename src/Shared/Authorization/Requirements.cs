@@ -6,7 +6,7 @@ namespace Shared.Authorization;
 public abstract class MemberRequirement<TPermissions> : IAuthorizationRequirement
     where TPermissions : struct, Enum
 {
-    public TPermissions? Permissions { get; set; }
+    public TPermissions? Permissions { get; init; }
 }
 
 public class OrganizationMemberRequirement : MemberRequirement<OrganizationPermissions>

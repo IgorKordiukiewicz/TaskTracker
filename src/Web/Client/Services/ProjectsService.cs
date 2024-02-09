@@ -1,5 +1,4 @@
-﻿using Flurl;
-using MudBlazor;
+﻿using MudBlazor;
 using Shared.Dtos;
 using Shared.Enums;
 using Shared.ViewModels;

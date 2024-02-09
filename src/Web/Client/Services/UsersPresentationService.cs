@@ -1,6 +1,5 @@
 ﻿namespace Web.Client.Services;
 
-// TODO: Make it a singleton
 public class UsersPresentationService
 {
     private readonly UsersService _usersService;

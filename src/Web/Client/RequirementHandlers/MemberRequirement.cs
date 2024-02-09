@@ -56,7 +56,7 @@ public abstract class MemberRequirementHandler<TAuthorizationRequirement, TPermi
 
         var url = _navigationManager.Uri;
         var route = $"/{_routeKey}/";
-        var routeStartIndex = url.IndexOf(route);
+        var routeStartIndex = url.IndexOf(route, StringComparison.Ordinal);
         var entityIdStr = url.Substring(routeStartIndex + route.Length, 36); // Guid is 36 characters long
         if (!Guid.TryParse(entityIdStr, out var entityId))
         {
@@ -77,6 +77,5 @@ public abstract class MemberRequirementHandler<TAuthorizationRequirement, TPermi
         }
 
         context.Succeed(requirement);
-        return;
     }
 }

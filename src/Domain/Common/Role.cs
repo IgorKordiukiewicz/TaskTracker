@@ -15,7 +15,7 @@ public abstract class Role<TPermissions> : Entity
 
     public TPermissions Permissions { get; set; }
 
-    public Role(string name, TPermissions permissions, RoleType type = RoleType.Custom)
+    protected Role(string name, TPermissions permissions, RoleType type = RoleType.Custom)
         : base(Guid.NewGuid())
     {
         Name = name;

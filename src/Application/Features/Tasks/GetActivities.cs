@@ -53,7 +53,7 @@ internal class GetTaskActivitiesHandler : IRequestHandler<GetTaskActivitiesQuery
             .Where(x => userIds.Contains(x.Id))
             .ToDictionaryAsync(k => k.Id, v => v.FullName);
 
-        var statusNameByid = await _dbContext.TaskStatuses
+        var statusNameById = await _dbContext.TaskStatuses
             .Where(x => statusIds.Contains(x.Id))
             .ToDictionaryAsync(k => k.Id, v => v.Name);
 
@@ -69,7 +69,7 @@ internal class GetTaskActivitiesHandler : IRequestHandler<GetTaskActivitiesQuery
             }
             else if (activity.Property == TaskProperty.Status)
             {
-                UpdateValue(ref oldValue, ref newValue, statusNameByid);
+                UpdateValue(ref oldValue, ref newValue, statusNameById);
             }
 
             updatedActivities.Add(new(activity.Property, oldValue, newValue, activity.OccurredAt));

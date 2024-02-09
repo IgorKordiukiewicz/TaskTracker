@@ -44,12 +44,12 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
             x => x.Id, 
             (task, status) => new
             {
-                Id = task.Id,
-                ShortId = task.ShortId,
-                Title = task.Title,
-                Description = task.Description,
-                AssigneeId = task.AssigneeId,
-                Priority = task.Priority,
+                task.Id,
+                task.ShortId,
+                task.Title,
+                task.Description,
+                task.AssigneeId,
+                task.Priority,
                 Status = status.Id,
             })
             .OrderByDescending(x => x.ShortId)
@@ -59,7 +59,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
             .Select(x => new TaskStatusDetailedVM(x.Id, x.Name, x.DisplayOrder))
             .ToList();
 
-        var possibleNextStatusesByStatus = workflow.Statuses.ToDictionary(k => k.Id, v => new List<Guid>());
+        var possibleNextStatusesByStatus = workflow.Statuses.ToDictionary(k => k.Id, _ => new List<Guid>());
         foreach(var (statusId, possibleNextStatuses) in possibleNextStatusesByStatus)
         {
             possibleNextStatuses.AddRange(workflow.Transitions.Where(x => x.FromStatusId == statusId).Select(x => x.ToStatusId));

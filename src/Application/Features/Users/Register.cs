@@ -36,7 +36,7 @@ internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result
 
         var user = User.Create(request.Model.AuthenticationId, request.Model.Email, request.Model.FirstName, request.Model.LastName);
 
-        using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
         try
         {

@@ -2,8 +2,8 @@
 
 public class TaskStatusTransition : ValueObject
 {
-    public Guid FromStatusId { get; private init; }
-    public Guid ToStatusId { get; private init; }
+    public Guid FromStatusId { get; }
+    public Guid ToStatusId { get; }
 
     public TaskStatusTransition(Guid fromStatusId, Guid toStatusId)
     {

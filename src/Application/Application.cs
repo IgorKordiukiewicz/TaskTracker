@@ -1,8 +1,7 @@
-﻿using Application.Behaviors;
+﻿using System.Reflection;
+using Application.Behaviors;
 using Application.Common;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace Application;
 

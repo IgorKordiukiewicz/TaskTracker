@@ -18,7 +18,7 @@ public abstract class ApiService
     private readonly HttpClient _httpClient;
     private readonly ISnackbar _snackbar;
 
-    public ApiService(HttpClient httpClient, ISnackbar snackbar)
+    protected ApiService(HttpClient httpClient, ISnackbar snackbar)
     {
         _httpClient = httpClient;
         _snackbar = snackbar;

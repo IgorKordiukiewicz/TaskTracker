@@ -44,7 +44,6 @@ internal class GetWorkflowForProjectHandler : IRequestHandler<GetWorkflowForProj
                 Id = x.Id,
                 Name = x.Name,
                 Initial = x.Initial,
-                DisplayOrder = x.DisplayOrder,
                 DeletionEligibility = x.Initial ? TaskStatusDeletionEligibility.Initial : 
                     (usedStatusesIds.Contains(x.Id) ? TaskStatusDeletionEligibility.InUse : TaskStatusDeletionEligibility.Eligible)
             }).ToList();

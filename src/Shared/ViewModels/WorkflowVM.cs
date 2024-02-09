@@ -8,7 +8,6 @@ public record WorkflowTaskStatusVM
     public required Guid Id { get; init; }
     public required string Name { get; init; }
     public required bool Initial { get; init; }
-    public required int DisplayOrder { get; init; }
     public required TaskStatusDeletionEligibility DeletionEligibility { get; init; }
 }
 

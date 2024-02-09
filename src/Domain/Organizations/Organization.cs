@@ -6,7 +6,7 @@ public class Organization : Entity, IAggregateRoot
 {
     public string Name { get; private set; } = string.Empty;
 
-    public Guid OwnerId { get; private set; } // User
+    public Guid OwnerId { get; private init; } // User
 
 
     private readonly List<OrganizationMember> _members = new();

@@ -16,7 +16,7 @@ public abstract class ValueObject
     public override int GetHashCode()
     {
         return GetEqualityComponents()
-            .Select(x => x != null ? x.GetHashCode() : 0)
+            .Select(x => x.GetHashCode())
             .Aggregate((x, y) => x ^ y);
     }
 

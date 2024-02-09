@@ -28,7 +28,7 @@ internal class DeleteProjectHandler : IRequestHandler<DeleteProjectCommand, Resu
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
-        using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
         try
         {

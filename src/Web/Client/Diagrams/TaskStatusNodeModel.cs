@@ -12,5 +12,5 @@ public class TaskStatusNodeModel : NodeModel
     }
 
     public required string Name { get; set; }
-    public bool Initial { get; set; } = false;
+    public bool Initial { get; set; }
 }

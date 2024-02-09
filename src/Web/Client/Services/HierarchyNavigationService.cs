@@ -27,10 +27,7 @@ public class HierarchyNavigationService
         _organization = null;
         _project = null;
 
-        if (Updated is not null)
-        {
-            Updated();
-        }
+        Updated?.Invoke();
     }
 
     public async Task OpenOrganizationPage(Guid organizationId)
@@ -44,10 +41,7 @@ public class HierarchyNavigationService
         var navData = await _organizationsService.GetNavData(organizationId);
         _organization = navData?.Organization;
 
-        if (Updated is not null)
-        {
-            Updated();
-        }
+        Updated?.Invoke();
     }
 
     public async Task OpenProjectPage(Guid projectId)
@@ -61,10 +55,7 @@ public class HierarchyNavigationService
         _project = navData?.Project;
         _organization = navData?.Organization;
 
-        if (Updated is not null)
-        {
-            Updated();
-        }
+        Updated?.Invoke();
     }
 
     public List<BreadcrumbItem> GetBreadcrumbs()

@@ -10,7 +10,7 @@ public abstract class MemberRequirementHandler<TAuthorizationRequirement> : Auth
     private readonly IHttpContextAccessor _contextAccessor;
     private readonly string _idKey;
 
-    public MemberRequirementHandler(AppDbContext dbContext, IHttpContextAccessor contextAccessor, string idKey)
+    protected MemberRequirementHandler(AppDbContext dbContext, IHttpContextAccessor contextAccessor, string idKey)
     {
         _dbContext = dbContext;
         _contextAccessor = contextAccessor;

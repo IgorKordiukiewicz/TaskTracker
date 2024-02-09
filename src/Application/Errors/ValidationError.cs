@@ -1,5 +1,4 @@
-﻿using FluentResults;
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 
 namespace Application.Errors;
 

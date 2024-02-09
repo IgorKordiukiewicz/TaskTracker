@@ -11,7 +11,7 @@ internal class CreateOrganizationRoleCommandValidator : AbstractValidator<Create
     {
         RuleFor(x => x.OrganizationId).NotEmpty();
         RuleFor(x => x.Model.Name).NotEmpty();
-        RuleFor(x => x.Model.Permissions).NotNull(); // TOOD: Validate in range
+        RuleFor(x => x.Model.Permissions).NotNull(); // TODO: Validate in range
     }
 }
 

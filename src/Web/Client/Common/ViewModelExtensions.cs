@@ -44,18 +44,18 @@ public static class ViewModelExtensions
 
     public static ProjectMemberVM? GetCurrentAssigneeVM(this ProjectMembersVM membersVM, Guid? assigneeId)
     {
-        return membersVM!.Members.FirstOrDefault(x => x.UserId == assigneeId) ?? null;
+        return membersVM.Members.FirstOrDefault(x => x.UserId == assigneeId) ?? null;
     }
 
     public static IEnumerable<ProjectMemberVM> GetPossibleAssignees(this ProjectMembersVM membersVM, Guid? assigneeId)
     {
         if (assigneeId is not null && assigneeId != Guid.Empty)
         {
-            return membersVM!.Members.Where(x => x.UserId != assigneeId.Value).Append(new(Guid.Empty, Guid.Empty, "-", Guid.Empty)).Reverse();
+            return membersVM.Members.Where(x => x.UserId != assigneeId.Value).Append(new(Guid.Empty, Guid.Empty, "-", Guid.Empty)).Reverse();
         }
         else
         {
-            return membersVM!.Members;
+            return membersVM.Members;
         }
     }
 }
