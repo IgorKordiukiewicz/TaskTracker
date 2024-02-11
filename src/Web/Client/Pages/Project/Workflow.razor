@@ -354,7 +354,7 @@
             return;
         }
 
-        if(!await _confirmDeleteBox.Show($"Are you sure you want to delete the status {name}?"))
+        if(!await _confirmDeleteBox.Show($"Are you sure you want to delete the '{name}' status?"))
         {
             return;
         }
@@ -376,7 +376,7 @@
             return;
         }
 
-        if (!await _confirmDeleteBox.Show($"Are you sure you want to delete the transition from {fromStatusName} to {toStatusName}?"))
+        if (!await _confirmDeleteBox.Show($"Are you sure you want to delete the transition from '{fromStatusName}' to '{toStatusName}'?"))
         {
             return;
         }
