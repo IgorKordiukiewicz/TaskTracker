@@ -40,11 +40,9 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 
-    public async System.Threading.Tasks.Task AddRemoveChildEntities<TDependent>(IEnumerable<TDependent> actualEntities)
+    public void AddRemoveChildEntities<TDependent>(IEnumerable<TDependent> actualEntities, IEnumerable<Guid> dbEntities)
         where TDependent : Entity
     {
-        var dbEntities = await Set<TDependent>().AsNoTracking().Select(x => x.Id).ToListAsync();
-
         var addedEntities = actualEntities.Where(x => !dbEntities.Any(y => y == x.Id));
         Set<TDependent>().AddRange(addedEntities);
 
@@ -52,17 +50,25 @@ public class AppDbContext : DbContext
         Set<TDependent>().RemoveRange(Set<TDependent>().Where(x => removedEntitiesIds.Contains(x.Id)));
     }
 
-    public async System.Threading.Tasks.Task AddRemoveChildValueObjects<TDependent>(IEnumerable<TDependent> actualEntities)
+    public void AddRemoveChildValueObjects<TDependent>(IEnumerable<TDependent> actualEntities,
+        IEnumerable<TDependent> dbEntities)
         where TDependent : ValueObject
     {
-        var dbEntities = await Set<TDependent>().ToListAsync();
-    
-        var addedEntities = actualEntities.Where(x => !dbEntities.Any(y => y == x));
+        var addedEntities = actualEntities.Except(dbEntities);
         Set<TDependent>().AddRange(addedEntities);
     
-        var removedEntities = dbEntities.Where(x => !actualEntities.Any(y => y == x));
+        var removedEntities = dbEntities.Except(actualEntities);
         foreach(var removedEntity in removedEntities)
         {
+            var existingEntity = Set<TDependent>().Local
+                .FirstOrDefault(x => x == removedEntity);
+
+            if (existingEntity is not null)
+            {
+                Entry(existingEntity).State = EntityState.Detached;
+            }
+
+            Set<TDependent>().Attach(removedEntity);
             Set<TDependent>().Remove(removedEntity);
         }
     }

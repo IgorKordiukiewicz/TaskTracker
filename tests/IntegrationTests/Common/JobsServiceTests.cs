@@ -31,6 +31,7 @@ public class JobsServiceTests
         {
             var project = Project.Create("proj" + i.ToString(), org.Id, users[0].Id);
             _ = project.AddMember(users[1].Id);
+            projects.Add(project);
         }
 
         await _fixture.SeedDb(db =>

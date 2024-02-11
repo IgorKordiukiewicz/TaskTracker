@@ -36,6 +36,8 @@ public class JobsService : IJobsService
                 _logger.LogCritical("Removing user (ID: {@userId}) from organization (ID: {@organizationId}) failed!", userId, organizationId);
                 // TODO: throw?
             }
+
+            var count = await _dbContext.ProjectMembers.CountAsync();
         }
     }
 }

@@ -32,8 +32,14 @@ public class TaskRepository : IRepository<Domain.Tasks.Task>
 
     public async Task Update(Domain.Tasks.Task entity)
     {
-        await _dbContext.AddRemoveChildEntities(entity.Comments);
-        await _dbContext.AddRemoveChildValueObjects(entity.Activities);
+        var oldEntity = await _dbContext.Tasks
+            .AsNoTracking()
+            .Include(x => x.Comments)
+            .Include(x => x.Activities)
+            .SingleAsync(x => x.Id == entity.Id);
+        
+        _dbContext.AddRemoveChildEntities(entity.Comments,oldEntity.Comments.Select(x => x.Id));
+        _dbContext.AddRemoveChildValueObjects(entity.Activities, oldEntity.Activities);
         await _dbContext.SaveChangesAsync();
     }
 }

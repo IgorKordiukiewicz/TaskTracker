@@ -34,8 +34,14 @@ public class ProjectRepository : IRepository<Project>
 
     public async Task Update(Project entity)
     {
-        await _dbContext.AddRemoveChildEntities(entity.Members);
-        await _dbContext.AddRemoveChildEntities(entity.Roles);
+        var oldEntity = await _dbContext.Projects
+            .AsNoTracking()
+            .Include(x => x.Members)
+            .Include(x => x.Roles)
+            .SingleAsync(x => x.Id == entity.Id);
+        
+        _dbContext.AddRemoveChildEntities(entity.Members, oldEntity.Members.Select(x => x.Id));
+        _dbContext.AddRemoveChildEntities(entity.Roles,oldEntity.Roles.Select(x => x.Id));
         await _dbContext.SaveChangesAsync();
     }
 }

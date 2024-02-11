@@ -36,9 +36,16 @@ public class OrganizationRepository : IRepository<Organization>
 
     public async Task Update(Organization entity)
     {
-        await _dbContext.AddRemoveChildEntities(entity.Members);
-        await _dbContext.AddRemoveChildEntities(entity.Invitations);
-        await _dbContext.AddRemoveChildEntities(entity.Roles);
+        var oldEntity = await _dbContext.Organizations
+            .AsNoTracking()
+            .Include(x => x.Members)
+            .Include(x => x.Invitations)
+            .Include(x => x.Roles)
+            .SingleAsync(x => x.Id == entity.Id);
+        
+        _dbContext.AddRemoveChildEntities(entity.Members, oldEntity.Members.Select(x => x.Id));
+        _dbContext.AddRemoveChildEntities(entity.Invitations, oldEntity.Invitations.Select(x => x.Id));
+        _dbContext.AddRemoveChildEntities(entity.Roles,oldEntity.Roles.Select(x => x.Id));
         await _dbContext.SaveChangesAsync();
     }
 }

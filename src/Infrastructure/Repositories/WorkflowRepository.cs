@@ -33,8 +33,14 @@ public class WorkflowRepository : IRepository<Workflow>
 
     public async Task Update(Workflow entity)
     {
-        await _dbContext.AddRemoveChildEntities(entity.Statuses);
-        await _dbContext.AddRemoveChildValueObjects(entity.Transitions);
+        var oldEntity = await _dbContext.Workflows
+            .AsNoTracking()
+            .Include(x => x.Statuses)
+            .Include(x => x.Transitions)
+            .SingleAsync(x => x.Id == entity.Id);
+        
+        _dbContext.AddRemoveChildEntities(entity.Statuses, oldEntity.Statuses.Select(x => x.Id));
+        _dbContext.AddRemoveChildValueObjects(entity.Transitions, oldEntity.Transitions);
         await _dbContext.SaveChangesAsync();
     }
 }
