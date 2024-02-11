@@ -146,7 +146,7 @@
     [CascadingParameter]
     public ProjectLayout Layout { get; set; } = null!;
 
-    private BlazorDiagram _diagram = null!;
+    private BlazorDiagram? _diagram;
 
     private WorkflowVM? _workflowVM;
     private Dictionary<string, Guid>? _statusIdByName;
@@ -234,6 +234,11 @@
         }
         var statusNameComparer = StringComparer.OrdinalIgnoreCase;
         _statusIdByName = _workflowVM.Statuses.ToDictionary(k => k.Name, v => v.Id, statusNameComparer);
+
+        if (_diagram is null)
+        {
+            return;
+        }
 
         if(newStatus is not null)
         {
@@ -411,6 +416,11 @@
 
     private async Task SaveDiagramLayout()
     {
+        if (_diagram is null)
+        {
+            return;
+        }
+        
         await LocalStorage.SaveDiagramLayout(_diagram, ProjectId);
     }
 }
