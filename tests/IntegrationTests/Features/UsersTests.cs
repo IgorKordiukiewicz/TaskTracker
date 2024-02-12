@@ -223,4 +223,37 @@ public class UsersTests
             updatedUser.LastName.Should().Be(newLastName);
         }
     }
+
+    [Fact]
+    public async Task GetAllUsersPresentationData_ShouldFail_WhenUserDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetAllUsersPresentationDataQuery("_"));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetAllUsersPresentationData_ShouldReturnPresentationDataForAllUsersTheUserCanSee_WhenUserExists()
+    {
+        var users =  await _factory.CreateUsers(3);
+        var organization = Organization.Create("org", users[0].Id);
+        var invitation = organization.CreateInvitation(users[1].Id).Value;
+        _ = organization.AcceptInvitation(invitation.Id);
+
+        await _fixture.SeedDb(db =>
+        {
+            db.Organizations.Add(organization);
+        });
+
+        var result = await _fixture.SendRequest(new GetAllUsersPresentationDataQuery(users[0].AuthenticationId));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Data.Select(x => x.UserId).Should().BeEquivalentTo(new[]
+            {
+                users[0].Id, users[1].Id
+            });
+        }
+    }
 }
