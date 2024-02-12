@@ -22,6 +22,8 @@ public static class Policy
     public const string ProjectManageWorkflows = nameof(ProjectManageWorkflows);
     public const string ProjectManageProject = nameof(ProjectManageProject);
     public const string ProjectManageRoles = nameof(ProjectManageRoles);
+    public const string ProjectLogTimeOnTasks = nameof(ProjectLogTimeOnTasks);
+    public const string ProjectEstimateTasks = nameof(ProjectEstimateTasks);
 
     public const string UserSelf = nameof(UserSelf);
 }
@@ -47,6 +49,8 @@ public static class PolicyExtensions
         options.AddPolicy(Policy.ProjectManageWorkflows, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.ManageWorkflows)));
         options.AddPolicy(Policy.ProjectManageProject, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.ManageProject)));
         options.AddPolicy(Policy.ProjectManageRoles, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.ManageRoles)));
+        options.AddPolicy(Policy.ProjectLogTimeOnTasks, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.LogTimeOnTasks)));
+        options.AddPolicy(Policy.ProjectEstimateTasks, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.EstimateTasks)));
 
         options.AddPolicy(Policy.UserSelf, policy => policy.Requirements.Add(new UserSelfRequirement()));
     }

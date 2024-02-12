@@ -24,4 +24,6 @@ public enum ProjectPermissions
     ManageWorkflows = 1 << 7, // 128
     ManageProject = 1 << 8, // 256
     ManageRoles = 1 << 9, // 512
+    LogTimeOnTasks = 1 << 10, // 1024
+    EstimateTasks = 1 << 11, // 2048
 }
