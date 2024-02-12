@@ -72,7 +72,9 @@ public class IntegrationTestsFixture : IDisposable
 
     public void Dispose()
     {
-        ResetDb();
+        using var scope = _services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.EnsureDeleted();
     }
 
     public async Task<TResponse> SendRequest<TResponse>(IRequest<TResponse> request)
