@@ -1,5 +1,4 @@
-﻿using Domain.Tasks;
-using Domain.Workflows;
+﻿using Domain.Workflows;
 using Shared.Enums;
 using Task = Domain.Tasks.Task;
 
@@ -66,7 +65,7 @@ public class TaskTests
     [Fact]
     public void UpdateAssignee_ShouldUpdateAssigneeId()
     {
-        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
+        var task = CreateDefaultTask();
         var assigneeId = Guid.NewGuid();
 
         task.UpdateAssignee(assigneeId);
@@ -81,7 +80,7 @@ public class TaskTests
     [Fact] 
     public void Unassign_ShouldSetAssigneeIdToNull()
     {
-        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
+        var task = CreateDefaultTask();
         task.UpdateAssignee(Guid.NewGuid());
         var assigneeIdBefore = task.AssigneeId;
 
@@ -98,7 +97,7 @@ public class TaskTests
     [Fact]
     public void UpdatePriority_ShouldUpdatePriority()
     {
-        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
+        var task = CreateDefaultTask();
         var priority = task.Priority;
         var newPriority = Enum.GetValues<TaskPriority>().Where(x => x != priority).First();
 
@@ -114,26 +113,48 @@ public class TaskTests
     [Fact]
     public void UpdateDescription_ShouldUpdateDescription()
     {
-        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
+        var task = CreateDefaultTask();
         var newDescription = task.Description + "A";
 
         task.UpdateDescription(newDescription);
 
-        using(new AssertionScope())
+        using (new AssertionScope())
         {
             task.Description.Should().Be(newDescription);
             task.Activities.Any(x => x.Property == TaskProperty.Description).Should().BeTrue();
         }
     }
-        
 
     [Fact]
     public void AddComment_ShouldAddComment()
     {
-        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
+        var task = CreateDefaultTask();
 
         task.AddComment("abc", Guid.NewGuid(), DateTime.Now);
 
         task.Comments.Count.Should().Be(1);
     }
+
+    [Fact]
+    public void LogTime_ShouldAddNewTimeLog()
+    {
+        var task = CreateDefaultTask();
+        var minutes = 10;
+        var userId = Guid.NewGuid();
+        var day = DateOnly.FromDayNumber(1);
+        
+        task.LogTime(minutes, day, userId);
+
+        using (new AssertionScope())
+        {
+            task.TimeLogs.Count.Should().Be(1);
+            task.TimeLogs[0].TaskId.Should().Be(task.Id);
+            task.TimeLogs[0].Minutes.Should().Be(minutes);
+            task.TimeLogs[0].Day.Should().Be(day);
+            task.TimeLogs[0].LoggedBy.Should().Be(userId);
+        }
+    }
+    
+    private static Task CreateDefaultTask()
+        => Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
 }

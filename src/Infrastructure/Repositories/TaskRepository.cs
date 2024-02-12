@@ -19,12 +19,14 @@ public class TaskRepository : IRepository<Domain.Tasks.Task>
         => await _dbContext.Tasks
         .Include(x => x.Comments)
         .Include(x => x.Activities)
+        .Include(x => x.TimeLogs)
         .AnyAsync(predicate);
 
     public async Task<Domain.Tasks.Task?> GetBy(Expression<Func<Domain.Tasks.Task, bool>> predicate)
         => await _dbContext.Tasks
         .Include(x => x.Comments)
         .Include(x => x.Activities)
+        .Include(x => x.TimeLogs)
         .FirstOrDefaultAsync(predicate);
 
     public async Task<Domain.Tasks.Task?> GetById(Guid id)
@@ -36,10 +38,12 @@ public class TaskRepository : IRepository<Domain.Tasks.Task>
             .AsNoTracking()
             .Include(x => x.Comments)
             .Include(x => x.Activities)
+            .Include(x => x.TimeLogs)
             .SingleAsync(x => x.Id == entity.Id);
         
         _dbContext.AddRemoveChildEntities(entity.Comments,oldEntity.Comments.Select(x => x.Id));
         _dbContext.AddRemoveChildValueObjects(entity.Activities, oldEntity.Activities);
+        _dbContext.AddRemoveChildValueObjects(entity.TimeLogs, oldEntity.TimeLogs);
         await _dbContext.SaveChangesAsync();
     }
 }

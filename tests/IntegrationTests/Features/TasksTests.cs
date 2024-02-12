@@ -52,7 +52,7 @@ public class TasksTests
     [Fact]
     public async System.Threading.Tasks.Task Create_ShouldCreateTask_WithCorrectShortIdAndInitialTaskStatus_WhenProjectExists()
     {
-        var tasks = await _factory.CreateTasks(2);
+        _ = await _factory.CreateTasks(2);
 
         var project = await _fixture.FirstAsync<Project>();
         var member = await _fixture.FirstAsync<ProjectMember>();
@@ -72,7 +72,7 @@ public class TasksTests
             var task = await _fixture.FirstAsync<Task>(x => x.Id == result.Value);
             task.ShortId.Should().Be(3);
 
-            var initialTaskStatus = await _fixture.FirstAsync<Domain.Workflows.TaskStatus>(x => x.Initial);
+            var initialTaskStatus = await _fixture.FirstAsync<TaskStatus>(x => x.Initial);
             task.StatusId.Should().Be(initialTaskStatus.Id);
         }
     }
@@ -352,6 +352,34 @@ public class TasksTests
                 activity.OldValue.Should().Be(expectedOldValue);
                 activity.NewValue.Should().Be(expectedNewValue);
             }
+        }
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task LogTime_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var user = (await _factory.CreateUsers())[0];
+
+        var result = await _fixture.SendRequest(new LogTaskTimeCommand(user.AuthenticationId, Guid.NewGuid(), 
+            new(1, DateOnly.FromDateTime(DateTime.Now))));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task LogTime_ShouldAddNewTimeLog_WhenTaskExists()
+    {
+        var task = (await _factory.CreateTasks())[0];
+        var user = await _fixture.FirstAsync<User>();
+        var timeLogsBefore = await _fixture.CountAsync<TaskTimeLog>();
+
+        var result = await _fixture.SendRequest(new LogTaskTimeCommand(user.AuthenticationId, task.Id, 
+            new(1, DateOnly.FromDateTime(DateTime.Now))));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<TaskTimeLog>()).Should().Be(timeLogsBefore + 1);
         }
     }
 }

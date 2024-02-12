@@ -12,13 +12,15 @@ public class Task : Entity, IAggregateRoot
     public Guid StatusId { get; private set; }
     public Guid? AssigneeId { get; private set; }
     public TaskPriority Priority { get; private set; } = TaskPriority.Normal;
-
-
+    
     private readonly List<TaskComment> _comments = new();
     public IReadOnlyList<TaskComment> Comments => _comments.AsReadOnly();
 
     private readonly List<TaskActivity> _activities = new();
     public IReadOnlyList<TaskActivity> Activities => _activities.AsReadOnly();
+
+    private readonly List<TaskTimeLog> _timeLogs = new();
+    public IReadOnlyList<TaskTimeLog> TimeLogs => _timeLogs.AsReadOnly();
 
     private Task(Guid id)
         : base(id)
@@ -79,5 +81,10 @@ public class Task : Entity, IAggregateRoot
     public void AddComment(string content, Guid authorId, DateTime now)
     {
         _comments.Add(new(Id, content, authorId, now));
+    }
+
+    public void LogTime(int minutes, DateOnly day, Guid userId)
+    {
+        _timeLogs.Add(new (Id, minutes, day, userId));
     }
 }

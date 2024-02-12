@@ -158,4 +158,19 @@ public class TasksController : ControllerBase
         var result = await _mediator.Send(new GetTaskActivitiesQuery(taskId));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Add a new entry to task's logged time.
+    /// </summary>
+    /// <param name="taskId"></param>
+    /// <param name="model"></param>
+    /// <response code="404">Task not found.</response>
+    [HttpPost("{taskId:guid}/log_time")]
+    [Authorize(Policy.ProjectMember)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> LogTaskTime(Guid taskId, LogTaskTimeDto model)
+    {
+        var result = await _mediator.Send(new LogTaskTimeCommand(User.GetUserAuthenticationId(), taskId, model));
+        return result.ToHttpResult();
+    }
 }
