@@ -13,7 +13,7 @@
     }
 </style>
 
-@if(RolesVM is not null && _roleColumnById is not null)
+@if(RolesVM is not null && _roleColumns is not null)
 {
     <div class="pa-4">
         <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Success" Class="mb-4" OnClick="@(() => _createRoleForm.Open())">Create</MudButton>
@@ -26,7 +26,7 @@
                         </MudText>
                     </CellTemplate>
                 </TemplateColumn>
-                @foreach (var (_, roleColumn) in _roleColumnById)
+                @foreach (var roleColumn in _roleColumns)
                 {
                     <TemplateColumn Title="@roleColumn.RoleVM.Name" HeaderStyle="min-width: 250px; ">
                         <HeaderTemplate>
@@ -104,6 +104,7 @@
 
     private List<PermissionRow> _permissionsRows = new();
     private Dictionary<Guid, RoleColumn>? _roleColumnById;
+    private IReadOnlyList<RoleColumn>? _roleColumns;
 
     public class RoleColumn 
     {
@@ -156,11 +157,15 @@
             return;
         }
 
-        _roleColumnById = RolesVM.Roles.ToDictionary(k => k.Id, v => new RoleColumn()
-        {
-            RoleVM = v,
-            PermissionsFlags = _allPermissionsFlags.ToDictionary(kk => kk, vv => v.Permissions.HasFlag(vv))
-        });
+        _roleColumns = RolesVM.Roles.Select(x => new RoleColumn()
+            {
+                RoleVM = x,
+                PermissionsFlags = _allPermissionsFlags.ToDictionary(k => k, v => x.Permissions.HasFlag(v))
+            })
+            .OrderBy(x => x.RoleVM.Modifiable)
+            .ThenBy(x => x.RoleVM.Name)
+            .ToList();
+        _roleColumnById = _roleColumns.ToDictionary(k => k.RoleVM.Id, v => v);
 
         _permissionsRows = _allPermissionsFlags
             .Select(x => new PermissionRow()
