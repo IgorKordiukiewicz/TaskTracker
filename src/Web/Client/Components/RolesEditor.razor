@@ -2,60 +2,56 @@
 @using Web.Client.Common;
 @typeparam TPermissions where TPermissions: struct, Enum
 
-@if(RolesVM is not null)
+<!--Defined locally to not affect MudBlazor's data grids in other components-->
+<style>
+    .mud-table-container {
+        min-width: 100% !important;
+    }
+
+    .mud-table-cell.sticky-left {
+        width: 400px !important;
+    }
+</style>
+
+@if(RolesVM is not null && _roleColumnById is not null)
 {
-    <MudPaper Class="pa-4">
+    <div class="pa-4">
         <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Success" Class="mb-4" OnClick="@(() => _createRoleForm.Open())">Create</MudButton>
-        <MudGrid Spacing="3">
-            @foreach (var role in _rolesData)
-            {
-                <MudItem md="12" Class="d-flex gap-2 flex-column">
-                    <div class="d-flex gap-2 align-center">
-                        @if(role.NameEditEnabled)
-                        {
-                            <MudTextField Variant="Variant.Text" @bind-Value="role.NameEditValue" />
-                            <MudButton Variant="Variant.Filled" OnClick="@(() => CancelNameEdit(role))">Cancel</MudButton>
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => UpdateName(role))" Disabled="@(role.NameEditValue == role.RoleVM.Name)">Save</MudButton>
-                        }
-                        else
-                        {
-                            <MudText Typo="Typo.h6">
-                                @role.RoleVM.Name
-                            </MudText>
-                            @if(role.RoleVM.Modifiable)
-                            {
-                                <MudMenu Icon="@Icons.Material.Filled.ArrowDropDown" AnchorOrigin="Origin.BottomCenter">
-                                    <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => StartNameEdit(role))">Edit name</MudMenuItem>
-                                    <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="@(() => DeleteRole(role.RoleVM.Id))">Delete</MudMenuItem>
-                                </MudMenu>
-                            }
-                        }
-                    </div>
-                    <div class="d-flex gap-2 align-center">
-                        @if (role.PermissionsEditEnabled)
-                        {
-                            <MudSelect Variant="Variant.Filled" MultiSelection="true" @bind-SelectedValues="@role.PermissionsFlags" AnchorOrigin="Origin.BottomCenter" Label="Permissions" 
-                                ToStringFunc="x => x.ToString().Humanize(LetterCasing.Title)">
-                                @foreach (var permission in _allPermissionsFlags)
+        <MudDataGrid Items="_permissionsRows" HorizontalScrollbar="true" Filterable="false" SortMode="@SortMode.None" Groupable="false" @ref="_dataGrid">
+            <Columns>
+                <TemplateColumn StickyLeft="true" Title="">
+                    <CellTemplate>
+                        <MudText>
+                            @(context.Item.Permission.ToString().Humanize(LetterCasing.Title))
+                        </MudText>
+                    </CellTemplate>
+                </TemplateColumn>
+                @foreach (var (_, roleColumn) in _roleColumnById)
+                {
+                    <TemplateColumn Title="@roleColumn.RoleVM.Name" HeaderStyle="min-width: 250px; ">
+                        <HeaderTemplate>
+                            <div class="d-flex gap-2 align-center justify-space-between">
+                                <MudText>
+                                    @roleColumn.RoleVM.Name
+                                </MudText>
+                                @if (roleColumn.RoleVM.Modifiable)
                                 {
-                                    <MudSelectItem Value="@permission">@(permission.ToString().Humanize(LetterCasing.Title))</MudSelectItem>
+                                    <MudMenu Icon="@Icons.Material.Filled.ArrowDropDown" AnchorOrigin="Origin.BottomCenter">
+                                        <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => StartNameEdit(roleColumn))">Edit name</MudMenuItem>
+                                        <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="@(() => DeleteRole(roleColumn.RoleVM.Id))">Delete</MudMenuItem>
+                                    </MudMenu>
                                 }
-                            </MudSelect>
-                            <MudButton Variant="Variant.Filled" OnClick="@(() => CancelPermissionsEdit(role))">Cancel</MudButton>
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => UpdatePermissions(role))">Save</MudButton>
-                        }
-                        else
-                        {
-                            <MudField Variant="Variant.Filled" Label="Permissions" Adornment="Adornment.End" AdornmentIcon="@GetEditPermissionsIcon(role)" OnAdornmentClick="() => StartPermissionsEdit(role)">
-                                @(string.Join(", ", role.PermissionsFlags.Select(x => x.ToString().Humanize(LetterCasing.Title))))
-                            </MudField>
-                        }
-                    </div>
-                </MudItem>
-            }
-        </MudGrid>
-        
-    </MudPaper>
+                            </div>
+                        </HeaderTemplate>
+                        <CellTemplate>
+                            <MudCheckBox T="bool" Disabled="@(!roleColumn.RoleVM.Modifiable)" Checked="@roleColumn.PermissionsFlags[context.Item.Permission]"
+                                         CheckedChanged="@(value => UpdatePermissions(roleColumn, context.Item.Permission, value))"></MudCheckBox>
+                        </CellTemplate>
+                    </TemplateColumn>
+                }
+            </Columns>
+        </MudDataGrid>
+    </div>
 }
 
 <Dialog Title="Create a new role" Form="_createRoleForm" OnConfirm="CreateRole" >
@@ -68,6 +64,10 @@
             </MudSelectItem>
         }
     </MudSelect>
+</Dialog>
+
+<Dialog Title="Update role name" Form="_updateRoleNameForm" OnConfirm="@UpdateName" ConfirmButtonText="Save" >
+    <MudTextField @bind-Value="@_updateRoleNameForm.Name" Label="Name" Required="true" Variant="Variant.Filled" />
 </Dialog>
 
 <ConfirmDeleteBox @ref="_confirmDeleteBox"></ConfirmDeleteBox>
@@ -92,19 +92,24 @@
     public required RolesVM<TPermissions>? RolesVM { get; set; }
 
     private ConfirmDeleteBox _confirmDeleteBox = null!;
+    private MudDataGrid<PermissionRow>? _dataGrid;
 
     private readonly TPermissions[] _allPermissionsFlags = Enum.GetValues<TPermissions>().Where(x => Convert.ToInt32(x) != 0).ToArray();
 
-    private class RoleData
+    private class PermissionRow
     {
-        public required RoleVM<TPermissions> RoleVM{ get; set; }
-        public required IEnumerable<TPermissions> PermissionsFlags { get; set; }
-        public required string NameEditValue { get; set; }
-
-        public bool NameEditEnabled { get; set; } = false;
-        public bool PermissionsEditEnabled { get; set; } = false;
+        public required TPermissions Permission { get; set; }
+        public required Dictionary<Guid, bool> EnabledByRole { get; set; }
     }
-    private List<RoleData> _rolesData = new();
+
+    private List<PermissionRow> _permissionsRows = new();
+    private Dictionary<Guid, RoleColumn>? _roleColumnById;
+
+    public class RoleColumn 
+    {
+        public required RoleVM<TPermissions> RoleVM { get; init; }
+        public required Dictionary<TPermissions, bool> PermissionsFlags { get; init; }
+    }
 
     private class CreateRoleForm : DialogForm
     {
@@ -115,6 +120,16 @@
             => !string.IsNullOrWhiteSpace(Name);
     }
     private CreateRoleForm _createRoleForm = new();
+
+    private class UpdateRoleNameForm : DialogForm
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+
+        public override bool IsValid()
+            => !string.IsNullOrWhiteSpace(Name);
+    }
+    private UpdateRoleNameForm _updateRoleNameForm = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -141,58 +156,51 @@
             return;
         }
 
-        _rolesData.Clear();
-        foreach (var role in RolesVM.Roles.OrderBy(x => x.Modifiable).ThenBy(x => x.Name))
+        _roleColumnById = RolesVM.Roles.ToDictionary(k => k.Id, v => new RoleColumn()
         {
-            _rolesData.Add(new()
+            RoleVM = v,
+            PermissionsFlags = _allPermissionsFlags.ToDictionary(kk => kk, vv => v.Permissions.HasFlag(vv))
+        });
+
+        _permissionsRows = _allPermissionsFlags
+            .Select(x => new PermissionRow()
             {
-                RoleVM = role,
-                PermissionsFlags = GetPermissionsFlags(role),
-                NameEditValue = role.Name
-            });
-        }
+                Permission = x,
+                EnabledByRole = _roleColumnById.Values.ToDictionary(k => k.RoleVM.Id, v => v.RoleVM.Permissions.HasFlag(x))
+            })
+            .ToList();
     }
 
     private IEnumerable<TPermissions> GetPermissionsFlags(RoleVM<TPermissions> roleVM)
         => _allPermissionsFlags.Where(x => roleVM.Permissions.HasFlag(x));
 
-    private void StartNameEdit(RoleData role)
+    private void StartNameEdit(RoleColumn roleColumn)
     {
-        role.NameEditEnabled = true;
+        _updateRoleNameForm.Open();
+        _updateRoleNameForm.Id = roleColumn.RoleVM.Id;
+        _updateRoleNameForm.Name = roleColumn.RoleVM.Name;
     }
 
-    private void CancelNameEdit(RoleData role)
+    private async Task UpdatePermissions(RoleColumn roleColumn, TPermissions permission, bool value)
     {
-        role.NameEditEnabled = false;
-        role.NameEditValue = role.RoleVM.Name;
-    }
+        roleColumn.PermissionsFlags[permission] = value;
+        var permissions = CreatePermissionsFromList(roleColumn.PermissionsFlags
+            .Where(x => x.Value)
+            .Select(x => x.Key)
+            .ToList());
 
-    private async Task UpdateName(RoleData role)
-    {
-        var model = new UpdateRoleNameDto(role.NameEditValue);
-        await UpdateNameFunc(role.RoleVM.Id, model);
+        var model = new UpdateRolePermissionsDto<TPermissions>(permissions);
 
-        CancelNameEdit(role);
+        await UpdatePermissionsFunc(roleColumn.RoleVM.Id, model);
         await UpdateRolesVM();
     }
 
-    private void StartPermissionsEdit(RoleData role)
+    private async Task UpdateName()
     {
-        role.PermissionsEditEnabled = true;
-    }
+        var model = new UpdateRoleNameDto(_updateRoleNameForm.Name);
+        await UpdateNameFunc(_updateRoleNameForm.Id, model);
 
-    private void CancelPermissionsEdit(RoleData role)
-    {
-        role.PermissionsEditEnabled = false;
-        role.PermissionsFlags = GetPermissionsFlags(role.RoleVM);
-    }
-
-    private async Task UpdatePermissions(RoleData role)
-    {
-        var permissions = CreatePermissionsFromList(role.PermissionsFlags);
-        var model = new UpdateRolePermissionsDto<TPermissions>(permissions);
-
-        await UpdatePermissionsFunc(role.RoleVM.Id, model);
+        _updateRoleNameForm.Close();
         await UpdateRolesVM();
     }
 
@@ -220,6 +228,16 @@
 
         await DeleteFunc(roleId);
         await UpdateRolesVM();
+
+        if(_dataGrid is null)
+        {
+            return;
+        }
+        // Work-around to fix a bug where after deleting a role, the datagrid's columns would get duplicated or not deleted properly.
+        StateHasChanged();
+        var removedDuplicates = _dataGrid.RenderedColumns.DistinctBy(x => x.Title);
+        var rolesNames = RolesVM!.Roles.Select(x => x.Name).ToHashSet();
+        _dataGrid.RenderedColumns.RemoveAll(x => !removedDuplicates.Contains(x) || (!rolesNames.Contains(x.Title) && !string.IsNullOrEmpty(x.Title)));
     }
 
     private static TPermissions CreatePermissionsFromList(IEnumerable<TPermissions> permissionsFlags)
@@ -232,6 +250,6 @@
         return (TPermissions)(object)value;
     }
 
-    private static string GetEditPermissionsIcon(RoleData role)
+    private static string GetEditPermissionsIcon(RoleColumn role)
         => role.RoleVM.Modifiable ? Icons.Material.Filled.Edit : string.Empty;
 }
