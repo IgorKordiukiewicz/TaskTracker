@@ -3,7 +3,7 @@
 @attribute [Authorize]
 
 @inject OrganizationsService OrganizationsService
-@inject IAuthorizationService AuthorizationService
+@inject UserDataService UserDataService
 
 @if (_membersVM is not null)
 {
@@ -33,11 +33,9 @@
     protected override async Task OnInitializedAsync()
     {
         await Layout.SetOrganizationId(OrganizationId);
-
-        var user = (await AuthenticationState).User;
         
-        _removeMembersPermission = (await AuthorizationService.AuthorizeAsync(user, Policy.OrganizationRemoveMembers)).Succeeded;
-        _manageRolesPermission = (await AuthorizationService.AuthorizeAsync(user, Policy.OrganizationManageRoles)).Succeeded;
+        _removeMembersPermission = UserDataService.HasOrganizationPermissions(OrganizationId, OrganizationPermissions.RemoveMembers);
+        _manageRolesPermission = UserDataService.HasOrganizationPermissions(OrganizationId, OrganizationPermissions.ManageRoles);
 
         _rolesVM = await OrganizationsService.GetRoles(OrganizationId);
         await UpdateMembersVM();
