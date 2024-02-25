@@ -1,0 +1,33 @@
+﻿@page "/org/{organizationId:guid}/team/roles"
+@layout OrganizationLayout
+@attribute [Authorize(Policy = Policy.OrganizationManageRoles)]
+
+@inject OrganizationsService OrganizationsService
+
+<RolesEditor RolesVM="@_rolesVM" TPermissions="OrganizationPermissions" RolesUpdated="UpdateRolesVM"
+                UpdateNameFunc="async (roleId, model) => await OrganizationsService.UpdateRoleName(OrganizationId, roleId, model)"
+                UpdatePermissionsFunc="async (roleId, model) => await OrganizationsService.UpdateRolePermissions(OrganizationId, roleId, model)"
+                CreateFunc="async (model) => await OrganizationsService.CreateRole(OrganizationId, model)"
+                DeleteFunc="async (roleId) => await OrganizationsService.DeleteRole(OrganizationId, roleId)"></RolesEditor>
+
+@code {
+    [Parameter]
+    public Guid OrganizationId { get; init; }
+
+    [CascadingParameter]
+    public OrganizationLayout Layout { get; set; } = null!;
+    
+    private RolesVM<OrganizationPermissions>? _rolesVM;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Layout.SetOrganizationId(OrganizationId);
+
+        await UpdateRolesVM();
+    }
+    
+    private async Task UpdateRolesVM()
+    {
+        _rolesVM = await OrganizationsService.GetRoles(OrganizationId);
+    }
+}

@@ -8,7 +8,15 @@
         <MudDrawer ClipMode="DrawerClipMode.Always" Elevation="2" Open="true">
             <MudNavMenu>
                 <MudNavLink Href="@GetPageRoute("projects")" Icon="@Icons.Material.Filled.ViewQuilt">Projects</MudNavLink>
-                <MudNavLink Href="@GetPageRoute("members")" Icon="@Icons.Material.Filled.Person">Members</MudNavLink>
+                <MudNavGroup Title="Team" Expanded="true" Icon="@Icons.Material.Filled.Group">
+                    <MudNavLink Href="@GetPageRoute("team/members")" Icon="@Icons.Material.Filled.Person">Members</MudNavLink>
+                    <AuthorizeView Policy="@Policy.OrganizationInviteMembers" Context="childContext">
+                        <MudNavLink Href="@GetPageRoute("team/invitations")" Icon="@Icons.Material.Filled.PersonAddAlt1">Invitations</MudNavLink>
+                    </AuthorizeView>
+                    <AuthorizeView Policy="@Policy.OrganizationManageRoles" Context="childContext">
+                        <MudNavLink Href="@GetPageRoute("team/roles")" Icon="@Icons.Material.Filled.ManageAccounts">Roles</MudNavLink>
+                    </AuthorizeView>
+                </MudNavGroup>
             </MudNavMenu>
         </MudDrawer>
         @Body

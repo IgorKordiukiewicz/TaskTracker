@@ -1,40 +1,40 @@
 ﻿@typeparam TMember where TMember : IMemberVM
 @typeparam TPermissions where TPermissions: struct, Enum
 
-<MudPaper>
-    <MudList>
-        @foreach (var member in Members)
-        {
-            <MudListItem>
-                <div class="d-flex justify-space-between align-center show-on-hover-parent">
-                    <div class="d-flex gap-3 align-center">
-                        <UserAvatar Name="@member.Name" UserId="@member.UserId"></UserAvatar>
+<div class="d-flex gap-2 flex-column">
+    @foreach (var member in Members)
+    {
+        <MudPaper Class="pa-2">
+            <div class="d-flex justify-space-between align-center show-on-hover-parent">
+                <div class="d-flex gap-3 align-center">
+                    <UserAvatar Name="@member.Name" UserId="@member.UserId"></UserAvatar>
+                    <MudText>
                         @member.Name
-                    </div>
-                    <div class="d-flex gap-3 align-center">
-                        @if (RolesVM is not null && ManageRolesPermission)
-                        {
-                            <div style="max-width: 400px;">
-                                <MudSelect Value="@GetRoleVM(member.RoleId)" AnchorOrigin="Origin.BottomCenter" ToStringFunc="x => x.Name" T="RoleVM<TPermissions>"
-                                           Variant="Variant.Outlined" Label="Role" ValueChanged="e => UpdateRole(member.Id, e.Id)">
-                                    @foreach (var role in RolesVM.Roles)
-                                    {
-                                        <MudSelectItem Value="@role"></MudSelectItem>
-                                    }
-                                </MudSelect>
-                            </div>
-                        }
-                        @if(RemoveMembersPermission)
-                        {
-                            <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="@(() => RemoveMember(member.Id))"
-                                Class="@GetRemoveIconButtonClass(member)"></MudIconButton>
-                        }
-                    </div>
+                    </MudText>
                 </div>
-            </MudListItem>
-        }
-    </MudList>
-</MudPaper>
+                <div class="d-flex gap-3 align-center">
+                    @if (RolesVM is not null && ManageRolesPermission)
+                    {
+                        <div style="max-width: 400px;">
+                            <MudSelect Value="@GetRoleVM(member.RoleId)" AnchorOrigin="Origin.BottomCenter" ToStringFunc="x => x.Name" T="RoleVM<TPermissions>"
+                                       Variant="Variant.Outlined" Label="Role" ValueChanged="e => UpdateRole(member.Id, e.Id)">
+                                @foreach (var role in RolesVM.Roles)
+                                {
+                                    <MudSelectItem Value="@role"></MudSelectItem>
+                                }
+                            </MudSelect>
+                        </div>
+                    }
+                    @if (RemoveMembersPermission)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="@(() => RemoveMember(member.Id))"
+                                       Class="@GetRemoveIconButtonClass(member)"></MudIconButton>
+                    }
+                </div>
+            </div>
+        </MudPaper>
+    }
+</div>
 
 <ConfirmDeleteBox @ref="_confirmDeleteBox"></ConfirmDeleteBox>
 
