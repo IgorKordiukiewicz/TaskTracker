@@ -5,6 +5,8 @@
 @inject OrganizationsService OrganizationsService
 @inject UserDataService UserDataService
 
+<PageHeading Content="Members"></PageHeading>
+
 @if (_membersVM is not null)
 {
     <MembersList Members="@_membersVM.Members" RemoveMembersPermission="@_removeMembersPermission" ManageRolesPermission="@_manageRolesPermission" 

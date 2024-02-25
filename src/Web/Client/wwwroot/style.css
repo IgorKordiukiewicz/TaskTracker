@@ -46,7 +46,7 @@ html, body, #app, .max-height {
 }
 
 .diagram-container {
-    height: calc(100vh - 130px);
+    height: calc(100vh - 175px);
     width: 100%;
     border: 2px solid white;
     border-radius: 10px;

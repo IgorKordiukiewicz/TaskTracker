@@ -13,45 +13,46 @@
     }
 </style>
 
+<PageHeading Content="Roles">
+    <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _createRoleForm.Open())">Create</MudButton>
+</PageHeading>
+
 @if(RolesVM is not null && _roleColumns is not null)
 {
-    <div class="pa-4">
-        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Success" Class="mb-4" OnClick="@(() => _createRoleForm.Open())">Create</MudButton>
-        <MudDataGrid Items="_permissionsRows" HorizontalScrollbar="true" Filterable="false" SortMode="@SortMode.None" Groupable="false" @ref="_dataGrid">
-            <Columns>
-                <TemplateColumn StickyLeft="true" Title="">
+    <MudDataGrid Items="_permissionsRows" HorizontalScrollbar="true" Filterable="false" SortMode="@SortMode.None" Groupable="false" @ref="_dataGrid">
+        <Columns>
+            <TemplateColumn StickyLeft="true" Title="">
+                <CellTemplate>
+                    <MudText>
+                        @(context.Item.Permission.ToString().Humanize(LetterCasing.Title))
+                    </MudText>
+                </CellTemplate>
+            </TemplateColumn>
+            @foreach (var roleColumn in _roleColumns)
+            {
+                <TemplateColumn Title="@roleColumn.RoleVM.Name" HeaderStyle="min-width: 250px; ">
+                    <HeaderTemplate>
+                        <div class="d-flex gap-2 align-center justify-space-between">
+                            <MudText>
+                                @roleColumn.RoleVM.Name
+                            </MudText>
+                            @if (roleColumn.RoleVM.Modifiable)
+                            {
+                                <MudMenu Icon="@Icons.Material.Filled.ArrowDropDown" AnchorOrigin="Origin.BottomCenter">
+                                    <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => StartNameEdit(roleColumn))">Edit name</MudMenuItem>
+                                    <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="@(() => DeleteRole(roleColumn.RoleVM.Id))">Delete</MudMenuItem>
+                                </MudMenu>
+                            }
+                        </div>
+                    </HeaderTemplate>
                     <CellTemplate>
-                        <MudText>
-                            @(context.Item.Permission.ToString().Humanize(LetterCasing.Title))
-                        </MudText>
+                        <MudCheckBox T="bool" Disabled="@(!roleColumn.RoleVM.Modifiable)" Checked="@roleColumn.PermissionsFlags[context.Item.Permission]"
+                                     CheckedChanged="@(value => UpdatePermissions(roleColumn, context.Item.Permission, value))"></MudCheckBox>
                     </CellTemplate>
                 </TemplateColumn>
-                @foreach (var roleColumn in _roleColumns)
-                {
-                    <TemplateColumn Title="@roleColumn.RoleVM.Name" HeaderStyle="min-width: 250px; ">
-                        <HeaderTemplate>
-                            <div class="d-flex gap-2 align-center justify-space-between">
-                                <MudText>
-                                    @roleColumn.RoleVM.Name
-                                </MudText>
-                                @if (roleColumn.RoleVM.Modifiable)
-                                {
-                                    <MudMenu Icon="@Icons.Material.Filled.ArrowDropDown" AnchorOrigin="Origin.BottomCenter">
-                                        <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => StartNameEdit(roleColumn))">Edit name</MudMenuItem>
-                                        <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="@(() => DeleteRole(roleColumn.RoleVM.Id))">Delete</MudMenuItem>
-                                    </MudMenu>
-                                }
-                            </div>
-                        </HeaderTemplate>
-                        <CellTemplate>
-                            <MudCheckBox T="bool" Disabled="@(!roleColumn.RoleVM.Modifiable)" Checked="@roleColumn.PermissionsFlags[context.Item.Permission]"
-                                         CheckedChanged="@(value => UpdatePermissions(roleColumn, context.Item.Permission, value))"></MudCheckBox>
-                        </CellTemplate>
-                    </TemplateColumn>
-                }
-            </Columns>
-        </MudDataGrid>
-    </div>
+            }
+        </Columns>
+    </MudDataGrid>
 }
 
 <Dialog Title="Create a new role" Form="_createRoleForm" OnConfirm="CreateRole" >

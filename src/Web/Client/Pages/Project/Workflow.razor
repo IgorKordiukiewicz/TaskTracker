@@ -24,9 +24,11 @@
 @inject WorkflowsService WorkflowsService
 @inject ILocalStorageService LocalStorage
 
+<PageHeading Content="Workflow"></PageHeading>
+
 @if(_workflowVM is not null)
 {
-    <MudGrid Class="mt-2">
+    <MudGrid>
         <MudItem md="2">
             <div class="d-flex flex-column gap-2">
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _addStatusForm.Open())" FullWidth="true">

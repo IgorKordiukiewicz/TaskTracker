@@ -8,12 +8,15 @@
 @inject IAuthorizationService AuthorizationService
 @inject UserDataService UserDataService
 
-@if (_projectsVM is not null)
-{
+<PageHeading Content="Projects">
     @if (_createProjectsPermission)
     {
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _createProjectForm.Open())" Class="mb-4 mt-4">Create project</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _createProjectForm.Open())">Create</MudButton>
     }
+</PageHeading>
+
+@if (_projectsVM is not null)
+{
     @if(_projectsVM.Projects.Any())
     {
         <div class="d-flex flex-column gap-4">

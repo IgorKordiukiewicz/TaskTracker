@@ -1,0 +1,18 @@
+﻿<div class="d-flex align-center justify-space-between">
+    <MudText Typo="Typo.h4" Class="mt-2">
+        @Content
+    </MudText>
+    @if (ChildContent is not null)
+    {
+        @ChildContent
+    }
+</div>
+<MudDivider Class="mb-3 mt-1" />
+
+@code {
+    [Parameter]
+    public required string Content { get; init; }
+    
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

@@ -5,15 +5,17 @@
 @inject OrganizationsService OrganizationsService
 @inject UsersService UsersService
 
- @if (_invitationsVM is not null)
+<PageHeading Content="Invitations">
+    <div class="d-flex gap-2 align-end mb-1" style="width: 40%;">
+        <MudAutocomplete T="UserSearchVM" Label="Search Users" @bind-Value="_selectedUserForInvitation" SearchFunc="SearchUsers"
+                         ResetValueOnEmptyText="true" AdornmentIcon="@Icons.Material.Filled.Search" ToStringFunc="(user => user.Email)" Variant="Variant.Filled" />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 56px; width: 100px;" Disabled="@(_selectedUserForInvitation is null)" OnClick="@SendInvitation">Invite</MudButton>
+    </div>
+</PageHeading>
+
+@if (_invitationsVM is not null)
 {
     <MudPaper Class="mb-4">
-        <div class="d-flex gap-2 align-end px-3 py-2">
-            <MudAutocomplete T="UserSearchVM" Label="Invite Users" @bind-Value="_selectedUserForInvitation" SearchFunc="SearchUsers"
-                             ResetValueOnEmptyText="true" AdornmentIcon="@Icons.Material.Filled.Search" ToStringFunc="(user => user.Email)" Variant="Variant.Filled" />
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 56px; width: 100px;" Disabled="@(_selectedUserForInvitation is null)" OnClick="@SendInvitation">Invite</MudButton>
-        </div>
-        <MudDivider Class="mt-2" />
         <MudList>
             @foreach (var invitation in _invitationsVM.Invitations)
             {

@@ -16,11 +16,11 @@
             </MudText>
             <MudIconButton Icon="@GetOrganizationInvitationsIcon()" Disabled="@(!HasOrganizationInvitations())" OnClick="@OpenInvitationsDialog"></MudIconButton>
         </div>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _createOrganizationForm.Open())">
-            Create Organization
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _createOrganizationForm.Open())">
+            Create
         </MudButton>
     </div>
-    <MudDivider Class="mb-4 mt-1" />
+    <MudDivider Class="mb-3 mt-1" />
     <div class="d-flex flex-column gap-4">
         @foreach (var organization in _organizationsVM.Organizations)
         {

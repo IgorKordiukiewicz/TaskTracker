@@ -6,10 +6,10 @@
 @inject UsersService UsersService
 @inject UserDataService UserDataService
 
-@if (_usersVM is not null && _addMembersPermission)
-{
-    <MudPaper>
-        <div class="d-flex gap-2 align-end px-3 py-2">
+<PageHeading Content="Members">
+    @if (_usersVM is not null && _addMembersPermission)
+    {
+        <div class="d-flex gap-2 align-end mb-1" style="width: 40%;">
             <MudSelect Label="Users" @bind-Value="_selectedUserVM" Variant="Variant.Filled" Disabled="@(!_usersVM.Users.Any())">
                 @foreach (var user in _usersVM.Users)
                 {
@@ -18,9 +18,9 @@
             </MudSelect>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 56px; width: 100px;" Disabled="@(_selectedUserVM is null)" OnClick="@(() => AddMember(_selectedUserVM!.Id))">Add</MudButton>
         </div>
-        <MudDivider Class="mt-2"/>
-    </MudPaper>
-}
+    }
+</PageHeading>
+
 @if (_membersVM is not null)
 {
     <MembersList Members="@_membersVM.Members" ManageRolesPermission="_manageRolesPermission" RemoveMembersPermission="_removeMembersPermission" 
