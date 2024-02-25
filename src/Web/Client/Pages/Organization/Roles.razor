@@ -5,10 +5,10 @@
 @inject OrganizationsService OrganizationsService
 
 <RolesEditor RolesVM="@_rolesVM" TPermissions="OrganizationPermissions" RolesUpdated="UpdateRolesVM"
-                UpdateNameFunc="async (roleId, model) => await OrganizationsService.UpdateRoleName(OrganizationId, roleId, model)"
-                UpdatePermissionsFunc="async (roleId, model) => await OrganizationsService.UpdateRolePermissions(OrganizationId, roleId, model)"
-                CreateFunc="async (model) => await OrganizationsService.CreateRole(OrganizationId, model)"
-                DeleteFunc="async (roleId) => await OrganizationsService.DeleteRole(OrganizationId, roleId)"></RolesEditor>
+    UpdateNameFunc="async (roleId, model) => await OrganizationsService.UpdateRoleName(OrganizationId, roleId, model)"
+    UpdatePermissionsFunc="async (roleId, model) => await OrganizationsService.UpdateRolePermissions(OrganizationId, roleId, model)"
+    CreateFunc="async (model) => await OrganizationsService.CreateRole(OrganizationId, model)"
+    DeleteFunc="async (roleId) => await OrganizationsService.DeleteRole(OrganizationId, roleId)"></RolesEditor>
 
 @code {
     [Parameter]

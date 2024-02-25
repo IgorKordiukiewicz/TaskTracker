@@ -1,50 +1,34 @@
-﻿@page "/project/{projectId:guid}/members"
+﻿@page "/project/{projectId:guid}/team/members"
 @layout ProjectLayout
 @attribute [Authorize]
 
 @inject ProjectsService ProjectsService
 @inject UsersService UsersService
-@inject IAuthorizationService AuthorizationService
 @inject UserDataService UserDataService
 
-<MudTabs Outlined="false" Border="true" ApplyEffectsToContainer="true" Color="Color.Default" Rounded="true" Position="Position.Top" Centered="false">
-    <MudTabPanel Text="Members">
-        @if (_usersVM is not null && _addMembersPermission)
-        {
-            <MudPaper>
-                <div class="d-flex gap-2 align-end px-3 py-2">
-                    <MudSelect Label="Users" @bind-Value="_selectedUserVM" Variant="Variant.Filled" Disabled="@(!_usersVM.Users.Any())">
-                        @foreach (var user in _usersVM.Users)
-                        {
-                            <MudSelectItem Value="@user">@user.Email</MudSelectItem>
-                        }
-                    </MudSelect>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 56px; width: 100px;" Disabled="@(_selectedUserVM is null)" OnClick="@(() => AddMember(_selectedUserVM!.Id))">Add</MudButton>
-                </div>
-                <MudDivider Class="mt-2"/>
-            </MudPaper>
-        }
-        @if (_membersVM is not null)
-        {
-            <MembersList Members="@_membersVM.Members" ManageRolesPermission="_manageRolesPermission" RemoveMembersPermission="_removeMembersPermission" 
-                MembersUpdated="UpdateMembersVM" RolesVM="@_rolesVM" 
-                UpdateRoleFunc="async (memberId, model) => await ProjectsService.UpdateMemberRole(ProjectId, memberId, model)"
-                RemoveMemberFunc="async (memberId) => await ProjectsService.RemoveMember(ProjectId, memberId)"
-            ></MembersList>
-        }
-    </MudTabPanel>
-    @if (_manageRolesPermission)
-    {
-        <MudTabPanel Text="Roles">
-            <RolesEditor RolesVM="@_rolesVM" TPermissions="ProjectPermissions" RolesUpdated="UpdateRolesVM"
-                UpdateNameFunc="async (roleId, model) => await ProjectsService.UpdateRoleName(ProjectId, roleId, model)"
-                UpdatePermissionsFunc="async (roleId, model) => await ProjectsService.UpdateRolePermissions(ProjectId, roleId, model)"
-                CreateFunc="async (model) => await ProjectsService.CreateRole(ProjectId, model)"
-                DeleteFunc="async (roleId) => await ProjectsService.DeleteRole(ProjectId, roleId)"
-            ></RolesEditor>
-        </MudTabPanel>
-    }
-</MudTabs>
+@if (_usersVM is not null && _addMembersPermission)
+{
+    <MudPaper>
+        <div class="d-flex gap-2 align-end px-3 py-2">
+            <MudSelect Label="Users" @bind-Value="_selectedUserVM" Variant="Variant.Filled" Disabled="@(!_usersVM.Users.Any())">
+                @foreach (var user in _usersVM.Users)
+                {
+                    <MudSelectItem Value="@user">@user.Email</MudSelectItem>
+                }
+            </MudSelect>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height: 56px; width: 100px;" Disabled="@(_selectedUserVM is null)" OnClick="@(() => AddMember(_selectedUserVM!.Id))">Add</MudButton>
+        </div>
+        <MudDivider Class="mt-2"/>
+    </MudPaper>
+}
+@if (_membersVM is not null)
+{
+    <MembersList Members="@_membersVM.Members" ManageRolesPermission="_manageRolesPermission" RemoveMembersPermission="_removeMembersPermission" 
+        MembersUpdated="UpdateMembersVM" RolesVM="@_rolesVM" 
+        UpdateRoleFunc="async (memberId, model) => await ProjectsService.UpdateMemberRole(ProjectId, memberId, model)"
+        RemoveMemberFunc="async (memberId) => await ProjectsService.RemoveMember(ProjectId, memberId)"
+    ></MembersList>
+}
 
 @code {
     [Parameter]
@@ -76,7 +60,7 @@
         await UpdateMembersVM();
         if(_manageRolesPermission)
         {
-            await UpdateRolesVM();
+            _rolesVM = await ProjectsService.GetRoles(ProjectId);
         }
     }
 
@@ -90,11 +74,6 @@
         {
             _usersVM = await UsersService.GetAvailableForProject(ProjectId, organizationId);
         }
-    }
-
-    private async Task UpdateRolesVM()
-    {
-        _rolesVM = await ProjectsService.GetRoles(ProjectId);
     }
 
     private async Task AddMember(Guid userId)

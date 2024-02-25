@@ -11,7 +11,12 @@
                     <MudNavLink Href="@GetPageRoute("tasks/table")" Icon="@Icons.Material.Filled.ViewList">Table</MudNavLink>
                     <MudNavLink Href="@GetPageRoute("tasks/board")" Icon="@Icons.Material.Filled.ViewKanban">Board</MudNavLink>
                 </MudNavGroup>
-                <MudNavLink Href="@GetPageRoute("members")" Icon="@Icons.Material.Filled.Person">Members</MudNavLink>
+                <MudNavGroup Title="Team" Expanded="true" Icon="@Icons.Material.Filled.Group">
+                    <MudNavLink Href="@GetPageRoute("team/members")" Icon="@Icons.Material.Filled.Person">Members</MudNavLink>
+                    <AuthorizeView Policy="@Policy.ProjectManageRoles" Context="childContext">
+                        <MudNavLink Href="@GetPageRoute("team/roles")" Icon="@Icons.Material.Filled.ManageAccounts">Roles</MudNavLink>
+                    </AuthorizeView>
+                </MudNavGroup>
                 <AuthorizeView Policy="@Policy.ProjectManageWorkflows" Context=childContext>
                     <MudNavLink Href="@GetPageRoute("workflow")" Icon="@Icons.Material.Filled.Route">Workflow</MudNavLink>
                 </AuthorizeView>

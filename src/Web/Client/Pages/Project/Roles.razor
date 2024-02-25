@@ -1,0 +1,33 @@
+﻿@page "/project/{projectId:guid}/team/roles"
+@layout ProjectLayout
+@attribute [Authorize(Policy = Policy.ProjectManageRoles)]
+
+@inject ProjectsService ProjectsService
+
+<RolesEditor RolesVM="@_rolesVM" TPermissions="ProjectPermissions" RolesUpdated="UpdateRolesVM"
+    UpdateNameFunc="async (roleId, model) => await ProjectsService.UpdateRoleName(ProjectId, roleId, model)"
+    UpdatePermissionsFunc="async (roleId, model) => await ProjectsService.UpdateRolePermissions(ProjectId, roleId, model)"
+    CreateFunc="async (model) => await ProjectsService.CreateRole(ProjectId, model)"
+    DeleteFunc="async (roleId) => await ProjectsService.DeleteRole(ProjectId, roleId)"></RolesEditor>
+
+@code {
+    [Parameter]
+    public Guid ProjectId { get; init; }
+
+    [CascadingParameter]
+    public ProjectLayout Layout { get; set; } = null!;
+    
+    private RolesVM<ProjectPermissions>? _rolesVM;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Layout.SetProjectId(ProjectId);
+
+        await UpdateRolesVM();
+    }
+
+    private async Task UpdateRolesVM()
+    {
+        _rolesVM = await ProjectsService.GetRoles(ProjectId);
+    }
+}
