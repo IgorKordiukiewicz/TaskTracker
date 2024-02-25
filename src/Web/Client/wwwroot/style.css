@@ -84,8 +84,9 @@ html, body, #app, .max-height {
 }
 
 .task-details-popup {
-    width: 640px;
+    width: 800px;
     overflow-y: auto;
+    height: 80vh;
     max-height: 80vh;
 }
 

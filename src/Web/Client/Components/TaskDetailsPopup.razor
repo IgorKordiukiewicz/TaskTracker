@@ -9,8 +9,143 @@
             <MudIconButton Icon="@Icons.Material.Filled.Close" OnClick="Close" />
         </div>
         <MudGrid>
-            <MudDivider />
-            <MudItem md="12">
+            <MudDivider/>
+            <MudItem md="7">
+                <div class="d-flex align-center justify-space-between" style="height: 48px;">
+                    <div class="d-flex align-center gap-4">
+                        <MudIcon Icon="@Icons.Material.Filled.FormatAlignLeft"></MudIcon>
+                        <MudText Typo="Typo.h6">
+                            Description
+                        </MudText>
+                    </div>
+                    @if (ModifyTasksPermissions && !_editDescriptionForm.Visible)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => { _editDescriptionForm.Open(); _editDescriptionForm.Content = _taskVM!.Description; })"/>
+                    }
+                    else if (_editDescriptionForm.Visible)
+                    {
+                        <div class="d-flex justify-end gap-2">
+                            <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="@(() => _editDescriptionForm.Close())">
+                                Cancel
+                            </MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_editDescriptionForm.IsValid())" OnClick="@(() => UpdateTaskDescription(_taskVM!.Id))">
+                                Save
+                            </MudButton>
+                        </div>
+                    }
+                </div>
+                <div class="d-flex align-top gap-4" style="margin-left: 40px;">
+                    @if (_editDescriptionForm.Visible)
+                    {
+                        <MudTextField @bind-Value="_editDescriptionForm.Content" Variant="Variant.Filled" Label="Enter description" AutoGrow></MudTextField>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body1">
+                            @_taskVM!.Description
+                        </MudText>
+                    }
+                </div>
+                <div class="d-flex align-center justify-space-between mt-6" style="height: 48px;">
+                    <div class="d-flex align-center gap-4">
+                        <MudIcon Icon="@Icons.Material.Filled.Comment"></MudIcon>
+                        <MudText Typo="Typo.h6">
+                            Comments
+                        </MudText>
+                    </div>
+                    @if (AddCommentsPermissions && !_addCommentForm.Visible)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="@(() => _addCommentForm.Open())"></MudIconButton>
+                    }
+                </div>
+                @if (_commentsVM is not null)
+                {
+                    <div style="margin-left: 40px;">
+                        @if (AddCommentsPermissions)
+                        {
+                            if (_addCommentForm.Visible)
+                            {
+                                <MudTextField @bind-Value="_addCommentForm.Content" Variant="Variant.Filled" Label="New comment" Class="mb-1"></MudTextField>
+                                <div class="d-flex justify-end gap-2">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="@(() => _addCommentForm.Close())">
+                                        Cancel
+                                    </MudButton>
+                                    <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!_addCommentForm.IsValid())" OnClick="@AddNewComment">
+                                        Add
+                                    </MudButton>
+                                </div>
+                            }
+                        }
+                        @if (_commentsVM.Comments.Any())
+                        {
+                            <div class="d-flex flex-column gap-4 mt-3">
+                                @foreach (var comment in _commentsVM.Comments)
+                                {
+                                    <div>
+                                        <div class="d-flex mb-2 align-center justify-space-between">
+                                            <div class="d-flex align-center gap-2">
+                                                <UserAvatar Name="@comment.AuthorName" UserId="@comment.AuthorId" Size="Size.Small"/>
+                                                <MudText Style="font-weight: bold;">@comment.AuthorName</MudText>
+                                            </div>
+                                            <MudText Typo="Typo.caption">@comment.CreatedAt.GetHumanReadableTimeDifference(DateTime.Now)</MudText>
+                                        </div>
+                                        <div class="pa-2 comment-text">
+                                            <MudText>
+                                                @comment.Content
+                                            </MudText>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <MudText>
+                                No comments yet.
+                            </MudText>
+                        }
+                    </div>
+                }
+                <div class="d-flex align-center justify-space-between mt-6" style="height: 48px;">
+                    <div class="d-flex align-center gap-4">
+                        <MudIcon Icon="@Icons.Material.Filled.History"></MudIcon>
+                        <MudText Typo="Typo.h6">
+                            Activity
+                        </MudText>
+                    </div>
+                </div>
+                @if (_activitiesVM is not null)
+                {
+                    <div style="margin-left: 40px;">
+                        @if (_activitiesVM.Activities.Any())
+                        {
+                            <div class="d-flex flex-column gap-4">
+                                @foreach (var activity in _activitiesVM.Activities)
+                                {
+                                    <div class="d-flex align-center gap-2">
+                                        <!--<UserAvatar Name="" /> TODO? -->
+                                        <div class="d-flex flex-column gap-1">
+                                            <MudText>
+                                                @GetActivityText(activity)
+                                            </MudText>
+                                            <MudText Typo="Typo.caption">
+                                                @activity.OccurredAt.GetHumanReadableTimeDifference(DateTime.Now)
+                                            </MudText>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <MudText>
+                                No activity yet.
+                            </MudText>
+                        }
+                    </div>
+                }
+            </MudItem>
+            <MudItem md="5">
                 @if (TransitionTasksPermissions)
                 {
                     <MudSelect T="TaskStatusVM" Value="@_taskVM!.Status" ValueChanged="e => UpdateTaskStatus(_taskVM!.Id, e.Id)"
@@ -60,129 +195,6 @@
                     </MudField>
                 }
             </MudItem>
-            <MudDivider />
-            <MudItem xs="12">
-                <div class="d-flex justify-space-between align-center">
-                    <MudText Typo="Typo.h6">
-                        Description
-                    </MudText>
-                    @if (ModifyTasksPermissions && !_editDescriptionForm.Visible)
-                    {
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => { _editDescriptionForm.Open(); _editDescriptionForm.Content = _taskVM!.Description; })" />
-                    }
-                    else if (_editDescriptionForm.Visible)
-                    {
-                        <div class="d-flex justify-end gap-2">
-                            <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="@(() => _editDescriptionForm.Close())">
-                                Cancel
-                            </MudButton>
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_editDescriptionForm.IsValid())" OnClick="@(() => UpdateTaskDescription(_taskVM!.Id))">
-                                Save
-                            </MudButton>
-                        </div>
-                    }
-                </div>
-                @if (_editDescriptionForm.Visible)
-                {
-                    <MudTextField @bind-Value="_editDescriptionForm.Content" Variant="Variant.Filled" Label="Enter description" AutoGrow></MudTextField>
-                }
-                else
-                {
-                    <MudText Typo="Typo.body1">
-                        @_taskVM!.Description
-                    </MudText>
-                }
-            </MudItem>
-            <MudDivider />
-            <MudItem xs="12">
-                <div class="d-flex align-center justify-space-between">
-                    <div class="d-flex align-center gap-3">
-                        <MudText Typo="Typo.h6">
-                            Comments
-                        </MudText>
-                        <MudChip>
-                            @_commentsVM?.Comments.Count
-                        </MudChip>
-                    </div>
-                    <ExpandButton @ref="_commentsExpandButton" VisibilityToggled="StateHasChanged"/>
-                </div>
-                @if (_commentsVM is not null && _commentsExpandButton.Visible)
-                {
-                    @if (AddCommentsPermissions)
-                    {
-                        if (_addCommentForm.Visible)
-                        {
-                            <MudTextField @bind-Value="_addCommentForm.Content" Variant="Variant.Filled" Label="New comment" Class="mb-1"></MudTextField>
-                            <div class="d-flex justify-end gap-2">
-                                <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="@(() => _addCommentForm.Close())">
-                                    Cancel
-                                </MudButton>
-                                <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!_addCommentForm.IsValid())" OnClick="@AddNewComment">
-                                    Add
-                                </MudButton>
-                            </div>
-                        }
-                        else
-                        {
-                            <MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true" Class="mb-4 mt-1" OnClick="@(() => _addCommentForm.Open())">
-                                Add Comment
-                            </MudButton>
-                        }
-                    }
-                    <div class="d-flex flex-column gap-4">
-                        @foreach (var comment in _commentsVM.Comments)
-                        {
-                            <div>
-                                <div class="d-flex mb-2 align-center justify-space-between">
-                                    <div class="d-flex align-center gap-2">
-                                        <UserAvatar Name="@comment.AuthorName" UserId="@comment.AuthorId" />
-                                        <MudText Style="font-weight: bold;">@comment.AuthorName</MudText>
-                                    </div>
-                                    <MudText Typo="Typo.caption">@comment.CreatedAt.GetHumanReadableTimeDifference(DateTime.Now)</MudText>
-                                </div>
-                                <div class="pa-2 comment-text">
-                                    <MudText>
-                                        @comment.Content
-                                    </MudText>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-            </MudItem>
-            <MudDivider />
-            <MudItem xs="12">
-                <div class="d-flex align-center justify-space-between">
-                    <div class="d-flex align-center gap-3">
-                        <MudText Typo="Typo.h6">
-                            Activities
-                        </MudText>
-                        <MudChip>
-                            @_activitiesVM?.Activities.Count
-                        </MudChip>
-                    </div>
-                    <ExpandButton @ref="_activitiesExpandButton" VisibilityToggled="StateHasChanged" />
-                </div>
-                @if (_activitiesVM is not null && _activitiesExpandButton.Visible)
-                {
-                    <div class="d-flex flex-column gap-4">
-                        @foreach (var activity in _activitiesVM.Activities)
-                        {
-                            <div class="d-flex align-center gap-2">
-                                <!--<UserAvatar Name="" /> TODO? -->
-                                <div class="d-flex flex-column gap-1">
-                                    <MudText>
-                                        @GetActivityText(activity)
-                                    </MudText>
-                                    <MudText Typo="Typo.caption">
-                                        @activity.OccurredAt.GetHumanReadableTimeDifference(DateTime.Now)
-                                    </MudText>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-            </MudItem>
         </MudGrid>
     </MudPaper>
 </MudOverlay>
@@ -209,14 +221,12 @@
     [Parameter]
     public EventCallback TaskUpdated { get; set; } 
 
-    public bool Visible { get; private set; } = false;
+    public bool Visible { get; private set; }
 
     private TaskVM? _taskVM;
 
     private TaskCommentsVM? _commentsVM = null;
     private TaskActivitiesVM? _activitiesVM = null;
-    private ExpandButton _activitiesExpandButton = null!;
-    private ExpandButton _commentsExpandButton = null!;
 
     private class AddCommentForm : DialogForm
     {
@@ -249,8 +259,6 @@
 
         _addCommentForm = new();
         _editDescriptionForm = new();
-        _activitiesExpandButton.Reset();
-        _commentsExpandButton.Reset();
     }
 
     public void Update(TaskVM taskVM)
