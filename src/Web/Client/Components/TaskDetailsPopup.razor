@@ -96,10 +96,15 @@
             <MudDivider />
             <MudItem xs="12">
                 <div class="d-flex align-center justify-space-between">
-                    <MudText Typo="Typo.h6">
-                        Comments
-                    </MudText>
-                    <ExpandButton @ref="_commentsExpandButton" VisibilityToggled="StateHasChanged" />
+                    <div class="d-flex align-center gap-3">
+                        <MudText Typo="Typo.h6">
+                            Comments
+                        </MudText>
+                        <MudChip>
+                            @_commentsVM?.Comments.Count
+                        </MudChip>
+                    </div>
+                    <ExpandButton @ref="_commentsExpandButton" VisibilityToggled="StateHasChanged"/>
                 </div>
                 @if (_commentsVM is not null && _commentsExpandButton.Visible)
                 {
@@ -148,9 +153,14 @@
             <MudDivider />
             <MudItem xs="12">
                 <div class="d-flex align-center justify-space-between">
-                    <MudText Typo="Typo.h6">
-                        Activities
-                    </MudText>
+                    <div class="d-flex align-center gap-3">
+                        <MudText Typo="Typo.h6">
+                            Activities
+                        </MudText>
+                        <MudChip>
+                            @_activitiesVM?.Activities.Count
+                        </MudChip>
+                    </div>
                     <ExpandButton @ref="_activitiesExpandButton" VisibilityToggled="StateHasChanged" />
                 </div>
                 @if (_activitiesVM is not null && _activitiesExpandButton.Visible)
