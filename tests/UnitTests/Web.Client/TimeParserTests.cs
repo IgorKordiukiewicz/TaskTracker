@@ -35,4 +35,27 @@ public class TimeParserTests
             result.Should().Be(expectedMinutes);
         }
     }
+
+    [Theory]
+    [InlineData(-5)]
+    [InlineData(0)]
+    public void FromMinutes_ShouldReturnEmptyString_WhenInputIsZeroOrNegative(int input)
+    {
+        var result = TimeParser.FromMinutes(input);
+
+        result.Should().BeEmpty();
+    }
+
+    [Theory]
+    [InlineData(45, "45m")]
+    [InlineData(150, "2h 30m")]
+    [InlineData(120, "2h")]
+    [InlineData(1440, "1d")]
+    [InlineData(1635, "1d 3h 15m")]
+    public void FromMinutes_ShouldReturnCorrectString_WhenInputIsPositive(int input, string expected)
+    {
+        var result = TimeParser.FromMinutes(input);
+
+        result.Should().Be(expected);
+    }
 }

@@ -46,6 +46,34 @@ public static class TimeParser
         result = (ParseGroup(days) * 24 * 60) + (ParseGroup(hours) * 60) + ParseGroup(minutes);
         return true;
     }
+
+    public static string FromMinutes(int totalMinutes)
+    {
+        if (totalMinutes <= 0)
+        {
+            return string.Empty;
+        }
+        
+        var days = totalMinutes / (24 * 60);
+        var hours = (totalMinutes % (24 * 60)) / 60;
+        var minutes = totalMinutes % 60;
+
+        var result = string.Empty;
+        if (days > 0)
+        {
+            result += $" {days}d";
+        }
+        if (hours > 0)
+        {
+            result += $" {hours}h";
+        }
+        if (minutes > 0)
+        {
+            result += $" {minutes}m";
+        }
+
+        return result.Trim();
+    }
     
     private static int ParseGroup(string group)
         => !string.IsNullOrEmpty(group) ? int.Parse(group[..^1]) : 0;
