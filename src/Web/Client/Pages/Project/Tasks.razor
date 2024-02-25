@@ -47,12 +47,12 @@
                     <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Clear" Style="height: 55px;" FullWidth="true" OnClick="@(() => { _filters = new(); FilterTasks(); })">
                             Clear
                         </MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Search" Style="height: 55px;" FullWidth="true" OnClick="@FilterTasks">
+                    <MudButton Variant="Variant.Filled" Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.Search" Style="height: 55px;" FullWidth="true" OnClick="@FilterTasks">
                         Search
                     </MudButton>
                     @if (_createTasksPermissions)
                     {
-                        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="@(() => _createTaskForm.Open())" Style="height: 55px;" StartIcon="@Icons.Material.Filled.AddTask" FullWidth="true">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _createTaskForm.Open())" Style="height: 55px;" StartIcon="@Icons.Material.Filled.AddTask" FullWidth="true">
                             Create
                         </MudButton>
                     }
