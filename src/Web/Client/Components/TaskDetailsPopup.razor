@@ -270,18 +270,28 @@
 
     private async Task UpdateCommentsVM()
     {
-        _commentsVM = await TasksService.GetComments(ProjectId, _taskVM!.Id);
+        if (_taskVM is null)
+        {
+            return;
+        }
+        
+        _commentsVM = await TasksService.GetComments(ProjectId, _taskVM.Id);
     }
 
     private async Task UpdateActivitiesVM()
     {
-        _activitiesVM = await TasksService.GetActivities(ProjectId, _taskVM!.Id);
+        if (_taskVM is null)
+        {
+            return;
+        }
+        
+        _activitiesVM = await TasksService.GetActivities(ProjectId, _taskVM.Id);
     }
 
     public async Task UpdateTaskStatus(Guid taskId, Guid newStatusId)
     {
         var model = new UpdateTaskStatusDto(newStatusId);
-        _ = await TasksService.UpdateStatus(ProjectId, _taskVM!.Id, model);
+        _ = await TasksService.UpdateStatus(ProjectId, taskId, model);
 
         await TaskUpdated.InvokeAsync();
         await UpdateActivitiesVM();
