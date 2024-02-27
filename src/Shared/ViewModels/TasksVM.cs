@@ -14,6 +14,7 @@ public record TaskVM
     public required TaskPriority Priority { get; init; }
     public required TaskStatusVM Status { get; init; }
     public required IReadOnlyList<TaskStatusVM> PossibleNextStatuses { get; init; }
+    public required int TotalTimeLogged { get; init; }
 }
 
 public record TaskStatusVM(Guid Id, string Name);

@@ -22,6 +22,8 @@ public class Task : Entity, IAggregateRoot
     private readonly List<TaskTimeLog> _timeLogs = new();
     public IReadOnlyList<TaskTimeLog> TimeLogs => _timeLogs.AsReadOnly();
 
+    public int TotalTimeLogged => TimeLogs.Sum(x => x.Minutes);
+
     private Task(Guid id)
         : base(id)
     {
@@ -85,6 +87,7 @@ public class Task : Entity, IAggregateRoot
 
     public void LogTime(int minutes, DateOnly day, Guid userId)
     {
+        // TODO: Save as activity ?
         _timeLogs.Add(new (Id, minutes, day, userId));
     }
 }

@@ -214,7 +214,7 @@
                 <div class="d-flex align-center justify-space-between">
                     <div class="d-flex align-center">
                         <MudText>
-                            2d 5h
+                            @TimeParser.FromMinutes(_taskVM!.TotalTimeLogged)
                         </MudText>
                         @if (LogTimePermissions && !_logTimeForm.Visible)
                         {

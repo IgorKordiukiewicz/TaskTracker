@@ -36,14 +36,20 @@ public class TimeParserTests
         }
     }
 
-    [Theory]
-    [InlineData(-5)]
-    [InlineData(0)]
-    public void FromMinutes_ShouldReturnEmptyString_WhenInputIsZeroOrNegative(int input)
+    [Fact]
+    public void FromMinutes_ShouldReturnEmptyString_WhenInputIsNegative()
     {
-        var result = TimeParser.FromMinutes(input);
+        var result = TimeParser.FromMinutes(-5);
 
         result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void FromMinutes_ShouldReturn0h_WhenInputIsZero()
+    {
+        var result = TimeParser.FromMinutes(0);
+
+        result.Should().Be("0h");
     }
 
     [Theory]

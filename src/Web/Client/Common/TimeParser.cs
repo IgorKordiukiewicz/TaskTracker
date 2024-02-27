@@ -49,9 +49,14 @@ public static class TimeParser
 
     public static string FromMinutes(int totalMinutes)
     {
-        if (totalMinutes <= 0)
+        if (totalMinutes < 0)
         {
             return string.Empty;
+        }
+
+        if (totalMinutes == 0)
+        {
+            return "0h";
         }
         
         var days = totalMinutes / (24 * 60);

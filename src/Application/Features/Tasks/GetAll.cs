@@ -38,6 +38,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
         var statusesById = workflow.Statuses.ToDictionary(x => x.Id, x => x);
 
         var tasks = await _context.Tasks
+            .Include(x => x.TimeLogs)
             .Where(x => x.ProjectId == request.ProjectId)
             .Join(_context.TaskStatuses, 
             x => x.StatusId,
@@ -50,6 +51,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
                 task.Description,
                 task.AssigneeId,
                 task.Priority,
+                task.TotalTimeLogged,
                 Status = status.Id,
             })
             .OrderByDescending(x => x.ShortId)
@@ -75,6 +77,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
             Priority = x.Priority,
             Status = new(x.Status, statusesById[x.Status].Name),
             PossibleNextStatuses = possibleNextStatusesByStatus[x.Status].Select(xx => new TaskStatusVM(xx, statusesById[xx].Name)).ToList(),
+            TotalTimeLogged = x.TotalTimeLogged
         }).ToList(), allTaskStatuses);
     }
 }

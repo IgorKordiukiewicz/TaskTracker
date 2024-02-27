@@ -154,6 +154,22 @@ public class TaskTests
             task.TimeLogs[0].LoggedBy.Should().Be(userId);
         }
     }
+
+    [Fact]
+    public void TotalTimeLogged_ShouldReturnSumOfAllLoggedMinutes()
+    {
+        var task = CreateDefaultTask();
+        var day = DateOnly.FromDayNumber(1);
+        var minutes = new int[] { 10, 25 };
+        foreach (var m in minutes)
+        {
+            task.LogTime(m, day, Guid.NewGuid());
+        }
+
+        var expected = minutes.Sum();
+
+        task.TotalTimeLogged.Should().Be(expected);
+    }
     
     private static Task CreateDefaultTask()
         => Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
