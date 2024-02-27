@@ -146,6 +146,10 @@
                 }
             </MudItem>
             <MudItem md="5">
+                <MudText Typo="Typo.h6">
+                    Properties
+                </MudText>
+                <MudDivider />
                 @if (TransitionTasksPermissions)
                 {
                     <MudSelect T="TaskStatusVM" Value="@_taskVM!.Status" ValueChanged="e => UpdateTaskStatus(_taskVM!.Id, e.Id)"
@@ -194,6 +198,64 @@
                         @(MembersVM.GetCurrentAssigneeVM(_taskVM!.AssigneeId)?.Name ?? string.Empty)
                     </MudField>
                 }
+                <MudText Typo="Typo.h6" Class="mt-4">
+                    Time Tracking
+                </MudText>
+                <MudDivider Class="mb-2" />
+                <div class="d-flex align-center justify-space-between">
+                    <MudText Typo="Typo.body2">
+                        Logged
+                    </MudText>
+                    <MudText Typo="Typo.body2">
+                        Remaining (Estimated)
+                    </MudText>
+                </div>
+                <MudProgressLinear Color="Color.Primary" Rounded="true" Value="100" Class="my-1"></MudProgressLinear>
+                <div class="d-flex align-center justify-space-between">
+                    <div class="d-flex align-center">
+                        <MudText>
+                            2d 5h
+                        </MudText>
+                        @if (LogTimePermissions && !_logTimeForm.Visible)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="@(() => { _editEstimatedTimeForm.Close(); _logTimeForm.Open(); })"></MudIconButton>
+                        }
+                    </div>
+                    <div class="d-flex align-center">
+                        @if (EstimateTasksPermissions && !_editEstimatedTimeForm.Visible)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => { _logTimeForm.Close(); _editEstimatedTimeForm.Open(); })"></MudIconButton>
+                        }
+                        <MudText>
+                            3h 45m (2d 8h)
+                        </MudText>
+                    </div>
+                </div>
+                @if (_logTimeForm.Visible)
+                {
+                    <MudDatePicker Label="Day" @bind-Date="_logTimeForm.Day" DisableToolbar="true" Variant="Variant.Filled"></MudDatePicker>
+                    <MudTextField @bind-Value="_logTimeForm.Content" Variant="Variant.Filled" Label="Time spent" Class="mb-1"></MudTextField>
+                    <div class="d-flex justify-end gap-2">
+                        <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="@(() => _logTimeForm.Close())">
+                            Cancel
+                        </MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_logTimeForm.IsValid())" OnClick="@LogTime">
+                            Add
+                        </MudButton>
+                    </div>
+                }
+                @if (_editEstimatedTimeForm.Visible)
+                {
+                    <MudTextField @bind-Value="_editEstimatedTimeForm.Content" Variant="Variant.Filled" Label="Estimated time" Class="mb-1"></MudTextField>
+                    <div class="d-flex justify-end gap-2">
+                        <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="@(() => _editEstimatedTimeForm.Close())">
+                            Cancel
+                        </MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!_editEstimatedTimeForm.IsValid())">
+                            Save
+                        </MudButton>
+                    </div>
+                }
             </MudItem>
         </MudGrid>
     </MudPaper>
@@ -217,6 +279,12 @@
 
     [Parameter]
     public bool AssignTasksPermissions { get; set; }
+    
+    [Parameter]
+    public bool LogTimePermissions { get; set; }
+    
+    [Parameter]
+    public bool EstimateTasksPermissions { get; set; }
 
     [Parameter]
     public EventCallback TaskUpdated { get; set; } 
@@ -244,6 +312,24 @@
     }
     private EditDescriptionForm _editDescriptionForm = new();
 
+    private class LogTimeForm : DialogForm
+    {
+        public string Content { get; set; } = string.Empty;
+        public DateTime? Day { get; set; } = DateTime.Today;
+
+        public override bool IsValid() => TimeParser.TryToMinutes(Content, out _) && Day is not null;
+    }
+    private LogTimeForm _logTimeForm = new();
+
+    private class EditEstimatedTimeForm : DialogForm
+    {
+        public string Content { get; set; } = string.Empty;
+
+        public override bool IsValid() => TimeParser.TryToMinutes(Content, out _);
+    }
+
+    private EditEstimatedTimeForm _editEstimatedTimeForm = new();
+    
     public async Task Open(TaskVM taskVM)
     {
         Visible = true;
@@ -259,6 +345,8 @@
 
         _addCommentForm = new();
         _editDescriptionForm = new();
+        _logTimeForm = new();
+        _editEstimatedTimeForm = new();
     }
 
     public void Update(TaskVM taskVM)
@@ -342,6 +430,22 @@
 
         await UpdateCommentsVM();
         _addCommentForm = new();
+    }
+
+    private async Task LogTime()
+    {
+        if (!_logTimeForm.IsValid())
+        {
+            return;
+        }
+
+        _ = TimeParser.TryToMinutes(_logTimeForm.Content, out var minutes);
+        var model = new LogTaskTimeDto(minutes, DateOnly.FromDateTime(_logTimeForm.Day!.Value));
+        _ = await TasksService.LogTime(ProjectId, _taskVM!.Id, model);
+
+        await TaskUpdated.InvokeAsync();
+        await UpdateActivitiesVM();
+        _logTimeForm = new();
     }
 
     private string GetActivityText(TaskActivityVM activity)

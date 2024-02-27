@@ -61,7 +61,8 @@
         </MudPaper>
         <TaskDetailsPopup @ref="_taskDetailsPopup" ProjectId="ProjectId" TaskUpdated="UpdateTasksVM" MembersVM="_membersVM"
             ModifyTasksPermissions="_modifyTasksPermissions" TransitionTasksPermissions="_transitionTasksPermissions" 
-            AddCommentsPermissions="_addCommentsPermissions" AssignTasksPermissions="_assignTasksPermissions"></TaskDetailsPopup>
+            AddCommentsPermissions="_addCommentsPermissions" AssignTasksPermissions="_assignTasksPermissions"
+            LogTimePermissions="_logTimePermissions" EstimateTasksPermissions="_estimateTasksPermissions"></TaskDetailsPopup>
         @if(GetDisplayType() == DisplayType.Table)
         {
             <MudTable Items="@_tasks" Hover="true" RowClass="clickable" OnRowClick="(TableRowClickEventArgs<TaskVM> args) => OpenTaskDetailsPopup(args.Item.Id)" Bordered="true">
@@ -198,6 +199,8 @@
     private bool _transitionTasksPermissions;
     private bool _assignTasksPermissions;
     private bool _addCommentsPermissions;
+    private bool _logTimePermissions;
+    private bool _estimateTasksPermissions;
 
     private TasksVM? _tasksVM;
     private Dictionary<string, Guid>? _taskStatusIdByName = new();
@@ -243,6 +246,8 @@
         _transitionTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.TransitionTasks);
         _assignTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AssignTasks);
         _addCommentsPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AddComments);
+        _logTimePermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.LogTimeOnTasks);
+        _estimateTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.EstimateTasks);
 
         await UpdateTasksVM();
         _membersVM = await ProjectsService.GetMembers(ProjectId);
