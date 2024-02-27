@@ -299,6 +299,11 @@
     private async Task UpdateTasksVM()
     {
         _tasksVM = await TasksService.GetList(ProjectId); // TODO: Optimize it, don't fetch all tasks again
+        if (_tasksVM is null)
+        {
+            return;
+        }
+        
         if(_taskDetailsPopup?.Visible ?? false)
         {
             _taskDetailsPopup!.Update(_tasksVM!.Tasks.Single(x => x.Id == _taskDetailsPopup.CurrentTaskId));

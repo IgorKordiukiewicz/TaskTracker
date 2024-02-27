@@ -11,6 +11,8 @@ internal class TaskConfiguration : BaseEntityTypeConfiguration<Domain.Tasks.Task
 
         builder.HasIndex(x => x.ShortId);
 
+        builder.Ignore(x => x.TotalTimeLogged);
+
         builder.HasOne<Project>()
             .WithMany()
             .HasForeignKey(x => x.ProjectId);

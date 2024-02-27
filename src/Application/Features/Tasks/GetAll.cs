@@ -52,6 +52,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
                 task.AssigneeId,
                 task.Priority,
                 task.TotalTimeLogged,
+                task.EstimatedTime,
                 Status = status.Id,
             })
             .OrderByDescending(x => x.ShortId)
@@ -77,7 +78,8 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
             Priority = x.Priority,
             Status = new(x.Status, statusesById[x.Status].Name),
             PossibleNextStatuses = possibleNextStatusesByStatus[x.Status].Select(xx => new TaskStatusVM(xx, statusesById[xx].Name)).ToList(),
-            TotalTimeLogged = x.TotalTimeLogged
+            TotalTimeLogged = x.TotalTimeLogged,
+            EstimatedTime = x.EstimatedTime
         }).ToList(), allTaskStatuses);
     }
 }

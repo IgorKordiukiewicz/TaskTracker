@@ -22,6 +22,7 @@ public class Task : Entity, IAggregateRoot
     private readonly List<TaskTimeLog> _timeLogs = new();
     public IReadOnlyList<TaskTimeLog> TimeLogs => _timeLogs.AsReadOnly();
 
+    public int? EstimatedTime { get; set; }
     public int TotalTimeLogged => TimeLogs.Sum(x => x.Minutes);
 
     private Task(Guid id)

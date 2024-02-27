@@ -224,7 +224,16 @@
                             <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => { _logTimeForm.Close(); _editEstimatedTimeForm.Open(); })"></MudIconButton>
                         }
                         <MudText>
-                            3h 45m (2d 8h)
+                            @if (_taskVM!.EstimatedTime is not null)
+                            {
+                                var remainingTime = _taskVM!.EstimatedTime!.Value - _taskVM!.TotalTimeLogged;
+                                var text = $"{(remainingTime < 0 ? "-": string.Empty)}{TimeParser.FromMinutes(Math.Abs(remainingTime))} ({TimeParser.FromMinutes(_taskVM!.EstimatedTime.Value)})";
+                                <text>@text</text>
+                            }
+                            else
+                            {
+                                <text>Not set</text>
+                            }
                         </MudText>
                     </div>
                 </div>
