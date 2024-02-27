@@ -375,7 +375,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TaskId");
 
-                    b.ToTable("TaskTimeLog");
+                    b.ToTable("TaskTimeLogs");
                 });
 
             modelBuilder.Entity("Domain.Users.User", b =>

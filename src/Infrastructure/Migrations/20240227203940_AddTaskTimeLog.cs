@@ -12,7 +12,7 @@ namespace Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "TaskTimeLog",
+                name: "TaskTimeLogs",
                 columns: table => new
                 {
                     Key = table.Column<int>(type: "int", nullable: false)
@@ -25,15 +25,15 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TaskTimeLog", x => x.Key);
+                    table.PrimaryKey("PK_TaskTimeLogs", x => x.Key);
                     table.ForeignKey(
-                        name: "FK_TaskTimeLog_Tasks_TaskId",
+                        name: "FK_TaskTimeLogs_Tasks_TaskId",
                         column: x => x.TaskId,
                         principalTable: "Tasks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_TaskTimeLog_Users_LoggedBy",
+                        name: "FK_TaskTimeLogs_Users_LoggedBy",
                         column: x => x.LoggedBy,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -41,13 +41,13 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_TaskTimeLog_LoggedBy",
-                table: "TaskTimeLog",
+                name: "IX_TaskTimeLogs_LoggedBy",
+                table: "TaskTimeLogs",
                 column: "LoggedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TaskTimeLog_TaskId",
-                table: "TaskTimeLog",
+                name: "IX_TaskTimeLogs_TaskId",
+                table: "TaskTimeLogs",
                 column: "TaskId");
         }
 
@@ -55,7 +55,7 @@ namespace Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "TaskTimeLog");
+                name: "TaskTimeLogs");
         }
     }
 }

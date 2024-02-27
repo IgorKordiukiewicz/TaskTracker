@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240212153657_AddTaskTimeLog")]
+    [Migration("20240227203940_AddTaskTimeLog")]
     partial class AddTaskTimeLog
     {
         /// <inheritdoc />
@@ -378,7 +378,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TaskId");
 
-                    b.ToTable("TaskTimeLog");
+                    b.ToTable("TaskTimeLogs");
                 });
 
             modelBuilder.Entity("Domain.Users.User", b =>
