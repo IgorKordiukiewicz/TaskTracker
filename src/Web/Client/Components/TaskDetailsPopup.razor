@@ -22,8 +22,11 @@
                     {
                         <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => { _editDescriptionForm.Open(); _editDescriptionForm.Content = _taskVM!.Description; })"/>
                     }
-                    else if (_editDescriptionForm.Visible)
+                </div>
+                <div style="margin-left: 40px;">
+                    @if (_editDescriptionForm.Visible)
                     {
+                        <MudTextField @bind-Value="_editDescriptionForm.Content" Variant="Variant.Filled" Label="Enter description" AutoGrow Class="mb-1"></MudTextField>
                         <div class="d-flex justify-end gap-2">
                             <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="@(() => _editDescriptionForm.Close())">
                                 Cancel
@@ -32,12 +35,6 @@
                                 Save
                             </MudButton>
                         </div>
-                    }
-                </div>
-                <div class="d-flex align-top gap-4" style="margin-left: 40px;">
-                    @if (_editDescriptionForm.Visible)
-                    {
-                        <MudTextField @bind-Value="_editDescriptionForm.Content" Variant="Variant.Filled" Label="Enter description" AutoGrow></MudTextField>
                     }
                     else
                     {
