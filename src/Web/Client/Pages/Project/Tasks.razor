@@ -65,7 +65,7 @@
             LogTimePermissions="_logTimePermissions" EstimateTasksPermissions="_estimateTasksPermissions"></TaskDetailsPopup>
         @if(GetDisplayType() == DisplayType.Table)
         {
-            <MudTable Items="@_tasks" Hover="true" RowClass="clickable" OnRowClick="(TableRowClickEventArgs<TaskVM> args) => OpenTaskDetailsPopup(args.Item.Id)" Bordered="true">
+            <MudTable Items="@_tasks" Hover="true" RowClass="clickable" OnRowClick="(TableRowClickEventArgs<TaskVM> args) => OpenTaskDetailsPopup(args.Item.Id)" Bordered="true" SortLabel="SortBy">
                 <ColGroup>
                     <col style="width: 100px;" />
                     <col />
@@ -74,11 +74,21 @@
                     <col style="width: 200px;" />
                 </ColGroup>
                 <HeaderContent>
-                    <MudTh>ID</MudTh>
-                    <MudTh>Title</MudTh>
-                    <MudTh>Status</MudTh>
-                    <MudTh>Priority</MudTh>
-                    <MudTh>Assignee</MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<TaskVM, object>(x => x.ShortId)">ID</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<TaskVM, object>(x => x.Title)">Title</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<TaskVM, object>(x => x.Status.Name)">Status</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<TaskVM, object>(x => x.Priority)">Priority</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<TaskVM, object>(x => x.AssigneeId ?? Guid.Empty)">Assignee</MudTableSortLabel>
+                    </MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="ID">@context.ShortId</MudTd>
