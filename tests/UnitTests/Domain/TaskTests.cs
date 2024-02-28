@@ -170,6 +170,29 @@ public class TaskTests
 
         task.TotalTimeLogged.Should().Be(expected);
     }
+
+    [Fact]
+    public void UpdateEstimatedTime_ShouldUpdateValue_WhenMinutesArePositive()
+    {
+        var task = CreateDefaultTask();
+        const int expected = 10;
+        
+        task.UpdateEstimatedTime(expected);
+
+        task.EstimatedTime.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(-5)]
+    [InlineData(0)]
+    public void UpdateEstimatedTime_ShouldSetValueToNull_WhenMinutesAreZeroOrNegative(int minutes)
+    {
+        var task = CreateDefaultTask();
+        
+        task.UpdateEstimatedTime(minutes);
+
+        task.EstimatedTime.Should().BeNull();
+    }
     
     private static Task CreateDefaultTask()
         => Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());

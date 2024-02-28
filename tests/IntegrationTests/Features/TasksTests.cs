@@ -382,4 +382,27 @@ public class TasksTests
             (await _fixture.CountAsync<TaskTimeLog>()).Should().Be(timeLogsBefore + 1);
         }
     }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateEstimatedTime_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateTaskEstimatedTimeCommand(Guid.NewGuid(), new(1)));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateEstimatedTime_ShouldUpdateEstimatedTime_WhenTaskExists()
+    {
+        var task = (await _factory.CreateTasks())[0];
+        const int newEstimatedTime = 10;
+
+        var result = await _fixture.SendRequest(new UpdateTaskEstimatedTimeCommand(task.Id, new(newEstimatedTime)));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<Task>(x => x.Id == task.Id)).EstimatedTime.Should().Be(newEstimatedTime);
+        }
+    }
 }

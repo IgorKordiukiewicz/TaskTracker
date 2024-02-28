@@ -221,7 +221,10 @@
                     <div class="d-flex align-center">
                         @if (EstimateTasksPermissions && !_editEstimatedTimeForm.Visible)
                         {
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => { _logTimeForm.Close(); _editEstimatedTimeForm.Open(); })"></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => { 
+                                _logTimeForm.Close(); 
+                                _editEstimatedTimeForm.Open(); 
+                                _editEstimatedTimeForm.Content = TimeParser.FromMinutes(_taskVM!.EstimatedTime.GetValueOrDefault()); })"></MudIconButton>
                         }
                         <MudText>
                             @if (_taskVM!.EstimatedTime is not null)
@@ -257,7 +260,7 @@
                         <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="@(() => _editEstimatedTimeForm.Close())">
                             Cancel
                         </MudButton>
-                        <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!_editEstimatedTimeForm.IsValid())">
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!_editEstimatedTimeForm.IsValid())" OnClick="@UpdateEstimatedTime">
                             Save
                         </MudButton>
                     </div>
@@ -450,8 +453,22 @@
         _ = await TasksService.LogTime(ProjectId, _taskVM!.Id, model);
 
         await TaskUpdated.InvokeAsync();
-        await UpdateActivitiesVM();
         _logTimeForm = new();
+    }
+
+    private async Task UpdateEstimatedTime()
+    {
+        if (!_editEstimatedTimeForm.IsValid())
+        {
+            return;
+        }
+
+        _ = TimeParser.TryToMinutes(_editEstimatedTimeForm.Content, out var minutes);
+        var model = new UpdateTaskEstimatedTimeDto(minutes);
+        _ = await TasksService.UpdateEstimatedTime(ProjectId, _taskVM!.Id, model);
+        
+        await TaskUpdated.InvokeAsync();
+        _editEstimatedTimeForm = new();
     }
 
     private string GetActivityText(TaskActivityVM activity)

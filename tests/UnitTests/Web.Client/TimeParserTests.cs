@@ -17,6 +17,7 @@ public class TimeParserTests
     }
     
     [Theory]
+    [InlineData("0", 0)]
     [InlineData("2", 120)]
     [InlineData("2d 5h 40m", 3220)]
     [InlineData("3d", 4320)]

@@ -166,11 +166,26 @@ public class TasksController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Task not found.</response>
     [HttpPost("{taskId:guid}/log_time")]
-    [Authorize(Policy.ProjectMember)]
+    [Authorize(Policy.ProjectLogTimeOnTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> LogTaskTime(Guid taskId, LogTaskTimeDto model)
     {
         var result = await _mediator.Send(new LogTaskTimeCommand(User.GetUserAuthenticationId(), taskId, model));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
+    /// Update a task's estimated time.
+    /// </summary>
+    /// <param name="taskId"></param>
+    /// <param name="model"></param>
+    /// <response code="404">Task not found.</response>
+    [HttpPost("{taskId:guid}/update-estimated-time")]
+    [Authorize(Policy.ProjectEstimateTasks)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> UpdateTaskEstimatedTime(Guid taskId, UpdateTaskEstimatedTimeDto model)
+    {
+        var result = await _mediator.Send(new UpdateTaskEstimatedTimeCommand(taskId, model));
         return result.ToHttpResult();
     }
 }

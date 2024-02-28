@@ -40,6 +40,9 @@ public class TasksService : ApiService
     public async Task<bool> LogTime(Guid projectId, Guid taskId, LogTaskTimeDto model)
         => await Post($"tasks/{taskId}/log_time", model, ProjectIdHeader(projectId));
 
+    public async Task<bool> UpdateEstimatedTime(Guid projectId, Guid taskId, UpdateTaskEstimatedTimeDto model)
+        => await Post($"tasks/{taskId}/update-estimated-time", model, ProjectIdHeader(projectId));
+
     private static Headers ProjectIdHeader(Guid projectId)
         => Headers.From(("ProjectId", projectId.ToString()));
 }
