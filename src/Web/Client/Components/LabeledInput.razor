@@ -1,0 +1,22 @@
+﻿<div>
+    <MudText Typo="@LabelTypo">
+        @LabelText
+    </MudText>
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public required string Label { get; init; }
+    
+    [Parameter]
+    public required RenderFragment ChildContent { get; set; }
+
+    [Parameter] 
+    public Typo LabelTypo { get; init; } = Typo.body2;
+
+    [Parameter] 
+    public bool Required { get; init; }
+
+    private string LabelText => $"{Label}{(Required ? " *" : string.Empty)}";
+}

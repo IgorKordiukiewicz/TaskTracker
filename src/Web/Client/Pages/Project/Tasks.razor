@@ -167,24 +167,32 @@
     </div>
 }
 
-<Dialog Title="Create a new task" Form="_createTaskForm" OnConfirm="CreateTask">
-    <MudTextField @bind-Value="@_createTaskForm.Title" Label="Title" Required="true" Variant="Variant.Filled" />
-    <MudTextField @bind-Value="@_createTaskForm.Description" Label="Description" Variant="Variant.Filled" />
-    <MudSelect @bind-Value="@_createTaskForm.Priority" Label="Priority" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-        @foreach(var priority in Enum.GetValues<TaskPriority>())
-        {
-            <MudSelectItem Value="@priority"></MudSelectItem>
-        }
-    </MudSelect>
-    @if (_membersVM is not null)
-    {
-        <MudSelect T="ProjectMemberVM" Value="@_membersVM.GetCurrentAssigneeVM(_createTaskForm.Assignee?.UserId)" ValueChanged="e => { _createTaskForm.Assignee = e; }"
-                   ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-            @foreach (var member in _membersVM.GetPossibleAssignees(_createTaskForm.Assignee?.UserId))
+<Dialog Title="Create a task" Form="_createTaskForm" OnConfirm="CreateTask">
+    <LabeledInput Label="Title" Required="true">
+        <MudTextField @bind-Value="@_createTaskForm.Title" Required="true" Variant="Variant.Outlined" Class="input-outlined-dark" />
+    </LabeledInput>
+    <LabeledInput Label="Description">
+        <MudTextField @bind-Value="@_createTaskForm.Description" Variant="Variant.Outlined" Class="input-outlined-dark"/>
+    </LabeledInput>
+    <LabeledInput Label="Priority">
+        <MudSelect @bind-Value="@_createTaskForm.Priority" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter"  Class="input-outlined-dark">
+            @foreach (var priority in Enum.GetValues<TaskPriority>())
             {
-                <MudSelectItem Value="@member"></MudSelectItem>
+                <MudSelectItem Value="@priority"></MudSelectItem>
             }
         </MudSelect>
+    </LabeledInput>
+    @if (_membersVM is not null)
+    {
+        <LabeledInput Label="Assignee">
+            <MudSelect T="ProjectMemberVM" Value="@_membersVM.GetCurrentAssigneeVM(_createTaskForm.Assignee?.UserId)" ValueChanged="e => { _createTaskForm.Assignee = e; }"
+                               ToStringFunc="@(x => x.Name)" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter"  Class="input-outlined-dark">
+                        @foreach (var member in _membersVM.GetPossibleAssignees(_createTaskForm.Assignee?.UserId))
+                        {
+                            <MudSelectItem Value="@member"></MudSelectItem>
+                        }
+                    </MudSelect>
+        </LabeledInput>
     }
 </Dialog>
 

@@ -116,27 +116,33 @@
     </MudGrid>
 }
 
-<Dialog Title="Add a new status" Form="_addStatusForm" ConfirmButtonText="Add" OnConfirm="AddStatus">
-    <MudTextField @bind-Value="@_addStatusForm.Name" Label="Name" Required="true" Variant="Variant.Filled" />
+<Dialog Title="Add a status" Form="_addStatusForm" ConfirmButtonText="Add" OnConfirm="AddStatus">
+    <LabeledInput Label="Name" Required="true">
+        <MudTextField @bind-Value="@_addStatusForm.Name" Required="true" Variant="Variant.Outlined" Class="input-outlined-dark" />
+    </LabeledInput>
 </Dialog>
 
-<Dialog Title="Add a new transition" Form="_addTransitionForm" ConfirmButtonText="Add" OnConfirm="AddTransition">
-    <MudSelect T="string" Label="From Status" @bind-Value="_addTransitionForm.FromStatus" AnchorOrigin="Origin.BottomCenter">
-        @foreach (var fromStatus in _workflowVM.GetAvailableFromStatuses())
-        {
-            <MudSelectItem Value="@fromStatus" />
-        }
-    </MudSelect>
-    <MudSelect T="string" Label="To Status" @bind-Value="_addTransitionForm.ToStatus" Disabled="@string.IsNullOrWhiteSpace(_addTransitionForm.FromStatus)" 
-        AnchorOrigin="Origin.BottomCenter">
-        @if (!string.IsNullOrWhiteSpace(_addTransitionForm.FromStatus))
-        {
-            foreach (var toStatus in _workflowVM.GetAvailableToStatuses(_addTransitionForm.FromStatus, _statusIdByName))
+<Dialog Title="Add a transition" Form="_addTransitionForm" ConfirmButtonText="Add" OnConfirm="AddTransition">
+    <LabeledInput Label="From Status" Required="true">
+        <MudSelect T="string" @bind-Value="_addTransitionForm.FromStatus" AnchorOrigin="Origin.BottomCenter" Class="input-outlined-dark" Variant="Variant.Outlined">
+            @foreach (var fromStatus in _workflowVM.GetAvailableFromStatuses())
             {
-                <MudSelectItem Value="@toStatus" />
+                <MudSelectItem Value="@fromStatus"/>
             }
-        }
-    </MudSelect>
+        </MudSelect>
+    </LabeledInput>
+    <LabeledInput Label="To Status" Required="true">
+        <MudSelect T="string" @bind-Value="_addTransitionForm.ToStatus" Disabled="@string.IsNullOrWhiteSpace(_addTransitionForm.FromStatus)" Variant="Variant.Outlined"
+                   AnchorOrigin="Origin.BottomCenter" Class="input-outlined-dark">
+            @if (!string.IsNullOrWhiteSpace(_addTransitionForm.FromStatus))
+            {
+                foreach (var toStatus in _workflowVM.GetAvailableToStatuses(_addTransitionForm.FromStatus, _statusIdByName))
+                {
+                    <MudSelectItem Value="@toStatus"/>
+                }
+            }
+        </MudSelect>
+    </LabeledInput>
 </Dialog>
 
 <ConfirmDeleteBox @ref="_confirmDeleteBox"></ConfirmDeleteBox>

@@ -55,20 +55,27 @@
     </MudDataGrid>
 }
 
-<Dialog Title="Create a new role" Form="_createRoleForm" OnConfirm="CreateRole" >
-    <MudTextField @bind-Value="@_createRoleForm.Name" Label="Name" Required="true" Variant="Variant.Filled" />
-    <MudSelect Label="Permissions" Variant="Variant.Filled" MultiSelection="true" T="TPermissions" @bind-SelectedValues="@_createRoleForm.PermissionsFlags" AnchorOrigin="Origin.BottomCenter">
-        @foreach (var permission in _allPermissionsFlags)
-        {
-            <MudSelectItem Value="@permission">
-                @(permission.ToString().Humanize(LetterCasing.Title))
-            </MudSelectItem>
-        }
-    </MudSelect>
+<Dialog Title="Create a role" Form="_createRoleForm" OnConfirm="CreateRole">
+    <LabeledInput Label="Name" Required="true">
+        <MudTextField @bind-Value="@_createRoleForm.Name" Required="true" Variant="Variant.Outlined" Class="input-outlined-dark"/>
+    </LabeledInput>
+    <LabeledInput Label="Permissions">
+        <MudSelect  Variant="Variant.Outlined" MultiSelection="true" T="TPermissions" @bind-SelectedValues="@_createRoleForm.PermissionsFlags"
+                       AnchorOrigin="Origin.BottomCenter" Class="input-outlined-dark">
+                @foreach (var permission in _allPermissionsFlags)
+                {
+                    <MudSelectItem Value="@permission">
+                        @(permission.ToString().Humanize(LetterCasing.Title))
+                    </MudSelectItem>
+                }
+            </MudSelect>
+    </LabeledInput>
 </Dialog>
 
-<Dialog Title="Update role name" Form="_updateRoleNameForm" OnConfirm="@UpdateName" ConfirmButtonText="Save" >
-    <MudTextField @bind-Value="@_updateRoleNameForm.Name" Label="Name" Required="true" Variant="Variant.Filled" />
+<Dialog Title="Update role" Form="_updateRoleNameForm" OnConfirm="@UpdateName" ConfirmButtonText="Save">
+    <LabeledInput Label="Name" Required="true">
+        <MudTextField @bind-Value="@_updateRoleNameForm.Name" Required="true" Variant="Variant.Outlined" Class="input-outlined-dark"/>
+    </LabeledInput>
 </Dialog>
 
 <ConfirmDeleteBox @ref="_confirmDeleteBox"></ConfirmDeleteBox>

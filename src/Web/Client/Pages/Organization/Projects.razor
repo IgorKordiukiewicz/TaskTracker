@@ -38,8 +38,10 @@
     }
 }
 
-<Dialog Title="Create a new project" Form="_createProjectForm" OnConfirm="CreateProject">
-    <MudTextField @bind-Value="@_createProjectForm.Name" Label="Name" Required="true" Variant="Variant.Filled" />
+<Dialog Title="Create a project" Form="_createProjectForm" OnConfirm="CreateProject">
+    <LabeledInput Label="Name" Required="true">
+        <MudTextField @bind-Value="@_createProjectForm.Name" Required="true" Variant="Variant.Outlined" Class="input-outlined-dark" />
+    </LabeledInput>
 </Dialog>
 
 @code {

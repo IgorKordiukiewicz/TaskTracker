@@ -33,8 +33,10 @@
     </div>
 }
 
-<Dialog Title="Create a new organization" Form="_createOrganizationForm" OnConfirm="CreateOrganization">
-    <MudTextField @bind-Value="@_createOrganizationForm.Name" Label="Name" Required="true" Variant="Variant.Filled" />
+<Dialog Title="Create a organization" Form="_createOrganizationForm" OnConfirm="CreateOrganization">
+    <LabeledInput Label="Name" Required="true">
+        <MudTextField @bind-Value="@_createOrganizationForm.Name" Required="true" Variant="Variant.Outlined" Class="input-outlined-dark" />
+    </LabeledInput>
 </Dialog>
 
 @code {
