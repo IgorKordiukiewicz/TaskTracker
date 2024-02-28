@@ -207,7 +207,7 @@
                         Remaining (Estimated)
                     </MudText>
                 </div>
-                <MudProgressLinear Color="Color.Primary" Rounded="true" Value="100" Class="my-1"></MudProgressLinear>
+                <MudProgressLinear Color="@GetTimeProgressBarColor()" Rounded="true" Value="@GetTimeProgressBarValue()" Class="my-1"></MudProgressLinear>
                 <div class="d-flex align-center justify-space-between">
                     <div class="d-flex align-center">
                         <MudText>
@@ -483,5 +483,26 @@
             TaskProperty.Priority => $"Changed priority from {activity.OldValue} to {activity.NewValue}.",
             _ => "Unrecognizable activity."
         };
+    }
+
+    private int GetTimeProgressBarValue()
+    {
+        if (_taskVM?.EstimatedTime is null || _taskVM.TotalTimeLogged > _taskVM.EstimatedTime.Value)
+        {
+            return 100;
+        }
+
+        var fraction = (float)_taskVM.TotalTimeLogged / _taskVM.EstimatedTime.Value;
+        return (int)(fraction * 100);
+    }
+
+    private Color GetTimeProgressBarColor()
+    {
+        if (_taskVM?.EstimatedTime is null || _taskVM.TotalTimeLogged <= _taskVM.EstimatedTime.Value)
+        {
+            return Color.Primary;
+        }
+        
+        return Color.Error;
     }
 }
