@@ -199,73 +199,65 @@
             <MudText Typo="Typo.h6">
                 Time Tracking
             </MudText>
-            <MudDivider Class="mb-2"/>
-            <div class="d-flex align-center justify-space-between">
-                <MudText Typo="Typo.body2">
-                    Logged
-                </MudText>
-                <MudText Typo="Typo.body2">
-                    Remaining (Estimated)
-                </MudText>
-            </div>
-            <MudProgressLinear Color="@GetTimeProgressBarColor()" Rounded="true" Value="@GetTimeProgressBarValue()" Class="my-1"></MudProgressLinear>
-            <div class="d-flex align-center justify-space-between">
-                <div class="d-flex align-center">
-                    <MudText>
-                        @TimeParser.FromMinutes(_taskVM!.TotalTimeLogged)
-                    </MudText>
-                    @if (_logTimePermissions && !_logTimeForm.Visible)
-                    {
-                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="@(() => { _editEstimatedTimeForm.Close(); _logTimeForm.Open(); })"></MudIconButton>
-                    }
-                </div>
-                <div class="d-flex align-center">
-                    @if (_estimateTasksPermissions && !_editEstimatedTimeForm.Visible)
-                    {
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => { _logTimeForm.Close(); _editEstimatedTimeForm.Open(); _editEstimatedTimeForm.Content = TimeParser.FromMinutes(_taskVM!.EstimatedTime.GetValueOrDefault()); })"></MudIconButton>
-                    }
-                    <MudText>
-                        @if (_taskVM!.EstimatedTime is not null)
-                        {
-                            var remainingTime = _taskVM!.EstimatedTime!.Value - _taskVM!.TotalTimeLogged;
-                            var text = $"{(remainingTime < 0 ? "-" : string.Empty)}{TimeParser.FromMinutes(Math.Abs(remainingTime))} ({TimeParser.FromMinutes(_taskVM!.EstimatedTime.Value)})";
-                            <text>@text</text>
-                        }
-                        else
-                        {
-                            <text>Not set</text>
-                        }
-                    </MudText>
-                </div>
-            </div>
-            @if (_logTimeForm.Visible)
+            @if(_taskVM.EstimatedTime is not null)
             {
-                <MudDatePicker Label="Day" @bind-Date="_logTimeForm.Day" DisableToolbar="true" Variant="Variant.Filled"></MudDatePicker>
-                <MudTextField @bind-Value="_logTimeForm.Content" Variant="Variant.Filled" Label="Time spent" Class="mb-1"></MudTextField>
-                <div class="d-flex justify-end gap-2">
-                    <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="@(() => _logTimeForm.Close())">
-                        Cancel
-                    </MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_logTimeForm.IsValid())" OnClick="@LogTime">
-                        Add
-                    </MudButton>
-                </div>
+                <MudProgressLinear Color="@GetTimeProgressBarColor()" Rounded="true" Value="@GetTimeProgressBarValue()" Class="my-4" Size="Size.Large"></MudProgressLinear>
             }
-            @if (_editEstimatedTimeForm.Visible)
+            <div class="d-flex align-center justify-space-between">
+                <MudText>
+                    Logged:
+                </MudText>
+                <div class="d-flex gap-2 align-center">
+                    <MudText>
+                        @TimeParser.FromMinutes(_taskVM.TotalTimeLogged)
+                    </MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="@(() => _logTimeForm.Open())"></MudIconButton>
+                </div>
+            </div>
+            <div class="d-flex align-center justify-space-between">
+                <MudText>
+                    Estimated:
+                </MudText>
+                <div class="d-flex gap-2 align-center">
+                    <MudText>
+                        @TimeParser.FromMinutes(_taskVM.EstimatedTime.GetValueOrDefault())
+                    </MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Medium" 
+                        OnClick="@(() => { _editEstimatedTimeForm.Open(); _editEstimatedTimeForm.Time = TimeParser.FromMinutes(_taskVM.EstimatedTime.GetValueOrDefault()); })"></MudIconButton>
+                </div>
+            </div>
+            @if (_taskVM.EstimatedTime is not null)
             {
-                <MudTextField @bind-Value="_editEstimatedTimeForm.Content" Variant="Variant.Filled" Label="Estimated time" Class="mb-1"></MudTextField>
-                <div class="d-flex justify-end gap-2">
-                    <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="@(() => _editEstimatedTimeForm.Close())">
-                        Cancel
-                    </MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!_editEstimatedTimeForm.IsValid())" OnClick="@UpdateEstimatedTime">
-                        Save
-                    </MudButton>
+                <div class="d-flex align-center justify-space-between" style="height: 48px; margin-right: 56px;">
+                    <MudText>
+                        Remaining:
+                    </MudText>
+                    <MudText>
+                        @{
+                            var remainingTime = _taskVM.EstimatedTime.Value - _taskVM.TotalTimeLogged;
+                        }
+                        @TimeParser.FromMinutes(remainingTime)
+                    </MudText>
                 </div>
             }
         </MudItem>
     </MudGrid>
 }
+
+<FormDialog Title="Log time" Form="_logTimeForm" OnConfirm="LogTime">
+    <LabeledInput Label="Day" Required="true">
+        <MudDatePicker Label="Day" @bind-Date="_logTimeForm.Day" DisableToolbar="true" Variant="Variant.Outlined" Class="input-outlined-dark" Required="true"></MudDatePicker>
+    </LabeledInput>
+    <LabeledInput Label="Time spent" Required="true">
+        <MudTextField @bind-Value="_logTimeForm.Time" Variant="Variant.Outlined" Class="input-outlined-dark" Required="true"></MudTextField>
+    </LabeledInput>
+</FormDialog>
+
+<FormDialog Title="Update estimated time" Form="_editEstimatedTimeForm" OnConfirm="UpdateEstimatedTime">
+    <LabeledInput Label="Estimated time" Required="true">
+        <MudTextField @bind-Value="_editEstimatedTimeForm.Time" Variant="Variant.Outlined" Class="input-outlined-dark" Required="true"></MudTextField>
+    </LabeledInput>
+</FormDialog>
 
 @code {
     [Parameter]
@@ -300,18 +292,18 @@
 
     private class LogTimeForm : Form
     {
-        public string Content { get; set; } = string.Empty;
+        public string Time { get; set; } = string.Empty;
         public DateTime? Day { get; set; } = DateTime.Today;
 
-        public override bool IsValid() => TimeParser.TryToMinutes(Content, out _) && Day is not null;
+        public override bool IsValid() => TimeParser.TryToMinutes(Time, out _) && Day is not null;
     }
     private LogTimeForm _logTimeForm = new();
 
     private class EditEstimatedTimeForm : Form
     {
-        public string Content { get; set; } = string.Empty;
+        public string Time { get; set; } = string.Empty;
 
-        public override bool IsValid() => TimeParser.TryToMinutes(Content, out _);
+        public override bool IsValid() => TimeParser.TryToMinutes(Time, out _);
     }
     private EditEstimatedTimeForm _editEstimatedTimeForm = new();
     
@@ -439,7 +431,7 @@
             return;
         }
 
-        _ = TimeParser.TryToMinutes(_logTimeForm.Content, out var minutes);
+        _ = TimeParser.TryToMinutes(_logTimeForm.Time, out var minutes);
         var model = new LogTaskTimeDto(minutes, DateOnly.FromDateTime(_logTimeForm.Day!.Value));
         _ = await TasksService.LogTime(ProjectId, _taskVM!.Id, model);
 
@@ -454,7 +446,7 @@
             return;
         }
 
-        _ = TimeParser.TryToMinutes(_editEstimatedTimeForm.Content, out var minutes);
+        _ = TimeParser.TryToMinutes(_editEstimatedTimeForm.Time, out var minutes);
         var model = new UpdateTaskEstimatedTimeDto(minutes);
         _ = await TasksService.UpdateEstimatedTime(ProjectId, _taskVM!.Id, model);
 
