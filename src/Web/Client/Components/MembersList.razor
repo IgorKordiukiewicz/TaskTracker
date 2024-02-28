@@ -17,7 +17,7 @@
                     {
                         <div style="max-width: 400px;">
                             <MudSelect Value="@GetRoleVM(member.RoleId)" AnchorOrigin="Origin.BottomCenter" ToStringFunc="x => x.Name" T="RoleVM<TPermissions>"
-                                       Variant="Variant.Outlined" Label="Role" ValueChanged="e => UpdateRole(member.Id, e.Id)">
+                                       Variant="Variant.Outlined" ValueChanged="e => UpdateRole(member.Id, e.Id)" Class="input-outlined-dark">
                                 @foreach (var role in RolesVM.Roles)
                                 {
                                     <MudSelectItem Value="@role"></MudSelectItem>
@@ -27,8 +27,9 @@
                     }
                     @if (RemoveMembersPermission)
                     {
-                        <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Error" OnClick="@(() => RemoveMember(member.Id))"
-                                       Class="@GetRemoveIconButtonClass(member)"></MudIconButton>
+                        <MudMenu Icon="@Icons.Material.Filled.ArrowDropDown" AnchorOrigin="Origin.BottomCenter">
+                            <MudMenuItem Icon="@Icons.Material.Filled.Clear" IconColor="Color.Error" OnClick="@(() => RemoveMember(member.Id))">Remove</MudMenuItem>
+                        </MudMenu>
                     }
                 </div>
             </div>
