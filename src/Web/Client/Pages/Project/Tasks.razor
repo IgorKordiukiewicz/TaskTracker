@@ -7,6 +7,7 @@
 @inject TasksService TasksService
 @inject ProjectsService ProjectsService
 @inject UserDataService UserDataService
+@inject NavigationManager NavigationManager
 
 @if(_tasksVM is not null && _membersVM is not null)
 {
@@ -59,13 +60,9 @@
                 </MudItem>
             </MudGrid>
         </MudPaper>
-        <TaskDetailsPopup @ref="_taskDetailsPopup" ProjectId="ProjectId" TaskUpdated="UpdateTasksVM" MembersVM="_membersVM"
-            ModifyTasksPermissions="_modifyTasksPermissions" TransitionTasksPermissions="_transitionTasksPermissions" 
-            AddCommentsPermissions="_addCommentsPermissions" AssignTasksPermissions="_assignTasksPermissions"
-            LogTimePermissions="_logTimePermissions" EstimateTasksPermissions="_estimateTasksPermissions"></TaskDetailsPopup>
         @if(GetDisplayType() == DisplayType.Table)
         {
-            <MudTable Items="@_tasks" Hover="true" RowClass="clickable" OnRowClick="(TableRowClickEventArgs<TaskVM> args) => OpenTaskDetailsPopup(args.Item.Id)" Bordered="true" SortLabel="SortBy">
+            <MudTable Items="@_tasks" Hover="true" RowClass="clickable" OnRowClick="(TableRowClickEventArgs<TaskVM> args) => OpenTaskDetails(args.Item.ShortId)" Bordered="true" SortLabel="SortBy">
                 <ColGroup>
                     <col style="width: 100px;" />
                     <col />
@@ -132,7 +129,7 @@
         {
         <div class="status-board-container">
             <MudDropContainer T="TaskVM" Items="@_tasks" ItemsSelector="@((items, dropzone) => items.Status.Name == dropzone)" ApplyDropClassesOnDragStarted="true" Class="status-board gap-6"
-                              ItemDropped="TaskDropped" CanDropClass="mud-border-success" NoDropClass="mud-border-error">
+                              ItemDropped="UpdateTaskStatus" CanDropClass="mud-border-success" NoDropClass="mud-border-error">
                 <ChildContent>
                     @foreach (var status in _tasksVM.AllTaskStatuses.OrderBy(x => x.DisplayOrder).Select(x => x.Name))
                     {
@@ -158,7 +155,7 @@
                                     <UserAvatar Name="@currentAssignee!.Name" UserId="@currentAssignee.UserId" Size="Size.Small" Tooltip="true"></UserAvatar>
                                 }
                                 <PriorityAvatar Priority="@context.Priority" Tooltip="true" />
-                                <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="@(() => OpenTaskDetailsPopup(context.Id))" />
+                                <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="@(() => OpenTaskDetails(context.ShortId))" />
                             </div>
                         </div>
                     </MudPaper>
@@ -205,20 +202,13 @@
     public Task<AuthenticationState> AuthenticationState { get; set; } = null!;
 
     private bool _createTasksPermissions;
-    private bool _modifyTasksPermissions;
     private bool _transitionTasksPermissions;
-    private bool _assignTasksPermissions;
-    private bool _addCommentsPermissions;
-    private bool _logTimePermissions;
-    private bool _estimateTasksPermissions;
 
     private TasksVM? _tasksVM;
     private Dictionary<string, Guid>? _taskStatusIdByName = new();
     private IEnumerable<TaskVM>? _tasks;
 
     private ProjectMembersVM? _membersVM;
-
-    private TaskDetailsPopup? _taskDetailsPopup;
 
     private enum DisplayType
     {
@@ -250,14 +240,8 @@
     {
         await Layout.SetProjectId(ProjectId);
 
-        // TODO: Refactor
         _createTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.CreateTasks);
-        _modifyTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.ModifyTasks);
         _transitionTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.TransitionTasks);
-        _assignTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AssignTasks);
-        _addCommentsPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.AddComments);
-        _logTimePermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.LogTimeOnTasks);
-        _estimateTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.EstimateTasks);
 
         await UpdateTasksVM();
         _membersVM = await ProjectsService.GetMembers(ProjectId);
@@ -285,15 +269,9 @@
             .ToList();
     }
 
-    private async Task OpenTaskDetailsPopup(Guid taskId)
+    private void OpenTaskDetails(int taskShortId)
     {
-        if(_taskDetailsPopup is null)
-        {
-            return;
-        }
-
-        var taskVM = _tasksVM!.Tasks.Single(x => x.Id == taskId);
-        await _taskDetailsPopup.Open(taskVM);
+        NavigationManager.NavigateTo($"project/{ProjectId}/tasks/{taskShortId}");
     }
 
     private async Task UpdateTasksVM()
@@ -303,25 +281,24 @@
         {
             return;
         }
-        
-        if(_taskDetailsPopup?.Visible ?? false)
-        {
-            _taskDetailsPopup!.Update(_tasksVM!.Tasks.Single(x => x.Id == _taskDetailsPopup.CurrentTaskId));
-        }
 
         _taskStatusIdByName = _tasksVM?.AllTaskStatuses
             .ToDictionary(x => x.Name, x => x.Id);
         FilterTasks();
     }
 
-    private async Task TaskDropped(MudItemDropInfo<TaskVM> dropItem)
+    private async Task UpdateTaskStatus(MudItemDropInfo<TaskVM> dropItem)
     {
-        if(dropItem.Item is null || _taskStatusIdByName is null || _taskDetailsPopup is null)
+        if(dropItem.Item is null || _taskStatusIdByName is null)
         {
             return;
         }
 
-        await _taskDetailsPopup.UpdateTaskStatus(dropItem.Item.Id, _taskStatusIdByName[dropItem.DropzoneIdentifier]);
+        var newStatusId = _taskStatusIdByName[dropItem.DropzoneIdentifier];
+        var model = new UpdateTaskStatusDto(newStatusId);
+        _ = await TasksService.UpdateStatus(ProjectId, dropItem.Item.Id, model);
+
+        await UpdateTasksVM();
     }
 
     private async Task CreateTask()
