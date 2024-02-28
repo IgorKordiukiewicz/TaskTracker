@@ -69,6 +69,7 @@
                     <col style="width: 200px;" />
                     <col style="width: 200px;" />
                     <col style="width: 200px;" />
+                    <col style="width: 200px;" />
                 </ColGroup>
                 <HeaderContent>
                     <MudTh>
@@ -76,6 +77,9 @@
                     </MudTh>
                     <MudTh>
                         <MudTableSortLabel SortBy="new Func<TaskVM, object>(x => x.Title)">Title</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        Time
                     </MudTh>
                     <MudTh>
                         <MudTableSortLabel SortBy="new Func<TaskVM, object>(x => x.Status.Name)">Status</MudTableSortLabel>
@@ -90,6 +94,25 @@
                 <RowTemplate>
                     <MudTd DataLabel="ID">@context.ShortId</MudTd>
                     <MudTd DataLabel="Title">@context.Title</MudTd>
+                    <MudTd DataLabel="Time">
+                        @if(context.TotalTimeLogged > 0)
+                        {
+                            var timeLoggedText = TimeParser.FromMinutes(context.TotalTimeLogged);
+                            if(context.EstimatedTime is not null)
+                            {
+                                var estimatedTimeText = TimeParser.FromMinutes(context.EstimatedTime.Value);
+                                <text>@($"{timeLoggedText} / {estimatedTimeText}")</text>
+                            }
+                            else
+                            {
+                                <text>@timeLoggedText</text>
+                            }
+                        }
+                        else
+                        {
+                            <text>-</text>
+                        }
+                    </MudTd>
                     <MudTd DataLabel="Status">@context.Status.Name</MudTd>
                     <MudTd DataLabel="Priority">
                         <div class="d-flex align-center gap-2">
