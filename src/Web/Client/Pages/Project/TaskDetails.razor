@@ -143,57 +143,64 @@
         <MudItem sm="3">
             <LabeledInput Label="Status" LabelTypo="Typo.h6" Class="mb-4">
                 @if (_transitionTasksPermissions && false)
-            {
+                {
                     <MudSelect T="TaskStatusVM" Value="@_taskVM!.Status" ValueChanged="e => UpdateTaskStatus(e.Id)" Class="input-outlined-dark"
                                ToStringFunc="@(x => x.Name)" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
-                    @foreach (var status in _taskVM!.PossibleNextStatuses)
-                    {
-                        <MudSelectItem Value="@status"></MudSelectItem>
-                    }
-                </MudSelect>
-            }
-            else
-            {
+                        @foreach (var status in _taskVM!.PossibleNextStatuses)
+                        {
+                            <MudSelectItem Value="@status"></MudSelectItem>
+                        }
+                    </MudSelect>
+                }
+                else
+                {
                     <MudField Variant="Variant.Outlined" Class="input-outlined-dark">
-                    @_taskVM!.Status.Name
-                </MudField>
-            }
+                        @_taskVM!.Status.Name
+                    </MudField>
+                }
             </LabeledInput>
             <LabeledInput Label="Priority" LabelTypo="Typo.h6" Class="mb-4">
-            @if (_modifyTasksPermissions)
-            {
+                @if (_modifyTasksPermissions)
+                {
                     <MudSelect T="TaskPriority" Value="@_taskVM!.Priority" ValueChanged="e => UpdateTaskPriority(e)" Class="input-outlined-dark"
                                Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
-                    @foreach (var priority in Enum.GetValues<TaskPriority>())
-                    {
-                        <MudSelectItem Value="@priority"></MudSelectItem>
-                    }
-                </MudSelect>
-            }
-            else
-            {
+                        @foreach (var priority in Enum.GetValues<TaskPriority>())
+                        {
+                            <MudSelectItem Value="@priority">
+                                <div class="d-flex gap-2 align-center">
+                                    <PriorityAvatar Priority="@priority"/>
+                                    <text>
+                                        @priority
+                                    </text>
+                                </div>
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                }
+                else
+                {
                     <MudField Variant="Variant.Outlined" Class="input-outlined-dark">
-                    @_taskVM!.Priority
-                </MudField>
-            }
+                        @_taskVM!.Priority
+                    </MudField>
+                }
             </LabeledInput>
             <LabeledInput Label="Assignee" LabelTypo="Typo.h6" Class="mb-4">
-            @if (_assignTasksPermissions)
-            {
-                <MudSelect T="ProjectMemberVM" Value="@_membersVM.GetCurrentAssigneeVM(_taskVM!.AssigneeId)" ValueChanged="e => UpdateTaskAssignee(e.Id)"
+                @if (_assignTasksPermissions)
+                {
+                    <MudSelect T="ProjectMemberVM" Value="@_membersVM.GetCurrentAssigneeVM(_taskVM!.AssigneeId)" ValueChanged="e => UpdateTaskAssignee(e.Id)"
                                Class="input-outlined-dark" ToStringFunc="@(x => x.Name)" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
-                    @foreach (var member in _membersVM.GetPossibleAssignees(_taskVM!.AssigneeId))
-                    {
-                        <MudSelectItem Value="@member"></MudSelectItem>
-                    }
-                </MudSelect>
-            }
-            else
-            {
+                        @foreach (var member in _membersVM.GetPossibleAssignees(_taskVM!.AssigneeId))
+                        {
+                            <MudSelectItem Value="@member"></MudSelectItem>
+                        }
+                    </MudSelect>
+                }
+                else
+                {
                     <MudField Variant="Variant.Filled" Class="input-outlined-dark">
-                    @(_membersVM.GetCurrentAssigneeVM(_taskVM!.AssigneeId)?.Name ?? string.Empty)
-                </MudField>
-            }
+                        @(_membersVM.GetCurrentAssigneeVM(_taskVM!.AssigneeId)?.Name ?? string.Empty)
+                    </MudField>
+                }
             </LabeledInput>
             <MudText Typo="Typo.h6">
                 Time Tracking

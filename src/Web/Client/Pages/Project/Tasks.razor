@@ -178,7 +178,14 @@
         <MudSelect @bind-Value="@_createTaskForm.Priority" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter"  Class="input-outlined-dark">
             @foreach (var priority in Enum.GetValues<TaskPriority>())
             {
-                <MudSelectItem Value="@priority"></MudSelectItem>
+                <MudSelectItem Value="@priority">
+                    <div class="d-flex gap-2 align-center">
+                        <PriorityAvatar Priority="@priority"/>
+                        <text>
+                            @priority
+                        </text>
+                    </div>
+                </MudSelectItem>
             }
         </MudSelect>
     </LabeledInput>
