@@ -27,7 +27,8 @@
                 }
             </div>
             <div style="margin-left: 40px;">
-                <MudTextField @bind-Value="_editDescriptionForm.Content" Variant="Variant.Filled" Lines="10" AutoGrow Class="mb-1" ReadOnly="@(!_editDescriptionForm.Visible)" ></MudTextField>
+                <MudTextField @bind-Value="_editDescriptionForm.Content" Variant="Variant.Outlined" Lines="10" AutoGrow Class="mb-1 input-outlined-dark" 
+                              ReadOnly="@(!_editDescriptionForm.Visible)"></MudTextField>
                 @if (_editDescriptionForm.Visible)
                 {
                     <div class="d-flex justify-end gap-2">
@@ -140,10 +141,11 @@
             }
         </MudItem>
         <MudItem sm="3">
-            @if (_transitionTasksPermissions)
+            <LabeledInput Label="Status" LabelTypo="Typo.h6" Class="mb-4">
+                @if (_transitionTasksPermissions && false)
             {
-                <MudSelect T="TaskStatusVM" Value="@_taskVM!.Status" ValueChanged="e => UpdateTaskStatus(e.Id)"
-                           ToStringFunc="@(x => x.Name)" Label="Status" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                    <MudSelect T="TaskStatusVM" Value="@_taskVM!.Status" ValueChanged="e => UpdateTaskStatus(e.Id)" Class="input-outlined-dark"
+                               ToStringFunc="@(x => x.Name)" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
                     @foreach (var status in _taskVM!.PossibleNextStatuses)
                     {
                         <MudSelectItem Value="@status"></MudSelectItem>
@@ -152,14 +154,16 @@
             }
             else
             {
-                <MudField Variant="Variant.Filled" Label="Status">
+                    <MudField Variant="Variant.Outlined" Class="input-outlined-dark">
                     @_taskVM!.Status.Name
                 </MudField>
             }
+            </LabeledInput>
+            <LabeledInput Label="Priority" LabelTypo="Typo.h6" Class="mb-4">
             @if (_modifyTasksPermissions)
             {
-                <MudSelect T="TaskPriority" Value="@_taskVM!.Priority" ValueChanged="e => UpdateTaskPriority(e)"
-                           Label="Priority" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                    <MudSelect T="TaskPriority" Value="@_taskVM!.Priority" ValueChanged="e => UpdateTaskPriority(e)" Class="input-outlined-dark"
+                               Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
                     @foreach (var priority in Enum.GetValues<TaskPriority>())
                     {
                         <MudSelectItem Value="@priority"></MudSelectItem>
@@ -168,14 +172,16 @@
             }
             else
             {
-                <MudField Variant="Variant.Filled" Label="Priority">
+                    <MudField Variant="Variant.Outlined" Class="input-outlined-dark">
                     @_taskVM!.Priority
                 </MudField>
             }
+            </LabeledInput>
+            <LabeledInput Label="Assignee" LabelTypo="Typo.h6" Class="mb-4">
             @if (_assignTasksPermissions)
             {
                 <MudSelect T="ProjectMemberVM" Value="@_membersVM.GetCurrentAssigneeVM(_taskVM!.AssigneeId)" ValueChanged="e => UpdateTaskAssignee(e.Id)"
-                           ToStringFunc="@(x => x.Name)" Label="Assignee" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+                               Class="input-outlined-dark" ToStringFunc="@(x => x.Name)" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
                     @foreach (var member in _membersVM.GetPossibleAssignees(_taskVM!.AssigneeId))
                     {
                         <MudSelectItem Value="@member"></MudSelectItem>
@@ -184,14 +190,15 @@
             }
             else
             {
-                <MudField Variant="Variant.Filled" Label="Assignee">
+                    <MudField Variant="Variant.Filled" Class="input-outlined-dark">
                     @(_membersVM.GetCurrentAssigneeVM(_taskVM!.AssigneeId)?.Name ?? string.Empty)
                 </MudField>
             }
-            <MudText Typo="Typo.h6" Class="mt-4">
+            </LabeledInput>
+            <MudText Typo="Typo.h6">
                 Time Tracking
             </MudText>
-            <MudDivider Class="mb-2" />
+            <MudDivider Class="mb-2"/>
             <div class="d-flex align-center justify-space-between">
                 <MudText Typo="Typo.body2">
                     Logged
@@ -214,16 +221,13 @@
                 <div class="d-flex align-center">
                     @if (_estimateTasksPermissions && !_editEstimatedTimeForm.Visible)
                     {
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => { 
-                            _logTimeForm.Close(); 
-                            _editEstimatedTimeForm.Open(); 
-                            _editEstimatedTimeForm.Content = TimeParser.FromMinutes(_taskVM!.EstimatedTime.GetValueOrDefault()); })"></MudIconButton>
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => { _logTimeForm.Close(); _editEstimatedTimeForm.Open(); _editEstimatedTimeForm.Content = TimeParser.FromMinutes(_taskVM!.EstimatedTime.GetValueOrDefault()); })"></MudIconButton>
                     }
                     <MudText>
                         @if (_taskVM!.EstimatedTime is not null)
                         {
                             var remainingTime = _taskVM!.EstimatedTime!.Value - _taskVM!.TotalTimeLogged;
-                            var text = $"{(remainingTime < 0 ? "-": string.Empty)}{TimeParser.FromMinutes(Math.Abs(remainingTime))} ({TimeParser.FromMinutes(_taskVM!.EstimatedTime.Value)})";
+                            var text = $"{(remainingTime < 0 ? "-" : string.Empty)}{TimeParser.FromMinutes(Math.Abs(remainingTime))} ({TimeParser.FromMinutes(_taskVM!.EstimatedTime.Value)})";
                             <text>@text</text>
                         }
                         else
