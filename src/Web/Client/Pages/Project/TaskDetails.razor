@@ -84,11 +84,9 @@
                                         </div>
                                         <MudText Typo="Typo.caption">@comment.CreatedAt.GetHumanReadableTimeDifference(DateTime.Now)</MudText>
                                     </div>
-                                    <div class="pa-2 comment-text">
-                                        <MudText>
-                                            @comment.Content
-                                        </MudText>
-                                    </div>
+                                    <MudField Variant="Variant.Outlined" Class="input-outlined-dark">
+                                        @comment.Content
+                                    </MudField>
                                 </div>
                             }
                         </div>
