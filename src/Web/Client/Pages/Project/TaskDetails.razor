@@ -178,7 +178,12 @@
                 else
                 {
                     <MudField Variant="Variant.Outlined" Class="input-outlined-dark">
-                        @_taskVM!.Priority
+                        <div class="d-flex gap-2 align-center">
+                            <PriorityAvatar Priority="@_taskVM!.Priority" />
+                            <div>
+                                @_taskVM!.Priority
+                            </div>
+                        </div>
                     </MudField>
                 }
             </LabeledInput>
@@ -199,18 +204,25 @@
                                         </div>
                                     </div>
                                 }
-                                else
-                                {
-                                    @member.Name
-                                }
                             </MudSelectItem>
                         }
                     </MudSelect>
                 }
                 else
                 {
-                    <MudField Variant="Variant.Filled" Class="input-outlined-dark">
-                        @(_membersVM.GetCurrentAssigneeVM(_taskVM!.AssigneeId)?.Name ?? string.Empty)
+                    <MudField Variant="Variant.Outlined" Class="input-outlined-dark">
+                        @{
+                            var currentAssigneeVM = _membersVM.GetCurrentAssigneeVM(_taskVM!.AssigneeId);
+                        }
+                        @if(currentAssigneeVM is not null)
+                        {
+                            <div class="d-flex gap-2 align-center">
+                                <UserAvatar Name="@currentAssigneeVM.Name" UserId="@currentAssigneeVM.UserId" Size="Size.Small" />
+                                <div>
+                                    @currentAssigneeVM.Name
+                                </div>
+                            </div>
+                        }
                     </MudField>
                 }
             </LabeledInput>
