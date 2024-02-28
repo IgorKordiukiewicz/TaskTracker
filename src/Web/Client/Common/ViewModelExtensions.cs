@@ -51,7 +51,7 @@ public static class ViewModelExtensions
     {
         if (assigneeId is not null && assigneeId != Guid.Empty)
         {
-            return membersVM.Members.Where(x => x.UserId != assigneeId.Value).Append(new(Guid.Empty, Guid.Empty, "-", Guid.Empty)).Reverse();
+            return membersVM.Members.Append(new(Guid.Empty, Guid.Empty, "-", Guid.Empty)).Reverse();
         }
         else
         {

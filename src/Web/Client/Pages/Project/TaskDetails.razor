@@ -167,9 +167,9 @@
                             <MudSelectItem Value="@priority">
                                 <div class="d-flex gap-2 align-center">
                                     <PriorityAvatar Priority="@priority"/>
-                                    <text>
+                                    <div>
                                         @priority
-                                    </text>
+                                    </div>
                                 </div>
                             </MudSelectItem>
                         }
@@ -186,10 +186,24 @@
                 @if (_assignTasksPermissions)
                 {
                     <MudSelect T="ProjectMemberVM" Value="@_membersVM.GetCurrentAssigneeVM(_taskVM!.AssigneeId)" ValueChanged="e => UpdateTaskAssignee(e.Id)"
-                               Class="input-outlined-dark" ToStringFunc="@(x => x.Name)" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
+                               Class="input-outlined-dark" ToStringFunc="@(x => x.Name)" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter" >
                         @foreach (var member in _membersVM.GetPossibleAssignees(_taskVM!.AssigneeId))
                         {
-                            <MudSelectItem Value="@member"></MudSelectItem>
+                            <MudSelectItem Value="@member" >
+                                @if(member.UserId != default)
+                                {
+                                    <div class="d-flex gap-2 align-center">
+                                        <UserAvatar Name="@member.Name" UserId="@member.UserId" Size="Size.Small" />
+                                        <div>
+                                            @member.Name
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    @member.Name
+                                }
+                            </MudSelectItem>
                         }
                     </MudSelect>
                 }

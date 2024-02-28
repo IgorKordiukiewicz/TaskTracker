@@ -147,7 +147,9 @@
                 <ItemRenderer>
                     <MudPaper Class="pa-4 my-4" Style="width: 350px;">
                         <div class="d-flex align-center justify-space-between">
-                            @context.Title
+                            <div>
+                                @context.Title
+                            </div>
                             <div class="d-flex align-center gap-2">
                                 @if(context.AssigneeId is not null)
                                 {
@@ -196,7 +198,21 @@
                                ToStringFunc="@(x => x.Name)" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter"  Class="input-outlined-dark">
                         @foreach (var member in _membersVM.GetPossibleAssignees(_createTaskForm.Assignee?.UserId))
                         {
-                            <MudSelectItem Value="@member"></MudSelectItem>
+                            <MudSelectItem Value="@member">
+                                @if (member.UserId != default)
+                                {
+                                    <div class="d-flex gap-2 align-center">
+                                        <UserAvatar Name="@member.Name" UserId="@member.UserId" Size="Size.Small" />
+                                        <div>
+                                            @member.Name
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    @member.Name
+                                }
+                            </MudSelectItem>
                         }
                     </MudSelect>
         </LabeledInput>
