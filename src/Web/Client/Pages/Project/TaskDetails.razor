@@ -165,12 +165,7 @@
                         @foreach (var priority in Enum.GetValues<TaskPriority>())
                         {
                             <MudSelectItem Value="@priority">
-                                <div class="d-flex gap-2 align-center">
-                                    <PriorityAvatar Priority="@priority"/>
-                                    <div>
-                                        @priority
-                                    </div>
-                                </div>
+                                <PriorityField Priority="@priority"></PriorityField>
                             </MudSelectItem>
                         }
                     </MudSelect>
@@ -178,12 +173,7 @@
                 else
                 {
                     <MudField Variant="Variant.Outlined" Class="input-outlined-dark">
-                        <div class="d-flex gap-2 align-center">
-                            <PriorityAvatar Priority="@_taskVM!.Priority" />
-                            <div>
-                                @_taskVM!.Priority
-                            </div>
-                        </div>
+                        <PriorityField Priority="@_taskVM!.Priority"></PriorityField>
                     </MudField>
                 }
             </LabeledInput>
@@ -197,12 +187,7 @@
                             <MudSelectItem Value="@member" >
                                 @if(member.UserId != default)
                                 {
-                                    <div class="d-flex gap-2 align-center">
-                                        <UserAvatar Name="@member.Name" UserId="@member.UserId" Size="Size.Small" />
-                                        <div>
-                                            @member.Name
-                                        </div>
-                                    </div>
+                                    <AssigneeField AssigneeVM="@member"></AssigneeField>
                                 }
                             </MudSelectItem>
                         }
@@ -216,12 +201,7 @@
                         }
                         @if(currentAssigneeVM is not null)
                         {
-                            <div class="d-flex gap-2 align-center">
-                                <UserAvatar Name="@currentAssigneeVM.Name" UserId="@currentAssigneeVM.UserId" Size="Size.Small" />
-                                <div>
-                                    @currentAssigneeVM.Name
-                                </div>
-                            </div>
+                            <AssigneeField AssigneeVM="@currentAssigneeVM"></AssigneeField>
                         }
                     </MudField>
                 }

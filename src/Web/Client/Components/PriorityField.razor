@@ -1,0 +1,11 @@
+﻿<div class="d-flex gap-2 align-center">
+    <PriorityAvatar Priority="@Priority" />
+    <div>
+        @Priority
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public required TaskPriority Priority { get; init; }
+}

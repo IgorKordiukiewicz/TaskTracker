@@ -181,12 +181,7 @@
             @foreach (var priority in Enum.GetValues<TaskPriority>())
             {
                 <MudSelectItem Value="@priority">
-                    <div class="d-flex gap-2 align-center">
-                        <PriorityAvatar Priority="@priority"/>
-                        <text>
-                            @priority
-                        </text>
-                    </div>
+                    <PriorityField Priority="@priority"></PriorityField>
                 </MudSelectItem>
             }
         </MudSelect>
@@ -201,12 +196,7 @@
                             <MudSelectItem Value="@member">
                                 @if (member.UserId != default)
                                 {
-                                    <div class="d-flex gap-2 align-center">
-                                        <UserAvatar Name="@member.Name" UserId="@member.UserId" Size="Size.Small" />
-                                        <div>
-                                            @member.Name
-                                        </div>
-                                    </div>
+                                    <AssigneeField AssigneeVM="@member"></AssigneeField>
                                 }
                             </MudSelectItem>
                         }
