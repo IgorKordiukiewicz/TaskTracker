@@ -294,7 +294,7 @@
     }
     private AddCommentForm _addCommentForm = new();
 
-    private class EditDescriptionForm : DialogForm
+    private class EditDescriptionForm : Form
     {
         public string Content { get; set; } = string.Empty;
 
@@ -302,7 +302,7 @@
     }
     private EditDescriptionForm _editDescriptionForm = new();
 
-    private class LogTimeForm : DialogForm
+    private class LogTimeForm : Form
     {
         public string Content { get; set; } = string.Empty;
         public DateTime? Day { get; set; } = DateTime.Today;
@@ -311,7 +311,7 @@
     }
     private LogTimeForm _logTimeForm = new();
 
-    private class EditEstimatedTimeForm : DialogForm
+    private class EditEstimatedTimeForm : Form
     {
         public string Content { get; set; } = string.Empty;
 

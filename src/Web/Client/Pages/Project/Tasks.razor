@@ -192,7 +192,7 @@
     </div>
 }
 
-<Dialog Title="Create a task" Form="_createTaskForm" OnConfirm="CreateTask">
+<FormDialog Title="Create a task" Form="_createTaskForm" OnConfirm="CreateTask">
     <LabeledInput Label="Title" Required="true">
         <MudTextField @bind-Value="@_createTaskForm.Title" Required="true" Variant="Variant.Outlined" Class="input-outlined-dark" />
     </LabeledInput>
@@ -226,7 +226,7 @@
                     </MudSelect>
         </LabeledInput>
     }
-</Dialog>
+</FormDialog>
 
 @code {
     [Parameter]
@@ -256,7 +256,7 @@
         Board
     }
 
-    private class CreateTaskForm : DialogForm
+    private class CreateTaskForm : Form
     {
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;

@@ -116,13 +116,13 @@
     </MudGrid>
 }
 
-<Dialog Title="Add a status" Form="_addStatusForm" ConfirmButtonText="Add" OnConfirm="AddStatus">
+<FormDialog Title="Add a status" Form="_addStatusForm" ConfirmButtonText="Add" OnConfirm="AddStatus">
     <LabeledInput Label="Name" Required="true">
         <MudTextField @bind-Value="@_addStatusForm.Name" Required="true" Variant="Variant.Outlined" Class="input-outlined-dark" />
     </LabeledInput>
-</Dialog>
+</FormDialog>
 
-<Dialog Title="Add a transition" Form="_addTransitionForm" ConfirmButtonText="Add" OnConfirm="AddTransition">
+<FormDialog Title="Add a transition" Form="_addTransitionForm" ConfirmButtonText="Add" OnConfirm="AddTransition">
     <LabeledInput Label="From Status" Required="true">
         <MudSelect T="string" @bind-Value="_addTransitionForm.FromStatus" AnchorOrigin="Origin.BottomCenter" Class="input-outlined-dark" Variant="Variant.Outlined">
             @foreach (var fromStatus in _workflowVM.GetAvailableFromStatuses())
@@ -143,7 +143,7 @@
             }
         </MudSelect>
     </LabeledInput>
-</Dialog>
+</FormDialog>
 
 <ConfirmDeleteBox @ref="_confirmDeleteBox"></ConfirmDeleteBox>
 
@@ -159,7 +159,7 @@
     private WorkflowVM? _workflowVM;
     private Dictionary<string, Guid>? _statusIdByName;
 
-    private class AddStatusForm : DialogForm
+    private class AddStatusForm : Form
     {
         public string Name { get; set; } = string.Empty;
 
@@ -167,7 +167,7 @@
     }
     private AddStatusForm _addStatusForm = new();
 
-    private class AddTransitionForm : DialogForm
+    private class AddTransitionForm : Form
     {
         public string FromStatus { get; set; } = string.Empty;
         public string ToStatus { get; set; } = string.Empty;

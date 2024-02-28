@@ -55,7 +55,7 @@
     </MudDataGrid>
 }
 
-<Dialog Title="Create a role" Form="_createRoleForm" OnConfirm="CreateRole">
+<FormDialog Title="Create a role" Form="_createRoleForm" OnConfirm="CreateRole">
     <LabeledInput Label="Name" Required="true">
         <MudTextField @bind-Value="@_createRoleForm.Name" Required="true" Variant="Variant.Outlined" Class="input-outlined-dark"/>
     </LabeledInput>
@@ -70,7 +70,7 @@
                 }
             </MudSelect>
     </LabeledInput>
-</Dialog>
+</FormDialog>
 
 <Dialog Title="Update role" Form="_updateRoleNameForm" OnConfirm="@UpdateName" ConfirmButtonText="Save">
     <LabeledInput Label="Name" Required="true">
@@ -120,7 +120,7 @@
         public required Dictionary<TPermissions, bool> PermissionsFlags { get; init; }
     }
 
-    private class CreateRoleForm : DialogForm
+    private class CreateRoleForm : Form
     {
         public string Name { get; set; } = string.Empty;
         public IEnumerable<TPermissions> PermissionsFlags { get; set; } = Enumerable.Empty<TPermissions>();
@@ -130,7 +130,7 @@
     }
     private CreateRoleForm _createRoleForm = new();
 
-    private class UpdateRoleNameForm : DialogForm
+    private class UpdateRoleNameForm : Form
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;

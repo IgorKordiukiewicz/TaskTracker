@@ -33,17 +33,17 @@
     </div>
 }
 
-<Dialog Title="Create a organization" Form="_createOrganizationForm" OnConfirm="CreateOrganization">
+<FormDialog Title="Create a organization" Form="_createOrganizationForm" OnConfirm="CreateOrganization">
     <LabeledInput Label="Name" Required="true">
         <MudTextField @bind-Value="@_createOrganizationForm.Name" Required="true" Variant="Variant.Outlined" Class="input-outlined-dark" />
     </LabeledInput>
-</Dialog>
+</FormDialog>
 
 @code {
     private UserOrganizationInvitationsVM? _invitationsVM;
     private OrganizationsForUserVM? _organizationsVM;
 
-    private class CreateOrganizationForm : DialogForm
+    private class CreateOrganizationForm : Form
     {
         public string Name { get; set; } = string.Empty;
 

@@ -1,6 +1,6 @@
 ﻿namespace Web.Client.Common;
 
-public abstract class DialogForm
+public abstract class Form
 {
     public bool Visible { get; set; }
 

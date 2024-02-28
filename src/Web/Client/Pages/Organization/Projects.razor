@@ -38,11 +38,11 @@
     }
 }
 
-<Dialog Title="Create a project" Form="_createProjectForm" OnConfirm="CreateProject">
+<FormDialog Title="Create a project" Form="_createProjectForm" OnConfirm="CreateProject">
     <LabeledInput Label="Name" Required="true">
         <MudTextField @bind-Value="@_createProjectForm.Name" Required="true" Variant="Variant.Outlined" Class="input-outlined-dark" />
     </LabeledInput>
-</Dialog>
+</FormDialog>
 
 @code {
     [Parameter]
@@ -58,7 +58,7 @@
 
     private ProjectsVM? _projectsVM;
 
-    private class CreateProjectForm : DialogForm
+    private class CreateProjectForm : Form
     {
         public string Name { get; set; } = string.Empty;
 
