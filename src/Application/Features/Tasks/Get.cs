@@ -2,26 +2,26 @@
 
 namespace Application.Features.Tasks;
 
-public record GetAllTasksQuery(Guid ProjectId) : IRequest<Result<TasksVM>>;
+public record GetTasksQuery(Guid ProjectId, IEnumerable<int> ShortIds) : IRequest<Result<TasksVM>>;
 
-internal class GetAllTasksQueryValidator : AbstractValidator<GetAllTasksQuery>
+internal class GetTasksQueryValidator : AbstractValidator<GetTasksQuery>
 {
-    public GetAllTasksQueryValidator()
+    public GetTasksQueryValidator()
     {
         RuleFor(x => x.ProjectId).NotEmpty();
     }
 }
 
-internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<TasksVM>>
+internal class GetTasksHandler : IRequestHandler<GetTasksQuery, Result<TasksVM>>
 {
     private readonly AppDbContext _context;
 
-    public GetAllTasksHandler(AppDbContext context)
+    public GetTasksHandler(AppDbContext context)
     {
         _context = context;
     }
 
-    public async Task<Result<TasksVM>> Handle(GetAllTasksQuery request, CancellationToken cancellationToken)
+    public async Task<Result<TasksVM>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
     {
         var workflow = await _context.Workflows
             .AsNoTracking()
@@ -39,7 +39,7 @@ internal class GetAllTasksHandler : IRequestHandler<GetAllTasksQuery, Result<Tas
 
         var tasks = await _context.Tasks
             .Include(x => x.TimeLogs)
-            .Where(x => x.ProjectId == request.ProjectId)
+            .Where(x => x.ProjectId == request.ProjectId && (!request.ShortIds.Any() || request.ShortIds.Contains(x.ShortId)))
             .Join(_context.TaskStatuses, 
             x => x.StatusId,
             x => x.Id, 

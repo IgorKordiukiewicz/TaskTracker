@@ -80,7 +80,7 @@ public class TasksTests
     [Fact]
     public async System.Threading.Tasks.Task GetAll_ShouldFail_WhenWorkflowDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new GetAllTasksQuery(Guid.NewGuid()));
+        var result = await _fixture.SendRequest(new GetTasksQuery(Guid.NewGuid(), Array.Empty<int>()));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -100,7 +100,7 @@ public class TasksTests
             db.AddRange(task1, task2, task3);
         });
 
-        var result = await _fixture.SendRequest(new GetAllTasksQuery(workflows[0].ProjectId));
+        var result = await _fixture.SendRequest(new GetTasksQuery(workflows[0].ProjectId, Array.Empty<int>()));
 
         using (new AssertionScope())
         {

@@ -323,16 +323,32 @@
         }
     }
 
-    private async Task UpdateTasksVM()
+    private async Task UpdateTasksVM(int? shortId = null)
     {
-        _tasksVM = await TasksService.GetList(ProjectId); // TODO: Optimize it, don't fetch all tasks again
-        if (_tasksVM is null)
+        if(shortId is null)
         {
-            return;
+            _tasksVM = await TasksService.GetAll(ProjectId);
+            if (_tasksVM is null)
+            {
+                return;
+            }
+
+            _taskStatusIdByName = _tasksVM?.AllTaskStatuses
+                .ToDictionary(x => x.Name, x => x.Id);
+        }
+        else
+        {
+            var newTaskVM = await TasksService.Get(ProjectId, shortId.Value);
+            if (newTaskVM is null || _tasksVM is null)
+            {
+                return;
+            }
+
+            var item = _tasksVM.Tasks.Single(x => x.ShortId == shortId.Value);
+            var index = _tasksVM.Tasks.IndexOf(item);
+            _tasksVM.Tasks[index] = newTaskVM;
         }
 
-        _taskStatusIdByName = _tasksVM?.AllTaskStatuses
-            .ToDictionary(x => x.Name, x => x.Id);
         FilterTasks();
     }
 
@@ -347,7 +363,7 @@
         var model = new UpdateTaskStatusDto(newStatusId);
         _ = await TasksService.UpdateStatus(ProjectId, dropItem.Item.Id, model);
 
-        await UpdateTasksVM();
+        await UpdateTasksVM(dropItem.Item.ShortId);
     }
 
     private async Task CreateTask()

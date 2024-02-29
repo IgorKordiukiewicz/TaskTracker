@@ -1,4 +1,5 @@
-﻿using MudBlazor;
+﻿using Flurl;
+using MudBlazor;
 using Shared.Dtos;
 using Shared.ViewModels;
 
@@ -10,8 +11,16 @@ public class TasksService : ApiService
     {
     }
 
-    public async Task<TasksVM?> GetList(Guid projectId)
+    public async Task<TasksVM?> GetAll(Guid projectId)
         => await Get<TasksVM>("tasks", ProjectIdHeader(projectId));
+
+    public async Task<TaskVM?> Get(Guid projectId, int shortId)
+    {
+        var url = "tasks"
+            .SetQueryParam("shortIds", new[] { shortId })
+            .ToString();
+        return (await Get<TasksVM>(url, ProjectIdHeader(projectId)))?.Tasks.Single();
+    }
 
     public async Task<bool> Create(Guid projectId, CreateTaskDto model)
         => await Post("tasks", model, ProjectIdHeader(projectId));

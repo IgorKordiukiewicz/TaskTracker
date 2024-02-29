@@ -43,14 +43,15 @@ public class TasksController : ControllerBase
     /// Get a list of tasks for a project.
     /// </summary>
     /// <param name="projectId"></param>
+    /// <param name="shortIds">List of tasks IDs to return. Returns all tasks if empty.</param>
     /// <response code="404">Project's workflow not found.</response> 
     [HttpGet]
     [Authorize(Policy.ProjectMember)]
     [ProducesResponseType(typeof(TasksVM), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetTasks([FromHeader] Guid projectId)
+    public async Task<IActionResult> GetTasks([FromHeader] Guid projectId, [FromQuery] IEnumerable<int> shortIds)
     {
-        var result = await _mediator.Send(new GetAllTasksQuery(projectId));
+        var result = await _mediator.Send(new GetTasksQuery(projectId, shortIds));
         return result.ToHttpResult();
     }
 

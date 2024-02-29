@@ -262,10 +262,10 @@
 @code {
     [Parameter]
     public Guid ProjectId { get; init; }
-    
+
     [Parameter]
     public int ShortId { get; init; }
-    
+
     [CascadingParameter]
     public ProjectLayout Layout { get; set; } = null!;
 
@@ -273,7 +273,7 @@
     private TaskCommentsVM? _commentsVM;
     private TaskActivitiesVM? _activitiesVM;
     private ProjectMembersVM? _membersVM;
-    
+
     private class AddCommentForm
     {
         public string Content { get; set; } = string.Empty;
@@ -306,7 +306,7 @@
         public override bool IsValid() => TimeParser.TryToMinutes(Time, out _);
     }
     private EditEstimatedTimeForm _editEstimatedTimeForm = new();
-    
+
     private bool _modifyTasksPermissions;
     private bool _transitionTasksPermissions;
     private bool _assignTasksPermissions;
@@ -317,7 +317,7 @@
     protected override async Task OnInitializedAsync()
     {
         await Layout.SetProjectId(ProjectId);
-        
+
         // TODO: Refactor
         _modifyTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.ModifyTasks);
         _transitionTasksPermissions = UserDataService.HasProjectPermissions(ProjectId, ProjectPermissions.TransitionTasks);
@@ -335,7 +335,7 @@
 
     private async Task UpdateTaskVM()
     {
-        _taskVM = (await TasksService.GetList(ProjectId))?.Tasks.First(x => x.ShortId == ShortId);
+        _taskVM = await TasksService.Get(ProjectId, ShortId);
         if (_taskVM is null)
         {
             return;
