@@ -8,6 +8,7 @@
 @inject ProjectsService ProjectsService
 @inject UserDataService UserDataService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 @if(_tasksVM is not null && _membersVM is not null)
 {
@@ -92,9 +93,9 @@
                     </MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd DataLabel="ID">@context.ShortId</MudTd>
-                    <MudTd DataLabel="Title">@context.Title</MudTd>
-                    <MudTd DataLabel="Time">
+                    <MudTd DataLabel="ID" @onmouseup="@(e => OpenTaskDetailsInNewPage(context, e))">@context.ShortId</MudTd>
+                    <MudTd DataLabel="Title" @onmouseup="@(e => OpenTaskDetailsInNewPage(context, e))">@context.Title</MudTd>
+                    <MudTd DataLabel="Time" @onmouseup="@(e => OpenTaskDetailsInNewPage(context, e))">
                         @if(context.TotalTimeLogged > 0)
                         {
                             var timeLoggedText = TimeParser.FromMinutes(context.TotalTimeLogged);
@@ -113,8 +114,8 @@
                             <text>-</text>
                         }
                     </MudTd>
-                    <MudTd DataLabel="Status">@context.Status.Name</MudTd>
-                    <MudTd DataLabel="Priority">
+                    <MudTd DataLabel="Status" @onmouseup="@(e => OpenTaskDetailsInNewPage(context, e))">@context.Status.Name</MudTd>
+                    <MudTd DataLabel="Priority" @onmouseup="@(e => OpenTaskDetailsInNewPage(context, e))">
                         <div class="d-flex align-center gap-2">
                             <PriorityAvatar Priority="@context.Priority" />
                             <text>
@@ -122,7 +123,7 @@
                             </text>
                         </div>
                     </MudTd>
-                    <MudTd DataLabel="Assignee">
+                    <MudTd DataLabel="Assignee" @onmouseup="@(e => OpenTaskDetailsInNewPage(context, e))">
                         @{
                             var currentAssignee = _membersVM.GetCurrentAssigneeVM(context.AssigneeId);
                         }
@@ -180,7 +181,7 @@
                                     <UserAvatar Name="@currentAssignee!.Name" UserId="@currentAssignee.UserId" Size="Size.Small" Tooltip="true"></UserAvatar>
                                 }
                                 <PriorityAvatar Priority="@context.Priority" Tooltip="true" />
-                                <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="@(() => OpenTaskDetails(context.ShortId))" />
+                                <MudIconButton Icon="@Icons.Material.Filled.MoreHoriz" OnClick="@(() => OpenTaskDetails(context.ShortId))" @onmouseup="@(e => OpenTaskDetailsInNewPage(context, e))" />
                             </div>
                         </div>
                     </MudPaper>
@@ -312,6 +313,14 @@
     private void OpenTaskDetails(int taskShortId)
     {
         NavigationManager.NavigateTo($"project/{ProjectId}/tasks/{taskShortId}");
+    }
+
+    private async Task OpenTaskDetailsInNewPage(TaskVM taskVM, MouseEventArgs e)
+    {
+        if(e.Button == 1)
+        {
+            await JSRuntime.InvokeVoidAsync("open", $"project/{ProjectId}/tasks/{taskVM.ShortId}", "_blank");
+        }
     }
 
     private async Task UpdateTasksVM()
