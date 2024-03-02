@@ -204,4 +204,18 @@ public class TasksController : ControllerBase
         var result = await _mediator.Send(new AddHierarchicalTaskRelationshipCommand(projectId, model));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Get a task's relationships.
+    /// </summary>
+    /// <param name="taskId"></param>
+    /// <response code="404">Task not found.</response>
+    [HttpGet("{taskId:guid}/relationships")]
+    [Authorize(Policy.ProjectMember)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetTaskRelationships(Guid taskId)
+    {
+        var result = await _mediator.Send(new GetTaskRelationshipsQuery(taskId));
+        return result.ToHttpResult();
+    }
 }

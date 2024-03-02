@@ -429,4 +429,55 @@ public class TasksTests
             relationship.Should().Be(expectedRelationship);
         }
     }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GetTaskRelationships_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetTaskRelationshipsQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GetTaskRelationships_ShouldReturnTaskRelationships_WhenTaskExists()
+    {
+        var workflow = (await _factory.CreateWorkflows())[0];
+        var relationshipManager = new TaskRelationshipManager(workflow.ProjectId);
+        var initialStatus = workflow.Statuses.First(x => x.Initial);
+        var tasks = new Task[]
+        {
+            Task.Create(1, relationshipManager.ProjectId, "a", "desc", initialStatus.Id),
+            Task.Create(2, relationshipManager.ProjectId, "b", "desc", initialStatus.Id),
+            Task.Create(3, relationshipManager.ProjectId, "c", "desc", initialStatus.Id),
+        };
+        var tasksIds = tasks.Select(x => x.Id);
+        var hierarchicalRelationships = new TaskHierarchicalRelationship[]
+        {
+            new(tasks[0].Id, tasks[1].Id),
+            new(tasks[1].Id, tasks[2].Id)
+        };
+        _ = relationshipManager.AddHierarchicalRelationship(tasks[0].Id, tasks[1].Id, tasksIds);
+        _ = relationshipManager.AddHierarchicalRelationship(tasks[1].Id, tasks[2].Id, tasksIds);
+
+        await _fixture.SeedDb(db =>
+        {
+            db.Add(relationshipManager);
+            db.AddRange(tasks);
+        });
+
+        var result = await _fixture.SendRequest(new GetTaskRelationshipsQuery(tasks[1].Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.ParentId.Should().Be(tasks[0].Id);
+
+            var childrenHierarchy = result.Value.ChildrenHierarchy;
+            childrenHierarchy.Should().NotBeNull();
+            childrenHierarchy!.TaskId.Should().Be(tasks[1].Id);
+            childrenHierarchy.Children.Should().HaveCount(1);
+            childrenHierarchy.Children[0].TaskId.Should().Be(tasks[2].Id);
+            childrenHierarchy.Children[0].Children.Should().BeEmpty();
+        }
+    }
 }
