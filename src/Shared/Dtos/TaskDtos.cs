@@ -17,3 +17,5 @@ public record UpdateTaskPriorityDto(TaskPriority Priority);
 public record UpdateTaskDescriptionDto(string Description);
 public record LogTaskTimeDto(int Minutes, DateOnly Day);
 public record UpdateTaskEstimatedTimeDto(int Minutes);
+
+public record AddHierarchicalTaskRelationshipDto(Guid ParentId, Guid ChildId);

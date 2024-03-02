@@ -1,5 +1,6 @@
 ﻿using Domain.Organizations;
 using Domain.Projects;
+using Domain.Tasks;
 using Domain.Workflows;
 
 namespace Application.Features.Projects;
@@ -21,12 +22,15 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
     private readonly AppDbContext _dbContext;
     private readonly IRepository<Project> _projectRepository;
     private readonly IRepository<Workflow> _workflowRepository;
+    private readonly IRepository<TaskRelationshipManager> _taskRelationshipManagerRepository;
 
-    public CreateProjectHandler(AppDbContext dbContext, IRepository<Project> projectRepository, IRepository<Workflow> workflowRepository)
+    public CreateProjectHandler(AppDbContext dbContext, IRepository<Project> projectRepository, 
+        IRepository<Workflow> workflowRepository, IRepository<TaskRelationshipManager> taskRelationshipManagerRepository)
     {
         _dbContext = dbContext;
         _projectRepository = projectRepository;
         _workflowRepository = workflowRepository;
+        _taskRelationshipManagerRepository = taskRelationshipManagerRepository;
     }
 
     public async Task<Result<Guid>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
@@ -45,11 +49,16 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
             .AsNoTracking()
             .FirstAsync(x => x.AuthenticationId == request.UserAuthId)).Id;
 
+        // TODO: Transaction?
+
         var project = Project.Create(request.Model.Name, request.OrganizationId, userId);
         await _projectRepository.Add(project);
 
         var workflow = Workflow.Create(project.Id);
         await _workflowRepository.Add(workflow);
+
+        var taskRelationshipManager = new TaskRelationshipManager(project.Id);
+        await _taskRelationshipManagerRepository.Add(taskRelationshipManager);
 
         return project.Id;
     }

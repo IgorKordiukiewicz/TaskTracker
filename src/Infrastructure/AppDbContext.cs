@@ -25,6 +25,8 @@ public class AppDbContext : DbContext
     public DbSet<TaskComment> TaskComments { get; set; }
     public DbSet<TaskActivity> TaskActivities { get; set; }
     public DbSet<TaskTimeLog> TaskTimeLogs { get; set; }
+    public DbSet<TaskRelationshipManager> TaskRelationshipManagers { get; set; }
+    public DbSet<TaskHierarchicalRelationship> TaskHierarchicalRelationships { get; set; }
 
     public DbSet<Domain.Workflows.TaskStatus> TaskStatuses { get; set; }
     public DbSet<TaskStatusTransition> TaskStatusTransitions { get; set; }

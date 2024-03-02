@@ -1,5 +1,4 @@
-﻿using Application.Features.Organizations;
-using Application.Features.Projects;
+﻿using Application.Features.Projects;
 using Domain.Common;
 using Domain.Organizations;
 using Domain.Projects;
@@ -7,7 +6,6 @@ using Domain.Users;
 using Domain.Workflows;
 using Shared.Enums;
 using Shared.ViewModels;
-using Web.Client.Pages.Organization;
 
 namespace IntegrationTests.Features;
 
@@ -45,7 +43,7 @@ public class ProjectsTests
     }
 
     [Fact]
-    public async Task Create_ShouldCreateNewProjectAndWorkflow_WhenValidationPassed()
+    public async Task Create_ShouldCreateNewProjectAndWorkflowAndTaskRelationshipManager_WhenValidationPassed()
     {
         var organization = (await _factory.CreateOrganizations())[0];
         var user = await _fixture.FirstAsync<User>();
@@ -57,8 +55,10 @@ public class ProjectsTests
             result.IsSuccess.Should().BeTrue();
             var project = await _fixture.FirstAsync<Project>(x => x.Id == result.Value);
             project.Should().NotBeNull();
-            var workflow = await _fixture.FirstAsync<Domain.Workflows.Workflow>(x => x.ProjectId == result.Value);
+            var workflow = await _fixture.FirstAsync<Workflow>(x => x.ProjectId == result.Value);
             workflow.Should().NotBeNull();
+            var taskRelationshipManager = await _fixture.FirstAsync<Domain.Tasks.TaskRelationshipManager>(x => x.ProjectId == result.Value);
+            taskRelationshipManager.Should().NotBeNull();
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿using Domain.Organizations;
 using Domain.Projects;
+using Domain.Tasks;
 using Domain.Users;
 using Domain.Workflows;
 using Infrastructure.Repositories;
@@ -19,6 +20,7 @@ public static class Infrastructure
         services.AddScoped<IRepository<Project>, ProjectRepository>();
         services.AddScoped<IRepository<Domain.Tasks.Task>, TaskRepository>();
         services.AddScoped<IRepository<Workflow>, WorkflowRepository>();
+        services.AddScoped<IRepository<TaskRelationshipManager>, TaskRelationshipManagerRepository>();
 
         return services;
     }

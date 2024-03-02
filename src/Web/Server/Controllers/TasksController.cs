@@ -189,4 +189,19 @@ public class TasksController : ControllerBase
         var result = await _mediator.Send(new UpdateTaskEstimatedTimeCommand(taskId, model));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Add a new hierarchical task relationship for given tasks.
+    /// </summary>
+    /// <param name="projectId"></param>
+    /// <param name="model"></param>
+    /// <response code="404">Task relationship manager not found.</response>
+    [HttpPost("relationships/hierarchical")]
+    [Authorize(Policy.ProjectModifyTasks)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> AddHierarchicalTaskRelationship([FromHeader] Guid projectId, AddHierarchicalTaskRelationshipDto model)
+    {
+        var result = await _mediator.Send(new AddHierarchicalTaskRelationshipCommand(projectId, model));
+        return result.ToHttpResult();
+    }
 }

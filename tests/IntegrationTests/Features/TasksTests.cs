@@ -405,4 +405,28 @@ public class TasksTests
             (await _fixture.FirstAsync<Task>(x => x.Id == task.Id)).EstimatedTime.Should().Be(newEstimatedTime);
         }
     }
+
+    [Fact]
+    public async System.Threading.Tasks.Task AddHierarchicalTaskRelationship_ShouldFail_WhenRelationshipManagerDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new AddHierarchicalTaskRelationshipCommand(Guid.NewGuid(), new(Guid.NewGuid(), Guid.NewGuid())));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task AddHierarchicalTaskRelationship_ShouldAddNewHierarchicalRelationship_WhenRelationshipManagerExists()
+    {
+        var tasks = await _factory.CreateTasks(2);
+
+        var result = await _fixture.SendRequest(new AddHierarchicalTaskRelationshipCommand(tasks[0].ProjectId, new(tasks[0].Id, tasks[1].Id)));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            var expectedRelationship = new TaskHierarchicalRelationship(tasks[0].Id, tasks[1].Id);
+            var relationship = await _fixture.FirstAsync<TaskHierarchicalRelationship>();
+            relationship.Should().Be(expectedRelationship);
+        }
+    }
 }
