@@ -468,6 +468,7 @@ public class ProjectsTests
         var task = (await _factory.CreateTasks())[0];
         var project = await _fixture.FirstAsync<Project>(x => x.Id == task.ProjectId);
         var workflowId = await _fixture.FirstAsync<Workflow>(x => x.ProjectId == project.Id);
+        var taskRelationshipManager = await _fixture.FirstAsync<Domain.Tasks.TaskRelationshipManager>(x => x.ProjectId == project.Id);
 
         var result = await _fixture.SendRequest(new DeleteProjectCommand(project.Id));
 
@@ -477,6 +478,7 @@ public class ProjectsTests
             (await _fixture.CountAsync<Project>(x => x.Id == project.Id)).Should().Be(0);
             (await _fixture.CountAsync<Domain.Tasks.Task>(x => x.Id == task.Id)).Should().Be(0);
             (await _fixture.CountAsync<Workflow>(x => x.Id == workflowId.Id)).Should().Be(0);
+            (await _fixture.CountAsync<Domain.Tasks.TaskRelationshipManager>(x => x.Id == taskRelationshipManager.Id)).Should().Be(0);
         }
     }
 

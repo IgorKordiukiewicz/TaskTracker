@@ -44,6 +44,10 @@ internal class DeleteProjectHandler : IRequestHandler<DeleteProjectCommand, Resu
                 .Where(x => x.ProjectId == request.ProjectId)
                 .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
 
+            await _dbContext.TaskRelationshipManagers
+                .Where(x => x.ProjectId == request.ProjectId)
+                .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
+
             await transaction.CommitAsync();
         }
         catch(Exception ex)
