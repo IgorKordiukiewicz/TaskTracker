@@ -70,7 +70,6 @@
                     <col style="width: 200px;" />
                     <col style="width: 200px;" />
                     <col style="width: 200px;" />
-                    <col style="width: 200px;" />
                 </ColGroup>
                 <HeaderContent>
                     <MudTh>
@@ -78,9 +77,6 @@
                     </MudTh>
                     <MudTh>
                         <MudTableSortLabel SortBy="new Func<TaskVM, object>(x => x.Title)">Title</MudTableSortLabel>
-                    </MudTh>
-                    <MudTh>
-                        Time
                     </MudTh>
                     <MudTh>
                         <MudTableSortLabel SortBy="new Func<TaskVM, object>(x => x.Status.Name)">Status</MudTableSortLabel>
@@ -95,25 +91,6 @@
                 <RowTemplate>
                     <MudTd DataLabel="ID" @onmouseup="@(e => OpenTaskDetailsInNewPage(context, e))">@context.ShortId</MudTd>
                     <MudTd DataLabel="Title" @onmouseup="@(e => OpenTaskDetailsInNewPage(context, e))">@context.Title</MudTd>
-                    <MudTd DataLabel="Time" @onmouseup="@(e => OpenTaskDetailsInNewPage(context, e))">
-                        @if(context.TotalTimeLogged > 0)
-                        {
-                            var timeLoggedText = TimeParser.FromMinutes(context.TotalTimeLogged);
-                            if(context.EstimatedTime is not null)
-                            {
-                                var estimatedTimeText = TimeParser.FromMinutes(context.EstimatedTime.Value);
-                                <text>@($"{timeLoggedText} / {estimatedTimeText}")</text>
-                            }
-                            else
-                            {
-                                <text>@timeLoggedText</text>
-                            }
-                        }
-                        else
-                        {
-                            <text>-</text>
-                        }
-                    </MudTd>
                     <MudTd DataLabel="Status" @onmouseup="@(e => OpenTaskDetailsInNewPage(context, e))">@context.Status.Name</MudTd>
                     <MudTd DataLabel="Priority" @onmouseup="@(e => OpenTaskDetailsInNewPage(context, e))">
                         <div class="d-flex align-center gap-2">
