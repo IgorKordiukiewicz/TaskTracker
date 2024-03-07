@@ -1,4 +1,5 @@
 ﻿using Application.Features.Tasks;
+using OneOf;
 
 namespace Web.Server.Controllers;
 
@@ -42,16 +43,35 @@ public class TasksController : ControllerBase
     /// <summary>
     /// Get a list of tasks for a project.
     /// </summary>
+    /// <remarks>
+    /// Use one of 
+    /// </remarks>
     /// <param name="projectId"></param>
-    /// <param name="shortIds">List of tasks IDs to return. Returns all tasks if empty.</param>
+    /// <param name="ids">List of tasks IDs to return. Returns all tasks if empty.</param>
     /// <response code="404">Project's workflow not found.</response> 
     [HttpGet]
     [Authorize(Policy.ProjectMember)]
     [ProducesResponseType(typeof(TasksVM), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetTasks([FromHeader] Guid projectId, [FromQuery] IEnumerable<int> shortIds)
+    public async Task<IActionResult> GetTasks([FromHeader] Guid projectId, [FromQuery] IEnumerable<Guid> ids)
     {
-        var result = await _mediator.Send(new GetTasksQuery(projectId, shortIds));
+        var result = await _mediator.Send(new GetTasksQuery(projectId, OneOf<int, IEnumerable<Guid>>.FromT1(ids)));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
+    /// Get a single task for a project.
+    /// </summary>
+    /// <param name="projectId"></param>
+    /// <param name="shortId"></param>
+    /// <response code="404">Project's workflow not found.</response> 
+    [HttpGet("{shortId:int}")]
+    [Authorize(Policy.ProjectMember)]
+    [ProducesResponseType(typeof(TasksVM), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetTask([FromHeader] Guid projectId, [FromQuery] int shortId)
+    {
+        var result = await _mediator.Send(new GetTasksQuery(projectId, shortId));
         return result.ToHttpResult();
     }
 

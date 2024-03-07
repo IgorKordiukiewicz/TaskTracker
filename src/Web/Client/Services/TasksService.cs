@@ -15,9 +15,12 @@ public class TasksService : ApiService
         => await Get<TasksVM>("tasks", ProjectIdHeader(projectId));
 
     public async Task<TaskVM?> Get(Guid projectId, int shortId)
+        => (await Get<TasksVM>($"tasks/{shortId}", ProjectIdHeader(projectId)))?.Tasks.Single();
+
+    public async Task<TaskVM?> Get(Guid projectId, IEnumerable<Guid> ids)
     {
         var url = "tasks"
-            .SetQueryParam("shortIds", new[] { shortId })
+            .SetQueryParam("ids", ids)
             .ToString();
         return (await Get<TasksVM>(url, ProjectIdHeader(projectId)))?.Tasks.Single();
     }
@@ -51,6 +54,9 @@ public class TasksService : ApiService
 
     public async Task<bool> UpdateEstimatedTime(Guid projectId, Guid taskId, UpdateTaskEstimatedTimeDto model)
         => await Post($"tasks/{taskId}/update-estimated-time", model, ProjectIdHeader(projectId));
+
+    public async Task<TaskRelationshipsVM?> GetRelationships(Guid projectId, Guid taskId)
+        => await Get<TaskRelationshipsVM>($"tasks/{taskId}/relationships", ProjectIdHeader(projectId));
 
     private static Headers ProjectIdHeader(Guid projectId)
         => Headers.From(("ProjectId", projectId.ToString()));

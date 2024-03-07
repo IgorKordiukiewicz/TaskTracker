@@ -78,15 +78,17 @@ public class TasksTests
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task GetAll_ShouldFail_WhenWorkflowDoesNotExist()
+    public async System.Threading.Tasks.Task Get_ShouldFail_WhenWorkflowDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new GetTasksQuery(Guid.NewGuid(), Array.Empty<int>()));
+        var result = await _fixture.SendRequest(new GetTasksQuery(Guid.NewGuid(), 1));
 
         result.IsFailed.Should().BeTrue();
     }
 
-    [Fact]
-    public async System.Threading.Tasks.Task GetAll_ShouldReturnProjectTasksAndAllPossibleStatuses()
+    [Theory]
+    [InlineData(false, 1)]
+    [InlineData(true, 2)]
+    public async System.Threading.Tasks.Task Get_ShouldReturnProjectTasksAndAllPossibleStatuses(bool useList, int expectedCount)
     {
         var workflows = await _factory.CreateWorkflows(2);
 
@@ -100,12 +102,12 @@ public class TasksTests
             db.AddRange(task1, task2, task3);
         });
 
-        var result = await _fixture.SendRequest(new GetTasksQuery(workflows[0].ProjectId, Array.Empty<int>()));
+        var result = await _fixture.SendRequest(new GetTasksQuery(workflows[0].ProjectId, useList ? new[] { task1.Id, task2.Id } : task1.ShortId));
 
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            result.Value.Tasks.Should().HaveCount(2);
+            result.Value.Tasks.Should().HaveCount(expectedCount);
             result.Value.AllTaskStatuses.Should().HaveCount(workflows[0].Statuses.Count);
         }
     }

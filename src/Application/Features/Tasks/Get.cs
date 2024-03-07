@@ -1,14 +1,16 @@
 ﻿using Domain.Workflows;
+using OneOf;
 
 namespace Application.Features.Tasks;
 
-public record GetTasksQuery(Guid ProjectId, IEnumerable<int> ShortIds) : IRequest<Result<TasksVM>>;
+public record GetTasksQuery(Guid ProjectId, OneOf<int, IEnumerable<Guid>> Ids) : IRequest<Result<TasksVM>>;
 
 internal class GetTasksQueryValidator : AbstractValidator<GetTasksQuery>
 {
     public GetTasksQueryValidator()
     {
         RuleFor(x => x.ProjectId).NotEmpty();
+        RuleFor(x => x.Ids).NotNull();
     }
 }
 
@@ -37,9 +39,14 @@ internal class GetTasksHandler : IRequestHandler<GetTasksQuery, Result<TasksVM>>
 
         var statusesById = workflow.Statuses.ToDictionary(x => x.Id, x => x);
 
-        var tasks = await _context.Tasks
-            .Include(x => x.TimeLogs)
-            .Where(x => x.ProjectId == request.ProjectId && (!request.ShortIds.Any() || request.ShortIds.Contains(x.ShortId)))
+        IQueryable<Domain.Tasks.Task> query = _context.Tasks
+            .Include(x => x.TimeLogs);
+
+        query = request.Ids.Match(
+            shortId => query.Where(x => x.ShortId == shortId && x.ProjectId == workflow.ProjectId),
+            ids => query.Where(x => !ids.Any() || ids.Contains(x.Id)));
+
+        var tasks = await query
             .Join(_context.TaskStatuses, 
             x => x.StatusId,
             x => x.Id, 
