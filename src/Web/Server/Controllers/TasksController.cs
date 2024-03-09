@@ -69,7 +69,7 @@ public class TasksController : ControllerBase
     [Authorize(Policy.ProjectMember)]
     [ProducesResponseType(typeof(TasksVM), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetTask([FromHeader] Guid projectId, [FromQuery] int shortId)
+    public async Task<IActionResult> GetTask([FromHeader] Guid projectId, int shortId)
     {
         var result = await _mediator.Send(new GetTasksQuery(projectId, shortId));
         return result.ToHttpResult();
