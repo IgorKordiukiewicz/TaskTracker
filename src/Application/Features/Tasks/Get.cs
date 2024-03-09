@@ -40,10 +40,11 @@ internal class GetTasksHandler : IRequestHandler<GetTasksQuery, Result<TasksVM>>
         var statusesById = workflow.Statuses.ToDictionary(x => x.Id, x => x);
 
         IQueryable<Domain.Tasks.Task> query = _context.Tasks
-            .Include(x => x.TimeLogs);
+            .Include(x => x.TimeLogs)
+            .Where(x => x.ProjectId == request.ProjectId);
 
         query = request.Ids.Match(
-            shortId => query.Where(x => x.ShortId == shortId && x.ProjectId == workflow.ProjectId),
+            shortId => query.Where(x => x.ShortId == shortId),
             ids => query.Where(x => !ids.Any() || ids.Contains(x.Id)));
 
         var tasks = await query
