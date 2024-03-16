@@ -26,7 +26,7 @@ public class ProjectsTests
     [Fact]
     public async Task Create_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new CreateProjectCommand(Guid.NewGuid(), "123", new("project")));
+        var result = await _fixture.SendRequest(new CreateProjectCommand("123", new(Guid.NewGuid(), "project")));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -37,7 +37,7 @@ public class ProjectsTests
     {
         var project = (await _factory.CreateProjects())[0];
 
-        var result = await _fixture.SendRequest(new CreateProjectCommand(project.OrganizationId, "123", new(project.Name)));
+        var result = await _fixture.SendRequest(new CreateProjectCommand("123", new(project.OrganizationId, project.Name)));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -48,7 +48,7 @@ public class ProjectsTests
         var organization = (await _factory.CreateOrganizations())[0];
         var user = await _fixture.FirstAsync<User>();
 
-        var result = await _fixture.SendRequest(new CreateProjectCommand(organization.Id, user.AuthenticationId, new("project")));
+        var result = await _fixture.SendRequest(new CreateProjectCommand(user.AuthenticationId, new(organization.Id, "project")));
 
         using(new AssertionScope())
         {

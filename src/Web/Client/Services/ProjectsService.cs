@@ -15,8 +15,8 @@ public class ProjectsService : ApiService
     public async Task<ProjectsVM?> GetForOrganizationUser(Guid organizationId)
         => await Get<ProjectsVM>($"projects/organization/{organizationId}/user");
 
-    public async Task<bool> Create(Guid organizationId, CreateProjectDto model)
-        => await Post($"projects/organization/{organizationId}", model);
+    public async Task<bool> Create(CreateProjectDto model)
+        => await Post($"projects", model);
 
     public async Task<RolesVM<ProjectPermissions>?> GetRoles(Guid projectId)
         => await Get<RolesVM<ProjectPermissions>>($"projects/{projectId}/roles");

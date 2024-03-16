@@ -27,15 +27,14 @@ public class ProjectsController : ControllerBase
     /// <remarks>
     /// Returns ID of the created project.
     /// </remarks>
-    /// <param name="organizationId"></param>
     /// <param name="model"></param>
     /// <response code="404">Organization not found.</response>
-    [HttpPost("organization/{organizationId:guid}")]
+    [HttpPost]
     [Authorize(Policy.OrganizationCreateProjects)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> CreateProject(Guid organizationId, [FromBody] CreateProjectDto model)
+    public async Task<IActionResult> CreateProject([FromBody] CreateProjectDto model)
     {
-        var result = await _mediator.Send(new CreateProjectCommand(organizationId, User.GetUserAuthenticationId(), model));
+        var result = await _mediator.Send(new CreateProjectCommand(User.GetUserAuthenticationId(), model));
         return result.ToHttpResult();
     }
 

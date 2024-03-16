@@ -5,14 +5,14 @@ using Domain.Workflows;
 
 namespace Application.Features.Projects;
 
-public record CreateProjectCommand(Guid OrganizationId, string UserAuthId, CreateProjectDto Model) : IRequest<Result<Guid>>;
+public record CreateProjectCommand(string UserAuthId, CreateProjectDto Model) : IRequest<Result<Guid>>;
 
 internal class CreateProjectCommandValidator : AbstractValidator<CreateProjectCommand>
 {
     public CreateProjectCommandValidator()
     {
-        RuleFor(x => x.OrganizationId).NotEmpty();
         RuleFor(x => x.UserAuthId).NotEmpty();
+        RuleFor(x => x.Model.OrganizationId).NotEmpty();
         RuleFor(x => x.Model.Name).NotEmpty().MaximumLength(100);
     }
 }
@@ -35,12 +35,12 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
 
     public async Task<Result<Guid>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
+        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.Model.OrganizationId))
         {
-            return Result.Fail<Guid>(new NotFoundError<Organization>(request.OrganizationId));
+            return Result.Fail<Guid>(new NotFoundError<Organization>(request.Model.OrganizationId));
         }
 
-        if(await _projectRepository.Exists(x => x.OrganizationId == request.OrganizationId && x.Name == request.Model.Name))
+        if(await _projectRepository.Exists(x => x.OrganizationId == request.Model.OrganizationId && x.Name == request.Model.Name))
         {
             return Result.Fail<Guid>(new ApplicationError("Project with the same name already exists in this organization."));
         }
@@ -51,7 +51,7 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
 
         // TODO: Transaction?
 
-        var project = Project.Create(request.Model.Name, request.OrganizationId, userId);
+        var project = Project.Create(request.Model.Name, request.Model.OrganizationId, userId);
         await _projectRepository.Add(project);
 
         var workflow = Workflow.Create(project.Id);

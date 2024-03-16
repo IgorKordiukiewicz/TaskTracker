@@ -93,8 +93,8 @@
             return;
         }
 
-        var model = new CreateProjectDto(_createProjectForm.Name);
-        var result = await ProjectsService.Create(OrganizationId, model);
+        var model = new CreateProjectDto(OrganizationId, _createProjectForm.Name);
+        var result = await ProjectsService.Create(model);
         if(result)
         {
             await UserDataService.UpdateUserData();
