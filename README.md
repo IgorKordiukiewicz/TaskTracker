@@ -7,6 +7,7 @@ Task/issue tracker made with ASP.NET Core & Blazor WASM.
 * Auth0
 * xUnit
 * MediatR
+* Hangfire
 * Domain Driven Design (DDD)
 * Vertical Slice Architecture
 * CQRS
