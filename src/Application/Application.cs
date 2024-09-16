@@ -13,7 +13,7 @@ public static class Application
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
         ValidatorOptions.Global.LanguageManager.Enabled = false;
-        services.AddValidatorsFromAssembly(assembly);
+        services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
 
         // Order matters; error logging has to be registered before validation,
         // otherwise error logging will not get called if validation returns failure

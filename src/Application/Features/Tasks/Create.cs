@@ -5,7 +5,7 @@ namespace Application.Features.Tasks;
 
 public record CreateTaskCommand(Guid ProjectId, CreateTaskDto Model) : IRequest<Result<Guid>>;
 
-public class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
+internal class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
 {
     public CreateTaskCommandValidator()
     {
