@@ -43,11 +43,11 @@ public class ProjectsController : ControllerBase
     /// </summary>
     /// <param name="organizationId"></param>
     /// <response code="404">Organization not found.</response>
-    [HttpGet("organization/{organizationId:guid}/user")]
+    [HttpGet("")]
     [Authorize(Policy.OrganizationMember)]
     [ProducesResponseType(typeof(ProjectsVM), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetProjects(Guid organizationId)
+    public async Task<IActionResult> GetProjects([FromQuery] Guid organizationId)
     {
         var result = await _mediator.Send(new GetProjectsForOrganizationQuery(organizationId, User.GetUserId()));
         return result.ToHttpResult();
@@ -103,12 +103,12 @@ public class ProjectsController : ControllerBase
     /// <param name="projectId"></param>
     /// <param name="memberId"></param>
     /// <response code="404">Project not found.</response>
-    [HttpPost("{projectId:guid}/members/{memberId:guid}/remove")]
+    [HttpPost("{projectId:guid}/members/remove")]
     [Authorize(Policy.ProjectRemoveMembers)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> RemoveProjectMember(Guid projectId, Guid memberId)
+    public async Task<IActionResult> RemoveProjectMember(Guid projectId, [FromBody] RemoveProjectMemberDto model)
     {
-        var result = await _mediator.Send(new RemoveProjectMemberCommand(projectId, memberId));
+        var result = await _mediator.Send(new RemoveProjectMemberCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -119,12 +119,12 @@ public class ProjectsController : ControllerBase
     /// <param name="memberId"></param>
     /// <param name="model"></param>
     /// <response code="404">Project not found.</response>
-    [HttpPost("{projectId:guid}/members/{memberId:guid}/update-role")]
+    [HttpPost("{projectId:guid}/members/role")]
     [Authorize(Policy.ProjectManageRoles)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> UpdateMemberRoleMember(Guid projectId, Guid memberId, [FromBody] UpdateMemberRoleDto model)
+    public async Task<IActionResult> UpdateMemberRoleMember(Guid projectId, [FromBody] UpdateMemberRoleDto model)
     {
-        var result = await _mediator.Send(new UpdateProjectMemberRoleCommand(projectId, memberId, model));
+        var result = await _mediator.Send(new UpdateProjectMemberRoleCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -177,14 +177,14 @@ public class ProjectsController : ControllerBase
     /// Delete a project role.
     /// </summary>
     /// <param name="projectId"></param>
-    /// <param name="roleId"></param>
+    /// <param name="model"></param>
     /// <response code="404">Project not found.</response>
-    [HttpPost("{projectId:guid}/roles/{roleId:guid}/delete")]
+    [HttpPost("{projectId:guid}/roles/delete")]
     [Authorize(Policy.ProjectManageRoles)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> DeleteProjectRole(Guid projectId, Guid roleId)
+    public async Task<IActionResult> DeleteProjectRole(Guid projectId, [FromBody] DeleteRoleDto model)
     {
-        var result = await _mediator.Send(new DeleteProjectRoleCommand(projectId, roleId));
+        var result = await _mediator.Send(new DeleteProjectRoleCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -192,15 +192,14 @@ public class ProjectsController : ControllerBase
     /// Update name of a project role.
     /// </summary>
     /// <param name="projectId"></param>
-    /// <param name="roleId"></param>
     /// <param name="model"></param>
     /// <response code="404">Project not found.</response>
-    [HttpPost("{projectId:guid}/roles/{roleId:guid}/update-name")]
+    [HttpPost("{projectId:guid}/roles/name")]
     [Authorize(Policy.ProjectManageRoles)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> UpdateRoleName(Guid projectId, Guid roleId, [FromBody] UpdateRoleNameDto model)
+    public async Task<IActionResult> UpdateRoleName(Guid projectId, [FromBody] UpdateRoleNameDto model)
     {
-        var result = await _mediator.Send(new UpdateProjectRoleNameCommand(projectId, roleId, model));
+        var result = await _mediator.Send(new UpdateProjectRoleNameCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -208,15 +207,14 @@ public class ProjectsController : ControllerBase
     /// Update permissions of a project role.
     /// </summary>
     /// <param name="projectId"></param>
-    /// <param name="roleId"></param>
     /// <param name="model"></param>
     /// <response code="404">Project not found.</response>
-    [HttpPost("{projectId:guid}/roles/{roleId:guid}/update-permissions")]
+    [HttpPost("{projectId:guid}/roles/permissions")]
     [Authorize(Policy.ProjectManageRoles)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> UpdateRolePermissions(Guid projectId, Guid roleId, [FromBody] UpdateRolePermissionsDto<ProjectPermissions> model)
+    public async Task<IActionResult> UpdateRolePermissions(Guid projectId, [FromBody] UpdateRolePermissionsDto<ProjectPermissions> model)
     {
-        var result = await _mediator.Send(new UpdateProjectRolePermissionsCommand(projectId, roleId, model));
+        var result = await _mediator.Send(new UpdateProjectRolePermissionsCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -241,7 +239,7 @@ public class ProjectsController : ControllerBase
     /// <param name="projectId"></param>
     /// <param name="model"></param>
     /// <response code="404">Project not found.</response>
-    [HttpPost("{projectId:guid}/update-name")]
+    [HttpPost("{projectId:guid}/name")]
     [Authorize(Policy.ProjectManageProject)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateProjectName(Guid projectId, [FromBody] UpdateProjectNameDto model)

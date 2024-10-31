@@ -2,14 +2,14 @@
 
 namespace Application.Features.Organizations;
 
-public record UpdateOrganizationRoleNameCommand(Guid OrganizationId, Guid RoleId, UpdateRoleNameDto Model) : IRequest<Result>;
+public record UpdateOrganizationRoleNameCommand(Guid OrganizationId, UpdateRoleNameDto Model) : IRequest<Result>;
 
 internal class UpdateOrganizationRoleNameCommandValidator : AbstractValidator<UpdateOrganizationRoleNameCommand>
 {
     public UpdateOrganizationRoleNameCommandValidator()
     {
         RuleFor(x => x.OrganizationId).NotEmpty();
-        RuleFor(x => x.RoleId).NotEmpty();
+        RuleFor(x => x.Model.RoleId).NotEmpty();
         RuleFor(x => x.Model.Name).NotEmpty();
     }
 }
@@ -31,7 +31,7 @@ internal class UpdateOrganizationRoleNameHandler : IRequestHandler<UpdateOrganiz
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
         }
 
-        var result = organization.RolesManager.UpdateRoleName(request.RoleId, request.Model.Name);
+        var result = organization.RolesManager.UpdateRoleName(request.Model.RoleId, request.Model.Name);
         if (result.IsFailed)
         {
             return Result.Fail(result.Errors);

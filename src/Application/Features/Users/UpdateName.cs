@@ -2,13 +2,12 @@
 
 namespace Application.Features.Users;
 
-public record UpdateUserNameCommand(Guid UserId, UpdateUserNameDto Model) : IRequest<Result>;
+public record UpdateUserNameCommand(Guid Id, UpdateUserNameDto Model) : IRequest<Result>;
 
 internal class UpdateUserNameCommandValidator : AbstractValidator<UpdateUserNameCommand>
 {
     public UpdateUserNameCommandValidator()
     {
-        RuleFor(x => x.UserId).NotEmpty();
         RuleFor(x => x.Model.FirstName).NotEmpty();
         RuleFor(x => x.Model.LastName).NotEmpty();
     }
@@ -25,10 +24,10 @@ internal class UpdateUserNameHandler : IRequestHandler<UpdateUserNameCommand, Re
 
     public async Task<Result> Handle(UpdateUserNameCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetById(request.UserId);
+        var user = await _userRepository.GetById(request.Id);
         if(user is null)
         {
-            return Result.Fail(new NotFoundError<User>(request.UserId));
+            return Result.Fail(new NotFoundError<User>(request.Id));
         }
 
         user.UpdateName(request.Model.FirstName, request.Model.LastName);

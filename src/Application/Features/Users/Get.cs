@@ -4,14 +4,6 @@ namespace Application.Features.Users;
 
 public record GetUserQuery(Guid Id) : IRequest<Result<UserVM>>;
 
-internal class GetUserQueryValidator : AbstractValidator<GetUserQuery>
-{
-    public GetUserQueryValidator()
-    {
-        RuleFor(x => x.Id).NotEmpty();
-    }
-}
-
 internal class GetUserHandler : IRequestHandler<GetUserQuery, Result<UserVM>>
 {
     private readonly AppDbContext _dbContext;
@@ -26,12 +18,7 @@ internal class GetUserHandler : IRequestHandler<GetUserQuery, Result<UserVM>>
         var user = await _dbContext.Users
             .AsNoTracking()
             .Where(x => x.Id == request.Id)
-            .SingleOrDefaultAsync();
-
-        if (user is null)
-        {
-            return Result.Fail<UserVM>(new NotFoundError<User>(request.Id));
-        }
+            .SingleAsync();
 
         var permissionsByOrganization = await _dbContext.Organizations
             .Include(x => x.Members)

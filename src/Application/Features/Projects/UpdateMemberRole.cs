@@ -2,14 +2,14 @@
 
 namespace Application.Features.Projects;
 
-public record UpdateProjectMemberRoleCommand(Guid ProjectId, Guid MemberId, UpdateMemberRoleDto Model) : IRequest<Result>;
+public record UpdateProjectMemberRoleCommand(Guid ProjectId, UpdateMemberRoleDto Model) : IRequest<Result>;
 
 internal class UpdateProjectMemberRoleCommandValidator : AbstractValidator<UpdateProjectMemberRoleCommand>
 {
     public UpdateProjectMemberRoleCommandValidator()
     {
         RuleFor(x => x.ProjectId).NotEmpty();
-        RuleFor(x => x.MemberId).NotEmpty();
+        RuleFor(x => x.Model.MemberId).NotEmpty();
         RuleFor(x => x.Model.RoleId).NotEmpty();
     }
 }
@@ -31,7 +31,7 @@ internal class UpdateProjectMemberRoleHandler : IRequestHandler<UpdateProjectMem
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
-        var result = project.RolesManager.UpdateMemberRole(request.MemberId, request.Model.RoleId, project.Members);
+        var result = project.RolesManager.UpdateMemberRole(request.Model.MemberId, request.Model.RoleId, project.Members);
         if(result.IsFailed)
         {
             return Result.Fail(result.Errors);

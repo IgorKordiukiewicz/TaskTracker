@@ -9,7 +9,6 @@ internal class GetProjectsForOrganizationQueryValidator : AbstractValidator<GetP
     public GetProjectsForOrganizationQueryValidator()
     {
         RuleFor(x => x.OrganizationId).NotEmpty();
-        RuleFor(x => x.UserId).NotEmpty();
     }
 }
 

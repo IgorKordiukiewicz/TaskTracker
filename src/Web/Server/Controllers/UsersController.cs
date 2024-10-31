@@ -25,7 +25,7 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Check whether user has been already registered in the system.
+    /// Check whether the user has been already registered in the system.
     /// </summary>
     [HttpGet("me/registered")]
     [ProducesResponseType(typeof(bool), 200)]
@@ -36,21 +36,20 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Get user's data along with their permissions.
+    /// Get the user's data along with their permissions.
     /// </summary>
-    /// <param name="userId"></param>
     /// <response code="404">User not found.</response> 
-    [HttpGet("{userId}/data")] // without /data the endpoint is not called
+    [HttpGet("me")] // without /data the endpoint is not called
     [ProducesResponseType(typeof(UserVM), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetUser(Guid userId)
+    public async Task<IActionResult> GetUser()
     {
-        var result = await _mediator.Send(new GetUserQuery(userId));
+        var result = await _mediator.Send(new GetUserQuery(User.GetUserId()));
         return result.ToHttpResult();
     }
 
     /// <summary>
-    /// Register user in the system.
+    /// Register the user in the system.
     /// </summary>
     [HttpPost("me/register")]
     [ProducesResponseType(201)]
@@ -98,12 +97,12 @@ public class UsersController : ControllerBase
     /// <param name="userId"></param>
     /// <param name="model"></param>
     /// <response code="404">User not found.</response> 
-    [HttpPost("{userId:guid}/update-name")]
+    [HttpPost("me/update-name")]
     [Authorize(Policy.UserSelf)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> UpdateUserName(Guid userId, [FromBody] UpdateUserNameDto model)
+    public async Task<IActionResult> UpdateUserName([FromBody] UpdateUserNameDto model)
     {
-        var result = await _mediator.Send(new UpdateUserNameCommand(userId, model));
+        var result = await _mediator.Send(new UpdateUserNameCommand(User.GetUserId(), model));
         return result.ToHttpResult();
     }
 

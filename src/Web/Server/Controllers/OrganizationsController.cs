@@ -45,7 +45,7 @@ public class OrganizationsController : ControllerBase
     /// <summary>
     /// Get a list of organizations the user belongs to.
     /// </summary>
-    [HttpGet("user")]
+    [HttpGet]
     [ProducesResponseType(typeof(OrganizationsForUserVM), 200)]
     public async Task<IActionResult> GetOrganizations()
     {
@@ -83,7 +83,7 @@ public class OrganizationsController : ControllerBase
     }
 
     /// <summary>
-    /// Get all invitations of an  organization.
+    /// Get all invitations of an organization.
     /// </summary>
     /// <param name="organizationId"></param>
     /// <param name="pagination"></param>
@@ -99,10 +99,10 @@ public class OrganizationsController : ControllerBase
     }
 
     /// <summary>
-    /// Get pending invitations for user.
+    /// Get pending invitations for the user.
     /// </summary>
     /// <response code="404">User not found.</response> 
-    [HttpGet("invitations/user")]
+    [HttpGet("invitations")]
     [ProducesResponseType(typeof(UserOrganizationInvitationsVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetOrganizationInvitationsForUser()
@@ -170,14 +170,14 @@ public class OrganizationsController : ControllerBase
     /// Remove member from an organization.
     /// </summary>
     /// <param name="organizationId"></param>
-    /// <param name="memberId"></param>
+    /// <param name="model"></param>
     /// <response code="404">Organization not found.</response> 
-    [HttpPost("{organizationId:guid}/members/{memberId:guid}/remove")]
+    [HttpPost("{organizationId:guid}/members/remove")]
     [Authorize(Policy.OrganizationRemoveMembers)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> RemoveOrganizationMember(Guid organizationId, Guid memberId)
+    public async Task<IActionResult> RemoveOrganizationMember(Guid organizationId, [FromBody] RemoveOrganizationMemberDto model)
     {
-        var result = await _mediator.Send(new RemoveOrganizationMemberCommand(organizationId, memberId));
+        var result = await _mediator.Send(new RemoveOrganizationMemberCommand(organizationId, model));
         return result.ToHttpResult();
     }
 
@@ -188,12 +188,12 @@ public class OrganizationsController : ControllerBase
     /// <param name="memberId"></param>
     /// <param name="model"></param>
     /// <response code="404">Organization not found.</response> 
-    [HttpPost("{organizationId:guid}/members/{memberId:guid}/update-role")]
+    [HttpPost("{organizationId:guid}/members/role")]
     [Authorize(Policy.OrganizationManageRoles)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> UpdateMemberRole(Guid organizationId, Guid memberId, [FromBody] UpdateMemberRoleDto model)
+    public async Task<IActionResult> UpdateMemberRole(Guid organizationId, [FromBody] UpdateMemberRoleDto model)
     {
-        var result = await _mediator.Send(new UpdateOrganizationMemberRoleCommand(organizationId, memberId, model));
+        var result = await _mediator.Send(new UpdateOrganizationMemberRoleCommand(organizationId, model));
         return result.ToHttpResult();
     }
 
@@ -231,14 +231,14 @@ public class OrganizationsController : ControllerBase
     /// Delete an organization role.
     /// </summary>
     /// <param name="organizationId"></param>
-    /// <param name="roleId"></param>
+    /// <param name="model"></param>
     /// <response code="404">Organization not found.</response> 
-    [HttpPost("{organizationId:guid}/roles/{roleId:guid}/delete")]
+    [HttpPost("{organizationId:guid}/roles/delete")]
     [Authorize(Policy.OrganizationManageRoles)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> DeleteOrganizationRole(Guid organizationId, Guid roleId)
+    public async Task<IActionResult> DeleteOrganizationRole(Guid organizationId, DeleteRoleDto model)
     {
-        var result = await _mediator.Send(new DeleteOrganizationRoleCommand(organizationId, roleId));
+        var result = await _mediator.Send(new DeleteOrganizationRoleCommand(organizationId, model));
         return result.ToHttpResult();
     }
 
@@ -246,15 +246,14 @@ public class OrganizationsController : ControllerBase
     /// Update name of an organization role.
     /// </summary>
     /// <param name="organizationId"></param>
-    /// <param name="roleId"></param>
     /// <param name="model"></param>
     /// <response code="404">Organization not found.</response> 
-    [HttpPost("{organizationId:guid}/roles/{roleId:guid}/update-name")]
+    [HttpPost("{organizationId:guid}/roles/name")]
     [Authorize(Policy.OrganizationManageRoles)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> UpdateRoleName(Guid organizationId, Guid roleId, [FromBody] UpdateRoleNameDto model)
+    public async Task<IActionResult> UpdateRoleName(Guid organizationId, [FromBody] UpdateRoleNameDto model)
     {
-        var result = await _mediator.Send(new UpdateOrganizationRoleNameCommand(organizationId, roleId, model));
+        var result = await _mediator.Send(new UpdateOrganizationRoleNameCommand(organizationId, model));
         return result.ToHttpResult();
     }
 
@@ -262,15 +261,14 @@ public class OrganizationsController : ControllerBase
     /// Update permissions of an organization role.
     /// </summary>
     /// <param name="organizationId"></param>
-    /// <param name="roleId"></param>
     /// <param name="model"></param>
     /// <response code="404">Organization not found.</response> 
-    [HttpPost("{organizationId:guid}/roles/{roleId:guid}/update-permissions")]
+    [HttpPost("{organizationId:guid}/roles/permissions")]
     [Authorize(Policy.OrganizationManageRoles)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> UpdateRolePermissions(Guid organizationId, Guid roleId, [FromBody] UpdateRolePermissionsDto<OrganizationPermissions> model)
+    public async Task<IActionResult> UpdateRolePermissions(Guid organizationId, [FromBody] UpdateRolePermissionsDto<OrganizationPermissions> model)
     {
-        var result = await _mediator.Send(new UpdateOrganizationRolePermissionsCommand(organizationId, roleId, model));
+        var result = await _mediator.Send(new UpdateOrganizationRolePermissionsCommand(organizationId, model));
         return result.ToHttpResult();
     }
 }

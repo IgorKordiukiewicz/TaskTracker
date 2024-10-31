@@ -81,7 +81,7 @@ public class TasksController : ControllerBase
     /// <param name="taskId"></param>
     /// <param name="model"></param>
     /// <response code="404">Task or task status not found.</response> 
-    [HttpPost("{taskId:guid}/update-status")]
+    [HttpPost("{taskId:guid}/status")]
     [Authorize(Policy.ProjectTransitionTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskStatus(Guid taskId, UpdateTaskStatusDto model)
@@ -96,7 +96,7 @@ public class TasksController : ControllerBase
     /// <param name="taskId"></param>
     /// <param name="model"></param>
     /// <response code="404">Task not found.</response> 
-    [HttpPost("{taskId:guid}/update-priority")]
+    [HttpPost("{taskId:guid}/priority")]
     [Authorize(Policy.ProjectModifyTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskPriority(Guid taskId, UpdateTaskPriorityDto model)
@@ -111,7 +111,7 @@ public class TasksController : ControllerBase
     /// <param name="taskId"></param>
     /// <param name="model"></param>
     /// <response code="404">Task or project member not found.</response> 
-    [HttpPost("{taskId:guid}/update-assignee")]
+    [HttpPost("{taskId:guid}/assignee")]
     [Authorize(Policy.ProjectAssignTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskAssignee(Guid taskId, UpdateTaskAssigneeDto model)
@@ -126,7 +126,7 @@ public class TasksController : ControllerBase
     /// <param name="taskId"></param>
     /// <param name="model"></param>
     /// <response code="404">Task not found.</response> 
-    [HttpPost("{taskId:guid}/update-description")]
+    [HttpPost("{taskId:guid}/description")]
     [Authorize(Policy.ProjectAssignTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskDescription(Guid taskId, UpdateTaskDescriptionDto model)
@@ -186,7 +186,7 @@ public class TasksController : ControllerBase
     /// <param name="taskId"></param>
     /// <param name="model"></param>
     /// <response code="404">Task not found.</response>
-    [HttpPost("{taskId:guid}/log_time")]
+    [HttpPost("{taskId:guid}/logged_time")]
     [Authorize(Policy.ProjectLogTimeOnTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> LogTaskTime(Guid taskId, LogTaskTimeDto model)
@@ -201,7 +201,7 @@ public class TasksController : ControllerBase
     /// <param name="taskId"></param>
     /// <param name="model"></param>
     /// <response code="404">Task not found.</response>
-    [HttpPost("{taskId:guid}/update-estimated-time")]
+    [HttpPost("{taskId:guid}/estimated-time")]
     [Authorize(Policy.ProjectEstimateTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskEstimatedTime(Guid taskId, UpdateTaskEstimatedTimeDto model)
