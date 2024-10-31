@@ -146,7 +146,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddTaskComment(Guid taskId, AddTaskCommentDto model)
     {
-        var result = await _mediator.Send(new AddTaskCommentCommand(taskId, User.GetUserAuthenticationId(), model));
+        var result = await _mediator.Send(new AddTaskCommentCommand(taskId, User.GetUserId(), model));
         return result.ToHttpResult();
     }
 
@@ -191,7 +191,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> LogTaskTime(Guid taskId, LogTaskTimeDto model)
     {
-        var result = await _mediator.Send(new LogTaskTimeCommand(User.GetUserAuthenticationId(), taskId, model));
+        var result = await _mediator.Send(new LogTaskTimeCommand(User.GetUserId(), taskId, model));
         return result.ToHttpResult();
     }
 

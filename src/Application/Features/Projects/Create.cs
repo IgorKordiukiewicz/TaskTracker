@@ -5,13 +5,13 @@ using Domain.Workflows;
 
 namespace Application.Features.Projects;
 
-public record CreateProjectCommand(string UserAuthId, CreateProjectDto Model) : IRequest<Result<Guid>>;
+public record CreateProjectCommand(Guid UserId, CreateProjectDto Model) : IRequest<Result<Guid>>;
 
 internal class CreateProjectCommandValidator : AbstractValidator<CreateProjectCommand>
 {
     public CreateProjectCommandValidator()
     {
-        RuleFor(x => x.UserAuthId).NotEmpty();
+        RuleFor(x => x.UserId).NotEmpty();
         RuleFor(x => x.Model.OrganizationId).NotEmpty();
         RuleFor(x => x.Model.Name).NotEmpty().MaximumLength(100);
     }
@@ -44,14 +44,9 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
         {
             return Result.Fail<Guid>(new ApplicationError("Project with the same name already exists in this organization."));
         }
-
-        var userId = (await _dbContext.Users
-            .AsNoTracking()
-            .FirstAsync(x => x.AuthenticationId == request.UserAuthId)).Id;
-
         // TODO: Transaction?
 
-        var project = Project.Create(request.Model.Name, request.Model.OrganizationId, userId);
+        var project = Project.Create(request.Model.Name, request.Model.OrganizationId, request.UserId);
         await _projectRepository.Add(project);
 
         var workflow = Workflow.Create(project.Id);

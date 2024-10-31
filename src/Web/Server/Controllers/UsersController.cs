@@ -27,37 +27,36 @@ public class UsersController : ControllerBase
     /// <summary>
     /// Check whether user has been already registered in the system.
     /// </summary>
-    /// <param name="userAuthenticationId"></param>
-    [HttpGet("{userAuthenticationId}/is-registered")]
+    [HttpGet("me/is-registered")]
     [ProducesResponseType(typeof(bool), 200)]
-    public async Task<IActionResult> IsUserRegistered(string userAuthenticationId)
+    public async Task<IActionResult> IsUserRegistered()
     {
-        var result = await _mediator.Send(new IsUserRegisteredQuery(userAuthenticationId));
+        var result = await _mediator.Send(new IsUserRegisteredQuery(User.GetUserId()));
         return result.ToHttpResult();
     }
 
     /// <summary>
     /// Get user's data along with their permissions.
     /// </summary>
-    /// <param name="userAuthenticationId"></param>
+    /// <param name="userId"></param>
     /// <response code="404">User not found.</response> 
-    [HttpGet("{userAuthenticationId}/data")] // without /data the endpoint is not called
+    [HttpGet("{userId}/data")] // without /data the endpoint is not called
     [ProducesResponseType(typeof(UserVM), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetUser(string userAuthenticationId)
+    public async Task<IActionResult> GetUser(Guid userId)
     {
-        var result = await _mediator.Send(new GetUserQuery(userAuthenticationId));
+        var result = await _mediator.Send(new GetUserQuery(userId));
         return result.ToHttpResult();
     }
 
     /// <summary>
     /// Register user in the system.
     /// </summary>
-    /// <param name="model"></param>
-    [HttpPost("register")]
+    [HttpPost("me/register")]
     [ProducesResponseType(201)]
-    public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDto model)
+    public async Task<IActionResult> RegisterUser() //[FromBody] UserRegistrationDto model
     {
+        var model = new UserRegistrationDto(User.GetUserId(), "email@test.com", "FirstName", "LastName", "#ffffff"); // TODO: Temp
         var result = await _mediator.Send(new RegisterUserCommand(model));
         return result.ToHttpResult(201);
     }
@@ -121,7 +120,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetAllUsersPresentationData()
     {
-        var result = await _mediator.Send(new GetAllUsersPresentationDataQuery(User.GetUserAuthenticationId()));
+        var result = await _mediator.Send(new GetAllUsersPresentationDataQuery(User.GetUserId()));
         return result.ToHttpResult();
     }
 }

@@ -2,8 +2,6 @@
 
 public class User : Entity, IAggregateRoot
 {
-    public string AuthenticationId { get; private set; } = string.Empty;
-
     public string Email { get; private set; } = string.Empty;
     public string FirstName { get; private set; } = string.Empty;
     public string LastName { get; private set; } = string.Empty;
@@ -14,11 +12,10 @@ public class User : Entity, IAggregateRoot
         : base(id)
     { }
 
-    public static User Create(string authenticationId, string email, string firstName, string lastName)
+    public static User Create(Guid id, string email, string firstName, string lastName)
     {
-        return new(Guid.NewGuid())
+        return new(id)
         {
-            AuthenticationId = authenticationId,
             Email = email,
             FirstName = firstName,
             LastName = lastName

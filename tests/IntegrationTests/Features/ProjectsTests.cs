@@ -26,7 +26,7 @@ public class ProjectsTests
     [Fact]
     public async Task Create_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new CreateProjectCommand("123", new(Guid.NewGuid(), "project")));
+        var result = await _fixture.SendRequest(new CreateProjectCommand(Guid.NewGuid(), new(Guid.NewGuid(), "project")));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -37,7 +37,7 @@ public class ProjectsTests
     {
         var project = (await _factory.CreateProjects())[0];
 
-        var result = await _fixture.SendRequest(new CreateProjectCommand("123", new(project.OrganizationId, project.Name)));
+        var result = await _fixture.SendRequest(new CreateProjectCommand(Guid.NewGuid(), new(project.OrganizationId, project.Name)));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -48,7 +48,7 @@ public class ProjectsTests
         var organization = (await _factory.CreateOrganizations())[0];
         var user = await _fixture.FirstAsync<User>();
 
-        var result = await _fixture.SendRequest(new CreateProjectCommand(user.AuthenticationId, new(organization.Id, "project")));
+        var result = await _fixture.SendRequest(new CreateProjectCommand(user.Id, new(organization.Id, "project")));
 
         using(new AssertionScope())
         {
@@ -65,7 +65,7 @@ public class ProjectsTests
     [Fact]
     public async Task GetForOrganization_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new GetProjectsForOrganizationQuery(Guid.NewGuid(), "123"));
+        var result = await _fixture.SendRequest(new GetProjectsForOrganizationQuery(Guid.NewGuid(), Guid.NewGuid()));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -73,8 +73,8 @@ public class ProjectsTests
     [Fact]
     public async Task GetForOrganization_ShouldReturnAListOfProjectsUserIsAMemberOfInGivenOrganization()
     {
-        var user1 = User.Create("123", "user1", "firstName", "lastName");
-        var user2 = User.Create("456", "user2", "firstName", "lastName");
+        var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
+        var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
         var invitation = organization.CreateInvitation(user2.Id).Value;
         _ = organization.AcceptInvitation(invitation.Id);
@@ -88,7 +88,7 @@ public class ProjectsTests
             db.AddRange(project1, project2, project3);
         });
 
-        var result = await _fixture.SendRequest(new GetProjectsForOrganizationQuery(organization.Id, "123"));
+        var result = await _fixture.SendRequest(new GetProjectsForOrganizationQuery(organization.Id, user1.Id));
 
         using(new AssertionScope())
         {
@@ -130,8 +130,8 @@ public class ProjectsTests
     [Fact]
     public async Task AddMember_ShouldAddNewMember()
     {
-        var user1 = User.Create("123", "user1", "firstName", "lastName");
-        var user2 = User.Create("1234", "user2", "firstName", "lastName");
+        var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
+        var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
         var project = Project.Create("project", organization.Id, user2.Id);
 

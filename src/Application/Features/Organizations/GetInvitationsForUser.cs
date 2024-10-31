@@ -3,13 +3,13 @@ using Shared.Enums;
 
 namespace Application.Features.Organizations;
 
-public record GetOrganizationInvitationsForUserQuery(string UserAuthenticationId) : IRequest<Result<UserOrganizationInvitationsVM>>;
+public record GetOrganizationInvitationsForUserQuery(Guid UserId) : IRequest<Result<UserOrganizationInvitationsVM>>;
 
 internal class GetOrganizationInvitationsForUserQueryValidator : AbstractValidator<GetOrganizationInvitationsForUserQuery>
 {
     public GetOrganizationInvitationsForUserQueryValidator()
     {
-        RuleFor(x => x.UserAuthenticationId).NotEmpty();
+        RuleFor(x => x.UserId).NotEmpty();
     }
 }
 
@@ -26,10 +26,10 @@ internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrg
     {
         var user = await _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.AuthenticationId == request.UserAuthenticationId);
+            .FirstOrDefaultAsync(x => x.Id == request.UserId);
         if(user is null)
         {
-            return Result.Fail<UserOrganizationInvitationsVM>(new NotFoundError<User>($"AuthID: {request.UserAuthenticationId}"));
+            return Result.Fail<UserOrganizationInvitationsVM>(new NotFoundError<User>(request.UserId)); // TODO: delete check
         }
 
         var invitations = await _dbContext.OrganizationInvitations

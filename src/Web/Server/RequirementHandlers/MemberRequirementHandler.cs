@@ -26,14 +26,8 @@ public abstract class MemberRequirementHandler<TAuthorizationRequirement> : Auth
             return;
         }
 
-        var userAuthId = context.User.GetUserAuthenticationId();
-        if (string.IsNullOrWhiteSpace(userAuthId))
-        {
-            context.Fail();
-            return;
-        }
-
-        var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.AuthenticationId == userAuthId);
+        var userId = context.User.GetUserId();
+        var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
         if (user is null)
         {
             context.Fail();

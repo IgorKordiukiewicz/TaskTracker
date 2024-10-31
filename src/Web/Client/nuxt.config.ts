@@ -10,7 +10,14 @@ export default defineNuxtConfig({
     'primeicons/primeicons.css', 
     './assets/css/main.css' 
   ],
-  modules: ['@primevue/nuxt-module', '@nuxtjs/tailwindcss'],
+  modules: ['@primevue/nuxt-module', '@nuxtjs/tailwindcss', '@nuxtjs/supabase'],
+  supabase: {
+    redirectOptions: {
+      login: '/account/login',
+      callback: '/',
+      exclude: [ '/account/forgot-password', '/account/reset-password' ]
+    }
+  },
   primevue: {
     options: {
       theme: {

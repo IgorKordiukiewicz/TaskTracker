@@ -75,7 +75,7 @@ public class OrganizationsTests
     public async Task CreateInvitation_ShouldCreateNewInvitation_WhenOrganizationAndUserBothExist()
     {
         var organization = (await _factory.CreateOrganizations())[0];
-        var newUser = User.Create("1234", "newUser","firstName", "lastName");
+        var newUser = User.Create(Guid.NewGuid(), "newUser","firstName", "lastName");
         await _fixture.SeedDb(db =>
         {
             db.Add(newUser);
@@ -172,7 +172,7 @@ public class OrganizationsTests
         var user = await _fixture.FirstAsync<User>();
         _ = await _factory.CreateOrganizations(); // organizations for different user
 
-        var result = await _fixture.SendRequest(new GetOrganizationsForUserQuery(user.AuthenticationId));
+        var result = await _fixture.SendRequest(new GetOrganizationsForUserQuery(user.Id));
 
         using (new AssertionScope())
         {
@@ -197,7 +197,7 @@ public class OrganizationsTests
     [Fact]
     public async Task GetInvitationsForUser_ShouldFail_WhenUserDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new GetOrganizationInvitationsForUserQuery("111"));
+        var result = await _fixture.SendRequest(new GetOrganizationInvitationsForUserQuery(Guid.NewGuid()));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -205,8 +205,8 @@ public class OrganizationsTests
     [Fact]
     public async Task GetInvitationsForUser_ShouldReturnUsersInvitations_WhenUserExists()
     {
-        var user1 = User.Create("123", "user1", "firstName", "lastName");
-        var user2 = User.Create("1234", "user2", "firstName", "lastName");
+        var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
+        var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
         var org1 = Organization.Create("org1", user1.Id);
         var org2 = Organization.Create("org2", user2.Id);
         var org3 = Organization.Create("org3", user1.Id);
@@ -219,7 +219,7 @@ public class OrganizationsTests
             db.AddRange(org1, org2, org3);
         });
 
-        var result = await _fixture.SendRequest(new GetOrganizationInvitationsForUserQuery("1234"));
+        var result = await _fixture.SendRequest(new GetOrganizationInvitationsForUserQuery(user2.Id));
 
         using(new AssertionScope())
         {
@@ -249,7 +249,7 @@ public class OrganizationsTests
         var user = await _fixture.FirstAsync<User>();
         await _fixture.SeedDb(db =>
         {
-            db.Add(User.Create("1234", "newUser", "firstName", "lastName"));
+            db.Add(User.Create(Guid.NewGuid(), "newUser", "firstName", "lastName"));
         });
 
         var result = await _fixture.SendRequest(new GetOrganizationMembersQuery(organization.Id));
@@ -275,8 +275,8 @@ public class OrganizationsTests
     [Fact]
     public async Task RemoveMember_ShouldRemoveMember_WhenOrganizationExists()
     {
-        var user1 = User.Create("123", "user1", "firstName", "lastName");
-        var user2 = User.Create("456", "user2", "firstName", "lastName");
+        var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
+        var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
         var invitation = organization.CreateInvitation(user2.Id).Value;
         organization.AcceptInvitation(invitation.Id);
@@ -310,10 +310,10 @@ public class OrganizationsTests
     [Fact]
     public async Task GetInvitations_ShouldReturnAllCreatedInvitationsByOrganization_WhenOrganizationExists()
     {
-        var user1 = User.Create("1", "user1", "firstName", "lastName");
-        var user2 = User.Create("2", "user2", "firstName", "lastName");
-        var user3 = User.Create("3", "user3", "firstName", "lastName");
-        var user4 = User.Create("4", "user4", "firstName", "lastName");
+        var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
+        var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
+        var user3 = User.Create(Guid.NewGuid(), "user3", "firstName", "lastName");
+        var user4 = User.Create(Guid.NewGuid(), "user4", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
         var acceptedInvitation = organization.CreateInvitation(user2.Id);
         acceptedInvitation.Value.Accept();
@@ -524,8 +524,8 @@ public class OrganizationsTests
 
     private async Task<Guid> CreateOrganizationWithInvitation()
     {
-        var user1 = User.Create("123", "user1","firstName", "lastName");
-        var user2 = User.Create("1234", "user2","firstName", "lastName");
+        var user1 = User.Create(Guid.NewGuid(), "user1","firstName", "lastName");
+        var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
         var invitation = organization.CreateInvitation(user2.Id).Value;
 

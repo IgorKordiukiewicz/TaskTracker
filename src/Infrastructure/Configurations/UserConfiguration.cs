@@ -8,10 +8,6 @@ internal class UserConfiguration : BaseEntityTypeConfiguration<User>
     {
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.AuthenticationId)
-            .IsRequired()
-            .HasMaxLength(100);
-
         builder.Property(x => x.Email)
             .IsRequired()
             .HasMaxLength(100);
@@ -23,9 +19,6 @@ internal class UserConfiguration : BaseEntityTypeConfiguration<User>
             .HasMaxLength(100);
 
         builder.Ignore(x => x.FullName);
-
-        builder.HasIndex(x => x.AuthenticationId)
-            .IsUnique();
 
         base.Configure(builder);
     }

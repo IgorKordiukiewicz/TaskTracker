@@ -3,14 +3,14 @@ using Task = Domain.Tasks.Task;
 
 namespace Application.Features.Tasks;
 
-public record AddTaskCommentCommand(Guid TaskId, string UserAuthenticationId, AddTaskCommentDto Model) : IRequest<Result>;
+public record AddTaskCommentCommand(Guid TaskId, Guid UserId, AddTaskCommentDto Model) : IRequest<Result>;
 
 internal class AddTaskCommentCommandValidator : AbstractValidator<AddTaskCommentCommand>
 {
     public AddTaskCommentCommandValidator()
     {
         RuleFor(x => x.TaskId).NotEmpty();
-        RuleFor(x => x.UserAuthenticationId).NotEmpty();
+        RuleFor(x => x.UserId).NotEmpty();
         RuleFor(x => x.Model.Content).NotEmpty();
     }
 }
@@ -36,11 +36,7 @@ internal class AddTaskCommentHandler : IRequestHandler<AddTaskCommentCommand, Re
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
-        var userId = (await _dbContext.Users
-           .AsNoTracking()
-           .FirstOrDefaultAsync(x => x.AuthenticationId == request.UserAuthenticationId))?.Id ?? Guid.Empty;
-
-        task.AddComment(request.Model.Content, userId, _dateTimeProvider.Now());
+        task.AddComment(request.Model.Content, request.UserId, _dateTimeProvider.Now());
 
         await _taskRepository.Update(task);
         return Result.Ok();

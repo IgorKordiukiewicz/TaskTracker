@@ -31,6 +31,18 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Web.Client", builder =>
+    {
+        builder
+        .SetIsOriginAllowed(origin => origin.Contains("localhost:3000")) // TODO: move to appsettings
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -55,6 +67,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors("Web.Client");
 
 app.UseHangfireDashboard();
 

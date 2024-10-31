@@ -23,14 +23,14 @@ public class UserSelfRequirementHandler : AuthorizationHandler<UserSelfRequireme
             return;
         }
 
-        var userAuthId = context.User.GetUserAuthenticationId();
-        if (string.IsNullOrWhiteSpace(userAuthId))
+        var currentUserId = context.User.GetUserId(); // TODO: refactor, is this whole req handler even necessary?
+        if (currentUserId != userId)
         {
             context.Fail();
             return;
         }
 
-        var result = await _dbContext.Users.AnyAsync(x => x.Id == userId && x.AuthenticationId == userAuthId);
+        var result = await _dbContext.Users.AnyAsync(x => x.Id == userId);
         if(result)
         {
             context.Succeed(requirement);

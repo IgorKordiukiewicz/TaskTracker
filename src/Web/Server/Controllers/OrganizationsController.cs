@@ -49,7 +49,7 @@ public class OrganizationsController : ControllerBase
     [ProducesResponseType(typeof(OrganizationsForUserVM), 200)]
     public async Task<IActionResult> GetOrganizations()
     {
-        var result = await _mediator.Send(new GetOrganizationsForUserQuery(User.GetUserAuthenticationId()));
+        var result = await _mediator.Send(new GetOrganizationsForUserQuery(User.GetUserId()));
         return result.ToHttpResult();
     }
 
@@ -107,7 +107,7 @@ public class OrganizationsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetOrganizationInvitationsForUser()
     {
-        var result = await _mediator.Send(new GetOrganizationInvitationsForUserQuery(User.GetUserAuthenticationId()));
+        var result = await _mediator.Send(new GetOrganizationInvitationsForUserQuery(User.GetUserId()));
         return result.ToHttpResult();
     }
 

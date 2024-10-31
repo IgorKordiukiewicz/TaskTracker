@@ -34,7 +34,7 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> CreateProject([FromBody] CreateProjectDto model)
     {
-        var result = await _mediator.Send(new CreateProjectCommand(User.GetUserAuthenticationId(), model));
+        var result = await _mediator.Send(new CreateProjectCommand(User.GetUserId(), model));
         return result.ToHttpResult();
     }
 
@@ -49,7 +49,7 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetProjects(Guid organizationId)
     {
-        var result = await _mediator.Send(new GetProjectsForOrganizationQuery(organizationId, User.GetUserAuthenticationId()));
+        var result = await _mediator.Send(new GetProjectsForOrganizationQuery(organizationId, User.GetUserId()));
         return result.ToHttpResult();
     }
 

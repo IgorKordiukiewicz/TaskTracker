@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxtjs/supabase": "^1.4.1",
     "@nuxtjs/tailwindcss": "^6.12.2",
     "@primevue/themes": "^4.1.1",
     "nuxt": "^3.13.2",
@@ -20,6 +21,9 @@
     "vue-router": "latest"
   },
   "devDependencies": {
-    "@primevue/nuxt-module": "^4.1.1"
+    "@primevue/nuxt-module": "^4.1.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14"
   }
 }

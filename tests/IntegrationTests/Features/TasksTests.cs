@@ -152,7 +152,7 @@ public class TasksTests
     [Fact]
     public async System.Threading.Tasks.Task AddComment_ShouldFail_WhenTaskDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new AddTaskCommentCommand(Guid.NewGuid(), "123", new("abc")));
+        var result = await _fixture.SendRequest(new AddTaskCommentCommand(Guid.NewGuid(), Guid.NewGuid(), new("abc")));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -164,7 +164,7 @@ public class TasksTests
         var user = await _fixture.FirstAsync<User>();
         var taskCommentsCountBefore = await _fixture.CountAsync<TaskComment>();
 
-        var result = await _fixture.SendRequest(new AddTaskCommentCommand(task.Id, user.AuthenticationId, new("abc")));
+        var result = await _fixture.SendRequest(new AddTaskCommentCommand(task.Id, user.Id, new("abc")));
 
         using(new AssertionScope())
         {
@@ -362,7 +362,7 @@ public class TasksTests
     {
         var user = (await _factory.CreateUsers())[0];
 
-        var result = await _fixture.SendRequest(new LogTaskTimeCommand(user.AuthenticationId, Guid.NewGuid(), 
+        var result = await _fixture.SendRequest(new LogTaskTimeCommand(user.Id, Guid.NewGuid(), 
             new(1, DateOnly.FromDateTime(DateTime.Now))));
 
         result.IsFailed.Should().BeTrue();
@@ -375,7 +375,7 @@ public class TasksTests
         var user = await _fixture.FirstAsync<User>();
         var timeLogsBefore = await _fixture.CountAsync<TaskTimeLog>();
 
-        var result = await _fixture.SendRequest(new LogTaskTimeCommand(user.AuthenticationId, task.Id, 
+        var result = await _fixture.SendRequest(new LogTaskTimeCommand(user.Id, task.Id, 
             new(1, DateOnly.FromDateTime(DateTime.Now))));
 
         using (new AssertionScope())
