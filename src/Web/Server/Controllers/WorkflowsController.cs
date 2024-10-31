@@ -61,7 +61,7 @@ public class WorkflowsController : ControllerBase
     /// <param name="workflowId"></param>
     /// <param name="statusId"></param>
     /// <response code="404">Workflow not found.</response>
-    [HttpPost("{workflowId:guid}/statuses/{statusId:guid}/delete")]
+    [HttpPost("{workflowId:guid}/statuses/{statusId:guid}/delete")] // TODO: {id}/statuses/delete (statusId in body?)
     [Authorize(Policy.ProjectManageWorkflows)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteStatus(Guid workflowId, Guid statusId)

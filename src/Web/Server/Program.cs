@@ -36,8 +36,6 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseWebAssemblyDebugging();
-
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -47,11 +45,8 @@ else
     app.UseHsts();
 }
 
-app.MapControllers();
-
 app.UseHttpsRedirection();
 
-app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -59,9 +54,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapRazorPages();
 app.MapControllers();
-app.MapFallbackToFile("index.html");
 
 app.UseHangfireDashboard();
 
