@@ -27,7 +27,7 @@ public class UsersController : ControllerBase
     /// <summary>
     /// Check whether user has been already registered in the system.
     /// </summary>
-    [HttpGet("me/is-registered")]
+    [HttpGet("me/registered")]
     [ProducesResponseType(typeof(bool), 200)]
     public async Task<IActionResult> IsUserRegistered()
     {
@@ -54,10 +54,9 @@ public class UsersController : ControllerBase
     /// </summary>
     [HttpPost("me/register")]
     [ProducesResponseType(201)]
-    public async Task<IActionResult> RegisterUser() //[FromBody] UserRegistrationDto model
+    public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDto model) 
     {
-        var model = new UserRegistrationDto(User.GetUserId(), "email@test.com", "FirstName", "LastName", "#ffffff"); // TODO: Temp
-        var result = await _mediator.Send(new RegisterUserCommand(model));
+        var result = await _mediator.Send(new RegisterUserCommand(User.GetUserId(), model));
         return result.ToHttpResult(201);
     }
 

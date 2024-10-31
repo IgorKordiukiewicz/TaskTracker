@@ -2,17 +2,15 @@
 
 namespace Application.Features.Users;
 
-public record RegisterUserCommand(UserRegistrationDto Model) : IRequest<Result>;
+public record RegisterUserCommand(Guid Id, UserRegistrationDto Model) : IRequest<Result>;
 
 internal class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
 {
     public RegisterUserCommandValidator()
     {
-        RuleFor(x => x.Model.Id).NotEmpty();
         RuleFor(x => x.Model.Email).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Model.FirstName).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Model.LastName).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.Model.AvatarColor).NotEmpty();
     }
 }
 
@@ -29,12 +27,13 @@ internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result
 
     public async Task<Result> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
-        if(await _userRepository.Exists(x => x.Id == request.Model.Id))
+        if(await _userRepository.Exists(x => x.Id == request.Id))
         {
             return Result.Fail(new ApplicationError("User is already registered in the database."));
         }
 
-        var user = User.Create(request.Model.Id, request.Model.Email, request.Model.FirstName, request.Model.LastName);
+        var user = User.Create(request.Id, request.Model.Email, request.Model.FirstName, request.Model.LastName);
+        var avatarColor = "#EF5350";
 
         await using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
@@ -45,7 +44,7 @@ internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result
             _dbContext.UsersPresentationData.Add(new()
             {
                 UserId = user.Id,
-                AvatarColor = request.Model.AvatarColor
+                AvatarColor = avatarColor
             });
             await _dbContext.SaveChangesAsync();
 

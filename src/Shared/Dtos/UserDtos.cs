@@ -1,5 +1,5 @@
 ﻿namespace Shared.Dtos;
 
-public record UserRegistrationDto(Guid Id, string Email, string FirstName, string LastName, string AvatarColor);
+public record UserRegistrationDto(string Email, string FirstName, string LastName);
 
 public record UpdateUserNameDto(string FirstName, string LastName);

@@ -1,3 +1,5 @@
+import { UserRegistrationDto } from "~/types/dtos/user";
+
 export const useAuth = () => {
     const supabaseClient = useSupabaseClient();
     const supabaseUser = useSupabaseUser();
@@ -18,22 +20,33 @@ export const useAuth = () => {
                         'Authorization': `Bearer ${accessToken}`
                     }
                 });
-                if(!data.value)
-                {
-                    await useFetch('https://localhost:7075/users/me/register', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${accessToken}`
-                        }
-                    });
+                console.log(data.value);
+                if(!data.value) {
+                    navigateTo('/account/complete-registration');
                 }
-
-                navigateTo('/');
+                else {
+                    navigateTo('/');
+                }
             }
             catch(error)
             {
                 console.log(error);
             }
+        },
+        async register(firstName: string, lastName: string) {
+            const email = (await supabaseClient.auth.getUser()).data.user?.email;
+            const accessToken = (await supabaseClient.auth.getSession()).data.session?.access_token;
+            const model = new UserRegistrationDto(email!, firstName, lastName);
+
+            await useFetch('https://localhost:7075/users/me/register', {
+                method: 'POST',
+                body: JSON.stringify(model),
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            navigateTo('/');
         },
         async sendResetPasswordEmail(email: string) {
             await supabaseClient.auth.resetPasswordForEmail(email, {

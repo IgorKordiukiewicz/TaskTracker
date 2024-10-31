@@ -15,7 +15,7 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: '/account/login',
       callback: '/',
-      exclude: [ '/account/forgot-password', '/account/reset-password' ]
+      exclude: [ '/account/forgot-password', '/account/reset-password', 'account/complete-registration' ]
     }
   },
   primevue: {
