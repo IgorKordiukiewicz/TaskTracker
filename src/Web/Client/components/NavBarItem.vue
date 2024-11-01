@@ -20,7 +20,7 @@ const props = defineProps({
 const route = useRoute()
 
 const selected = computed(() => {
-    return route.path.includes(props.link) || (props.includeIndex && route.path.includes('/'));
+    return route.path === props.link || (props.includeIndex && route.path === '/');
 })
 </script>
 
