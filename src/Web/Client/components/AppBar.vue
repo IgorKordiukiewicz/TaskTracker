@@ -1,6 +1,9 @@
 <template>
     <div class="flex justify-between border-b h-14 p-3 items-center">
-        <i class="pi pi-bars p-2 hover:bg-surface-100 cursor-pointer rounded" @click="toggleSidebar"></i>
+        <div class="flex gap-2 items-center">
+            <i class="pi pi-bars p-2 hover:bg-surface-100 cursor-pointer rounded" @click="toggleSidebar"></i>
+            <HierarchyNav></HierarchyNav>
+        </div>
         <div class="flex gap-2 items-center">
             <span @click="toggle">
                 <Avatar :label="avatarLabel" shape="circle" aria-haspopup="true" aria-controls="user_menu" class="cursor-pointer" />

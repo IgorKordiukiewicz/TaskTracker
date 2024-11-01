@@ -1,4 +1,4 @@
-import type { ProjectsVM } from "~/types/viewModels/projects";
+import type { ProjectNavDataVM, ProjectsVM } from "~/types/viewModels/projects";
 
 export const useProjectsService = () => {
     const api = useApi();
@@ -6,6 +6,9 @@ export const useProjectsService = () => {
     return {
         async getProjects(organizationId: string) {
             return await api.sendGetRequest<ProjectsVM>(`projects?organizationId=${organizationId}`);
+        },
+        async getNavData(id: string) {
+            return await api.sendGetRequest<ProjectNavDataVM>(`projects/${id}/nav-data`);
         }
     }
 }

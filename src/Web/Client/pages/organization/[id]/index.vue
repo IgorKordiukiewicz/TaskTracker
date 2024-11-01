@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <OrganizationLayout>
         <p class="text-lg">Projects</p>
         <div v-if="projects" class="flex flex-wrap gap-3 mt-4">
             <div v-for="project in projects.projects" class="project-list-item rounded-md bg-white shadow size-fit cursor-pointer h-40" @click="navigateTo(`/project/${project.id}/`)">
@@ -8,7 +8,7 @@
                 </span>
             </div>
         </div>
-    </div>
+    </OrganizationLayout>
 </template>
 
 <script setup lang="ts">

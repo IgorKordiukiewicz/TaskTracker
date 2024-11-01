@@ -1,5 +1,8 @@
 <template>
-    <div>
+    <OrganizationLayout>
         <h1>Members</h1>
-    </div>
+    </OrganizationLayout>
 </template>
+
+<script setup lang="ts">
+</script>
