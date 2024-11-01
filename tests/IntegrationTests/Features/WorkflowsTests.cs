@@ -105,7 +105,7 @@ public class WorkflowsTests
     [Fact]
     public async System.Threading.Tasks.Task DeleteStatus_ShouldFail_WhenWorkflowDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new DeleteWorkflowStatusCommand(Guid.NewGuid(), Guid.NewGuid()));
+        var result = await _fixture.SendRequest(new DeleteWorkflowStatusCommand(Guid.NewGuid(), new(Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -121,7 +121,7 @@ public class WorkflowsTests
             db.Add(task);
         });
 
-        var result = await _fixture.SendRequest(new DeleteWorkflowStatusCommand(workflow.Id, task.StatusId));
+        var result = await _fixture.SendRequest(new DeleteWorkflowStatusCommand(workflow.Id, new(task.StatusId)));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -136,7 +136,7 @@ public class WorkflowsTests
         var statusTransitions = workflow.Transitions.Count(x =>
             x.FromStatusId == notInitialStatus.Id || x.ToStatusId == notInitialStatus.Id);
 
-        var result = await _fixture.SendRequest(new DeleteWorkflowStatusCommand(workflow.Id, notInitialStatus.Id));
+        var result = await _fixture.SendRequest(new DeleteWorkflowStatusCommand(workflow.Id, new(notInitialStatus.Id)));
 
         using(new AssertionScope())
         {

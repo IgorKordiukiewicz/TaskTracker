@@ -30,7 +30,7 @@ public class JobsService : IJobsService
 
         foreach (var projectAndMember in projectsAndMembers)
         {
-            var result = await _mediator.Send(new RemoveProjectMemberCommand(projectAndMember.ProjectId, projectAndMember.MemberId));
+            var result = await _mediator.Send(new RemoveProjectMemberCommand(projectAndMember.ProjectId, new(projectAndMember.MemberId)));
             if(result.IsFailed)
             {
                 _logger.LogCritical("Removing user (ID: {@userId}) from organization (ID: {@organizationId}) failed!", userId, organizationId);

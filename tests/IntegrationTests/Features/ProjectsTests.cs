@@ -182,7 +182,7 @@ public class ProjectsTests
     [Fact]
     public async Task RemoveMember_ShouldFail_WhenProjectDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new RemoveProjectMemberCommand(Guid.NewGuid(), Guid.NewGuid()));
+        var result = await _fixture.SendRequest(new RemoveProjectMemberCommand(Guid.NewGuid(), new(Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -202,7 +202,7 @@ public class ProjectsTests
 
         var membersBefore = await _fixture.CountAsync<ProjectMember>();
 
-        var result = await _fixture.SendRequest(new RemoveProjectMemberCommand(project.Id, member.Id));
+        var result = await _fixture.SendRequest(new RemoveProjectMemberCommand(project.Id, new(member.Id)));
 
         using (new AssertionScope())
         {
@@ -317,7 +317,7 @@ public class ProjectsTests
     [Fact]
     public async Task DeleteRole_ShouldFail_WhenProjectDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new DeleteProjectRoleCommand(Guid.NewGuid(), Guid.NewGuid()));
+        var result = await _fixture.SendRequest(new DeleteProjectRoleCommand(Guid.NewGuid(), new(Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -328,7 +328,7 @@ public class ProjectsTests
         var (project, roleName) = await CreateProjectWithCustomRole();
         var rolesCountBefore = await _fixture.CountAsync<ProjectRole>();
 
-        var result = await _fixture.SendRequest(new DeleteProjectRoleCommand(project.Id, project.Roles.First(x => x.Name == roleName).Id));
+        var result = await _fixture.SendRequest(new DeleteProjectRoleCommand(project.Id, new(project.Roles.First(x => x.Name == roleName).Id)));
 
         using (new AssertionScope())
         {
@@ -340,7 +340,7 @@ public class ProjectsTests
     [Fact]
     public async Task UpdateRoleName_ShouldFail_WhenProjectDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new UpdateProjectRoleNameCommand(Guid.NewGuid(), Guid.NewGuid(), new("abc")));
+        var result = await _fixture.SendRequest(new UpdateProjectRoleNameCommand(Guid.NewGuid(), new(Guid.NewGuid(), "abc")));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -352,7 +352,7 @@ public class ProjectsTests
         var newName = roleName + "A";
         var roleId = project.Roles.First(x => x.Name == roleName).Id;
 
-        var result = await _fixture.SendRequest(new UpdateProjectRoleNameCommand(project.Id, roleId, new(newName)));
+        var result = await _fixture.SendRequest(new UpdateProjectRoleNameCommand(project.Id, new(roleId, newName)));
 
         using(new AssertionScope())
         {
@@ -364,7 +364,7 @@ public class ProjectsTests
     [Fact]
     public async Task UpdateMemberRole_ShouldFail_WhenProjectDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new UpdateProjectMemberRoleCommand(Guid.NewGuid(), Guid.NewGuid(), new(Guid.NewGuid())));
+        var result = await _fixture.SendRequest(new UpdateProjectMemberRoleCommand(Guid.NewGuid(), new(Guid.NewGuid(), Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -376,7 +376,7 @@ public class ProjectsTests
         var member = project.Members[0];
         var newRoleId = project.Roles.First(x => x.Id != member.RoleId).Id;
 
-        var result = await _fixture.SendRequest(new UpdateProjectMemberRoleCommand(project.Id, member.Id, new(newRoleId)));
+        var result = await _fixture.SendRequest(new UpdateProjectMemberRoleCommand(project.Id, new(member.Id, newRoleId)));
 
         using(new AssertionScope())
         {
@@ -388,7 +388,7 @@ public class ProjectsTests
     [Fact]
     public async Task UpdateRolePermissions_ShouldFail_WhenProjectDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new UpdateProjectRolePermissionsCommand(Guid.NewGuid(), Guid.NewGuid(), new(ProjectPermissions.None)));
+        var result = await _fixture.SendRequest(new UpdateProjectRolePermissionsCommand(Guid.NewGuid(), new(Guid.NewGuid(), ProjectPermissions.None)));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -400,7 +400,7 @@ public class ProjectsTests
         var roleId = project.Roles.First(x => x.Name == roleName).Id;
         var newPermissions = ProjectPermissions.CreateTasks | ProjectPermissions.AddComments;
 
-        var result = await _fixture.SendRequest(new UpdateProjectRolePermissionsCommand(project.Id, roleId, new(newPermissions)));
+        var result = await _fixture.SendRequest(new UpdateProjectRolePermissionsCommand(project.Id, new(roleId, newPermissions)));
 
         using(new AssertionScope())
         {
