@@ -2,12 +2,15 @@ export const useApi = () => {
     const client = useSupabaseClient();
 
     return {
-        async sendPostRequest<T>(url: string, body: T) {
+        async sendPostRequest<T>(url: string, body: T, customHeaders?: Record<string, string>) {
             try {
                 const { data, error } = await useFetch(`https://localhost:7075/${url}`, {
                     method: 'POST',
                     body: JSON.stringify(body),
-                    headers: getHeaders(await getAccessToken())
+                    headers: { 
+                        ...getHeaders(await getAccessToken()),
+                        ...customHeaders
+                    }
                 });
     
                 if(error.value) {
