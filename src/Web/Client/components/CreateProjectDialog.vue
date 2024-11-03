@@ -1,16 +1,10 @@
 <template>
-    <Dialog v-model:visible="visible" modal header="Create a project" style="min-width: 24rem;">
-        <div class="flex flex-col gap-2">
-            <div class="flex flex-col gap-1">
-                <label for="name">Name</label>
-                <InputText id="name" v-model="model.name" autocomplete="off" class="w-full" />
-            </div>
-            <div class="flex justify-end gap-2 mt-4">
-                <Button type="button" label="Cancel" severity="secondary" @click="visible = false" autofocus></Button>
-                <Button type="button" label="Save" @click="createProject"></Button>
-            </div>
+    <ActionDialog header="Create a project" submit-label="Create" @submit="createProject" ref="dialog">
+        <div class="flex flex-col gap-1">
+            <label for="name">Name</label>
+            <InputText id="name" v-model="model.name" autocomplete="off" class="w-full" />
         </div>
-    </Dialog>
+    </ActionDialog>
 </template>
 
 <script setup lang="ts">
@@ -24,11 +18,11 @@ const props = defineProps({
 
 const projectsService = useProjectsService();
 
-const visible = ref(false);
+const dialog = ref();
 const model = ref(new CreateProjectDto());
 
 function show() {
-    visible.value = true;
+    dialog.value.show();
 }
 
 async function createProject() {
@@ -37,7 +31,6 @@ async function createProject() {
 
     model.value = new CreateProjectDto();
 
-    visible.value = false;
     emit('onCreate');
 }
 </script>
