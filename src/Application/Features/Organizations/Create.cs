@@ -3,13 +3,12 @@ using Domain.Users;
 
 namespace Application.Features.Organizations;
 
-public record CreateOrganizationCommand(CreateOrganizationDto Model) : IRequest<Result<Guid>>;
+public record CreateOrganizationCommand(CreateOrganizationDto Model, Guid OwnerId) : IRequest<Result<Guid>>;
 
 internal class CreateOrganizationCommandValidator : AbstractValidator<CreateOrganizationCommand>
 {
     public CreateOrganizationCommandValidator()
     {
-        RuleFor(x => x.Model.OwnerId).NotEmpty();
         RuleFor(x => x.Model.Name).NotEmpty().MaximumLength(100);
     }
 }
@@ -27,12 +26,12 @@ internal class CreateOrganizationHandler : IRequestHandler<CreateOrganizationCom
 
     public async Task<Result<Guid>> Handle(CreateOrganizationCommand request, CancellationToken cancellationToken)
     {
-        if(!await _context.Users.AnyAsync(x => x.Id == request.Model.OwnerId))
+        if(!await _context.Users.AnyAsync(x => x.Id == request.OwnerId))
         {
-            return Result.Fail(new NotFoundError<User>(request.Model.OwnerId));
+            return Result.Fail(new NotFoundError<User>(request.OwnerId));
         }
 
-        var organization = Organization.Create(request.Model.Name, request.Model.OwnerId);
+        var organization = Organization.Create(request.Model.Name, request.OwnerId);
 
         await _organizationRepository.Add(organization);
 

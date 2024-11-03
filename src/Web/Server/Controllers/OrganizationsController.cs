@@ -38,7 +38,7 @@ public class OrganizationsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> CreateOrganization([FromBody] CreateOrganizationDto model)
     {
-        var result = await _mediator.Send(new CreateOrganizationCommand(model));
+        var result = await _mediator.Send(new CreateOrganizationCommand(model, User.GetUserId()));
         return result.ToHttpResult();
     }
 

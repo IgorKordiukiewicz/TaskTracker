@@ -1,3 +1,4 @@
+import type { CreateOrganizationDto } from "~/types/dtos/organizations";
 import type { OrganizationNavDataVM, OrganizationsVM } from "~/types/viewModels/organizations";
 
 export const useOrganizationsService = () => {
@@ -9,6 +10,9 @@ export const useOrganizationsService = () => {
         },
         async getNavData(id: string) {
             return await api.sendGetRequest<OrganizationNavDataVM>(`organizations/${id}/nav-data`);
+        },
+        async createOrganization(model: CreateOrganizationDto) {
+            await api.sendPostRequest('organizations', model);
         }
     }
 }
