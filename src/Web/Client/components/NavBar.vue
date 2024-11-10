@@ -11,7 +11,6 @@
         <template v-if="view === 'default'">
             <NavBarItem label="Organizations" link="/" icon="pi pi-list" :include-index="true"></NavBarItem>
         </template>
-        
     </ul>
 </template>
 

@@ -1,5 +1,5 @@
 import type { CreateOrganizationDto } from "~/types/dtos/organizations";
-import type { OrganizationNavDataVM, OrganizationsVM } from "~/types/viewModels/organizations";
+import type { OrganizationRolesVM, OrganizationMembersVM, OrganizationNavDataVM, OrganizationsVM } from "~/types/viewModels/organizations";
 
 export const useOrganizationsService = () => {
     const api = useApi();
@@ -13,6 +13,12 @@ export const useOrganizationsService = () => {
         },
         async createOrganization(model: CreateOrganizationDto) {
             await api.sendPostRequest('organizations', model);
+        },
+        async getMembers(id: string) {
+            return await api.sendGetRequest<OrganizationMembersVM>(`organizations/${id}/members`);
+        },
+        async getRoles(id: string) {
+            return await api.sendGetRequest<OrganizationRolesVM>(`organizations/${id}/roles`);
         }
     }
 }

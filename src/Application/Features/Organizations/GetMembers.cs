@@ -31,6 +31,10 @@ internal class GetOrganizationMembersHandler : IRequestHandler<GetOrganizationMe
             return Result.Fail<OrganizationMembersVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
+        var roleNameById = await _dbContext.OrganizationRoles
+            .Where(x => x.OrganizationId == request.OrganizationId)
+            .ToDictionaryAsync(k => k.Id, v => v.Name);
+
         var members = await _dbContext.Organizations
             .Include(x => x.Members)
             .Where(x => x.Id == request.OrganizationId)
@@ -38,7 +42,16 @@ internal class GetOrganizationMembersHandler : IRequestHandler<GetOrganizationMe
             .Join(_dbContext.Users,
             member => member.UserId,
             user => user.Id,
-            (member, user) => new OrganizationMemberVM(member.Id, user.Id, user.FullName, member.RoleId, user.Id == organization.OwnerId))
+            (member, user) => new OrganizationMemberVM
+            {
+                Id = member.Id,
+                UserId = user.Id,
+                Name = user.FullName,
+                Email = user.Email,
+                RoleId = member.RoleId,
+                RoleName = roleNameById[member.RoleId],
+                Owner = user.Id == organization.OwnerId
+            })
             .ToListAsync();
 
         return Result.Ok(new OrganizationMembersVM(members));
