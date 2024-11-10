@@ -5,3 +5,8 @@ export class CreateOrganizationDto {
 export class CreateOrganizationInvitationDto {
     userId: string = '';
 }
+
+export class UpdateOrganizationMemberRoleDto {
+    memberId: string = '';
+    roleId: string = '';
+}
