@@ -4,7 +4,29 @@
             <i class="pi pi-bars p-2 hover:bg-surface-100 cursor-pointer rounded" @click="toggleSidebar"></i>
             <HierarchyNav></HierarchyNav>
         </div>
-        <div class="flex gap-2 items-center">
+        <div class="flex gap-4 items-end">
+            <span class="cursor-pointer" style="color: rgb(100, 116, 139);" @click="toggleNotifications">
+                <template v-if="invitations && invitations.invitations.length > 0">
+                    <OverlayBadge class="cursor-pointer">
+                        <i class="pi pi-bell" style="font-size: 1.25rem;" />
+                    </OverlayBadge>
+                </template>
+                <tempalte v-else>
+                    <i class="pi pi-bell" style="font-size: 1.25rem;" />
+                </tempalte>
+            </span>
+            <Popover ref="notificationsPopover">
+                <div class="flex flex-col gap-3 w-72" v-if="invitations">
+                    <p class="font-semibold">Invitations</p>
+                    <div v-for="invitation in invitations.invitations" class="flex justify-between items-center">
+                        <p>{{ invitation.organizationName }}</p>
+                        <div class="flex gap-1 items-center">
+                            <Button icon="pi pi-times" severity="danger" rounded text @click="declineInvitation(invitation.id)" />
+                            <Button icon="pi pi-check" severity="success"  rounded text @click="acceptInvitation(invitation.id)" />
+                        </div>
+                    </div>
+                </div>
+            </Popover>
             <span @click="toggle">
                 <Avatar :label="avatarLabel" shape="circle" aria-haspopup="true" aria-controls="user_menu" class="cursor-pointer" />
             </span>
@@ -17,6 +39,7 @@
 const emit = defineEmits([ 'toggleSidebar' ])
 
 const auth = useAuth();
+const organizationsService = useOrganizationsService();
 
 const menu = ref();
 const items = ref([
@@ -33,6 +56,10 @@ const items = ref([
     }
 ])
 
+const notificationsPopover = ref();
+
+const invitations = ref(await organizationsService.getUserInvitations());
+
 const avatarLabel = computed(() => {
     return auth.getUser()?.email?.at(0)?.toUpperCase() ?? "";
 })
@@ -41,7 +68,28 @@ const toggle = (event: Event) => {
     menu.value.toggle(event);
 }
 
+const toggleNotifications = (event: Event) => {
+    if(invitations.value && invitations.value?.invitations.length > 0) {
+        notificationsPopover.value.toggle(event);
+    }
+}
+
 function toggleSidebar() {
     emit('toggleSidebar');
+}
+
+async function updateInvitations() {
+    invitations.value = await organizationsService.getUserInvitations();
+}
+
+async function declineInvitation(id: string) {
+    await organizationsService.declineInvitation(id);
+    await updateInvitations();
+}
+
+async function acceptInvitation(id: string) {
+    await organizationsService.acceptInvitation(id);
+    await updateInvitations();
+    // TODO: update organizations if on index page? (or always redirect to org page)
 }
 </script>

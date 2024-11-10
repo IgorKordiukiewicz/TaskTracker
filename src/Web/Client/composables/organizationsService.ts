@@ -1,6 +1,6 @@
 import { UpdateOrganizationMemberRoleDto } from './../types/dtos/organizations';
 import type { CreateOrganizationDto, CreateOrganizationInvitationDto } from "~/types/dtos/organizations";
-import type { OrganizationRolesVM, OrganizationMembersVM, OrganizationNavDataVM, OrganizationsVM, OrganizationInvitationsVM } from "~/types/viewModels/organizations";
+import type { OrganizationRolesVM, OrganizationMembersVM, OrganizationNavDataVM, OrganizationsVM, OrganizationInvitationsVM, UserOrganizationInvitationsVM } from "~/types/viewModels/organizations";
 
 export const useOrganizationsService = () => {
     const api = useApi();
@@ -29,6 +29,15 @@ export const useOrganizationsService = () => {
         },
         async updateMemberRole(id: string, model: UpdateOrganizationMemberRoleDto) {
             await api.sendPostRequest(`organizations/${id}/members/role`, model);
-        }
+        },
+        async getUserInvitations() {
+            return await api.sendGetRequest<UserOrganizationInvitationsVM>('organizations/invitations');
+        },
+        async acceptInvitation(invitationId: string) {
+            await api.sendPostRequest(`organizations/invitations/${invitationId}/accept`, '');
+        },
+        async declineInvitation(invitationId: string) {
+            await api.sendPostRequest(`organizations/invitations/${invitationId}/decline`, '');
+        },
     }
 }

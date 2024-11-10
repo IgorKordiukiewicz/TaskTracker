@@ -2,7 +2,7 @@
     <OrganizationLayout>
         <p class="text-lg">Members</p>
         <div v-if="members && roles" class="rounded-md bg-white w-100 shadow mt-4 p-4">
-            <DataTable :value="[ ...members.members, ...members.members, ...members.members, ...members.members]" v-if="members">
+            <DataTable :value="members.members" v-if="members">
                 <Column header="Name">
                     <template #body="slotProps">
                         <div class="flex gap-4 items-center">
@@ -14,7 +14,8 @@
                 <Column field="email" header="Email"></Column>
                 <Column field="roleName" header="Role">
                     <template #body="slotProps">
-                        <Select :options="availableRoles" option-label="name" :model-value="getRoleValue(slotProps.data)" @change="async (e) => await updateMemberRole(e, slotProps.data)" />
+                        <Select :options="availableRoles" option-label="name" :model-value="getRoleValue(slotProps.data)" 
+                        @change="async (e) => await updateMemberRole(e, slotProps.data)"  class="w-48" />
                     </template>
                 </Column>
             </DataTable>
@@ -49,10 +50,15 @@ function getRoleValue(member: OrganizationMemberVM) {
     };
 }
 
+async function updateMembers() {
+    members.value = await organizationsService.getMembers(organizationId.value);
+}
+
 async function updateMemberRole(event: SelectChangeEvent, member: OrganizationMemberVM) {
     const model = new UpdateOrganizationMemberRoleDto();
     model.memberId = member.id;
     model.roleId = event.value.id;
     await organizationsService.updateMemberRole(organizationId.value, model);
+    await updateMembers();
 }
 </script>

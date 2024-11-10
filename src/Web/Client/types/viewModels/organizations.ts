@@ -53,3 +53,12 @@ export interface OrganizationInvitationVM {
     createdAt: Date;
     finalizedAt: Date;
 }
+
+export interface UserOrganizationInvitationsVM {
+    invitations: UserOrganizationInvitationVM[];
+}
+
+export interface UserOrganizationInvitationVM {
+    id: string;
+    organizationName: string;
+}
