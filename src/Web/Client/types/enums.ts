@@ -5,3 +5,11 @@ export enum OrganizationPermissions {
     RemoveMembers = 1 << 2, // 4
     ManageRoles = 1 << 3, // 8
 }
+
+export enum OrganizationInvitationState
+{
+    Pending,
+    Accepted,
+    Declined,
+    Canceled
+}

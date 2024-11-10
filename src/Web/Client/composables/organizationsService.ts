@@ -1,5 +1,5 @@
-import type { CreateOrganizationDto } from "~/types/dtos/organizations";
-import type { OrganizationRolesVM, OrganizationMembersVM, OrganizationNavDataVM, OrganizationsVM } from "~/types/viewModels/organizations";
+import type { CreateOrganizationDto, CreateOrganizationInvitationDto } from "~/types/dtos/organizations";
+import type { OrganizationRolesVM, OrganizationMembersVM, OrganizationNavDataVM, OrganizationsVM, OrganizationInvitationsVM } from "~/types/viewModels/organizations";
 
 export const useOrganizationsService = () => {
     const api = useApi();
@@ -19,6 +19,12 @@ export const useOrganizationsService = () => {
         },
         async getRoles(id: string) {
             return await api.sendGetRequest<OrganizationRolesVM>(`organizations/${id}/roles`);
+        },
+        async createInvitation(id: string, model: CreateOrganizationInvitationDto) {
+            await api.sendPostRequest(`organizations/${id}/invitations`, model);
+        },
+        async getInvitations(id: string) {
+            return await api.sendGetRequest<OrganizationInvitationsVM>(`organizations/${id}/invitations`);
         }
     }
 }
