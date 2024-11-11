@@ -1,11 +1,8 @@
 <template>
     <ActionDialog header="Update role name" submit-label="Confirm" @submit="updateRoleName" ref="dialog">
-        <div class="flex flex-col gap-2">
-            <div class="flex flex-col gap-1">
-                <label for="title">Name</label>
-                <InputText id="title" v-model="model.name" autocomplete="off" class="w-full" />
-            </div>
-        </div>
+        <LabeledInput label="Name">
+            <InputText v-model="model.name" autocomplete="off" class="w-full" />
+        </LabeledInput>
     </ActionDialog>
 </template>
 

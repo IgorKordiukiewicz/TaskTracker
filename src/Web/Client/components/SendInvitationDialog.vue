@@ -1,9 +1,8 @@
 <template>
     <ActionDialog header="Send an invitation" submit-label="Send" @submit="sendInvitation" ref="dialog">
-        <div class="flex flex-col gap-1">
-            <label>User</label>
+        <LabeledInput label="User">
             <AutoComplete v-model="selectedUser" option-label="email" :suggestions="filteredUsers" @complete="searchUsers" :inputStyle="{ 'width': '100%' }" />
-        </div>
+        </LabeledInput>
     </ActionDialog>
 </template>
 

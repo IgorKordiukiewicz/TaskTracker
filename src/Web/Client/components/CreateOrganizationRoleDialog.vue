@@ -1,15 +1,11 @@
 <template>
     <ActionDialog header="Create a role" submit-label="Create" @submit="createRole" ref="dialog">
-        <div class="flex flex-col gap-2">
-            <div class="flex flex-col gap-1">
-                <label for="title">Name</label>
-                <InputText id="title" v-model="model.name" autocomplete="off" class="w-full" />
-            </div>
-            <div class="flex flex-col gap-1">
-                <label for="title">Permissions</label>
-                <MultiSelect id="title" v-model="selectedPermissions" :options="permissions" option-label="label" class="w-full" />
-            </div>
-        </div>
+        <LabeledInput label="Name">
+            <InputText id="title" v-model="model.name" autocomplete="off" class="w-full" />
+        </LabeledInput>
+        <LabeledInput label="Permissions">
+            <MultiSelect id="title" v-model="selectedPermissions" :options="permissions" option-label="label" class="w-full" />
+        </LabeledInput>
     </ActionDialog>
 </template>
 

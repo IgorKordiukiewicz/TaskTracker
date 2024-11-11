@@ -1,9 +1,8 @@
 <template>
     <ActionDialog header="Create an organization" submit-label="Create" @submit="createOrganization" ref="dialog">
-        <div class="flex flex-col gap-1">
-            <label for="name">Name</label>
-            <InputText id="name" v-model="model.name" autocomplete="off" class="w-full" />
-        </div>
+        <LabeledInput label="name">
+            <InputText v-model="model.name" autocomplete="off" class="w-full" />
+        </LabeledInput>
     </ActionDialog>
 </template>
 
