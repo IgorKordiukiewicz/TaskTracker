@@ -26,16 +26,18 @@
         </div>
         <ContextMenu ref="menu" :model="menuItems" @hide="selectedRole = null" />
         <UpdateOrganizationRoleNameDialog ref="updateRoleNameDialog" :organization-id="organizationId" @on-update="updateRoles" />
+        <ConfirmDialog></ConfirmDialog>
     </OrganizationLayout>
 </template>
 
 <script setup lang="ts">
-import { UpdateOrganizationRolePermissionsDto } from '~/types/dtos/organizations';
+import { DeleteOrganizationRoleDto, UpdateOrganizationRolePermissionsDto } from '~/types/dtos/organizations';
 import { OrganizationPermissions } from '~/types/enums';
 import type { OrganizationRoleVM } from '~/types/viewModels/organizations';
 
 const route = useRoute();
 const organizationsService = useOrganizationsService();
+const confirm = useConfirm();
 
 const createRoleDialog = ref();
 const updateRoleNameDialog = ref();
@@ -56,14 +58,27 @@ const menuItems = ref([
         label: 'Edit name',
         icon: 'pi pi-pencil',
         command: () => {
-            openUpdateRoleNameDialog()
+            updateRoleNameDialog.value.show(selectedRole.value);
         }
     },
     {
         label: 'Delete',
         icon: 'pi pi-trash',
         command: () => {
-
+            const roleId = selectedRole.value.id;
+            confirm.require({
+                message: `Are you sure you want to delete the ${selectedRole.value.name} role?`,
+                header: 'Confirm action',
+                rejectProps: {
+                    label: 'Cancel',
+                    severity: 'secondary'
+                },
+                acceptProps: {
+                    label: 'Confirm',
+                    severity: 'danger'
+                },
+                accept: async () => await deleteRole(roleId)
+            })
         }
     }
 ])
@@ -76,10 +91,6 @@ function openCreateRoleDialog() {
     createRoleDialog.value.show();
 }
 
-function openUpdateRoleNameDialog() {
-    updateRoleNameDialog.value.show(selectedRole.value);
-}
-
 async function updateRoles() {
     roles.value = await organizationsService.getRoles(organizationId.value);
 }
@@ -89,6 +100,13 @@ async function updateRolePermissions(event: Event, role: OrganizationRoleVM, per
     model.roleId = role.id;
     model.permissions = role.permissions ^ permission;
     await organizationsService.updateRolePermissions(organizationId.value, model);
+    await updateRoles();
+}
+
+async function deleteRole(roleId: string) {
+    const model = new DeleteOrganizationRoleDto();
+    model.roleId = roleId;
+    await organizationsService.deleteRole(organizationId.value, model);
     await updateRoles();
 }
 

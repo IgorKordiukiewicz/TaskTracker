@@ -27,3 +27,7 @@ export class UpdateOrganizationRoleNameDto {
     roleId: string = '';
     name: string = '';
 }
+
+export class DeleteOrganizationRoleDto {
+    roleId: string = '';
+}
