@@ -2,7 +2,8 @@
     <OrganizationLayout>
         <div class="flex justify-between items-center">
             <p class="text-lg">Roles</p>
-            <Button icon="pi pi-plus" severity="primary" label="Create" @click="" />
+            <Button icon="pi pi-plus" severity="primary" label="Create" @click="openCreateRoleDialog" />
+            <CreateOrganizationRoleDialog ref="createRoleDialog" :organization-id="organizationId" @on-create="updateRoles" />
         </div>
         <div class="rounded-md bg-white w-100 shadow mt-4 p-4" v-if="roles">
             <table class="w-full" style="border-spacing: 5000px;">
@@ -31,6 +32,8 @@ import { OrganizationPermissions } from '~/types/enums';
 const route = useRoute();
 const organizationsService = useOrganizationsService();
 
+const createRoleDialog = ref();
+
 const organizationId = ref(route.params.id as string);
 const roles = ref(await organizationsService.getRoles(organizationId.value));
 
@@ -41,8 +44,15 @@ const permissions = ref([
 ])
 
 function hasPermission(permission: OrganizationPermissions, permissions: OrganizationPermissions) {
-    console.log(`${permission}, current: ${permissions}, result: ${(permissions & permission) === permission}`);
     return (permissions & permission) === permission;
+}
+
+function openCreateRoleDialog() {
+    createRoleDialog.value.show();
+}
+
+async function updateRoles() {
+    roles.value = await organizationsService.getRoles(organizationId.value);
 }
 </script>
 
