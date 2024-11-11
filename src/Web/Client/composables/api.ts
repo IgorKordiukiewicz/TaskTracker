@@ -21,10 +21,13 @@ export const useApi = () => {
                 handleError(error);
             }
         },
-        async sendGetRequest<T>(url: string) {
+        async sendGetRequest<T>(url: string, customHeaders?: Record<string, string>) {
             try {
                 const { data, error } = await useFetch<T>(`https://localhost:7075/${url}`, {
-                    headers: getHeaders(await getAccessToken())
+                    headers: { 
+                        ...getHeaders(await getAccessToken()),
+                        ...customHeaders
+                    }
                 });
     
                 if(error.value) {

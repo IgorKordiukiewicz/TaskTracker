@@ -13,3 +13,10 @@ export enum OrganizationInvitationState
     Declined,
     Canceled
 }
+
+export enum TaskPriority {
+    Low,
+    Normal,
+    High,
+    Urgent
+}

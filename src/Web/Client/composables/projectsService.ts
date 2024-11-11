@@ -1,5 +1,5 @@
 import type { CreateProjectDto } from "~/types/dtos/projects";
-import type { ProjectNavDataVM, ProjectsVM } from "~/types/viewModels/projects";
+import type { ProjectMembersVM, ProjectNavDataVM, ProjectsVM } from "~/types/viewModels/projects";
 
 export const useProjectsService = () => {
     const api = useApi();
@@ -13,6 +13,9 @@ export const useProjectsService = () => {
         },
         async createProject(model: CreateProjectDto) {
             await api.sendPostRequest('projects', model, { 'OrganizationId': model.organizationId });
+        },
+        async getMembers(id: string) {
+            return await api.sendGetRequest<ProjectMembersVM>(`projects/${id}/members`);
         }
     }
 }
