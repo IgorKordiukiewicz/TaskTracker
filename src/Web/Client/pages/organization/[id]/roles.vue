@@ -18,7 +18,8 @@
                         {{ role.name }}
                     </td>
                     <td v-for="permission in permissions" class="text-center">
-                        <Checkbox binary :model-value="hasPermission(permission.value, role.permissions)" :disabled="!role.modifiable" />
+                        <Checkbox binary :model-value="hasPermission(permission.value, role.permissions)" :disabled="!role.modifiable" 
+                        @change="async (e) => await updateRolePermissions(e, role, permission.value)" />
                     </td>
                 </tr>
             </table>
@@ -27,7 +28,9 @@
 </template>
 
 <script setup lang="ts">
+import { UpdateOrganizationRolePermissionsDto } from '~/types/dtos/organizations';
 import { OrganizationPermissions } from '~/types/enums';
+import type { OrganizationRoleVM } from '~/types/viewModels/organizations';
 
 const route = useRoute();
 const organizationsService = useOrganizationsService();
@@ -53,6 +56,14 @@ function openCreateRoleDialog() {
 
 async function updateRoles() {
     roles.value = await organizationsService.getRoles(organizationId.value);
+}
+
+async function updateRolePermissions(event: Event, role: OrganizationRoleVM, permission: OrganizationPermissions) {
+    const model = new UpdateOrganizationRolePermissionsDto();
+    model.roleId = role.id;
+    model.permissions = role.permissions ^ permission;
+    await organizationsService.updateRolePermissions(organizationId.value, model);
+    await updateRoles();
 }
 </script>
 

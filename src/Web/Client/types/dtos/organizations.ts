@@ -17,3 +17,8 @@ export class CreateOrganizationRoleDto {
     name: string = '';
     permissions: OrganizationPermissions = 0;
 }
+
+export class UpdateOrganizationRolePermissionsDto {
+    roleId: string = '';
+    permissions: OrganizationPermissions = 0;
+}
