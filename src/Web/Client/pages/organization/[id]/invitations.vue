@@ -15,9 +15,7 @@
                 </Column>
                 <Column header="State">
                     <template #body="slotProps">
-                        <div class="rounded-full py-2 px-4 w-28 flex justify-center text-white" :style="{ 'background': getStateColor(slotProps.data.state) }" >
-                            {{ OrganizationInvitationState[slotProps.data.state] }}
-                        </div>
+                        <Tag class="w-24" :value="OrganizationInvitationState[slotProps.data.state]" :severity="getStateSeverity(slotProps.data.state)"></Tag>
                     </template>
                 </Column>
                 <Column header="Created At" >
@@ -49,18 +47,18 @@ async function updateInvitations() {
     invitations.value = await organizationsService.getInvitations(organizationId.value);
 }
 
-function getStateColor(state: OrganizationInvitationState) {
+function getStateSeverity(state: OrganizationInvitationState) {
     switch (+state) {
         case OrganizationInvitationState.Pending: 
-            return "var(--p-button-text-info-color)";
+            return "info";
         case OrganizationInvitationState.Accepted:
-            return "var(--p-button-text-success-color)";
+            return "success";
         case OrganizationInvitationState.Canceled:
-            return "var(--p-button-text-warn-color)";
+            return "warn";
         case OrganizationInvitationState.Declined:
-            return "var(--p-button-text-danger-color)";
+            return "danger";
         default: 
-            return "#ffffff";
+            return "primary";
     }
 }
 

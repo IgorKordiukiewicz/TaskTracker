@@ -49,10 +49,7 @@
                 </Column>
                 <Column header="Priority" style="width: 200px;" sortable sortField="priority" filter-field="priority" :show-filter-match-modes="false">
                     <template #body="{ data }">
-                        <div class="flex gap-3 items-center">
-                            <PriorityAvatar :priority="data.priority" />
-                            <p>{{ TaskPriority[data.priority] }}</p>
-                        </div>
+                        <Tag class="w-24" :value="TaskPriority[data.priority]" :severity="getPrioritySeverity(data.priority)"></Tag>
                     </template>
                     <template #filter="{ filterModel }">
                         <MultiSelect v-model="filterModel.value" :options="priorities" option-label="name" option-value="key"></MultiSelect>
@@ -127,5 +124,20 @@ initFilters();
 
 function resetFilters() {
     initFilters();
+}
+
+function getPrioritySeverity(priority: TaskPriority) {
+    switch (+priority) {
+        case TaskPriority.Urgent: 
+            return "danger";
+        case TaskPriority.High:
+            return "warn";
+        case TaskPriority.Normal:
+            return "info";
+        case TaskPriority.Low:
+            return "success";
+        default: 
+            return "primary";
+    }
 }
 </script>
