@@ -294,7 +294,7 @@ public class ProjectsTests
     [Fact]
     public async Task CreateRole_ShouldFail_WhenProjectDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new CreateProjectRoleCommand(Guid.NewGuid(), new("abc", ProjectPermissions.CreateTasks)));
+        var result = await _fixture.SendRequest(new CreateProjectRoleCommand(Guid.NewGuid(), new("abc", ProjectPermissions.EditTasks)));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -305,7 +305,7 @@ public class ProjectsTests
         var project = (await _factory.CreateProjects())[0];
         var rolesCountBefore = await _fixture.CountAsync<ProjectRole>();
 
-        var result = await _fixture.SendRequest(new CreateProjectRoleCommand(project.Id, new("abc", ProjectPermissions.CreateTasks)));
+        var result = await _fixture.SendRequest(new CreateProjectRoleCommand(project.Id, new("abc", ProjectPermissions.EditTasks)));
 
         using(new AssertionScope())
         {
@@ -398,7 +398,7 @@ public class ProjectsTests
     {
         var (project, roleName) = await CreateProjectWithCustomRole();
         var roleId = project.Roles.First(x => x.Name == roleName).Id;
-        var newPermissions = ProjectPermissions.CreateTasks | ProjectPermissions.AddComments;
+        var newPermissions = ProjectPermissions.EditRoles | ProjectPermissions.EditMembers;
 
         var result = await _fixture.SendRequest(new UpdateProjectRolePermissionsCommand(project.Id, new(roleId, newPermissions)));
 
@@ -488,7 +488,7 @@ public class ProjectsTests
         var user = await _fixture.FirstAsync<User>();
         var project = Project.Create("abc", organization.Id, user.Id);
         var roleName = "abc";
-        _ = project.RolesManager.AddRole(roleName, ProjectPermissions.CreateTasks);
+        _ = project.RolesManager.AddRole(roleName, ProjectPermissions.EditTasks);
 
         await _fixture.SeedDb(db =>
         {

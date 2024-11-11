@@ -74,7 +74,7 @@ public class OrganizationsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Organization or user not found.</response> 
     [HttpPost("{organizationId:guid}/invitations")]
-    [Authorize(Policy.OrganizationInviteMembers)]
+    [Authorize(Policy.OrganizationEditMembers)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> CreateOrganizationInvitation(Guid organizationId, [FromBody] CreateOrganizationInvitationDto model)
     {
@@ -89,7 +89,7 @@ public class OrganizationsController : ControllerBase
     /// <param name="pagination"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpGet("{organizationId:guid}/invitations")]
-    [Authorize(Policy.OrganizationInviteMembers)]
+    [Authorize(Policy.OrganizationEditMembers)]
     [ProducesResponseType(typeof(OrganizationInvitationsVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetOrganizationInvitationsForOrganization(Guid organizationId, [FromQuery] Pagination pagination)
@@ -143,7 +143,7 @@ public class OrganizationsController : ControllerBase
     /// <param name="invitationId"></param>
     /// <response code="404">Organization with given invitation not found.</response> 
     [HttpPost("invitations/{invitationId:guid}/cancel")]
-    [Authorize(Policy.OrganizationInviteMembers)]
+    [Authorize(Policy.OrganizationEditMembers)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> CancelOrganizationInvitation(Guid invitationId)
     {
@@ -173,7 +173,7 @@ public class OrganizationsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpPost("{organizationId:guid}/members/remove")]
-    [Authorize(Policy.OrganizationRemoveMembers)]
+    [Authorize(Policy.OrganizationEditMembers)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> RemoveOrganizationMember(Guid organizationId, [FromBody] RemoveOrganizationMemberDto model)
     {
@@ -189,7 +189,7 @@ public class OrganizationsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpPost("{organizationId:guid}/members/role")]
-    [Authorize(Policy.OrganizationManageRoles)]
+    [Authorize(Policy.OrganizationEditRoles)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateMemberRole(Guid organizationId, [FromBody] UpdateMemberRoleDto model)
     {
@@ -203,7 +203,7 @@ public class OrganizationsController : ControllerBase
     /// <param name="organizationId"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpGet("{organizationId:guid}/roles")]
-    [Authorize(Policy.OrganizationManageRoles)]
+    [Authorize(Policy.OrganizationEditRoles)]
     [ProducesResponseType(typeof(RolesVM<OrganizationPermissions>), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetOrganizationRoles(Guid organizationId)
@@ -219,7 +219,7 @@ public class OrganizationsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpPost("{organizationId:guid}/roles")]
-    [Authorize(Policy.OrganizationManageRoles)]
+    [Authorize(Policy.OrganizationEditRoles)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> CreateOrganizationRole(Guid organizationId, [FromBody] CreateRoleDto<OrganizationPermissions> model)
     {
@@ -234,7 +234,7 @@ public class OrganizationsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpPost("{organizationId:guid}/roles/delete")]
-    [Authorize(Policy.OrganizationManageRoles)]
+    [Authorize(Policy.OrganizationEditRoles)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteOrganizationRole(Guid organizationId, DeleteRoleDto model)
     {
@@ -249,7 +249,7 @@ public class OrganizationsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpPost("{organizationId:guid}/roles/name")]
-    [Authorize(Policy.OrganizationManageRoles)]
+    [Authorize(Policy.OrganizationEditRoles)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateRoleName(Guid organizationId, [FromBody] UpdateRoleNameDto model)
     {
@@ -264,7 +264,7 @@ public class OrganizationsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpPost("{organizationId:guid}/roles/permissions")]
-    [Authorize(Policy.OrganizationManageRoles)]
+    [Authorize(Policy.OrganizationEditRoles)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateRolePermissions(Guid organizationId, [FromBody] UpdateRolePermissionsDto<OrganizationPermissions> model)
     {

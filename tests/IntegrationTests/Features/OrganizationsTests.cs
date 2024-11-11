@@ -31,7 +31,7 @@ public class OrganizationsTests
     {
         await _factory.CreateUsers();
 
-        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new("org", Guid.NewGuid())));
+        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new(new("org"), Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -41,7 +41,7 @@ public class OrganizationsTests
     {
         var user = (await _factory.CreateUsers())[0];
 
-        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new("org", user.Id)));
+        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new(new("org"), user.Id)));
 
         using(new AssertionScope())
         {
@@ -259,7 +259,16 @@ public class OrganizationsTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Members.Should().BeEquivalentTo(new[]
             {
-                new OrganizationMemberVM(organization.Members[0].Id, user.Id, user.FullName, organization.Members[0].RoleId, true)
+                new OrganizationMemberVM()
+                {
+                    Id = organization.Members[0].Id,
+                    UserId = user.Id,
+                    Name = user.FullName,
+                    Email = user.Email,
+                    RoleId = organization.Members[0].RoleId,
+                    RoleName = "Administrator",
+                    Owner = true
+                }
             });
         }
     }
@@ -407,7 +416,7 @@ public class OrganizationsTests
     [Fact]
     public async Task CreateRole_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(Guid.NewGuid(), new("abc", OrganizationPermissions.InviteMembers)));
+        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(Guid.NewGuid(), new("abc", OrganizationPermissions.EditProjects)));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -418,7 +427,7 @@ public class OrganizationsTests
         var organization = (await _factory.CreateOrganizations())[0];
         var rolesCountBefore = await _fixture.CountAsync<OrganizationRole>();
 
-        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(organization.Id, new("abc", OrganizationPermissions.InviteMembers)));
+        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(organization.Id, new("abc", OrganizationPermissions.EditProjects)));
 
         using (new AssertionScope())
         {
@@ -511,7 +520,7 @@ public class OrganizationsTests
     {
         var (organization, roleName) = await CreateOrganizationWithCustomRole();
         var roleId = organization.Roles.First(x => x.Name == roleName).Id;
-        var newPermissions = OrganizationPermissions.CreateProjects | OrganizationPermissions.InviteMembers;
+        var newPermissions = OrganizationPermissions.EditRoles | OrganizationPermissions.EditMembers;
 
         var result = await _fixture.SendRequest(new UpdateOrganizationRolePermissionsCommand(organization.Id, new(roleId, newPermissions)));
 
@@ -543,7 +552,7 @@ public class OrganizationsTests
         var user = (await _factory.CreateUsers())[0];
         var organization = Organization.Create("org", user.Id);
         var roleName = "abc";
-        _ = organization.RolesManager.AddRole(roleName, OrganizationPermissions.CreateProjects);
+        _ = organization.RolesManager.AddRole(roleName, OrganizationPermissions.EditProjects);
 
         await _fixture.SeedDb(db =>
         {

@@ -66,7 +66,7 @@ public class UsersController : ControllerBase
     /// <param name="organizationId"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpGet("available-for-invitation")]
-    [Authorize(Policy.OrganizationInviteMembers)]
+    [Authorize(Policy.OrganizationEditMembers)]
     [ProducesResponseType(typeof(UsersSearchVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetUsersNotInOrganization([FromQuery] string searchValue, [FromQuery] Guid organizationId)
@@ -82,7 +82,7 @@ public class UsersController : ControllerBase
     /// <param name="organizationId"></param>
     /// <response code="404">Project or organization not found.</response> 
     [HttpGet("available-for-project")]
-    [Authorize(Policy.ProjectAddMembers)]
+    [Authorize(Policy.ProjectEditTasks)]
     [ProducesResponseType(typeof(UsersSearchVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetUsersAvailableForProject([FromQuery] Guid projectId, [FromQuery] Guid organizationId)
