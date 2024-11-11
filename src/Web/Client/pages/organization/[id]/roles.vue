@@ -5,15 +5,15 @@
             <Button icon="pi pi-plus" severity="primary" label="Create" @click="openCreateRoleDialog" />
             <CreateOrganizationRoleDialog ref="createRoleDialog" :organization-id="organizationId" @on-create="updateRoles" />
         </div>
-        <div class="rounded-md bg-white w-100 shadow mt-4 p-4" v-if="roles">
+        <div class="rounded-md bg-white w-100 shadow mt-4 py-4" v-if="roles">
             <table class="w-full" style="border-spacing: 5000px;">
                 <tr>
                     <th style="width: 200px;"></th>
-                    <th v-for="permission in permissions">
+                    <th v-for="permission in permissions" class="pb-2">
                         {{ permission.label }}
                     </th>
                 </tr>
-                <tr v-for="role in roles.roles">
+                <tr v-for="role in roles.roles" class="hover:bg-surface-100" @contextmenu="onRightClick($event, role)">
                     <td>
                         {{ role.name }}
                     </td>
@@ -24,6 +24,8 @@
                 </tr>
             </table>
         </div>
+        <ContextMenu ref="menu" :model="menuItems" @hide="selectedRole = null" />
+        <UpdateOrganizationRoleNameDialog ref="updateRoleNameDialog" :organization-id="organizationId" @on-update="updateRoles" />
     </OrganizationLayout>
 </template>
 
@@ -36,6 +38,9 @@ const route = useRoute();
 const organizationsService = useOrganizationsService();
 
 const createRoleDialog = ref();
+const updateRoleNameDialog = ref();
+const menu = ref();
+const selectedRole = ref();
 
 const organizationId = ref(route.params.id as string);
 const roles = ref(await organizationsService.getRoles(organizationId.value));
@@ -46,12 +51,33 @@ const permissions = ref([
     { label: 'Roles', value: OrganizationPermissions.EditRoles }
 ])
 
+const menuItems = ref([
+    {
+        label: 'Edit name',
+        icon: 'pi pi-pencil',
+        command: () => {
+            openUpdateRoleNameDialog()
+        }
+    },
+    {
+        label: 'Delete',
+        icon: 'pi pi-trash',
+        command: () => {
+
+        }
+    }
+])
+
 function hasPermission(permission: OrganizationPermissions, permissions: OrganizationPermissions) {
     return (permissions & permission) === permission;
 }
 
 function openCreateRoleDialog() {
     createRoleDialog.value.show();
+}
+
+function openUpdateRoleNameDialog() {
+    updateRoleNameDialog.value.show(selectedRole.value);
 }
 
 async function updateRoles() {
@@ -65,10 +91,17 @@ async function updateRolePermissions(event: Event, role: OrganizationRoleVM, per
     await organizationsService.updateRolePermissions(organizationId.value, model);
     await updateRoles();
 }
+
+function onRightClick(event: Event, role: OrganizationRoleVM) {
+    selectedRole.value = role;
+    menu.value.show(event);
+}
 </script>
 
 <style scoped>
 td {
-    padding: 0.75rem 0;
+    padding: 0.75rem 1rem;
+    border-style: solid;
+    border-width: 0 0 1px 0;
 }
 </style>

@@ -22,3 +22,8 @@ export class UpdateOrganizationRolePermissionsDto {
     roleId: string = '';
     permissions: OrganizationPermissions = 0;
 }
+
+export class UpdateOrganizationRoleNameDto {
+    roleId: string = '';
+    name: string = '';
+}
