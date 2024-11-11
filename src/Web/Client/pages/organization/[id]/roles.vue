@@ -5,7 +5,7 @@
             <Button icon="pi pi-plus" severity="primary" label="Create" @click="openCreateRoleDialog" />
             <CreateOrganizationRoleDialog ref="createRoleDialog" :organization-id="organizationId" @on-create="updateRoles" />
         </div>
-        <div class="rounded-md bg-white w-100 shadow mt-4 py-4" v-if="roles">
+        <div class="bg-white w-100 shadow mt-4" v-if="roles">
             <table class="w-full" style="border-spacing: 5000px;">
                 <tr>
                     <th style="width: 200px;"></th>
@@ -121,5 +121,9 @@ td {
     padding: 0.75rem 1rem;
     border-style: solid;
     border-width: 0 0 1px 0;
+}
+
+th {
+    padding: 0.75rem 1rem;
 }
 </style>

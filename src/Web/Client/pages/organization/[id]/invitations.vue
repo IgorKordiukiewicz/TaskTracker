@@ -5,26 +5,24 @@
             <Button icon="pi pi-plus" severity="primary" label="Invite" @click="openSendInvitationDialog" />
             <SendInvitationDialog ref="sendInvitationDialog" :organizationId="organizationId" @onCreate="updateInvitations" />
         </div>
-        <div v-if="invitations" class="rounded-md bg-white w-100 shadow mt-4 p-4">
-            <DataTable :value="invitations.invitations">
-                <Column header="Email" field="userEmail"></Column>
-                <Column header="Finalized At">
-                    <template #body="slotProps">
-                        {{ formatDate(slotProps.data.finalizedAt) }}
-                    </template>
-                </Column>
-                <Column header="State">
-                    <template #body="slotProps">
-                        <Tag class="w-24" :value="OrganizationInvitationState[slotProps.data.state]" :severity="getStateSeverity(slotProps.data.state)"></Tag>
-                    </template>
-                </Column>
-                <Column header="Created At" >
-                    <template #body="slotProps">
-                        {{ formatDate(slotProps.data.createdAt) }}
-                    </template>
-                </Column>
-            </DataTable>
-        </div>
+        <DataTable v-if="invitations" :value="invitations.invitations" class="mt-4 shadow">
+            <Column header="Email" field="userEmail"></Column>
+            <Column header="Finalized At">
+                <template #body="slotProps">
+                    {{ formatDate(slotProps.data.finalizedAt) }}
+                </template>
+            </Column>
+            <Column header="State">
+                <template #body="slotProps">
+                    <Tag class="w-24" :value="OrganizationInvitationState[slotProps.data.state]" :severity="getStateSeverity(slotProps.data.state)"></Tag>
+                </template>
+            </Column>
+            <Column header="Created At" >
+                <template #body="slotProps">
+                    {{ formatDate(slotProps.data.createdAt) }}
+                </template>
+            </Column>
+        </DataTable>
     </OrganizationLayout>
 </template>
 

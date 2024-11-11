@@ -1,25 +1,23 @@
 <template>
     <OrganizationLayout>
         <p class="text-lg">Members</p>
-        <div v-if="members && roles" class="rounded-md bg-white w-100 shadow mt-4 p-4">
-            <DataTable :value="members.members" v-if="members">
-                <Column header="Name">
-                    <template #body="slotProps">
-                        <div class="flex gap-4 items-center">
-                            <Avatar label="AA" shape="circle" /> <!--TODO-->
-                            <p>{{ slotProps.data.name }}</p>
-                        </div>
-                    </template>
-                </Column>
-                <Column field="email" header="Email"></Column>
-                <Column field="roleName" header="Role">
-                    <template #body="slotProps">
-                        <Select :options="availableRoles" option-label="name" :model-value="getRoleValue(slotProps.data)" 
-                        @change="async (e) => await updateMemberRole(e, slotProps.data)"  class="w-48" />
-                    </template>
-                </Column>
-            </DataTable>
-        </div>
+        <DataTable :value="members.members" v-if="members && roles" class="mt-4 shadow">
+            <Column header="Name">
+                <template #body="slotProps">
+                    <div class="flex gap-4 items-center">
+                        <Avatar label="AA" shape="circle" /> <!--TODO-->
+                        <p>{{ slotProps.data.name }}</p>
+                    </div>
+                </template>
+            </Column>
+            <Column field="email" header="Email"></Column>
+            <Column field="roleName" header="Role">
+                <template #body="slotProps">
+                    <Select :options="availableRoles" option-label="name" :model-value="getRoleValue(slotProps.data)" 
+                    @change="async (e) => await updateMemberRole(e, slotProps.data)"  class="w-48" />
+                </template>
+            </Column>
+        </DataTable>
     </OrganizationLayout>
 </template>
 

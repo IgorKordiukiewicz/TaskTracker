@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center">
             <p class="text-lg">Tasks</p>
             <div class="flex gap-2 items-center">
-                <Button type="button" icon="pi pi-filter-slash" label="Clear" severity="info" @click="resetFilters" />
+                <Button type="button" icon="pi pi-filter-slash" label="Clear" severity="contrast" outlined @click="resetFilters" />
                 <IconField>
                     <InputIcon class="pi pi-search" />
                     <InputText v-model="filters['global'].value" placeholder="Search" />
@@ -41,7 +41,7 @@
                 </Column>
                 <Column header="Status" style="width: 200px;" sortable sortField="status.name" filter-field="status.name" :show-filter-match-modes="false">
                     <template #body="{ data }">
-                        {{ data.status.name }}
+                        <Tag class="w-28" :value="data.status.name" severity="secondary"></Tag>
                     </template>
                     <template #filter="{ filterModel }">
                         <MultiSelect v-model="filterModel.value" :options="tasks.allTaskStatuses" option-value="name" option-label="name"></MultiSelect>
@@ -49,7 +49,7 @@
                 </Column>
                 <Column header="Priority" style="width: 200px;" sortable sortField="priority" filter-field="priority" :show-filter-match-modes="false">
                     <template #body="{ data }">
-                        <Tag class="w-24" :value="TaskPriority[data.priority]" :severity="getPrioritySeverity(data.priority)"></Tag>
+                        <Tag class="w-28" :value="TaskPriority[data.priority]" :severity="getPrioritySeverity(data.priority)"></Tag>
                     </template>
                     <template #filter="{ filterModel }">
                         <MultiSelect v-model="filterModel.value" :options="priorities" option-label="name" option-value="key"></MultiSelect>
