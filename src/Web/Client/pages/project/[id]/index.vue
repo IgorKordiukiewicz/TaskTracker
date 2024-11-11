@@ -17,7 +17,7 @@
                 <Column header="Priority" style="width: 200px;" :sortable="true" sortField="priority">
                     <template #body="slotProps">
                         <div class="flex gap-3 items-center">
-                            <Avatar label="AA" shape="circle" />
+                            <PriorityAvatar :priority="slotProps.data.priority" />
                             <p>{{ TaskPriority[slotProps.data.priority] }}</p>
                         </div>
                     </template>
