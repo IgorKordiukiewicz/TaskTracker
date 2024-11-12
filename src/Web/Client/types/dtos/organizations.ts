@@ -8,11 +8,6 @@ export class CreateOrganizationInvitationDto {
     userId: string = '';
 }
 
-export class UpdateOrganizationMemberRoleDto {
-    memberId: string = '';
-    roleId: string = '';
-}
-
 export class CreateOrganizationRoleDto {
     name: string = '';
     permissions: OrganizationPermissions = 0;

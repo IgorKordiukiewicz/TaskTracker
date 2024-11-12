@@ -1,5 +1,5 @@
-import { UpdateOrganizationMemberRoleDto } from './../types/dtos/organizations';
 import type { CreateOrganizationDto, CreateOrganizationInvitationDto, CreateOrganizationRoleDto, DeleteOrganizationRoleDto, UpdateOrganizationRoleNameDto, UpdateOrganizationRolePermissionsDto } from "~/types/dtos/organizations";
+import type { UpdateMemberRoleDto } from '~/types/dtos/shared';
 import type { OrganizationRolesVM, OrganizationMembersVM, OrganizationNavDataVM, OrganizationsVM, OrganizationInvitationsVM, UserOrganizationInvitationsVM } from "~/types/viewModels/organizations";
 
 export const useOrganizationsService = () => {
@@ -27,7 +27,7 @@ export const useOrganizationsService = () => {
         async getInvitations(id: string) {
             return await api.sendGetRequest<OrganizationInvitationsVM>(`organizations/${id}/invitations`);
         },
-        async updateMemberRole(id: string, model: UpdateOrganizationMemberRoleDto) {
+        async updateMemberRole(id: string, model: UpdateMemberRoleDto) {
             await api.sendPostRequest(`organizations/${id}/members/role`, model);
         },
         async getUserInvitations() {

@@ -1,5 +1,5 @@
 import type { OrganizationInvitationState, OrganizationPermissions } from "../enums";
-import type { NavDataVM } from "./shared";
+import type { MemberVM, NavDataVM, RoleVM } from "./shared";
 
 export interface OrganizationsVM
 {
@@ -20,13 +20,7 @@ export interface OrganizationMembersVM {
     members: OrganizationMemberVM[];
 }
 
-export interface OrganizationMemberVM {
-    id: string;
-    userId: string;
-    name: string;
-    email: string;
-    roleId: string;
-    roleName: string;
+export interface OrganizationMemberVM extends MemberVM {
     owner: boolean;
 }
 
@@ -34,11 +28,8 @@ export interface OrganizationRolesVM {
     roles: OrganizationRoleVM[];
 }
 
-export interface OrganizationRoleVM {
-    id: string;
-    name: string;
+export interface OrganizationRoleVM extends RoleVM {
     permissions: OrganizationPermissions;
-    modifiable: boolean;
 }
 
 export interface OrganizationInvitationsVM {
