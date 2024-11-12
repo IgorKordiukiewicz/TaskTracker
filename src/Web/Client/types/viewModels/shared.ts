@@ -15,5 +15,6 @@ export interface MemberVM {
 export interface RoleVM {
     id: string;
     name: string;
+    permissions: number;
     modifiable: boolean;
 }

@@ -92,6 +92,11 @@ const projectNodes = ref([
                 icon: 'pi pi-user',
                 link: [ '/project/', '/members' ]
             },
+            {
+                title: 'Roles',
+                icon: 'pi pi-user-edit',
+                link: [ '/project/', '/roles' ]
+            },
         ]
     },
 ]);

@@ -1,5 +1,5 @@
-import type { CreateOrganizationDto, CreateOrganizationInvitationDto, CreateOrganizationRoleDto, DeleteOrganizationRoleDto, UpdateOrganizationRoleNameDto, UpdateOrganizationRolePermissionsDto } from "~/types/dtos/organizations";
-import type { UpdateMemberRoleDto } from '~/types/dtos/shared';
+import type { CreateOrganizationDto, CreateOrganizationInvitationDto } from "~/types/dtos/organizations";
+import type { CreateRoleDto, DeleteRoleDto, UpdateMemberRoleDto, UpdateRoleNameDto, UpdateRolePermissionsDto } from '~/types/dtos/shared';
 import type { OrganizationRolesVM, OrganizationMembersVM, OrganizationNavDataVM, OrganizationsVM, OrganizationInvitationsVM, UserOrganizationInvitationsVM } from "~/types/viewModels/organizations";
 
 export const useOrganizationsService = () => {
@@ -39,16 +39,16 @@ export const useOrganizationsService = () => {
         async declineInvitation(invitationId: string) {
             await api.sendPostRequest(`organizations/invitations/${invitationId}/decline`, '');
         },
-        async createRole(id: string, model: CreateOrganizationRoleDto) {
+        async createRole(id: string, model: CreateRoleDto) {
             await api.sendPostRequest(`organizations/${id}/roles`, model);
         },
-        async updateRolePermissions(id: string, model: UpdateOrganizationRolePermissionsDto) {
+        async updateRolePermissions(id: string, model: UpdateRolePermissionsDto) {
             await api.sendPostRequest(`organizations/${id}/roles/permissions`, model);
         },
-        async updateRoleName(id: string, model: UpdateOrganizationRoleNameDto) {
+        async updateRoleName(id: string, model: UpdateRoleNameDto) {
             await api.sendPostRequest(`organizations/${id}/roles/name`, model);
         },
-        async deleteRole(id: string, model: DeleteOrganizationRoleDto) {
+        async deleteRole(id: string, model: DeleteRoleDto) {
             await api.sendPostRequest(`organizations/${id}/roles/delete`, model);
         }
     }
