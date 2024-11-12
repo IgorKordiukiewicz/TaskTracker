@@ -11,12 +11,12 @@
                         <i class="toggle pi pi-chevron-down" style="height: 16px; color: var(--p-menu-item-icon-color)"></i>
                     </summary>
                     <li v-for="childNode in node.children" class="pl-4">
-                        <NavBarItem :title="childNode.title" :icon="childNode.icon" :link="childNode.link" :include-index="false" />
+                        <NavBarItem :title="childNode.title" :icon="childNode.icon" :link="childNode.link[0] + id + childNode.link[1]" :include-index="false" />
                     </li>
                 </details>
             </template>
             <template v-else>
-                <NavBarItem :title="node.title" :icon="node.icon" :link="node.link" :include-index="node.includeIndex" />
+                <NavBarItem :title="node.title" :icon="node.icon" :link="node.link[0] + id + node.link[1]" :include-index="node.includeIndex" />
             </template>
         </li>
     </ul>
@@ -42,7 +42,7 @@ const nodes = computed(() => {
         return projectNodes.value;
     }
     else {
-        return [];
+        return indexNodes.value;
     }
 })
 
@@ -51,7 +51,7 @@ const organizationNodes = ref([
         title: 'Projects',
         icon: 'pi pi-objects-column', // pi-th-large
         includeIndex: true,
-        link: getIdLink('organization', '')
+        link: [ '/organization/', '/' ]
     },
     {
         title: 'Team',
@@ -60,17 +60,17 @@ const organizationNodes = ref([
             {
                 title: 'Members',
                 icon: 'pi pi-user',
-                link: getIdLink('organization', 'members')
+                link: [ '/organization/', '/members' ]
             },
             {
                 title: 'Invitations',
                 icon: 'pi pi-user-plus',
-                link: getIdLink('organization', 'invitations')
+                link: [ '/organization/', '/invitations' ]
             },
             {
                 title: 'Roles',
                 icon: 'pi pi-user-edit',
-                link: getIdLink('organization', 'roles')
+                link: [ '/organization/', '/roles' ]
             },
         ]
     }
@@ -79,9 +79,9 @@ const organizationNodes = ref([
 const projectNodes = ref([
     {
         title: 'Tasks',
-        icon: 'pi pi-list', // pi-th-large
+        icon: 'pi pi-list',
         includeIndex: true,
-        link: getIdLink('project', '')
+        link: [ '/project/', '/' ]
     },
     {
         title: 'Team',
@@ -90,15 +90,21 @@ const projectNodes = ref([
             {
                 title: 'Members',
                 icon: 'pi pi-user',
-                link: getIdLink('project', 'members')
+                link: [ '/project/', '/members' ]
             },
         ]
     },
 ]);
 
-function getIdLink(parent: string, page: string) {
-    return `/${parent}/${id.value}/${page}`;
-}
+const indexNodes = ref([
+    {
+        title: 'Dashboard',
+        icon: 'pi pi-home',
+        includeIndex: true,
+        link: [ '', '' ],
+        children: null
+    }
+])
 </script>
 
 <style scoped>
