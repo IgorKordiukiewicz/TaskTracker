@@ -1,5 +1,6 @@
 import type { CreateProjectDto } from "~/types/dtos/projects";
-import type { ProjectMembersVM, ProjectNavDataVM, ProjectsVM } from "~/types/viewModels/projects";
+import type { UpdateMemberRoleDto } from "~/types/dtos/shared";
+import type { ProjectRolesVM, ProjectMembersVM, ProjectNavDataVM, ProjectsVM } from "~/types/viewModels/projects";
 
 export const useProjectsService = () => {
     const api = useApi();
@@ -16,6 +17,12 @@ export const useProjectsService = () => {
         },
         async getMembers(id: string) {
             return await api.sendGetRequest<ProjectMembersVM>(`projects/${id}/members`);
+        },
+        async getRoles(id: string) {
+            return await api.sendGetRequest<ProjectRolesVM>(`projects/${id}/roles`);
+        },
+        async updateMemberRole(id: string, model: UpdateMemberRoleDto) {
+            await api.sendPostRequest(`projects/${id}/members/role`, model);
         }
     }
 }

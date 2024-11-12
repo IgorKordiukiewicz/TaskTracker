@@ -24,6 +24,7 @@
 <script setup lang="ts">
 import type { SelectChangeEvent } from 'primevue/select';
 import { UpdateOrganizationMemberRoleDto } from '~/types/dtos/organizations';
+import { UpdateMemberRoleDto } from '~/types/dtos/shared';
 import type { OrganizationMemberVM } from '~/types/viewModels/organizations';
 
 const route = useRoute();
@@ -53,7 +54,7 @@ async function updateMembers() {
 }
 
 async function updateMemberRole(event: SelectChangeEvent, member: OrganizationMemberVM) {
-    const model = new UpdateOrganizationMemberRoleDto();
+    const model = new UpdateMemberRoleDto();
     model.memberId = member.id;
     model.roleId = event.value.id;
     await organizationsService.updateMemberRole(organizationId.value, model);

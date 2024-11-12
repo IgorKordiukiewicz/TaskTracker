@@ -1,3 +1,4 @@
+import type { ProjectPermissions } from "../enums";
 import type { NavDataVM } from "./shared";
 
 export interface ProjectsVM {
@@ -22,5 +23,18 @@ export interface ProjectMemberVM {
     id: string;
     userId: string;
     name: string;
+    email: string;
     roleId: string;
+    roleName: string;
+}
+
+export interface ProjectRolesVM {
+    roles: ProjectRoleVM[];
+}
+
+export interface ProjectRoleVM {
+    id: string;
+    name: string;
+    permissions: ProjectPermissions;
+    modifiable: boolean;
 }
