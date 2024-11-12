@@ -3,13 +3,12 @@ using Domain.Projects;
 
 namespace Application.Features.Users;
 
-public record GetUsersAvailableForProjectQuery(Guid OrganizationId, Guid ProjectId) : IRequest<Result<UsersSearchVM>>;
+public record GetUsersAvailableForProjectQuery(Guid ProjectId) : IRequest<Result<UsersSearchVM>>;
 
 internal class GetUsersAvailableForProjectQueryValidator : AbstractValidator<GetUsersAvailableForProjectQuery>
 {
     public GetUsersAvailableForProjectQueryValidator()
     {
-        RuleFor(x => x.OrganizationId).NotEmpty();
         RuleFor(x => x.ProjectId).NotEmpty();
     }
 }
@@ -35,15 +34,16 @@ internal class GetUsersAvailableForProjectHandler : IRequestHandler<GetUsersAvai
             return Result.Fail<UsersSearchVM>(new NotFoundError<Project>(request.ProjectId));
         }
 
+        var organizationId = await _dbContext.Projects
+            .Where(x => x.Id == request.ProjectId)
+            .Select(x => x.OrganizationId)
+            .FirstAsync();
+
         var organizationMembersUserIds = await _dbContext.Organizations
             .Include(x => x.Members)
-            .Where(x => x.Id == request.OrganizationId)
+            .Where(x => x.Id == organizationId)
             .Select(x => x.Members.Select(xx => xx.UserId))
-            .FirstOrDefaultAsync();
-        if(organizationMembersUserIds is null)
-        {
-            return Result.Fail<UsersSearchVM>(new NotFoundError<Organization>(request.OrganizationId));
-        }
+            .FirstAsync();
 
         var usersIds = organizationMembersUserIds.Except(projectMembersUserIds)
             .ToHashSet();

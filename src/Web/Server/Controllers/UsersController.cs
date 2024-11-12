@@ -85,9 +85,9 @@ public class UsersController : ControllerBase
     [Authorize(Policy.ProjectEditTasks)]
     [ProducesResponseType(typeof(UsersSearchVM), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetUsersAvailableForProject([FromQuery] Guid projectId, [FromQuery] Guid organizationId)
+    public async Task<IActionResult> GetUsersAvailableForProject([FromQuery] Guid projectId)
     {
-        var result = await _mediator.Send(new GetUsersAvailableForProjectQuery(organizationId, projectId));
+        var result = await _mediator.Send(new GetUsersAvailableForProjectQuery(projectId));
         return result.ToHttpResult();
     }
 
