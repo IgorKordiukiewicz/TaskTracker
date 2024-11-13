@@ -1,4 +1,4 @@
-import type { CreateTaskDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from "~/types/dtos/tasks";
+import type { AddTaskCommentDto, CreateTaskDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from "~/types/dtos/tasks";
 import type { TasksVM } from "~/types/viewModels/tasks";
 
 export const useTasksService = () => {
@@ -25,6 +25,9 @@ export const useTasksService = () => {
         },
         async updateStatus(id: string, projectId: string, model: UpdateTaskStatusDto) {
             await api.sendPostRequest(`tasks/${id}/status`, model, { 'ProjectId': projectId });
-        }
+        },
+        async addComment(id: string, projectId: string, model: AddTaskCommentDto) {
+            await api.sendPostRequest(`tasks/${id}/comments`, model, { 'ProjectId': projectId });
+        },
     }
 }

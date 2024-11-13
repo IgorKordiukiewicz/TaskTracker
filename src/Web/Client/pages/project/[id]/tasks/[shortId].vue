@@ -39,8 +39,8 @@
                         </p>
                     </div>
                     <div class="flex gap-2 items-center">
-                        <InputText class="w-full" placeholder="Add a comment" />
-                        <Button icon="pi pi-send" label="Send" />
+                        <InputText v-model="newCommentContent" class="w-full" placeholder="Add a comment" />
+                        <Button icon="pi pi-send" label="Send" :disabled="!newCommentContent" @click="addComment" />
                     </div>
                 </div>
                 <div class="bg-white w-full shadow p-4 flex flex-col gap-3">
@@ -102,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
+import { AddTaskCommentDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
 import { TaskPriority } from '~/types/enums';
 
 const route = useRoute();
@@ -133,6 +133,7 @@ const statuses = ref(details.value?.possibleNextStatuses.map(x => ({
 const selectedPriority = ref(details.value?.priority);
 const selectedAssigneeUserId = ref(details.value?.assigneeId);
 const selectedStatusId = ref(details.value?.status.id);
+const newCommentContent = ref();
 
 async function updateDetails() {
     details.value = await tasksService.getTask(taskShortId.value, projectId.value);
@@ -182,6 +183,14 @@ async function updateStatus() {
     const model = new UpdateTaskStatusDto();
     model.statusId = selectedStatusId.value!;
     await tasksService.updateStatus(details.value!.id, projectId.value, model);
+    await updateDetails();
+}
+
+async function addComment() {
+    const model = new AddTaskCommentDto();
+    model.content = newCommentContent.value;
+    newCommentContent.value = '';
+    await tasksService.addComment(details.value!.id, projectId.value, model);
     await updateDetails();
 }
 

@@ -22,3 +22,7 @@ export class UpdateTaskAssigneeDto {
 export class UpdateTaskStatusDto {
     statusId: string = '';
 }
+
+export class AddTaskCommentDto {
+    content: string = '';
+}
