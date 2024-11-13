@@ -1,12 +1,13 @@
 <template>
     <OrganizationLayout>
         <p class="text-lg">Members</p>
-        <MembersList v-if="members && roles" :members="members.members" :roles="roles.roles" @on-update-member-role="updateMemberRole" />
+        <MembersList v-if="members && roles" :members="members.members" :roles="roles.roles" 
+        @on-update-member-role="updateMemberRole" @on-remove-member="removeMember" />
     </OrganizationLayout>
 </template>
 
 <script setup lang="ts">
-import { UpdateMemberRoleDto } from '~/types/dtos/shared';
+import { RemoveMemberDto, UpdateMemberRoleDto } from '~/types/dtos/shared';
 
 const route = useRoute();
 const organizationsService = useOrganizationsService();
@@ -22,6 +23,11 @@ async function updateMembers() {
 
 async function updateMemberRole(model: UpdateMemberRoleDto) {
     await organizationsService.updateMemberRole(organizationId.value, model);
+    await updateMembers();
+}
+
+async function removeMember(model: RemoveMemberDto) {
+    await organizationsService.removeMember(organizationId.value, model);
     await updateMembers();
 }
 </script>

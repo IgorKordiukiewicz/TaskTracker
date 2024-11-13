@@ -21,3 +21,7 @@ export class UpdateRoleNameDto {
 export class DeleteRoleDto {
     roleId: string = '';
 }
+
+export class RemoveMemberDto {
+    memberId: string = '';
+}

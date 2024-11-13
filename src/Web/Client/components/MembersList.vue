@@ -16,7 +16,8 @@
         </Column>
         <Column header="" style="width: 10px;">
             <template #body="slotProps">
-                <Button type="button" icon="pi pi-ellipsis-v" text severity="secondary" />
+                <Button type="button" icon="pi pi-ellipsis-v" text severity="secondary" @click="(e) => toggleMenu(e, slotProps.data.id)" />
+                <Menu ref="menu" :model="menuItems" :popup="true" />
             </template>             
         </Column>
     </DataTable>
@@ -24,7 +25,7 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue';
-import type { UpdateMemberRoleDto } from '~/types/dtos/shared';
+import { RemoveMemberDto, type UpdateMemberRoleDto } from '~/types/dtos/shared';
 import type { MemberVM, RoleVM } from '~/types/viewModels/shared';
 
 const props = defineProps({
@@ -33,11 +34,35 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
-    'onUpdateMemberRole'
+    'onUpdateMemberRole', 'onRemoveMember'
 ])
+
+const menu = ref();
+const menuItems = ref([
+    {
+        label: 'Options',
+        items: [
+            {
+                label: 'Remove',
+                icon: 'pi pi-trash',
+                command: () => {
+                    const model = new RemoveMemberDto();
+                    model.memberId = selectedMemberId.value;
+                    emit('onRemoveMember', model);
+                }
+            }
+        ]
+    }
+])
+const selectedMemberId = ref();
 
 function updateMemberRole(model: UpdateMemberRoleDto) {
     emit('onUpdateMemberRole', model);
+}
+
+function toggleMenu(event: Event, memberId: string) {
+    selectedMemberId.value = memberId;
+    menu.value.toggle(event);
 }
 
 </script>
