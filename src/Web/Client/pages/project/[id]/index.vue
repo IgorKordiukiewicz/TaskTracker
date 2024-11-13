@@ -13,8 +13,8 @@
             </div>
         </div>
         <template v-if="tasks && members">
-            <DataTable :value="tasks.tasks" class="mt-4 shadow" removable-sort data-key="shortId"
-            filter-display="menu" :global-filter-fields="['title' ,'description' ]" v-model:filters="filters">
+            <DataTable :value="tasks.tasks" class="mt-4 shadow" removable-sort data-key="shortId" :row-hover="true" :row-class="() => 'cursor-pointer'"
+            filter-display="menu" :global-filter-fields="['title' ,'description' ]" v-model:filters="filters" @row-click="openTaskDetails">
                 <Column header="Id" field="shortId" style="width: 80px;" sortable filter-field="shortId" data-type="numeric" :show-filter-match-modes="false">
                     <template #body="{ data }">
                         {{  data.shortId }}
@@ -77,6 +77,7 @@
 <script setup lang="ts">
 import { TaskPriority } from '~/types/enums';
 import { FilterMatchMode } from '@primevue/core/api';
+import type { DataTableRowClickEvent } from 'primevue/datatable';
 
 const route = useRoute();
 const tasksService = useTasksService();
@@ -139,5 +140,9 @@ function getPrioritySeverity(priority: TaskPriority) {
         default: 
             return "primary";
     }
+}
+
+function openTaskDetails(event: DataTableRowClickEvent) {
+    navigateTo(`/project/${projectId.value}/tasks/${event.data.shortId}`);
 }
 </script>

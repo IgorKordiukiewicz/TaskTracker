@@ -10,6 +10,9 @@ export const useTasksService = () => {
         },
         async createTask(projectId: string, model: CreateTaskDto) {
             await api.sendPostRequest('tasks', model, { 'ProjectId': projectId });
+        },
+        async getTask(shortId: number, projectId: string) {
+            return (await api.sendGetRequest<TasksVM>(`tasks/${shortId}`, { 'ProjectId': projectId }))?.tasks[0];
         }
     }
 }
