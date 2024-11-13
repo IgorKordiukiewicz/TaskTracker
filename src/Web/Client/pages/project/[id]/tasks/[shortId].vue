@@ -22,8 +22,8 @@
                             </p>
                         </div>
                         <div v-if="descriptionEditValue !== details.description" class="flex gap-3">
-                            <Button severity="secondary" text icon="pi pi-times" style="height: 24px; width: 24px;" />
-                            <Button severity="primary" text icon="pi pi-check" :disabled="!descriptionEditValue" style="height: 24px; width: 24px;"  />
+                            <Button severity="secondary" text icon="pi pi-times" style="height: 24px; width: 24px;" @click="cancelDescriptionEdit" />
+                            <Button severity="primary" text icon="pi pi-check" :disabled="!descriptionEditValue" style="height: 24px; width: 24px;" @click="updateDescription" />
                         </div>
                     </div>
                     <div>
@@ -88,7 +88,7 @@
                             <p class="text-sm">Logged</p>
                             <p class="text-base font-semibold">1h 36min</p>
                         </div>
-                        <Knob :model-value="40" value-template="{value}%" :stroke-width="10" readonly /> <!-- on hover show remaining -->
+                        <Knob :model-value="40" :value-template="(val) => `${val}%`" :stroke-width="10" readonly /> <!-- on hover show remaining -->
                         <!-- if logged > estimated: red color and value 100 -->
                         <div class="flex flex-col gap-1 items-center w-full">
                             <p class="text-sm">Estimated</p>
@@ -102,6 +102,8 @@
 </template>
 
 <script setup lang="ts">
+import { UpdateTaskDescriptionDto } from '~/types/dtos/tasks';
+
 const route = useRoute();
 const tasksService = useTasksService();
 
@@ -110,5 +112,20 @@ const taskShortId = ref(+(route.params.shortId as string));
 const details = ref(await tasksService.getTask(taskShortId.value, projectId.value));
 
 const descriptionEditValue = ref(details.value?.description);
+
+async function updateDetails() {
+    details.value = await tasksService.getTask(taskShortId.value, projectId.value);
+}
+
+function cancelDescriptionEdit() {
+    descriptionEditValue.value = details.value!.description;
+}
+
+async function updateDescription() {
+    const model = new UpdateTaskDescriptionDto();
+    model.description = descriptionEditValue.value!;
+    await tasksService.updateDescription(details.value!.id, projectId.value, model);
+    await updateDetails();
+}
 
 </script>

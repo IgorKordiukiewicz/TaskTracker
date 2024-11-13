@@ -4,3 +4,7 @@ export class CreateTaskDto {
     priority: number = 1;
     assigneeMemberId?: string;
 }
+
+export class UpdateTaskDescriptionDto {
+    description: string = '';
+}
