@@ -5,22 +5,7 @@
             <Button icon="pi pi-plus" severity="primary" label="Add" @click="openAddProjectMemberDialog" />
             <AddProjectMemberDialog v-if="availableUsers" ref="addProjectMemberDialog" :projectId="projectId" :available-users="availableUsers.users" @on-add="updateMembers" />
         </div>
-        <DataTable :value="members.members" v-if="members && roles" class="mt-4 shadow">
-            <Column header="Name">
-                <template #body="slotProps">
-                    <div class="flex gap-4 items-center">
-                        <Avatar label="AA" shape="circle" /> <!--TODO-->
-                        <p>{{ slotProps.data.name }}</p>
-                    </div>
-                </template>
-            </Column>
-            <Column field="email" header="Email"></Column>
-            <Column field="roleName" header="Role">
-                <template #body="slotProps">
-                    <RoleSelect :roles="roles.roles" :member="slotProps.data" @on-update="updateMemberRole" />
-                </template>
-            </Column>
-        </DataTable>
+        <MembersList v-if="members && roles" :members="members.members" :roles="roles.roles" @on-update-member-role="updateMemberRole" />
     </div>
 </template>
 
