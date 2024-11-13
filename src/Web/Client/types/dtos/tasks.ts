@@ -1,3 +1,5 @@
+import type { TaskPriority } from "../enums";
+
 export class CreateTaskDto {
     title: string = '';
     description: string = '';
@@ -7,4 +9,16 @@ export class CreateTaskDto {
 
 export class UpdateTaskDescriptionDto {
     description: string = '';
+}
+
+export class UpdateTaskPriorityDto {
+    priority: TaskPriority = 0;
+}
+
+export class UpdateTaskAssigneeDto {
+    memberId?: string;
+}
+
+export class UpdateTaskStatusDto {
+    statusId: string = '';
 }

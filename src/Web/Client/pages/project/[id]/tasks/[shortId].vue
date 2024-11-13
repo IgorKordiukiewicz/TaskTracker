@@ -11,7 +11,7 @@
                 <Button icon="pi pi-chevron-left" text severity="secondary" label="Back" @click="navigateTo(`/project/${projectId}/`)" />
             </div>
         </div>
-        <div class="flex gap-4 w-100 mt-4" v-if="details">
+        <div class="flex gap-4 w-100 mt-4" v-if="details && members">
             <div class="flex flex-col gap-4 w-3/4">
                 <div class="bg-white w-full shadow p-4 flex flex-col gap-3">
                     <div class="flex justify-between items-center">
@@ -61,13 +61,13 @@
                         </p>
                     </div>
                     <LabeledInput label="Status">
-                        <Select />
+                        <Select v-model="selectedStatusId" :options="statuses" option-label="name" option-value="id" class="w-full" @change="updateStatus" />
                     </LabeledInput>
                     <LabeledInput label="Priority">
-                        <Select />
+                        <Select v-model="selectedPriority" :options="priorities" option-label="name" option-value="key" class="w-full" @change="updatePriority" />
                     </LabeledInput>
                     <LabeledInput label="Assignee">
-                        <Select />
+                        <Select v-model="selectedAssigneeUserId" :options="members.members" option-label="name" option-value="userId" class="w-full" showClear @change="updateAssignee" />
                     </LabeledInput>
                 </div>
                 <div class="bg-white w-full shadow p-4">
@@ -102,16 +102,37 @@
 </template>
 
 <script setup lang="ts">
-import { UpdateTaskDescriptionDto } from '~/types/dtos/tasks';
+import { UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
+import { TaskPriority } from '~/types/enums';
 
 const route = useRoute();
 const tasksService = useTasksService();
+const projectsService = useProjectsService();
 
 const projectId = ref(route.params.id as string);
 const taskShortId = ref(+(route.params.shortId as string));
 const details = ref(await tasksService.getTask(taskShortId.value, projectId.value));
+const members = ref(await projectsService.getMembers(projectId.value)); // TODO: pass from tasks list page?
 
 const descriptionEditValue = ref(details.value?.description);
+
+const priorities = ref([
+    { key: TaskPriority.Low, name: TaskPriority[TaskPriority.Low] },
+    { key: TaskPriority.Normal, name: TaskPriority[TaskPriority.Normal] },
+    { key: TaskPriority.High, name: TaskPriority[TaskPriority.High] },
+    { key: TaskPriority.Urgent, name: TaskPriority[TaskPriority.Urgent] },
+]);
+
+const statuses = ref(details.value?.possibleNextStatuses.map(x => ({
+    id: x.id, name: x.name }))
+    .concat([
+        { id: details.value.status.id, name: details.value.status.name }
+    ]
+))
+
+const selectedPriority = ref(details.value?.priority);
+const selectedAssigneeUserId = ref(details.value?.assigneeId);
+const selectedStatusId = ref(details.value?.status.id);
 
 async function updateDetails() {
     details.value = await tasksService.getTask(taskShortId.value, projectId.value);
@@ -125,6 +146,42 @@ async function updateDescription() {
     const model = new UpdateTaskDescriptionDto();
     model.description = descriptionEditValue.value!;
     await tasksService.updateDescription(details.value!.id, projectId.value, model);
+    await updateDetails();
+}
+
+async function updatePriority() {
+    if(selectedPriority.value === details.value!.priority) {
+        return;
+    }
+
+    const model = new UpdateTaskPriorityDto();
+    model.priority = selectedPriority.value!;
+    await tasksService.updatePriority(details.value!.id, projectId.value, model);
+    await updateDetails();
+}
+
+async function updateAssignee() {
+    if(selectedAssigneeUserId.value === details.value!.assigneeId) {
+        return;
+    }
+
+    const memberId = selectedAssigneeUserId.value 
+        ? members.value!.members.find(x => x.userId === selectedAssigneeUserId.value)!.id
+        : undefined;
+    const model = new UpdateTaskAssigneeDto();
+    model.memberId = memberId;
+    await tasksService.updateAssignee(details.value!.id, projectId.value, model);
+    await updateDetails();
+}
+
+async function updateStatus() {
+    if(selectedStatusId.value === details.value!.status.id) {
+        return;
+    }
+
+    const model = new UpdateTaskStatusDto();
+    model.statusId = selectedStatusId.value!;
+    await tasksService.updateStatus(details.value!.id, projectId.value, model);
     await updateDetails();
 }
 
