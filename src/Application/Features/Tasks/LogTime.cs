@@ -34,7 +34,7 @@ internal class LogTaskTimeHandler : IRequestHandler<LogTaskTimeCommand, Result>
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
         
-        task.LogTime(request.Model.Minutes, request.Model.Day, request.UserId);
+        task.LogTime(request.Model.Minutes, DateOnly.FromDateTime(request.Model.Day), request.UserId);
         
         await _taskRepository.Update(task);
         return Result.Ok();

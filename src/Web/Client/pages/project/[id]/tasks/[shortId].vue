@@ -79,20 +79,28 @@
                             </p>
                         </div>
                         <div class="flex gap-3">
-                            <Button severity="secondary" text icon="pi pi-pencil" style="height: 24px; width: 24px;" />
-                            <Button severity="secondary" text icon="pi pi-plus" style="height: 24px; width: 24px;"  />
+                            <Button severity="secondary" text icon="pi pi-plus" style="height: 24px; width: 24px;" @click="openLogTimeDialog"  />
+                            <Button severity="secondary" text icon="pi pi-pencil" style="height: 24px; width: 24px;" @click="openEstimatedTimeDialog" />
                         </div>
+                        <TimeInputDialog ref="estimatedTimeDialog" header="Edit estimated time" @on-submit="updateEstimatedTime" />
+                        <TimeInputDialog ref="logTimeDialog" header="Log time" @on-submit="addLoggedTime" />
                     </div>
                     <div class="flex gap-2 items-center w-full mt-4">
                         <div class="flex flex-col gap-1 items-center w-full">
                             <p class="text-sm">Logged</p>
-                            <p class="text-base font-semibold">1h 36min</p>
+                            <p class="text-base font-semibold">{{ loggedTimeDisplay }}</p>
                         </div>
-                        <Knob :model-value="40" :value-template="(val) => `${val}%`" :stroke-width="10" readonly /> <!-- on hover show remaining -->
+                        <template v-if="details.estimatedTime">
+                            <Knob :model-value="timeKnobValue" :value-template="(val) => `${val}%`" :stroke-width="10" readonly :value-color="timeKnobColor" /> <!-- on hover show remaining -->
+                        </template>
+                        <template v-else>
+                            <Knob :model-value="0" :value-template="(val) => `-`" :stroke-width="10" readonly />
+                        </template>
                         <!-- if logged > estimated: red color and value 100 -->
+                        <!-- what if some time is logged but nothing estimated - show full with '-' as display ?-->
                         <div class="flex flex-col gap-1 items-center w-full">
                             <p class="text-sm">Estimated</p>
-                            <p class="text-base font-semibold">4h</p>
+                            <p class="text-base font-semibold">{{ estimatedTimeDisplay }}</p>
                         </div>
                     </div>
                 </div>
@@ -102,19 +110,22 @@
 </template>
 
 <script setup lang="ts">
-import { AddTaskCommentDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
+import { $dt } from '@primevue/themes';
+import { AddTaskCommentDto, AddTaskLoggedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
 import { TaskPriority } from '~/types/enums';
 
 const route = useRoute();
 const tasksService = useTasksService();
 const projectsService = useProjectsService();
+const timeParser = useTimeParser();
 
 const projectId = ref(route.params.id as string);
 const taskShortId = ref(+(route.params.shortId as string));
 const details = ref(await tasksService.getTask(taskShortId.value, projectId.value));
 const members = ref(await projectsService.getMembers(projectId.value)); // TODO: pass from tasks list page?
 
-const descriptionEditValue = ref(details.value?.description);
+const logTimeDialog = ref();
+const estimatedTimeDialog = ref();
 
 const priorities = ref([
     { key: TaskPriority.Low, name: TaskPriority[TaskPriority.Low] },
@@ -130,10 +141,35 @@ const statuses = ref(details.value?.possibleNextStatuses.map(x => ({
     ]
 ))
 
+const descriptionEditValue = ref(details.value?.description);
 const selectedPriority = ref(details.value?.priority);
 const selectedAssigneeUserId = ref(details.value?.assigneeId);
 const selectedStatusId = ref(details.value?.status.id);
 const newCommentContent = ref();
+
+const loggedTimeDisplay = computed(() => {
+    return details.value ? timeParser.fromMinutes(details.value?.totalTimeLogged) : '';
+})
+
+const estimatedTimeDisplay = computed(() => {
+    return details.value?.estimatedTime ? timeParser.fromMinutes(details.value.estimatedTime) : '-';
+})
+
+const timeKnobValue = computed(() => {
+    if(!details.value || !details.value.estimatedTime) {
+        return 0;
+    }
+
+    return Math.min(Math.floor(details.value.totalTimeLogged / details.value.estimatedTime * 100), 100);
+})
+
+const timeKnobColor = computed(() => {
+    if(!details.value || !details.value.estimatedTime || details.value.totalTimeLogged < details.value.estimatedTime) {
+        return $dt('knob.value.background').value;
+    }
+
+    return '#ef4444';
+})
 
 async function updateDetails() {
     details.value = await tasksService.getTask(taskShortId.value, projectId.value);
@@ -141,6 +177,14 @@ async function updateDetails() {
 
 function cancelDescriptionEdit() {
     descriptionEditValue.value = details.value!.description;
+}
+
+function openLogTimeDialog() {
+    logTimeDialog.value.show();
+}
+
+function openEstimatedTimeDialog() {
+    estimatedTimeDialog.value.show();
 }
 
 async function updateDescription() {
@@ -194,4 +238,17 @@ async function addComment() {
     await updateDetails();
 }
 
+async function updateEstimatedTime(minutes: number) {
+    const model = new UpdateTaskEstimatedTimeDto();
+    model.minutes = minutes;
+    await tasksService.updateEstimatedTime(details.value!.id, projectId.value, model);
+    await updateDetails();
+}
+
+async function addLoggedTime(minutes: number) {
+    const model = new AddTaskLoggedTimeDto();
+    model.minutes = minutes;
+    await tasksService.addLoggedTime(details.value!.id, projectId.value, model);
+    await updateDetails();
+}
 </script>

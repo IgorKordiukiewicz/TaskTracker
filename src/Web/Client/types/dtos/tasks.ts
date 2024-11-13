@@ -26,3 +26,12 @@ export class UpdateTaskStatusDto {
 export class AddTaskCommentDto {
     content: string = '';
 }
+
+export class AddTaskLoggedTimeDto {
+    minutes: number = 0;
+    day: Date = new Date();
+}
+
+export class UpdateTaskEstimatedTimeDto {
+    minutes: number = 0;
+}
