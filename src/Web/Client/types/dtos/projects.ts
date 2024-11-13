@@ -6,3 +6,7 @@ export class CreateProjectDto {
 export class AddProjectMemberDto {
     userId: string = '';
 }
+
+export class UpdateProjectNameDto {
+    name: string = '';
+}

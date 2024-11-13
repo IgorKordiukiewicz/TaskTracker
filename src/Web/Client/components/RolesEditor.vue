@@ -5,7 +5,7 @@
             <Button icon="pi pi-plus" severity="primary" label="Create" @click="openCreateRoleDialog" />
             <CreateRoleDialog :permissions="permissions" @on-create="createRole" ref="createRoleDialog" />
         </div>
-        <div class="bg-white w-100 shadow mt-4">
+        <div class="bg-white w-full shadow mt-4">
             <table class="w-full" style="border-spacing: 5000px;">
                 <tr>
                     <th style="width: 200px;"></th>

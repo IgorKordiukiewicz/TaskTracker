@@ -1,6 +1,6 @@
-import type { AddProjectMemberDto, CreateProjectDto } from "~/types/dtos/projects";
+import type { AddProjectMemberDto, CreateProjectDto, UpdateProjectNameDto } from "~/types/dtos/projects";
 import type { CreateRoleDto, DeleteRoleDto, RemoveMemberDto, UpdateMemberRoleDto, UpdateRoleNameDto, UpdateRolePermissionsDto } from "~/types/dtos/shared";
-import type { ProjectRolesVM, ProjectMembersVM, ProjectNavDataVM, ProjectsVM } from "~/types/viewModels/projects";
+import type { ProjectRolesVM, ProjectMembersVM, ProjectNavDataVM, ProjectsVM, ProjectSettingsVM } from "~/types/viewModels/projects";
 
 export const useProjectsService = () => {
     const api = useApi();
@@ -41,6 +41,15 @@ export const useProjectsService = () => {
         },
         async removeMember(id: string, model: RemoveMemberDto) {
             await api.sendPostRequest(`projects/${id}/members/remove`, model);
+        },
+        async getSettings(id: string) {
+            return await api.sendGetRequest<ProjectSettingsVM>(`projects/${id}/settings`);
+        },
+        async updateName(id: string, model: UpdateProjectNameDto) {
+            await api.sendPostRequest(`projects/${id}/name`, model);
+        },
+        async deleteProject(id: string) {
+            await api.sendPostRequest(`projects/${id}/delete`, '');
         }
     }
 }
