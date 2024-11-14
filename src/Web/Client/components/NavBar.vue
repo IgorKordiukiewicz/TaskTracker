@@ -2,18 +2,15 @@
     <ul class="navbar">
         <li v-for="node in nodes">
             <template v-if="node.children">
-                <details>
-                    <summary class="flex justify-between items-center cursor-pointer p-3 hover:bg-surface-100 rounded">
+                <li class="flex justify-between items-center p-3 rounded">
                         <div class="flex gap-3 items-center">
                             <i :class="node.icon" style="height: 16px; color: var(--p-menu-item-icon-color)"></i>
                             <span>{{ node.title }}</span>
                         </div>
-                        <i class="toggle pi pi-chevron-down" style="height: 16px; color: var(--p-menu-item-icon-color)"></i>
-                    </summary>
-                    <li v-for="childNode in node.children" class="pl-4">
+                    </li>
+                    <li v-for="childNode in node.children" class="ml-3 pl-2" style="border-left: 2px solid #d1d7e0;">
                         <NavBarItem :title="childNode.title" :icon="childNode.icon" :link="childNode.link[0] + id + childNode.link[1]" :include-index="false" />
                     </li>
-                </details>
             </template>
             <template v-else>
                 <NavBarItem :title="node.title" :icon="node.icon" :link="node.link[0] + id + node.link[1]" :include-index="node.includeIndex" />
