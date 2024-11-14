@@ -37,16 +37,20 @@
                             <InputText v-model="newCommentContent" class="w-full" placeholder="Add a comment" />
                             <Button icon="pi pi-send" label="Send" :disabled="!newCommentContent" @click="addComment" />
                         </div>
-                        <div class="flex flex-col gap-4 mt-2">
-                            <TaskComment v-for="comment in comments.comments" :comment="comment" />
-                        </div>
+                        <ScrollPanel class="h-fit" style="max-height: 50vh;" id="commentsScroll">
+                            <div class="flex flex-col gap-4 mt-2" :class="{ negativeMargin: isScrollHidden('commentsScroll', 'commentsContent') }" id="commentsContent">
+                                <TaskComment v-for="comment in comments.comments" :comment="comment" />
+                            </div>
+                        </ScrollPanel>
                     </TogglableSection>
                 </div>
                 <div class="bg-white w-full shadow p-4 flex flex-col gap-3" v-if="activities">
                     <TogglableSection title="Activity" icon="pi pi-history">
-                        <div class="flex flex-col gap-3 mt-2">
-                            <TaskActivity v-for="activity in activities.activities" :activity="activity" />
-                        </div>
+                        <ScrollPanel class="h-fit" style="max-height: 50vh;" id="activitiesScroll">
+                            <div class="flex flex-col gap-3 mt-2" :class="{ negativeMargin: isScrollHidden('activitiesScroll', 'activitiesContent') }" id="activitiesContent">
+                                <TaskActivity v-for="activity in activities.activities" :activity="activity" />
+                            </div>
+                        </ScrollPanel>
                     </TogglableSection>
                 </div>
             </div>
@@ -175,6 +179,12 @@ const timeKnobColor = computed(() => {
     return '#ef4444';
 })
 
+function isScrollHidden(scrollPanelId: string, contentId: string) {
+    const scrollPanel = document.getElementById(scrollPanelId);
+    const content = document.getElementById(contentId);
+    return scrollPanel && content ? content.scrollHeight < scrollPanel.clientHeight : true;
+}
+
 async function updateDetails() {
     details.value = await tasksService.getTask(taskShortId.value, projectId.value);
 }
@@ -268,3 +278,9 @@ async function addLoggedTime(minutes: number) {
     await updateDetails();
 }
 </script>
+
+<style scoped>
+.negativeMargin {
+    margin-bottom: -18px;
+}
+</style>
