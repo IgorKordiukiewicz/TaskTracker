@@ -186,7 +186,7 @@ public class TasksController : ControllerBase
     /// <param name="taskId"></param>
     /// <param name="model"></param>
     /// <response code="404">Task not found.</response>
-    [HttpPost("{taskId:guid}/logged_time")]
+    [HttpPost("{taskId:guid}/logged-time")]
     [Authorize(Policy.ProjectEditTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> LogTaskTime(Guid taskId, LogTaskTimeDto model)

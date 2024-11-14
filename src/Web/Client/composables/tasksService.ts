@@ -30,7 +30,7 @@ export const useTasksService = () => {
             await api.sendPostRequest(`tasks/${id}/comments`, model, { 'ProjectId': projectId });
         },
         async addLoggedTime(id: string, projectId: string, model: AddTaskLoggedTimeDto) {
-            await api.sendPostRequest(`tasks/${id}/logged_time`, model, { 'ProjectId': projectId });
+            await api.sendPostRequest(`tasks/${id}/logged-time`, model, { 'ProjectId': projectId });
         },
         async updateEstimatedTime(id: string, projectId: string, model: UpdateTaskEstimatedTimeDto) {
             await api.sendPostRequest(`tasks/${id}/estimated-time`, model, { 'ProjectId': projectId });
