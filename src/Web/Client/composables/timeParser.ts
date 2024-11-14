@@ -66,6 +66,36 @@ export const useTimeParser = () => {
             }
         
             return result.trim();
+        },
+        toReadableTimeDifference(date: Date) {
+            const from = new Date(date);
+            const to = new Date(Date.now());
+            if(from > to) {
+                return '';
+            }
+
+            var diffInSeconds = Math.floor((to.valueOf() - from.valueOf()) / 1000);
+            if(diffInSeconds < 10) {
+                return "just now";
+            }
+            else if(diffInSeconds < 60) {
+                return "a few seconds ago";
+            }
+            else if(diffInSeconds < 120) {
+                return "a minute ago";
+            }
+            else if(diffInSeconds < 60 * 60) {
+                return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+            }
+            else if(diffInSeconds < 60 * 60 * 2) {
+                return 'an hour ago';
+            }
+            else if(diffInSeconds < 60 * 60 * 24) {
+                return `${Math.floor(diffInSeconds / 60 / 60)} hours ago`;
+            }
+            else {
+                return new Date(date).toLocaleDateString();
+            }
         }
     }
 

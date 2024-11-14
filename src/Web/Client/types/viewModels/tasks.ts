@@ -28,3 +28,14 @@ export interface TaskStatusDetailsVM {
     name: string;
     displayOrder: number;
 }
+
+export interface TaskCommentsVM {
+    comments: TaskCommentVM[];
+}
+
+export interface TaskCommentVM {
+    content: string;
+    authorId: string;
+    authorName: string;
+    createdAt: Date;
+}
