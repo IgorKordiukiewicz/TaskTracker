@@ -32,16 +32,7 @@
 
                 </div>
                 <div class="bg-white w-full shadow p-4 flex flex-col gap-3" v-if="comments">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <i class="pi pi-comments" />
-                            <p class="font-semibold">
-                                Comments
-                            </p>
-                        </div>
-                        <i class="toggle pi pi-chevron-down cursor-pointer" :class="{ 'toggle-open': commentsSectionOpen }" @click="toggleCommentsSection" />
-                    </div>
-                    <template v-if="commentsSectionOpen">
+                    <TogglableSection title="Comments" icon="pi pi-comments">
                         <div class="flex gap-2 items-center mt-1">
                             <InputText v-model="newCommentContent" class="w-full" placeholder="Add a comment" />
                             <Button icon="pi pi-send" label="Send" :disabled="!newCommentContent" @click="addComment" />
@@ -49,16 +40,14 @@
                         <div class="flex flex-col gap-4 mt-2">
                             <TaskComment v-for="comment in comments.comments" :comment="comment" />
                         </div>
-                    </template>
-
+                    </TogglableSection>
                 </div>
-                <div class="bg-white w-full shadow p-4 flex flex-col gap-3">
-                    <div class="flex items-center gap-3">
-                        <i class="pi pi-history" />
-                        <p class="font-semibold">
-                            Activity
-                        </p>
-                    </div>
+                <div class="bg-white w-full shadow p-4 flex flex-col gap-3" v-if="activities">
+                    <TogglableSection title="Activity" icon="pi pi-history">
+                        <div class="flex flex-col gap-3 mt-2">
+                            <TaskActivity v-for="activity in activities.activities" :activity="activity" />
+                        </div>
+                    </TogglableSection>
                 </div>
             </div>
             <div class="flex flex-col gap-4 w-1/4">
@@ -135,6 +124,9 @@ const members = ref(await projectsService.getMembers(projectId.value)); // TODO:
 const comments = ref(details.value 
     ? await tasksService.getComments(details.value.id, projectId.value)
     : null);
+const activities = ref(details.value 
+    ? await tasksService.getActivities(details.value.id, projectId.value)
+    : null);
 
 const logTimeDialog = ref();
 const estimatedTimeDialog = ref();
@@ -158,8 +150,6 @@ const selectedPriority = ref(details.value?.priority);
 const selectedAssigneeUserId = ref(details.value?.assigneeId);
 const selectedStatusId = ref(details.value?.status.id);
 const newCommentContent = ref();
-
-const commentsSectionOpen = ref(true);
 
 const loggedTimeDisplay = computed(() => {
     return details.value ? timeParser.fromMinutes(details.value?.totalTimeLogged) : '';
@@ -195,6 +185,12 @@ async function updateComments() {
         : null;
 }
 
+async function updateActivities() {
+    activities.value = details.value 
+        ? await tasksService.getActivities(details.value.id, projectId.value)
+        : null;
+}
+
 function cancelDescriptionEdit() {
     descriptionEditValue.value = details.value!.description;
 }
@@ -205,10 +201,6 @@ function openLogTimeDialog() {
 
 function openEstimatedTimeDialog() {
     estimatedTimeDialog.value.show();
-}
-
-function toggleCommentsSection() {
-    commentsSectionOpen.value = !commentsSectionOpen.value;
 }
 
 async function updateDescription() {
@@ -276,15 +268,3 @@ async function addLoggedTime(minutes: number) {
     await updateDetails();
 }
 </script>
-
-<style scoped>
-.toggle {
-    transition-property: transform;
-    transition-duration: .3s;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.toggle-open {
-    transform: rotate(180deg);
-}
-</style>

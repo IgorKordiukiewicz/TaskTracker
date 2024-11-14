@@ -1,5 +1,5 @@
 import type { AddTaskLoggedTimeDto, AddTaskCommentDto, CreateTaskDto, UpdateTaskEstimatedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from "~/types/dtos/tasks";
-import type { TaskCommentsVM, TasksVM } from "~/types/viewModels/tasks";
+import type { TaskActivitiesVM, TaskCommentsVM, TasksVM } from "~/types/viewModels/tasks";
 
 export const useTasksService = () => {
     const api = useApi();
@@ -37,6 +37,9 @@ export const useTasksService = () => {
         },
         async getComments(id: string, projectId: string) {
             return await api.sendGetRequest<TaskCommentsVM>(`tasks/${id}/comments`, { 'ProjectId': projectId });
+        },
+        async getActivities(id: string, projectId: string) {
+            return await api.sendGetRequest<TaskActivitiesVM>(`tasks/${id}/activities`, { 'ProjectId': projectId });
         },
     }
 }

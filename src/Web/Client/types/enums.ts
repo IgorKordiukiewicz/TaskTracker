@@ -27,3 +27,11 @@ export enum TaskPriority {
     High,
     Urgent
 }
+
+export enum TaskProperty
+{
+    Description,
+    Status,
+    Assignee,
+    Priority
+}

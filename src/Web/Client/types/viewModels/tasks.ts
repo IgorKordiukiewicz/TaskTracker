@@ -1,4 +1,5 @@
-import type { TaskPriority } from "../enums";
+import { TaskActivity } from './../../.nuxt/components.d';
+import type { TaskPriority, TaskProperty } from "../enums";
 
 export interface TasksVM {
     tasks: TaskVM[];
@@ -38,4 +39,15 @@ export interface TaskCommentVM {
     authorId: string;
     authorName: string;
     createdAt: Date;
+}
+
+export interface TaskActivitiesVM {
+    activities: TaskActivityVM[];
+}
+
+export interface TaskActivityVM {
+    property: TaskProperty;
+    oldValue: string;
+    newValue: string;
+    occurredAt: Date;
 }
