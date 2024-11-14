@@ -37,12 +37,7 @@ export const useTimeParser = () => {
             return { result: true, value: result };
         },
         fromMinutes(totalMinutes: number) {
-            if (totalMinutes < 0)
-            {
-                return '';
-            }
-        
-            if (totalMinutes == 0)
+            if (totalMinutes <= 0)
             {
                 return "0h";
             }

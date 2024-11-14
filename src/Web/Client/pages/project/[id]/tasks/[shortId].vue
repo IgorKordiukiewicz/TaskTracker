@@ -93,7 +93,8 @@
                             <p class="text-base font-semibold">{{ loggedTimeDisplay }}</p>
                         </div>
                         <template v-if="details.estimatedTime">
-                            <Knob :model-value="timeKnobValue" :value-template="(val) => `${val}%`" :stroke-width="10" readonly :value-color="timeKnobColor" /> <!-- on hover show remaining -->
+                            <Knob :model-value="timeKnobValue" :value-template="(val) => `${val}%`" :stroke-width="10" readonly 
+                                :value-color="timeKnobColor" v-tooltip.bottom="remainingTimeDisplay" />
                         </template>
                         <template v-else>
                             <Knob :model-value="0" :value-template="(val) => `-`" :stroke-width="10" readonly />
@@ -161,6 +162,12 @@ const loggedTimeDisplay = computed(() => {
 
 const estimatedTimeDisplay = computed(() => {
     return details.value?.estimatedTime ? timeParser.fromMinutes(details.value.estimatedTime) : '-';
+})
+
+const remainingTimeDisplay = computed(() => {
+    return details.value?.estimatedTime
+        ? `Remaining: ${timeParser.fromMinutes(details.value.estimatedTime - details.value.totalTimeLogged)}`
+        : '-';
 })
 
 const timeKnobValue = computed(() => {
