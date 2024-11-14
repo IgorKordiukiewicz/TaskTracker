@@ -22,7 +22,15 @@
                     {{ formatDate(slotProps.data.createdAt) }}
                 </template>
             </Column>
+            <Column header="" style="width: 10px;">
+                <template #body="slotProps">
+                    <Button type="button" icon="pi pi-ellipsis-v" text severity="secondary" @click="(e) => toggleMenu(e, slotProps.data.id)" 
+                        :disabled="isMenuButtonDisabled(slotProps.data.state)" />
+                </template>             
+        </Column>
         </DataTable>
+        <Menu ref="menu" :model="menuItems" :popup="true" />
+        <ConfirmDialog></ConfirmDialog>
     </OrganizationLayout>
 </template>
 
@@ -31,11 +39,46 @@ import { OrganizationInvitationState } from '~/types/enums';
 
 const route = useRoute();
 const organizationsService = useOrganizationsService();
-
-const sendInvitationDialog = ref();
+const confirm = useConfirm();
 
 const organizationId = ref(route.params.id as string);
 const invitations = ref(await organizationsService.getInvitations(organizationId.value));
+
+const sendInvitationDialog = ref();
+const selectedInvitation = ref();
+const menu = ref();
+const menuItems = ref([
+    {
+        label: 'Options',
+        items: [
+            {
+                label: 'Cancel',
+                icon: 'pi pi-times',
+                command: () => {
+                    const invitationId = selectedInvitation.value;
+                    confirm.require({
+                        message: `Are you sure you want to cancel the invitation?`,
+                        header: 'Confirm action',
+                        rejectProps: {
+                            label: 'Cancel',
+                            severity: 'secondary'
+                        },
+                        acceptProps: {
+                            label: 'Confirm',
+                            severity: 'danger'
+                        },
+                        accept: async () => await cancelInvitation(invitationId)
+                    })
+                }
+            }
+        ]
+    }
+])
+
+function toggleMenu(event: Event, invitationId: string) {
+    selectedInvitation.value = invitationId;
+    menu.value.toggle(event);
+}
 
 function openSendInvitationDialog() {
     sendInvitationDialog.value.show();
@@ -43,6 +86,15 @@ function openSendInvitationDialog() {
 
 async function updateInvitations() {
     invitations.value = await organizationsService.getInvitations(organizationId.value);
+}
+
+async function cancelInvitation(invitationId: string) {
+    await organizationsService.cancelInvitation(organizationId.value, invitationId);
+    await updateInvitations();
+}
+
+function isMenuButtonDisabled(state: OrganizationInvitationState) {
+    return state != OrganizationInvitationState.Pending;
 }
 
 function getStateSeverity(state: OrganizationInvitationState) {
@@ -61,6 +113,6 @@ function getStateSeverity(state: OrganizationInvitationState) {
 }
 
 function formatDate(date?: Date) {
-    return date ? new Date(date).toLocaleString() : '-';
+    return date ? new Date(date).toLocaleDateString() : '-';
 }
 </script>

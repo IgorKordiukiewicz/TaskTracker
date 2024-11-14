@@ -14,7 +14,7 @@
                 <RoleSelect :roles="roles" :member="slotProps.data" @on-update="updateMemberRole" />
             </template>
         </Column>
-        <Column header="" style="width: 10px;">
+        <Column header="" style="width: 1px;">
             <template #body="slotProps">
                 <Button type="button" icon="pi pi-ellipsis-v" text severity="secondary" @click="(e) => toggleMenu(e, slotProps.data.id)" />
                 <Menu ref="menu" :model="menuItems" :popup="true" />

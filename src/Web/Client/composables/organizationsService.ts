@@ -39,6 +39,9 @@ export const useOrganizationsService = () => {
         async declineInvitation(invitationId: string) {
             await api.sendPostRequest(`organizations/invitations/${invitationId}/decline`, '');
         },
+        async cancelInvitation(id: string, invitationId: string) {
+            await api.sendPostRequest(`organizations/invitations/${invitationId}/cancel`, '',  { 'OrganizationId': id });
+        },
         async createRole(id: string, model: CreateRoleDto) {
             await api.sendPostRequest(`organizations/${id}/roles`, model);
         },

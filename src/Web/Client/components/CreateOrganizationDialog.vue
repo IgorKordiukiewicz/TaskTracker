@@ -1,6 +1,6 @@
 <template>
     <ActionDialog header="Create an organization" submit-label="Create" @submit="createOrganization" ref="dialog">
-        <LabeledInput label="name">
+        <LabeledInput label="Name">
             <InputText v-model="model.name" autocomplete="off" class="w-full" />
         </LabeledInput>
     </ActionDialog>
