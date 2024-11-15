@@ -5,6 +5,7 @@
       <Button icon="pi pi-chevron-down" severity="primary" label="Actions" @click="toggleCreateMenu" aria-haspopup="true" aria-controls="overlay_menu" icon-pos="right" />
       <Menu ref="createMenu" :model="createMenuItems" :popup="true" />
       <AddWorkflowStatusDialog ref="addWorkflowStatusDialog" :workflow-id="workflow.id" :project-id="projectId" @on-add="updateWorkflow" />
+      <AddWorkflowTransitionDialog ref="addWorkflowTransitionDialog" :workflow="workflow" :project-id="projectId" @on-add="updateWorkflow" />
     </div>
     <div class="w-full h-full mt-4 shadow bg-white" style="height: calc(100% - 1rem - 28px);"> <!-- 150 is temp-->
         <VueFlow
@@ -41,6 +42,7 @@ const workflow = ref(await workflowsService.getWorkflow(projectId.value));
 
 const createMenu = ref();
 const addWorkflowStatusDialog = ref();
+const addWorkflowTransitionDialog = ref();
 const nodes = ref<Node[]>();
 // TODO: NodeToolbar in custom node on click?
 
@@ -58,7 +60,7 @@ const createMenuItems = ref([
     label: 'Add Transition',
     icon: "pi pi-plus",
     command: () => {
-
+      addWorkflowTransitionDialog.value.show(); // TODO: disable button if no possible from transitions are available
     }
   },
 ])

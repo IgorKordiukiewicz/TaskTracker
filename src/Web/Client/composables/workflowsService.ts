@@ -1,4 +1,4 @@
-import type { AddWorkflowStatusDto } from "~/types/dtos/workflows";
+import type { AddWorkflowStatusDto, AddWorkflowTransitionDto } from "~/types/dtos/workflows";
 import type { WorkflowVM } from "~/types/viewModels/workflows";
 
 export const useWorkflowsService = () => {
@@ -10,6 +10,9 @@ export const useWorkflowsService = () => {
         },
         async addStatus(id: string, projectId: string, model: AddWorkflowStatusDto) {
             await api.sendPostRequest(`workflows/${id}/statuses`, model, { 'ProjectId': projectId });
+        },
+        async addTransition(id: string, projectId: string, model: AddWorkflowTransitionDto) {
+            await api.sendPostRequest(`workflows/${id}/transitions`, model, { 'ProjectId': projectId });
         }
     }
 }
