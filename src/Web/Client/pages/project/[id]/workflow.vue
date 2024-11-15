@@ -1,8 +1,11 @@
 <template>
-  <div class="w-full h-full">
-    <p class="text-lg">
-      Workflow
-    </p>
+  <div class="w-full h-full" v-if="workflow">
+    <div class="flex justify-between items-center">
+      <p class="text-lg">Workflow</p>
+      <Button icon="pi pi-chevron-down" severity="primary" label="Actions" @click="toggleCreateMenu" aria-haspopup="true" aria-controls="overlay_menu" icon-pos="right" />
+      <Menu ref="createMenu" :model="createMenuItems" :popup="true" />
+      <AddWorkflowStatusDialog ref="addWorkflowStatusDialog" :workflow-id="workflow.id" :project-id="projectId" @on-add="updateWorkflow" />
+    </div>
     <div class="w-full h-full mt-4 shadow bg-white" style="height: calc(100% - 1rem - 28px);"> <!-- 150 is temp-->
         <VueFlow
       v-model:nodes="nodes"
@@ -36,12 +39,35 @@ const projectId = ref(route.params.id as string);
 
 const workflow = ref(await workflowsService.getWorkflow(projectId.value));
 
+const createMenu = ref();
+const addWorkflowStatusDialog = ref();
 const nodes = ref<Node[]>();
 // TODO: NodeToolbar in custom node on click?
 
 const edges = ref<Edge[]>();
 
+const createMenuItems = ref([
+  {
+    label: 'Add Status',
+    icon: "pi pi-plus",
+    command: () => {
+      addWorkflowStatusDialog.value.show();
+    }
+  },
+  {
+    label: 'Add Transition',
+    icon: "pi pi-plus",
+    command: () => {
+
+    }
+  },
+])
+
 initializeDiagram();
+
+function toggleCreateMenu(event: Event) {
+  createMenu.value.toggle(event);
+}
 
 function initializeDiagram() {
   if(!workflow.value) {
@@ -84,6 +110,11 @@ function getTransitionKey(transition: WorkflowTransitionVM) {
 
 function getReverseTransitionKey(transition: WorkflowTransitionVM) {
   return `${transition.toStatusId}${transition.fromStatusId}`;
+}
+
+async function updateWorkflow() {
+  workflow.value = await workflowsService.getWorkflow(projectId.value);
+  initializeDiagram();
 }
 
 </script>
