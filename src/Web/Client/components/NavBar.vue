@@ -97,6 +97,11 @@ const projectNodes = ref([
         ]
     },
     {
+        title: 'Workflow',
+        icon: 'pi pi-arrow-right-arrow-left',
+        link: [ '/project/', '/workflow' ]
+    },
+    {
         title: 'Settings',
         icon: 'pi pi-cog',
         link: [ '/project/', '/settings' ]

@@ -35,3 +35,10 @@ export enum TaskProperty
     Assignee,
     Priority
 }
+
+export enum TaskStatusDeletionEligibility 
+{
+    Eligible,
+    InUse,
+    Initial
+}
