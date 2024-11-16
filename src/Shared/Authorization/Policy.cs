@@ -9,6 +9,7 @@ public static class Policy
     public const string OrganizationEditMembers = nameof(OrganizationEditMembers);
     public const string OrganizationEditProjects = nameof(OrganizationEditProjects);
     public const string OrganizationEditRoles = nameof(OrganizationEditRoles);
+    public const string OrganizationEditOrganization = nameof(OrganizationEditOrganization);
 
     public const string ProjectMember = nameof(ProjectMember);
     public const string ProjectEditTasks = nameof(ProjectEditTasks);
@@ -27,6 +28,7 @@ public static class PolicyExtensions
         options.AddPolicy(Policy.OrganizationEditMembers, policy => policy.Requirements.Add(new OrganizationMemberRequirement(OrganizationPermissions.EditMembers)));
         options.AddPolicy(Policy.OrganizationEditProjects, policy => policy.Requirements.Add(new OrganizationMemberRequirement(OrganizationPermissions.EditProjects)));
         options.AddPolicy(Policy.OrganizationEditRoles, policy => policy.Requirements.Add(new OrganizationMemberRequirement(OrganizationPermissions.EditRoles)));
+        options.AddPolicy(Policy.OrganizationEditOrganization, policy => policy.Requirements.Add(new OrganizationMemberRequirement(OrganizationPermissions.EditOrganization)));
 
         options.AddPolicy(Policy.ProjectMember, policy => policy.Requirements.Add(new ProjectMemberRequirement()));
         options.AddPolicy(Policy.ProjectEditTasks, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.EditTasks)));

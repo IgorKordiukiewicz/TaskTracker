@@ -70,6 +70,11 @@ const organizationNodes = ref([
                 link: [ '/organization/', '/roles' ]
             },
         ]
+    },
+    {
+        title: 'Settings',
+        icon: 'pi pi-cog',
+        link: [ '/organization/', '/settings' ]
     }
 ]);
 

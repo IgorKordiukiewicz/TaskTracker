@@ -210,7 +210,7 @@ public class ProjectsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/roles/permissions")]
-    [Authorize(Policy.ProjectEditTasks)]
+    [Authorize(Policy.ProjectEditRoles)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateRolePermissions(Guid projectId, [FromBody] UpdateRolePermissionsDto<ProjectPermissions> model)
     {
@@ -224,7 +224,7 @@ public class ProjectsController : ControllerBase
     /// <param name="projectId"></param>
     /// <response code="404">Project not found.</response>
     [HttpGet("{projectId:guid}/settings")]
-    [Authorize(Policy.ProjectEditTasks)]
+    [Authorize(Policy.ProjectEditProject)]
     [ProducesResponseType(typeof(ProjectSettingsVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetProjectSettings(Guid projectId)
@@ -240,7 +240,7 @@ public class ProjectsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/name")]
-    [Authorize(Policy.ProjectEditTasks)]
+    [Authorize(Policy.ProjectEditProject)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateProjectName(Guid projectId, [FromBody] UpdateProjectNameDto model)
     {
@@ -254,7 +254,7 @@ public class ProjectsController : ControllerBase
     /// <param name="projectId"></param>
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/delete")]
-    [Authorize(Policy.ProjectEditTasks)]
+    [Authorize(Policy.ProjectEditProject)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteProject(Guid projectId)
     {

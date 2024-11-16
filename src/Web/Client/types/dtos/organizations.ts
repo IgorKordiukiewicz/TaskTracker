@@ -5,3 +5,7 @@ export class CreateOrganizationDto {
 export class CreateOrganizationInvitationDto {
     userId: string = '';
 }
+
+export class UpdateOrganizationNameDto {
+    name: string = '';
+}

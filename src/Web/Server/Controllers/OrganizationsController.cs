@@ -271,4 +271,34 @@ public class OrganizationsController : ControllerBase
         var result = await _mediator.Send(new UpdateOrganizationRolePermissionsCommand(organizationId, model));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Get settings for an organization.
+    /// </summary>
+    /// <param name="organizationId"></param>
+    /// <response code="404">Organization not found.</response>
+    [HttpGet("{organizationId:guid}/settings")]
+    [Authorize(Policy.OrganizationEditOrganization)]
+    [ProducesResponseType(typeof(OrganizationSettingsVM), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetOrganizationSettings(Guid organizationId)
+    {
+        var result = await _mediator.Send(new GetOrganizationSettingsQuery(organizationId));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
+    /// Update an organization's name.
+    /// </summary>
+    /// <param name="organizationId"></param>
+    /// <param name="model"></param>
+    /// <response code="404">Project not found.</response>
+    [HttpPost("{organizationId:guid}/name")]
+    [Authorize(Policy.OrganizationEditOrganization)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> UpdateOrganizationName(Guid organizationId, [FromBody] UpdateOrganizationNameDto model)
+    {
+        var result = await _mediator.Send(new UpdateOrganizationNameCommand(organizationId, model));
+        return result.ToHttpResult();
+    }
 }

@@ -53,3 +53,8 @@ export interface UserOrganizationInvitationVM {
     id: string;
     organizationName: string;
 }
+
+export interface OrganizationSettingsVM {
+    name: string;
+    ownerId: string;
+}

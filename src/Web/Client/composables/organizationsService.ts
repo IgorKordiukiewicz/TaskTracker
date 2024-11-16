@@ -1,6 +1,6 @@
-import type { CreateOrganizationDto, CreateOrganizationInvitationDto } from "~/types/dtos/organizations";
+import type { CreateOrganizationDto, CreateOrganizationInvitationDto, UpdateOrganizationNameDto } from "~/types/dtos/organizations";
 import type { CreateRoleDto, DeleteRoleDto, RemoveMemberDto, UpdateMemberRoleDto, UpdateRoleNameDto, UpdateRolePermissionsDto } from '~/types/dtos/shared';
-import type { OrganizationRolesVM, OrganizationMembersVM, OrganizationNavDataVM, OrganizationsVM, OrganizationInvitationsVM, UserOrganizationInvitationsVM } from "~/types/viewModels/organizations";
+import type { OrganizationRolesVM, OrganizationMembersVM, OrganizationNavDataVM, OrganizationsVM, OrganizationInvitationsVM, UserOrganizationInvitationsVM, OrganizationSettingsVM } from "~/types/viewModels/organizations";
 
 export const useOrganizationsService = () => {
     const api = useApi();
@@ -56,6 +56,12 @@ export const useOrganizationsService = () => {
         },
         async removeMember(id: string, model: RemoveMemberDto) {
             await api.sendPostRequest(`organizations/${id}/members/remove`, model);
+        },
+        async getSettings(id: string) {
+            return await api.sendGetRequest<OrganizationSettingsVM>(`organizations/${id}/settings`);
+        },
+        async updateName(id: string, model: UpdateOrganizationNameDto) {
+            await api.sendPostRequest(`organizations/${id}/name`, model);
         }
     }
 }
