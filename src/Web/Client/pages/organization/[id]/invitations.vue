@@ -2,22 +2,33 @@
     <OrganizationLayout>
         <div class="flex justify-between items-center">
             <p class="text-lg">Invitations</p>
-            <Button icon="pi pi-plus" severity="primary" label="Invite" @click="openSendInvitationDialog" />
-            <SendInvitationDialog ref="sendInvitationDialog" :organizationId="organizationId" @onCreate="updateInvitations" />
+            <div class="flex gap-2 items-center">
+                <Button type="button" icon="pi pi-filter-slash" label="Clear" severity="contrast" outlined @click="resetFilters" />
+                <IconField>
+                    <InputIcon class="pi pi-search" />
+                    <InputText v-model="filters['global'].value" placeholder="Search" />
+                </IconField>
+                <Button icon="pi pi-plus" severity="primary" label="Invite" @click="openSendInvitationDialog" />
+                <SendInvitationDialog ref="sendInvitationDialog" :organizationId="organizationId" @onCreate="updateInvitations" />
+            </div>
         </div>
-        <DataTable v-if="invitations" :value="invitations.invitations" class="mt-4 shadow" paginator :rows="10" :rows-per-page-options="[10, 25, 50]">
-            <Column header="Email" field="userEmail"></Column>
-            <Column header="Finalized At">
+        <DataTable v-if="invitations" :value="invitations.invitations" class="mt-4 shadow" paginator :rows="10" :rows-per-page-options="[10, 25, 50]"
+        removable-sort filter-display="menu" :global-filter-fields="['userEmail' ]" v-model:filters="filters">
+            <Column header="Email" field="userEmail" sortable></Column>
+            <Column header="Finalized At" sortable sortField="finalizedAt">
                 <template #body="slotProps">
                     {{ formatDate(slotProps.data.finalizedAt) }}
                 </template>
             </Column>
-            <Column header="State">
+            <Column header="State" filter-field="state" :show-filter-match-modes="false">
                 <template #body="slotProps">
                     <Tag class="w-24" :value="OrganizationInvitationState[slotProps.data.state]" :severity="getStateSeverity(slotProps.data.state)"></Tag>
                 </template>
+                <template #filter="{ filterModel }">
+                    <MultiSelect v-model="filterModel.value" :options="states" option-label="name" option-value="key"></MultiSelect>
+                </template>
             </Column>
-            <Column header="Created At" >
+            <Column header="Created At" sortable sortField="createdAt">
                 <template #body="slotProps">
                     {{ formatDate(slotProps.data.createdAt) }}
                 </template>
@@ -36,6 +47,7 @@
 
 <script setup lang="ts">
 import { OrganizationInvitationState } from '~/types/enums';
+import { FilterMatchMode } from '@primevue/core/api';
 
 const route = useRoute();
 const organizationsService = useOrganizationsService();
@@ -43,6 +55,8 @@ const confirm = useConfirm();
 
 const organizationId = ref(route.params.id as string);
 const invitations = ref(await organizationsService.getInvitations(organizationId.value));
+
+const filters = ref();
 
 const sendInvitationDialog = ref();
 const selectedInvitation = ref();
@@ -74,6 +88,25 @@ const menuItems = ref([
         ]
     }
 ])
+
+const states = ref([
+    { key: OrganizationInvitationState.Pending, name: OrganizationInvitationState[OrganizationInvitationState.Pending] },
+    { key: OrganizationInvitationState.Accepted, name: OrganizationInvitationState[OrganizationInvitationState.Accepted] },
+    { key: OrganizationInvitationState.Declined, name: OrganizationInvitationState[OrganizationInvitationState.Declined] },
+    { key: OrganizationInvitationState.Canceled, name: OrganizationInvitationState[OrganizationInvitationState.Canceled] },
+]);
+
+const initFilters = () => {
+    filters.value = {
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        state: { value: null, matchMode: FilterMatchMode.IN }
+    }
+}
+initFilters();
+
+function resetFilters() {
+    initFilters();
+}
 
 function toggleMenu(event: Event, invitationId: string) {
     selectedInvitation.value = invitationId;
