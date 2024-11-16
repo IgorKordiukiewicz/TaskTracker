@@ -23,6 +23,12 @@ public class OrganizationMemberRequirementHandler : MemberRequirementHandler<Org
             return false;
         }
 
+        if(requirement.Owner)
+        {
+            return await dbContext.Organizations
+                .AnyAsync(x => x.Id == entityId && x.OwnerId == userId);
+        }
+
         if(requirement.Permissions is null)
         {
             return true;

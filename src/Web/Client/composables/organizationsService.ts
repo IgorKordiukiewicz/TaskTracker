@@ -62,6 +62,9 @@ export const useOrganizationsService = () => {
         },
         async updateName(id: string, model: UpdateOrganizationNameDto) {
             await api.sendPostRequest(`organizations/${id}/name`, model);
+        },
+        async deleteOrganization(id: string) {
+            await api.sendPostRequest(`organizations/${id}/delete`, '');
         }
     }
 }

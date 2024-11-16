@@ -301,4 +301,18 @@ public class OrganizationsController : ControllerBase
         var result = await _mediator.Send(new UpdateOrganizationNameCommand(organizationId, model));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Delete an organization.
+    /// </summary>
+    /// <param name="organizationId"></param>
+    /// <response code="404">Organization not found.</response>
+    [HttpPost("{organizationId:guid}/delete")]
+    [Authorize(Policy.OrganizationOwner)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> DeleteProject(Guid organizationId)
+    {
+        var result = await _mediator.Send(new DeleteOrganizationCommand(organizationId));
+        return result.ToHttpResult();
+    }
 }

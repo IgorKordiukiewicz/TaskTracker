@@ -18,7 +18,18 @@
                     </template>
                 </div>
             </div>
+            <Divider />
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="font-semibold mb-1">Delete Organization</p>
+                    <p style="color: rgb(100, 116, 139);" class="text-sm">This will permanently delete the organization and all its projects.</p>
+                </div>
+                <div >
+                    <Button severity="danger" label="Delete" @click="deleteOrganization" />
+                </div>
+            </div>
         </div>
+        <ConfirmDialog></ConfirmDialog>
     </div>
 </template>
 
@@ -27,6 +38,7 @@ import { UpdateOrganizationNameDto } from '~/types/dtos/organizations';
 
 const route = useRoute();
 const organizationsService = useOrganizationsService();
+const confirm = useConfirm();
 
 const organizationId = ref(route.params.id as string);
 const settings = ref(await organizationsService.getSettings(organizationId.value));
@@ -53,5 +65,24 @@ async function updateName() {
     await organizationsService.updateName(organizationId.value, model);
     await updateSettings();
     cancelNameEdit();
+}
+
+async function deleteOrganization() {
+    confirm.require({
+        message: `Are you sure you want to delete the ${settings.value!.name} organization?`,
+        header: 'Confirm action',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary'
+        },
+        acceptProps: {
+            label: 'Confirm',
+            severity: 'danger'
+        },
+        accept: async () => {
+            await organizationsService.deleteOrganization(organizationId.value);
+            navigateTo('/');
+        }
+    })
 }
 </script>
