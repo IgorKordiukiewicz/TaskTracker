@@ -1,8 +1,8 @@
 <template>
     <OrganizationLayout>
-        <p class="text-lg">Members</p>
         <MembersList v-if="members && roles" :members="members.members" :roles="roles.roles" 
-        @on-update-member-role="updateMemberRole" @on-remove-member="removeMember" />
+        @on-update-member-role="updateMemberRole" @on-remove-member="removeMember">
+        </MembersList>
     </OrganizationLayout>
 </template>
 

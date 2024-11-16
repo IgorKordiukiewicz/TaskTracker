@@ -1,12 +1,10 @@
 <template>
     <div>
-        <div class="flex justify-between items-center">
-            <p class="text-lg">Members</p>
+        <MembersList v-if="members && roles" :members="members.members" :roles="roles.roles" 
+        @on-update-member-role="updateMemberRole" @on-remove-member="removeMember">
             <Button icon="pi pi-plus" severity="primary" label="Add" @click="openAddProjectMemberDialog" />
             <AddProjectMemberDialog v-if="availableUsers" ref="addProjectMemberDialog" :projectId="projectId" :available-users="availableUsers.users" @on-add="updateMembers" />
-        </div>
-        <MembersList v-if="members && roles" :members="members.members" :roles="roles.roles" 
-        @on-update-member-role="updateMemberRole" @on-remove-member="removeMember" />
+        </MembersList>
     </div>
 </template>
 

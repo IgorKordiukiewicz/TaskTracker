@@ -1,7 +1,19 @@
 <template>
-    <div class="mt-4">
-        <DataTable :value="members" class="shadow" paginator :rows="10" :rows-per-page-options="[10, 25, 50]">
-            <Column header="Name">
+    <div>
+        <div class="flex justify-between items-center">
+            <p class="text-lg">Members</p> 
+            <div class="flex gap-2 items-center">
+                <Button type="button" icon="pi pi-filter-slash" label="Clear" severity="contrast" outlined @click="resetFilters" />
+                <IconField>
+                    <InputIcon class="pi pi-search" />
+                    <InputText v-model="filters['global'].value" placeholder="Search" />
+                </IconField>
+                <slot />
+            </div>
+        </div>
+        <DataTable :value="members" class="mt-4 shadow" paginator :rows="10" :rows-per-page-options="[10, 25, 50]"
+        removable-sort filter-display="menu" :global-filter-fields="[ 'name', 'email' ]" v-model:filters="filters">
+            <Column header="Name" sortable filter-field="name" sort-field="name">
                 <template #body="slotProps">
                     <div class="flex gap-4 items-center">
                         <Avatar label="AA" shape="circle" /> <!--TODO-->
@@ -9,10 +21,13 @@
                     </div>
                 </template>
             </Column>
-            <Column field="email" header="Email"></Column>
-            <Column field="roleName" header="Role">
+            <Column field="email" header="Email" sortable></Column>
+            <Column field="roleName" header="Role" filter-field="roleName" :show-filter-match-modes="false">
                 <template #body="slotProps">
                     <RoleSelect :roles="roles" :member="slotProps.data" @on-update="updateMemberRole" />
+                </template>
+                <template #filter="{ filterModel }">
+                    <MultiSelect v-model="filterModel.value" :options="roles" option-label="name" option-value="name"></MultiSelect>
                 </template>
             </Column>
             <Column header="" style="width: 1px;">
@@ -30,6 +45,7 @@
 import type { PropType } from 'vue';
 import { RemoveMemberDto, type UpdateMemberRoleDto } from '~/types/dtos/shared';
 import type { MemberVM, RoleVM } from '~/types/viewModels/shared';
+import { FilterMatchMode } from '@primevue/core/api';
 
 const props = defineProps({
     members: { type: Object as PropType<MemberVM[]>, required: true },
@@ -74,6 +90,19 @@ const menuItems = ref([
     }
 ])
 const selectedMemberId = ref();
+
+const filters = ref();
+const initFilters = () => {
+    filters.value = {
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        roleName: { value: null, matchMode: FilterMatchMode.IN }
+    }
+}
+initFilters();
+
+function resetFilters() {
+    initFilters();
+}
 
 function updateMemberRole(model: UpdateMemberRoleDto) {
     emit('onUpdateMemberRole', model);
