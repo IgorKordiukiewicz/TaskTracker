@@ -11,6 +11,7 @@ internal class RegisterUserCommandValidator : AbstractValidator<RegisterUserComm
         RuleFor(x => x.Model.Email).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Model.FirstName).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Model.LastName).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.Model.AvatarColor).NotEmpty().Length(7);
     }
 }
 
@@ -33,7 +34,6 @@ internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result
         }
 
         var user = User.Create(request.Id, request.Model.Email, request.Model.FirstName, request.Model.LastName);
-        var avatarColor = "#EF5350";
 
         await using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
@@ -44,7 +44,7 @@ internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result
             _dbContext.UsersPresentationData.Add(new()
             {
                 UserId = user.Id,
-                AvatarColor = avatarColor
+                AvatarColor = request.Model.AvatarColor
             });
             await _dbContext.SaveChangesAsync();
 
