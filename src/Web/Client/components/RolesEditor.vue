@@ -7,21 +7,26 @@
         </div>
         <div class="bg-white w-full shadow mt-4">
             <table class="w-full" style="border-spacing: 5000px;">
-                <tr>
-                    <th style="width: 200px;"></th>
-                    <th v-for="permission in permissions" class="pb-2">
-                        {{ permission.label }}
-                    </th>
-                </tr>
-                <tr v-for="role in props.roles" class="hover:bg-surface-100" @contextmenu="onRightClick($event, role)">
-                    <td>
-                        {{ role.name }}
-                    </td>
-                    <td v-for="permission in permissions" class="text-center">
-                        <Checkbox binary :model-value="hasPermission(permission.value, role.permissions)" :disabled="!role.modifiable" 
-                        @change="async (e: Event) => await updateRolePermissions(e, role, permission.value)" />
-                    </td>
-                </tr>
+                <thead>
+                    <tr>
+                        <th style="width: 200px;"></th>
+                        <th v-for="permission in permissions" class="pb-2">
+                            {{ permission.label }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="role in props.roles" class="hover:bg-surface-100" @contextmenu="onRightClick($event, role)">
+                        <td>
+                            {{ role.name }}
+                        </td>
+                        <td v-for="permission in permissions" class="text-center">
+                            <Checkbox binary :model-value="hasPermission(permission.value, role.permissions)" :disabled="!role.modifiable" 
+                            @change="async (e: Event) => await updateRolePermissions(e, role, permission.value)" />
+                        </td>
+                    </tr>
+                </tbody>
+
             </table>
         </div>
         <ContextMenu ref="menu" :model="menuItems" @hide="selectedRole = null" />
