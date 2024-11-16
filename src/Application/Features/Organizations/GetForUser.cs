@@ -28,7 +28,9 @@ internal class GetOrganizationsForUserHandler : IRequestHandler<GetOrganizations
             {
                 Id = x.Id,
                 Name = x.Name,
-            }).ToListAsync();
+            })
+            .OrderBy(x => x.Name)
+            .ToListAsync();
 
         return Result.Ok<OrganizationsForUserVM>(new(organizations));
     }

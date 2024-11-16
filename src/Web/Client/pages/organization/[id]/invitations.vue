@@ -5,7 +5,7 @@
             <Button icon="pi pi-plus" severity="primary" label="Invite" @click="openSendInvitationDialog" />
             <SendInvitationDialog ref="sendInvitationDialog" :organizationId="organizationId" @onCreate="updateInvitations" />
         </div>
-        <DataTable v-if="invitations" :value="invitations.invitations" class="mt-4 shadow">
+        <DataTable v-if="invitations" :value="invitations.invitations" class="mt-4 shadow" paginator :rows="10" :rows-per-page-options="[10, 25, 50]">
             <Column header="Email" field="userEmail"></Column>
             <Column header="Finalized At">
                 <template #body="slotProps">

@@ -1,6 +1,6 @@
 <template>
     <div class="mt-4">
-        <DataTable :value="members" class="shadow">
+        <DataTable :value="members" class="shadow" paginator :rows="10" :rows-per-page-options="[10, 25, 50]">
             <Column header="Name">
                 <template #body="slotProps">
                     <div class="flex gap-4 items-center">

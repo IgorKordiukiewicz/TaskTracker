@@ -32,7 +32,7 @@ internal class GetProjectMembersHandler : IRequestHandler<GetProjectMembersQuery
             .Where(x => x.ProjectId == request.ProjectId)
             .ToDictionaryAsync(k => k.Id, v => v.Name);
 
-        var members = await _dbContext.Projects
+        var members = (await _dbContext.Projects
             .Include(x => x.Members)
             .Where(x => x.Id == request.ProjectId)
             .SelectMany(x => x.Members)
@@ -48,7 +48,9 @@ internal class GetProjectMembersHandler : IRequestHandler<GetProjectMembersQuery
                 RoleId = member.RoleId,
                 RoleName = roleNameById[member.RoleId],
             })
-            .ToListAsync();
+            .ToListAsync())
+            .OrderBy(x => x.Name)
+            .ToList();
 
         return Result.Ok(new ProjectMembersVM(members));
     }

@@ -35,7 +35,7 @@ internal class GetOrganizationMembersHandler : IRequestHandler<GetOrganizationMe
             .Where(x => x.OrganizationId == request.OrganizationId)
             .ToDictionaryAsync(k => k.Id, v => v.Name);
 
-        var members = await _dbContext.Organizations
+        var members = (await _dbContext.Organizations
             .Include(x => x.Members)
             .Where(x => x.Id == request.OrganizationId)
             .SelectMany(x => x.Members)
@@ -52,7 +52,9 @@ internal class GetOrganizationMembersHandler : IRequestHandler<GetOrganizationMe
                 RoleName = roleNameById[member.RoleId],
                 Owner = user.Id == organization.OwnerId
             })
-            .ToListAsync();
+            .ToListAsync())
+            .OrderBy(x => x.Name)
+            .ToList();
 
         return Result.Ok(new OrganizationMembersVM(members));
     }

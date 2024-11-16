@@ -14,7 +14,7 @@
         </div>
         <template v-if="tasks && members">
             <DataTable :value="tasks.tasks" class="mt-4 shadow" removable-sort data-key="shortId" :row-hover="true" :row-class="() => 'cursor-pointer'"
-            filter-display="menu" :global-filter-fields="['title' ,'description' ]" v-model:filters="filters" @row-click="openTaskDetails">
+            filter-display="menu" :global-filter-fields="['title' ,'description' ]" v-model:filters="filters" @row-click="openTaskDetails" paginator :rows="10" :rows-per-page-options="[10, 25, 50]">
                 <Column header="Id" field="shortId" style="width: 80px;" sortable filter-field="shortId" data-type="numeric" :show-filter-match-modes="false">
                     <template #body="{ data }">
                         {{  data.shortId }}

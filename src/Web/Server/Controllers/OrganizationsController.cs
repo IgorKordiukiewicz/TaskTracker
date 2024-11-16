@@ -86,15 +86,14 @@ public class OrganizationsController : ControllerBase
     /// Get all invitations of an organization.
     /// </summary>
     /// <param name="organizationId"></param>
-    /// <param name="pagination"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpGet("{organizationId:guid}/invitations")]
     [Authorize(Policy.OrganizationEditMembers)]
     [ProducesResponseType(typeof(OrganizationInvitationsVM), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetOrganizationInvitationsForOrganization(Guid organizationId, [FromQuery] Pagination pagination)
+    public async Task<IActionResult> GetOrganizationInvitationsForOrganization(Guid organizationId)
     {
-        var result = await _mediator.Send(new GetOrganizationInvitationsQuery(organizationId, pagination));
+        var result = await _mediator.Send(new GetOrganizationInvitationsQuery(organizationId));
         return result.ToHttpResult();
     }
 

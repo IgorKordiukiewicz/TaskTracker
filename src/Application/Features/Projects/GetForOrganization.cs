@@ -35,7 +35,9 @@ internal class GetProjectsForOrganizationHandler : IRequestHandler<GetProjectsFo
             {
                 Id = x.Id,
                 Name = x.Name,
-            }).ToListAsync();
+            })
+            .OrderBy(x => x.Name)
+            .ToListAsync();
 
         return Result.Ok(new ProjectsVM(projects));
     }
