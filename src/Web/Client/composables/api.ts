@@ -1,5 +1,6 @@
 export const useApi = () => {
     const client = useSupabaseClient();
+    const toast = useToast();
 
     return {
         async sendPostRequest<T>(url: string, body: T, customHeaders?: Record<string, string>) {
@@ -54,7 +55,6 @@ export const useApi = () => {
     }
 
     function handleError(error: any) {
-        // TODO
-        //toast.add({ severity: 'error', 'summary': 'Request Error', detail: error?.message, life: 2000 });
+        toast.add({ severity: 'error', 'summary': 'Request Error', detail: error?.message, life: 2000 });
     }
 }

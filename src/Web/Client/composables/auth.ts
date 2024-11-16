@@ -3,6 +3,8 @@ import { UserRegistrationDto } from "~/types/dtos/user";
 export const useAuth = () => {
     const supabaseClient = useSupabaseClient();
     const supabaseUser = useSupabaseUser();
+    const api = useApi();
+    const toast = useToast();
 
     return {
         async login(email: string, password: string) {
@@ -12,16 +14,13 @@ export const useAuth = () => {
                     email: email,
                     password: password
                 });
+                if(result.error) {
+                    throw new Error(result.error.message);
+                }
 
-                const accessToken = result.data.session?.access_token;
-                const { data } = await useFetch<boolean>('https://localhost:7075/users/me/registered', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-                console.log(data.value);
-                if(!data.value) {
+                const data = await api.sendGetRequest<boolean>('users/me/registered');
+
+                if(!data) {
                     navigateTo('/account/complete-registration');
                 }
                 else {
@@ -35,17 +34,8 @@ export const useAuth = () => {
         },
         async register(firstName: string, lastName: string) {
             const email = (await supabaseClient.auth.getUser()).data.user?.email;
-            const accessToken = (await supabaseClient.auth.getSession()).data.session?.access_token;
             const model = new UserRegistrationDto(email!, firstName, lastName);
-
-            await useFetch('https://localhost:7075/users/me/register', {
-                method: 'POST',
-                body: JSON.stringify(model),
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`
-                }
-            });
-
+            await api.sendPostRequest('users/me/register', model);
             navigateTo('/');
         },
         async sendResetPasswordEmail(email: string) {
