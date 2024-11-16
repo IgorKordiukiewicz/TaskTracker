@@ -111,7 +111,22 @@ public class TaskTests
     }
 
     [Fact]
-    public void UpdateDescription_ShouldUpdateDescription()
+    public void UpdateTitle_ShouldUpdateTitleAndAddActivity()
+    {
+        var task = CreateDefaultTask();
+        var newTitle = task.Title + "A";
+
+        task.UpdateTitle(newTitle);
+
+        using(new AssertionScope())
+        {
+            task.Title.Should().Be(newTitle);
+            task.Activities.Any(x => x.Property == TaskProperty.Title).Should().BeTrue();
+        }
+    }
+
+    [Fact]
+    public void UpdateDescription_ShouldUpdateDescriptionAndAddActivity()
     {
         var task = CreateDefaultTask();
         var newDescription = task.Description + "A";

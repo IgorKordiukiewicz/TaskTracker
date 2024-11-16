@@ -45,6 +45,12 @@ public class Task : Entity, IAggregateRoot
         };
     }
 
+    public void UpdateTitle(string title)
+    {
+        _activities.Add(new(Id, TaskProperty.Title, Title, title));
+        Title = title;
+    }
+
     public void UpdateDescription(string description)
     {
         _activities.Add(new(Id, TaskProperty.Description, Description, description));

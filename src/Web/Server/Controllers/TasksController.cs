@@ -121,6 +121,21 @@ public class TasksController : ControllerBase
     }
 
     /// <summary>
+    /// Update a task's title.
+    /// </summary>
+    /// <param name="taskId"></param>
+    /// <param name="model"></param>
+    /// <response code="404">Task not found.</response> 
+    [HttpPost("{taskId:guid}/title")]
+    [Authorize(Policy.ProjectEditTasks)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> UpdateTaskTitle(Guid taskId, UpdateTaskTitleDto model)
+    {
+        var result = await _mediator.Send(new UpdateTaskTitleCommand(taskId, model));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
     /// Update a task's description.
     /// </summary>
     /// <param name="taskId"></param>

@@ -5,5 +5,6 @@ public enum TaskProperty
     Description,
     Status,
     Assignee,
-    Priority
+    Priority,
+    Title
 }

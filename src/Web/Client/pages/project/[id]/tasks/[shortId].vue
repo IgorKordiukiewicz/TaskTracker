@@ -7,9 +7,10 @@
                 </p>
             </div>
             <div class="flex gap-1 items-center">
-                <Button icon="pi pi-pencil" text severity="secondary" label="Title" />
+                <Button icon="pi pi-pencil" text severity="secondary" label="Title" @click="openUpdateTitleDialog" />
                 <Button icon="pi pi-chevron-left" text severity="secondary" label="Back" @click="navigateTo(`/project/${projectId}/`)" />
             </div>
+            <UpdateTaskTitleDialog ref="updateTitleDialog" :id="details.id" :project-id="projectId" @on-update="updateDetails" />
         </div>
         <div class="flex gap-4 w-100 mt-4" v-if="details && members">
             <div class="flex flex-col gap-4 w-3/4">
@@ -99,8 +100,6 @@
                         <template v-else>
                             <Knob :model-value="0" :value-template="(val) => `-`" :stroke-width="10" readonly />
                         </template>
-                        <!-- if logged > estimated: red color and value 100 -->
-                        <!-- what if some time is logged but nothing estimated - show full with '-' as display ?-->
                         <div class="flex flex-col gap-1 items-center w-full">
                             <p class="text-sm">Estimated</p>
                             <p class="text-base font-semibold">{{ estimatedTimeDisplay }}</p>
@@ -135,6 +134,7 @@ const activities = ref(details.value
 
 const logTimeDialog = ref();
 const estimatedTimeDialog = ref();
+const updateTitleDialog = ref();
 
 const priorities = ref([
     { key: TaskPriority.Low, name: TaskPriority[TaskPriority.Low] },
@@ -194,17 +194,14 @@ function isScrollHidden(scrollPanelId: string, contentId: string) {
 
 async function updateDetails() {
     details.value = await tasksService.getTask(taskShortId.value, projectId.value);
+    activities.value = details.value 
+        ? await tasksService.getActivities(details.value.id, projectId.value)
+        : null;
 }
 
 async function updateComments() {
     comments.value = details.value
         ? await tasksService.getComments(details.value.id, projectId.value)
-        : null;
-}
-
-async function updateActivities() {
-    activities.value = details.value 
-        ? await tasksService.getActivities(details.value.id, projectId.value)
         : null;
 }
 
@@ -218,6 +215,10 @@ function openLogTimeDialog() {
 
 function openEstimatedTimeDialog() {
     estimatedTimeDialog.value.show();
+}
+
+function openUpdateTitleDialog() {
+    updateTitleDialog.value.show(details.value!.title);
 }
 
 async function updateDescription() {

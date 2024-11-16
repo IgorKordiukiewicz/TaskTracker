@@ -35,3 +35,7 @@ export class AddTaskLoggedTimeDto {
 export class UpdateTaskEstimatedTimeDto {
     minutes: number = 0;
 }
+
+export class UpdateTaskTitleDto {
+    title: string = '';
+}
