@@ -2,14 +2,14 @@
 
 namespace Application.Features.Projects;
 
-public record RemoveProjectMemberCommand(Guid ProjectId, Guid MemberId) : IRequest<Result>;
+public record RemoveProjectMemberCommand(Guid ProjectId, RemoveProjectMemberDto Model) : IRequest<Result>;
 
 internal class RemoveProjectMemberCommandValidator : AbstractValidator<RemoveProjectMemberCommand>
 {
     public RemoveProjectMemberCommandValidator()
     {
         RuleFor(x => x.ProjectId).NotEmpty();
-        RuleFor(x => x.MemberId).NotEmpty();
+        RuleFor(x => x.Model.MemberId).NotEmpty();
     }
 }
 
@@ -32,9 +32,9 @@ internal class RemoveProjectMemberHandler : IRequestHandler<RemoveProjectMemberC
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
-        var userId = project.Members.FirstOrDefault(x => x.Id == request.MemberId)?.UserId;
+        var userId = project.Members.FirstOrDefault(x => x.Id == request.Model.MemberId)?.UserId;
 
-        var result = project.RemoveMember(request.MemberId);
+        var result = project.RemoveMember(request.Model.MemberId);
         if(result.IsFailed)
         {
             return Result.Fail(result.Errors);

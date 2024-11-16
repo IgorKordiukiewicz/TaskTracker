@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+/* these are necessary styles for vue flow */
+@import '@vue-flow/core/dist/style.css';
+/* this contains the default theme, these are optional styles */
+@import '@vue-flow/core/dist/theme-default.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-optical-sizing: auto;
+    color: rgb(51, 65, 85);
+    width: 100%;
+    height: 100%;
+}
+
+.block-list-item {
+    width: calc(20% - 0.6rem);
+}
+
+.navbar-item-icon {
+    height: 16px;
+    color: var(--p-menu-item-icon-color);
+}
+
+.settings-label-caption {
+    color: rgb(100, 116, 139);
+}

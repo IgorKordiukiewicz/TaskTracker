@@ -2,7 +2,7 @@
 
 namespace Shared.ViewModels;
 
-public record OrganizationInvitationsVM(IReadOnlyList<OrganizationInvitationVM> Invitations, int TotalPagesCount);
+public record OrganizationInvitationsVM(IReadOnlyList<OrganizationInvitationVM> Invitations);
 public record OrganizationInvitationVM(Guid Id, string UserEmail, OrganizationInvitationState State, DateTime CreatedAt, DateTime? FinalizedAt);
 
 public record OrganizationsForUserVM(IReadOnlyList<OrganizationForUserVM> Organizations);
@@ -15,5 +15,9 @@ public record OrganizationForUserVM
 
 public record UserOrganizationInvitationsVM(IReadOnlyList<UserOrganizationInvitationVM> Invitations);
 public record UserOrganizationInvitationVM(Guid Id, string OrganizationName);
+
+public record OrganizationSettingsVM(string Name, Guid OwnerId);
+
+public record UserOrganizationPermissionsVM(OrganizationPermissions Permissions);
 
 

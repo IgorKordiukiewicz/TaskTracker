@@ -4,14 +4,14 @@ using Hangfire;
 
 namespace Application.Features.Organizations;
 
-public record RemoveOrganizationMemberCommand(Guid OrganizationId, Guid MemberId) : IRequest<Result>;
+public record RemoveOrganizationMemberCommand(Guid OrganizationId, RemoveOrganizationMemberDto Model) : IRequest<Result>;
 
 internal class RemoveOrganizationMemberCommandValidator : AbstractValidator<RemoveOrganizationMemberCommand>
 {
     public RemoveOrganizationMemberCommandValidator()
     {
         RuleFor(x => x.OrganizationId).NotEmpty();
-        RuleFor(x => x.MemberId).NotEmpty();
+        RuleFor(x => x.Model.MemberId).NotEmpty();
     }
 }
 
@@ -36,9 +36,9 @@ internal class RemoveOrganizationMemberHandler : IRequestHandler<RemoveOrganizat
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
         }
 
-        var userId = organization.Members.FirstOrDefault(x => x.Id == request.MemberId)?.UserId;
+        var userId = organization.Members.FirstOrDefault(x => x.Id == request.Model.MemberId)?.UserId;
 
-        var result = organization.RemoveMember(request.MemberId);
+        var result = organization.RemoveMember(request.Model.MemberId);
         if (result.IsFailed)
         {
             return Result.Fail(result.Errors);

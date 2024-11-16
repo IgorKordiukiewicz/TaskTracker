@@ -2,14 +2,14 @@
 
 namespace Application.Features.Organizations;
 
-public record DeleteOrganizationRoleCommand(Guid OrganizationId, Guid RoleId) : IRequest<Result>;
+public record DeleteOrganizationRoleCommand(Guid OrganizationId, DeleteRoleDto Model) : IRequest<Result>;
 
 internal class DeleteOrganizationRoleCommandValidator : AbstractValidator<DeleteOrganizationRoleCommand>
 {
     public DeleteOrganizationRoleCommandValidator()
     {
         RuleFor(x => x.OrganizationId).NotEmpty();
-        RuleFor(x => x.RoleId).NotEmpty();
+        RuleFor(x => x.Model.RoleId).NotEmpty();
     }
 }
 
@@ -30,7 +30,7 @@ internal class DeleteProjectRoleHandler : IRequestHandler<DeleteOrganizationRole
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
         }
 
-        var result = organization.RolesManager.DeleteRole(request.RoleId, organization.Members);
+        var result = organization.RolesManager.DeleteRole(request.Model.RoleId, organization.Members);
         if (result.IsFailed)
         {
             return Result.Fail(result.Errors);

@@ -11,9 +11,12 @@ public abstract class MemberRequirement<TPermissions> : IAuthorizationRequiremen
 
 public class OrganizationMemberRequirement : MemberRequirement<OrganizationPermissions>
 {
-    public OrganizationMemberRequirement(OrganizationPermissions? permissions = null)
+    public bool Owner { get; init; }
+
+    public OrganizationMemberRequirement(OrganizationPermissions? permissions = null, bool owner = false)
     {
         Permissions = permissions;
+        Owner = owner;
     }
 }
 

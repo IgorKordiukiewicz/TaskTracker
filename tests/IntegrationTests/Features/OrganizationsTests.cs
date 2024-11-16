@@ -4,11 +4,9 @@ using Domain.Common;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Users;
-using Hangfire;
-using NSubstitute;
+using Domain.Workflows;
 using Shared.Enums;
 using Shared.ViewModels;
-using System.Linq.Expressions;
 
 namespace IntegrationTests.Features;
 
@@ -31,7 +29,7 @@ public class OrganizationsTests
     {
         await _factory.CreateUsers();
 
-        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new("org", Guid.NewGuid())));
+        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new("org"), Guid.NewGuid()));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -41,7 +39,7 @@ public class OrganizationsTests
     {
         var user = (await _factory.CreateUsers())[0];
 
-        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new("org", user.Id)));
+        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new("org"), user.Id));
 
         using(new AssertionScope())
         {
@@ -75,7 +73,7 @@ public class OrganizationsTests
     public async Task CreateInvitation_ShouldCreateNewInvitation_WhenOrganizationAndUserBothExist()
     {
         var organization = (await _factory.CreateOrganizations())[0];
-        var newUser = User.Create("1234", "newUser","firstName", "lastName");
+        var newUser = User.Create(Guid.NewGuid(), "newUser","firstName", "lastName");
         await _fixture.SeedDb(db =>
         {
             db.Add(newUser);
@@ -172,7 +170,7 @@ public class OrganizationsTests
         var user = await _fixture.FirstAsync<User>();
         _ = await _factory.CreateOrganizations(); // organizations for different user
 
-        var result = await _fixture.SendRequest(new GetOrganizationsForUserQuery(user.AuthenticationId));
+        var result = await _fixture.SendRequest(new GetOrganizationsForUserQuery(user.Id));
 
         using (new AssertionScope())
         {
@@ -195,18 +193,10 @@ public class OrganizationsTests
     }
 
     [Fact]
-    public async Task GetInvitationsForUser_ShouldFail_WhenUserDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetOrganizationInvitationsForUserQuery("111"));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
     public async Task GetInvitationsForUser_ShouldReturnUsersInvitations_WhenUserExists()
     {
-        var user1 = User.Create("123", "user1", "firstName", "lastName");
-        var user2 = User.Create("1234", "user2", "firstName", "lastName");
+        var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
+        var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
         var org1 = Organization.Create("org1", user1.Id);
         var org2 = Organization.Create("org2", user2.Id);
         var org3 = Organization.Create("org3", user1.Id);
@@ -219,7 +209,7 @@ public class OrganizationsTests
             db.AddRange(org1, org2, org3);
         });
 
-        var result = await _fixture.SendRequest(new GetOrganizationInvitationsForUserQuery("1234"));
+        var result = await _fixture.SendRequest(new GetOrganizationInvitationsForUserQuery(user2.Id));
 
         using(new AssertionScope())
         {
@@ -249,7 +239,7 @@ public class OrganizationsTests
         var user = await _fixture.FirstAsync<User>();
         await _fixture.SeedDb(db =>
         {
-            db.Add(User.Create("1234", "newUser", "firstName", "lastName"));
+            db.Add(User.Create(Guid.NewGuid(), "newUser", "firstName", "lastName"));
         });
 
         var result = await _fixture.SendRequest(new GetOrganizationMembersQuery(organization.Id));
@@ -259,7 +249,16 @@ public class OrganizationsTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Members.Should().BeEquivalentTo(new[]
             {
-                new OrganizationMemberVM(organization.Members[0].Id, user.Id, user.FullName, organization.Members[0].RoleId, true)
+                new OrganizationMemberVM()
+                {
+                    Id = organization.Members[0].Id,
+                    UserId = user.Id,
+                    Name = user.FullName,
+                    Email = user.Email,
+                    RoleId = organization.Members[0].RoleId,
+                    RoleName = "Administrator",
+                    Owner = true
+                }
             });
         }
     }
@@ -267,7 +266,7 @@ public class OrganizationsTests
     [Fact]
     public async Task RemoveMember_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new RemoveOrganizationMemberCommand(Guid.NewGuid(), Guid.NewGuid()));
+        var result = await _fixture.SendRequest(new RemoveOrganizationMemberCommand(Guid.NewGuid(), new(Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -275,8 +274,8 @@ public class OrganizationsTests
     [Fact]
     public async Task RemoveMember_ShouldRemoveMember_WhenOrganizationExists()
     {
-        var user1 = User.Create("123", "user1", "firstName", "lastName");
-        var user2 = User.Create("456", "user2", "firstName", "lastName");
+        var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
+        var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
         var invitation = organization.CreateInvitation(user2.Id).Value;
         organization.AcceptInvitation(invitation.Id);
@@ -290,7 +289,7 @@ public class OrganizationsTests
         var membersBefore = await _fixture.CountAsync<OrganizationMember>();
 
         var result = await _fixture.SendRequest(new RemoveOrganizationMemberCommand(organization.Id, 
-            organization.Members.First(x => x.UserId == user2.Id).Id));
+            new(organization.Members.First(x => x.UserId == user2.Id).Id)));
 
         using(new AssertionScope())
         {
@@ -302,7 +301,7 @@ public class OrganizationsTests
     [Fact]
     public async Task GetInvitations_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new GetOrganizationInvitationsQuery(Guid.NewGuid(), new()));
+        var result = await _fixture.SendRequest(new GetOrganizationInvitationsQuery(Guid.NewGuid()));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -310,10 +309,10 @@ public class OrganizationsTests
     [Fact]
     public async Task GetInvitations_ShouldReturnAllCreatedInvitationsByOrganization_WhenOrganizationExists()
     {
-        var user1 = User.Create("1", "user1", "firstName", "lastName");
-        var user2 = User.Create("2", "user2", "firstName", "lastName");
-        var user3 = User.Create("3", "user3", "firstName", "lastName");
-        var user4 = User.Create("4", "user4", "firstName", "lastName");
+        var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
+        var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
+        var user3 = User.Create(Guid.NewGuid(), "user3", "firstName", "lastName");
+        var user4 = User.Create(Guid.NewGuid(), "user4", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
         var acceptedInvitation = organization.CreateInvitation(user2.Id);
         acceptedInvitation.Value.Accept();
@@ -327,7 +326,7 @@ public class OrganizationsTests
             db.AddRange(user1, user2, user3, user4);
         });
 
-        var result = await _fixture.SendRequest(new GetOrganizationInvitationsQuery(organization.Id, new()));
+        var result = await _fixture.SendRequest(new GetOrganizationInvitationsQuery(organization.Id));
 
         using(new AssertionScope())
         {
@@ -407,7 +406,7 @@ public class OrganizationsTests
     [Fact]
     public async Task CreateRole_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(Guid.NewGuid(), new("abc", OrganizationPermissions.InviteMembers)));
+        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(Guid.NewGuid(), new("abc", OrganizationPermissions.EditProjects)));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -418,7 +417,7 @@ public class OrganizationsTests
         var organization = (await _factory.CreateOrganizations())[0];
         var rolesCountBefore = await _fixture.CountAsync<OrganizationRole>();
 
-        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(organization.Id, new("abc", OrganizationPermissions.InviteMembers)));
+        var result = await _fixture.SendRequest(new CreateOrganizationRoleCommand(organization.Id, new("abc", OrganizationPermissions.EditProjects)));
 
         using (new AssertionScope())
         {
@@ -430,7 +429,7 @@ public class OrganizationsTests
     [Fact]
     public async Task DeleteRole_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new DeleteOrganizationRoleCommand(Guid.NewGuid(), Guid.NewGuid()));
+        var result = await _fixture.SendRequest(new DeleteOrganizationRoleCommand(Guid.NewGuid(), new(Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -441,7 +440,7 @@ public class OrganizationsTests
         var (organization, roleName) = await CreateOrganizationWithCustomRole();
         var rolesCountBefore = await _fixture.CountAsync<OrganizationRole>();
 
-        var result = await _fixture.SendRequest(new DeleteOrganizationRoleCommand(organization.Id, organization.Roles.First(x => x.Name == roleName).Id));
+        var result = await _fixture.SendRequest(new DeleteOrganizationRoleCommand(organization.Id, new(organization.Roles.First(x => x.Name == roleName).Id)));
 
         using(new AssertionScope())
         {
@@ -453,7 +452,7 @@ public class OrganizationsTests
     [Fact]
     public async Task UpdateRoleName_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new UpdateOrganizationRoleNameCommand(Guid.NewGuid(), Guid.NewGuid(), new("abc")));
+        var result = await _fixture.SendRequest(new UpdateOrganizationRoleNameCommand(Guid.NewGuid(), new(Guid.NewGuid(), "abc")));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -465,7 +464,7 @@ public class OrganizationsTests
         var newName = roleName + "A";
         var roleId = organization.Roles.First(x => x.Name == roleName).Id;
 
-        var result = await _fixture.SendRequest(new UpdateOrganizationRoleNameCommand(organization.Id, roleId, new(newName)));
+        var result = await _fixture.SendRequest(new UpdateOrganizationRoleNameCommand(organization.Id, new(roleId, newName)));
 
         using (new AssertionScope())
         {
@@ -477,7 +476,7 @@ public class OrganizationsTests
     [Fact]
     public async Task UpdateMemberRole_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new UpdateOrganizationMemberRoleCommand(Guid.NewGuid(), Guid.NewGuid(), new(Guid.NewGuid())));
+        var result = await _fixture.SendRequest(new UpdateOrganizationMemberRoleCommand(Guid.NewGuid(), new(Guid.NewGuid(), Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -489,7 +488,7 @@ public class OrganizationsTests
         var member = organization.Members[0];
         var newRoleId = organization.Roles.First(x => x.Id != member.RoleId).Id;
 
-        var result = await _fixture.SendRequest(new UpdateOrganizationMemberRoleCommand(organization.Id, member.Id, new(newRoleId)));
+        var result = await _fixture.SendRequest(new UpdateOrganizationMemberRoleCommand(organization.Id, new(member.Id, newRoleId)));
 
         using (new AssertionScope())
         {
@@ -501,7 +500,7 @@ public class OrganizationsTests
     [Fact]
     public async Task UpdateRolePermissions_ShouldFail_WhenOrganizationDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new UpdateOrganizationRolePermissionsCommand(Guid.NewGuid(), Guid.NewGuid(), new(OrganizationPermissions.None)));
+        var result = await _fixture.SendRequest(new UpdateOrganizationRolePermissionsCommand(Guid.NewGuid(), new(Guid.NewGuid(), OrganizationPermissions.None)));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -511,9 +510,9 @@ public class OrganizationsTests
     {
         var (organization, roleName) = await CreateOrganizationWithCustomRole();
         var roleId = organization.Roles.First(x => x.Name == roleName).Id;
-        var newPermissions = OrganizationPermissions.CreateProjects | OrganizationPermissions.InviteMembers;
+        var newPermissions = OrganizationPermissions.EditRoles | OrganizationPermissions.EditMembers;
 
-        var result = await _fixture.SendRequest(new UpdateOrganizationRolePermissionsCommand(organization.Id, roleId, new(newPermissions)));
+        var result = await _fixture.SendRequest(new UpdateOrganizationRolePermissionsCommand(organization.Id, new(roleId, newPermissions)));
 
         using (new AssertionScope())
         {
@@ -522,10 +521,118 @@ public class OrganizationsTests
         }
     }
 
+    [Fact]
+    public async Task DeleteOrganization_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new DeleteOrganizationCommand(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task DeleteOrganization_ShouldSucceedAndMarkRequiredRootsAsDeleted_WhenOrganizationExists()
+    {
+        var task = (await _factory.CreateTasks())[0];
+        var project = await _fixture.FirstAsync<Project>(x => x.Id == task.ProjectId);
+        var workflowId = await _fixture.FirstAsync<Workflow>(x => x.ProjectId == project.Id);
+        var taskRelationshipManager = await _fixture.FirstAsync<Domain.Tasks.TaskRelationshipManager>(x => x.ProjectId == project.Id);
+        var organization = await _fixture.FirstAsync<Organization>(x => x.Id == project.OrganizationId);
+
+        var user = User.Create(Guid.NewGuid(), "aaa@mail.com", "bbb", "ccc");
+        var organizationInvitation = organization.CreateInvitation(user.Id).Value;
+        await _fixture.SeedDb(db =>
+        {
+            db.Add(user);
+            db.Add(organizationInvitation);
+        });
+
+        var result = await _fixture.SendRequest(new DeleteOrganizationCommand(organization.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<Organization>(x => x.Id == organization.Id)).Should().Be(0);
+            (await _fixture.CountAsync<OrganizationInvitation>(x => x.OrganizationId == organization.Id)).Should().Be(0);
+            (await _fixture.CountAsync<Project>(x => x.Id == project.Id)).Should().Be(0);
+            (await _fixture.CountAsync<Domain.Tasks.Task>(x => x.Id == task.Id)).Should().Be(0);
+            (await _fixture.CountAsync<Workflow>(x => x.Id == workflowId.Id)).Should().Be(0);
+            (await _fixture.CountAsync<Domain.Tasks.TaskRelationshipManager>(x => x.Id == taskRelationshipManager.Id)).Should().Be(0);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateName_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateOrganizationNameCommand(Guid.NewGuid(), new("abc")));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UpdateName_ShouldSucceedAndUpdateName_WhenOrganizationExists()
+    {
+        var organization = (await _factory.CreateOrganizations())[0];
+        var newName = organization.Name + "A";
+
+        var result = await _fixture.SendRequest(new UpdateOrganizationNameCommand(organization.Id, new(newName)));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<Organization>(x => x.Id == organization.Id)).Name.Should().Be(newName);
+        }
+    }
+
+    [Fact]
+    public async Task GetSettings_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetOrganizationSettingsQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetSettings_ShouldReturnSettings_WhenOrganizationExists()
+    {
+        var organization = (await _factory.CreateOrganizations())[0];
+
+        var result = await _fixture.SendRequest(new GetOrganizationSettingsQuery(organization.Id));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().Be(new OrganizationSettingsVM(organization.Name, organization.OwnerId));
+        }
+    }
+
+    [Fact]
+    public async Task GetUserPermissions_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetUserOrganizationPermissionsQuery(Guid.NewGuid(), Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetUserPermissions_ShouldSucceedAndReturnUserPermissions_WhenOrganizationExists()
+    {
+        var organization = (await _factory.CreateOrganizations())[0];
+        var member = await _fixture.FirstAsync<OrganizationMember>();
+        var role = await _fixture.FirstAsync<OrganizationRole>(x => x.Id == member.RoleId);
+
+        var result = await _fixture.SendRequest(new GetUserOrganizationPermissionsQuery(member.UserId, organization.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Permissions.Should().Be(role.Permissions);
+        }
+    }
+
     private async Task<Guid> CreateOrganizationWithInvitation()
     {
-        var user1 = User.Create("123", "user1","firstName", "lastName");
-        var user2 = User.Create("1234", "user2","firstName", "lastName");
+        var user1 = User.Create(Guid.NewGuid(), "user1","firstName", "lastName");
+        var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
         var invitation = organization.CreateInvitation(user2.Id).Value;
 
@@ -543,7 +650,7 @@ public class OrganizationsTests
         var user = (await _factory.CreateUsers())[0];
         var organization = Organization.Create("org", user.Id);
         var roleName = "abc";
-        _ = organization.RolesManager.AddRole(roleName, OrganizationPermissions.CreateProjects);
+        _ = organization.RolesManager.AddRole(roleName, OrganizationPermissions.EditProjects);
 
         await _fixture.SeedDb(db =>
         {

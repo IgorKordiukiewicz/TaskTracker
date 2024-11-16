@@ -25,40 +25,37 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Check whether user has been already registered in the system.
+    /// Check whether the user has been already registered in the system.
     /// </summary>
-    /// <param name="userAuthenticationId"></param>
-    [HttpGet("{userAuthenticationId}/is-registered")]
+    [HttpGet("me/registered")]
     [ProducesResponseType(typeof(bool), 200)]
-    public async Task<IActionResult> IsUserRegistered(string userAuthenticationId)
+    public async Task<IActionResult> IsUserRegistered()
     {
-        var result = await _mediator.Send(new IsUserRegisteredQuery(userAuthenticationId));
+        var result = await _mediator.Send(new IsUserRegisteredQuery(User.GetUserId()));
         return result.ToHttpResult();
     }
 
     /// <summary>
-    /// Get user's data along with their permissions.
+    /// Get the user's data.
     /// </summary>
-    /// <param name="userAuthenticationId"></param>
     /// <response code="404">User not found.</response> 
-    [HttpGet("{userAuthenticationId}/data")] // without /data the endpoint is not called
+    [HttpGet("me")] // without /data the endpoint is not called
     [ProducesResponseType(typeof(UserVM), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetUser(string userAuthenticationId)
+    public async Task<IActionResult> GetUser()
     {
-        var result = await _mediator.Send(new GetUserQuery(userAuthenticationId));
+        var result = await _mediator.Send(new GetUserQuery(User.GetUserId()));
         return result.ToHttpResult();
     }
 
     /// <summary>
-    /// Register user in the system.
+    /// Register the user in the system.
     /// </summary>
-    /// <param name="model"></param>
-    [HttpPost("register")]
+    [HttpPost("me/register")]
     [ProducesResponseType(201)]
-    public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDto model)
+    public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDto model) 
     {
-        var result = await _mediator.Send(new RegisterUserCommand(model));
+        var result = await _mediator.Send(new RegisterUserCommand(User.GetUserId(), model));
         return result.ToHttpResult(201);
     }
 
@@ -69,7 +66,7 @@ public class UsersController : ControllerBase
     /// <param name="organizationId"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpGet("available-for-invitation")]
-    [Authorize(Policy.OrganizationInviteMembers)]
+    [Authorize(Policy.OrganizationEditMembers)]
     [ProducesResponseType(typeof(UsersSearchVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetUsersNotInOrganization([FromQuery] string searchValue, [FromQuery] Guid organizationId)
@@ -85,27 +82,25 @@ public class UsersController : ControllerBase
     /// <param name="organizationId"></param>
     /// <response code="404">Project or organization not found.</response> 
     [HttpGet("available-for-project")]
-    [Authorize(Policy.ProjectAddMembers)]
+    [Authorize(Policy.ProjectEditTasks)]
     [ProducesResponseType(typeof(UsersSearchVM), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetUsersAvailableForProject([FromQuery] Guid projectId, [FromQuery] Guid organizationId)
+    public async Task<IActionResult> GetUsersAvailableForProject([FromQuery] Guid projectId)
     {
-        var result = await _mediator.Send(new GetUsersAvailableForProjectQuery(organizationId, projectId));
+        var result = await _mediator.Send(new GetUsersAvailableForProjectQuery(projectId));
         return result.ToHttpResult();
     }
 
     /// <summary>
     /// Update a user's first and last name.
     /// </summary>
-    /// <param name="userId"></param>
     /// <param name="model"></param>
-    /// <response code="404">User not found.</response> 
-    [HttpPost("{userId:guid}/update-name")]
-    [Authorize(Policy.UserSelf)]
+    [HttpPost("me/update-name")]
+    [Authorize]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> UpdateUserName(Guid userId, [FromBody] UpdateUserNameDto model)
+    public async Task<IActionResult> UpdateUserName([FromBody] UpdateUserNameDto model)
     {
-        var result = await _mediator.Send(new UpdateUserNameCommand(userId, model));
+        var result = await _mediator.Send(new UpdateUserNameCommand(User.GetUserId(), model));
         return result.ToHttpResult();
     }
 
@@ -118,10 +113,11 @@ public class UsersController : ControllerBase
     /// <response code="404">User not found.</response> 
     [HttpGet("presentation")]
     [Authorize]
+    [ProducesResponseType(typeof(UsersPresentationDataVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetAllUsersPresentationData()
     {
-        var result = await _mediator.Send(new GetAllUsersPresentationDataQuery(User.GetUserAuthenticationId()));
+        var result = await _mediator.Send(new GetAllUsersPresentationDataQuery(User.GetUserId()));
         return result.ToHttpResult();
     }
 }

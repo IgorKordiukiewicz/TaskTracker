@@ -3,14 +3,14 @@ using Shared.Enums;
 
 namespace Application.Features.Projects;
 
-public record UpdateProjectRolePermissionsCommand(Guid ProjectId, Guid RoleId, UpdateRolePermissionsDto<ProjectPermissions> Model) : IRequest<Result>;
+public record UpdateProjectRolePermissionsCommand(Guid ProjectId, UpdateRolePermissionsDto<ProjectPermissions> Model) : IRequest<Result>;
 
 internal class UpdateProjectRolePermissionsCommandValidator : AbstractValidator<UpdateProjectRolePermissionsCommand>
 {
     public UpdateProjectRolePermissionsCommandValidator()
     {
         RuleFor(x => x.ProjectId).NotEmpty();
-        RuleFor(x => x.RoleId).NotEmpty();
+        RuleFor(x => x.Model.RoleId).NotEmpty();
         RuleFor(x => x.Model.Permissions).NotEmpty();
     }
 }
@@ -32,7 +32,7 @@ internal class UpdateProjectRolePermissionsHandler : IRequestHandler<UpdateProje
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
-        var result = project.RolesManager.UpdateRolePermissions(request.RoleId, request.Model.Permissions);
+        var result = project.RolesManager.UpdateRolePermissions(request.Model.RoleId, request.Model.Permissions);
         if(result.IsFailed)
         {
             return Result.Fail(result.Errors);

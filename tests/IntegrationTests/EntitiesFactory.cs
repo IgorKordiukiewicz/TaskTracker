@@ -19,7 +19,7 @@ public class EntitiesFactory
 
     public async Task<List<User>> CreateUsers(int count = 1)
     {
-        var users = CreateEntities(count, i => User.Create($"authId{DateTime.Now.Ticks}{i}", $"user{i}", "firstName", "lastName"));
+        var users = CreateEntities(count, i => User.Create(Guid.NewGuid(), $"user{i}", "firstName", "lastName"));
 
         var usersPresentationData = users.Select(x => new UserPresentationData()
         {

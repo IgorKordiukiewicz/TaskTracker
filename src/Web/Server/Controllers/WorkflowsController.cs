@@ -31,7 +31,7 @@ public class WorkflowsController : ControllerBase
     /// <param name="projectId"></param>
     /// <response code="404">Workflow not found.</response>
     [HttpGet]
-    [Authorize(Policy.ProjectManageWorkflows)]
+    [Authorize(Policy.ProjectEditProject)]
     [ProducesResponseType(typeof(WorkflowVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetWorkflow([FromQuery] Guid projectId)
@@ -47,7 +47,7 @@ public class WorkflowsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Workflow not found.</response>
     [HttpPost("{workflowId:guid}/statuses")]
-    [Authorize(Policy.ProjectManageWorkflows)]
+    [Authorize(Policy.ProjectEditProject)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddStatus(Guid workflowId, AddWorkflowStatusDto model)
     {
@@ -59,14 +59,13 @@ public class WorkflowsController : ControllerBase
     /// Delete a workflow status.
     /// </summary>
     /// <param name="workflowId"></param>
-    /// <param name="statusId"></param>
     /// <response code="404">Workflow not found.</response>
-    [HttpPost("{workflowId:guid}/statuses/{statusId:guid}/delete")]
-    [Authorize(Policy.ProjectManageWorkflows)]
+    [HttpPost("{workflowId:guid}/statuses/delete")]
+    [Authorize(Policy.ProjectEditProject)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> DeleteStatus(Guid workflowId, Guid statusId)
+    public async Task<IActionResult> DeleteStatus(Guid workflowId, DeleteWorkflowStatusDto model)
     {
-        var result = await _mediator.Send(new DeleteWorkflowStatusCommand(workflowId, statusId));
+        var result = await _mediator.Send(new DeleteWorkflowStatusCommand(workflowId, model));
         return result.ToHttpResult();
     }
 
@@ -77,7 +76,7 @@ public class WorkflowsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Workflow not found.</response>
     [HttpPost("{workflowId:guid}/transitions")]
-    [Authorize(Policy.ProjectManageWorkflows)]
+    [Authorize(Policy.ProjectEditProject)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddTransition(Guid workflowId, AddWorkflowTransitionDto model)
     {
@@ -92,7 +91,7 @@ public class WorkflowsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Workflow not found.</response>
     [HttpPost("{workflowId:guid}/transitions/delete")]
-    [Authorize(Policy.ProjectManageWorkflows)]
+    [Authorize(Policy.ProjectEditProject)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteTransition(Guid workflowId, DeleteWorkflowTransitionDto model)
     {
@@ -106,8 +105,8 @@ public class WorkflowsController : ControllerBase
     /// <param name="workflowId"></param>
     /// <param name="model"></param>
     /// <response code="404">Workflow not found.</response>
-    [HttpPost("{workflowId:guid}/change-initial-status")]
-    [Authorize(Policy.ProjectManageWorkflows)]
+    [HttpPost("{workflowId:guid}/initial-status")]
+    [Authorize(Policy.ProjectEditProject)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> ChangeInitialStatus(Guid workflowId, ChangeInitialWorkflowStatusDto model)
     {

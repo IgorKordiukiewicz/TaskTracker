@@ -4,7 +4,7 @@ namespace Domain.Organizations;
 
 public class Organization : Entity, IAggregateRoot
 {
-    public string Name { get; private set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     public Guid OwnerId { get; private init; } // User
 

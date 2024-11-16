@@ -28,15 +28,29 @@ internal class GetProjectMembersHandler : IRequestHandler<GetProjectMembersQuery
             return Result.Fail<ProjectMembersVM>(new NotFoundError<Project>(request.ProjectId));
         }
 
-        var members = await _dbContext.Projects
+        var roleNameById = await _dbContext.ProjectRoles
+            .Where(x => x.ProjectId == request.ProjectId)
+            .ToDictionaryAsync(k => k.Id, v => v.Name);
+
+        var members = (await _dbContext.Projects
             .Include(x => x.Members)
             .Where(x => x.Id == request.ProjectId)
             .SelectMany(x => x.Members)
             .Join(_dbContext.Users,
             member => member.UserId,
             user => user.Id,
-            (member, user) => new ProjectMemberVM(member.Id, user.Id, user.FullName, member.RoleId))
-            .ToListAsync();
+            (member, user) => new ProjectMemberVM
+            {
+                Id = member.Id,
+                UserId = user.Id,
+                Name = user.FullName,
+                Email = user.Email,
+                RoleId = member.RoleId,
+                RoleName = roleNameById[member.RoleId],
+            })
+            .ToListAsync())
+            .OrderBy(x => x.Name)
+            .ToList();
 
         return Result.Ok(new ProjectMembersVM(members));
     }

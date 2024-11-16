@@ -31,13 +31,23 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Web.Client", builder =>
+    {
+        builder
+        .SetIsOriginAllowed(origin => origin.Contains("localhost:3000")) // TODO: move to appsettings
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseWebAssemblyDebugging();
-
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -47,11 +57,8 @@ else
     app.UseHsts();
 }
 
-app.MapControllers();
-
 app.UseHttpsRedirection();
 
-app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -59,9 +66,9 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapRazorPages();
 app.MapControllers();
-app.MapFallbackToFile("index.html");
+
+app.UseCors("Web.Client");
 
 app.UseHangfireDashboard();
 

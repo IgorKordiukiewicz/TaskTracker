@@ -2,13 +2,13 @@
 
 namespace Application.Features.Tasks;
 
-public record LogTaskTimeCommand(string UserAuthenticationId, Guid TaskId, LogTaskTimeDto Model) : IRequest<Result>;
+public record LogTaskTimeCommand(Guid UserId, Guid TaskId, LogTaskTimeDto Model) : IRequest<Result>;
 
 internal class LogTaskTimeCommandValidator : AbstractValidator<LogTaskTimeCommand>
 {
     public LogTaskTimeCommandValidator()
     {
-        RuleFor(x => x.UserAuthenticationId).NotEmpty();
+        RuleFor(x => x.UserId).NotEmpty();
         RuleFor(x => x.TaskId).NotEmpty();
         RuleFor(x => x.Model.Minutes).GreaterThan(0);
         RuleFor(x => x.Model.Day).NotEmpty();
@@ -28,18 +28,13 @@ internal class LogTaskTimeHandler : IRequestHandler<LogTaskTimeCommand, Result>
 
     public async Task<Result> Handle(LogTaskTimeCommand request, CancellationToken cancellationToken)
     {
-        var userId = await _dbContext.Users
-            .Where(x => x.AuthenticationId == request.UserAuthenticationId)
-            .Select(x => x.Id)
-            .SingleAsync();
-
         var task = await _taskRepository.GetById(request.TaskId);
         if (task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
         
-        task.LogTime(request.Model.Minutes, request.Model.Day, userId);
+        task.LogTime(request.Model.Minutes, DateOnly.FromDateTime(request.Model.Day), request.UserId);
         
         await _taskRepository.Update(task);
         return Result.Ok();

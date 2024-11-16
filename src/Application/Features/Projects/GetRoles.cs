@@ -38,6 +38,7 @@ internal class GetProjectRolesHandler : IRequestHandler<GetProjectRolesQuery, Re
                 Permissions = x.Permissions,
                 Modifiable = x.IsModifiable(),
             })
+            .OrderBy(x => x.Name)
             .ToListAsync();
 
         return Result.Ok(new RolesVM<ProjectPermissions>(roles));

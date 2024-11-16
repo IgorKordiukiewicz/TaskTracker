@@ -38,6 +38,7 @@ internal class GetOrganizationRolesHandler : IRequestHandler<GetOrganizationRole
                 Permissions = x.Permissions,
                 Modifiable = x.IsModifiable(),
             })
+            .OrderBy(x => x.Name)
             .ToListAsync();
 
         return Result.Ok(new RolesVM<OrganizationPermissions>(roles));

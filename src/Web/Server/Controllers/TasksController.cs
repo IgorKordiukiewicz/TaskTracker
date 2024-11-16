@@ -32,7 +32,7 @@ public class TasksController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Project not found.</response> 
     [HttpPost]
-    [Authorize(Policy.ProjectCreateTasks)]
+    [Authorize(Policy.ProjectEditRoles)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> CreateTask([FromHeader] Guid projectId, [FromBody] CreateTaskDto model)
     {
@@ -81,8 +81,8 @@ public class TasksController : ControllerBase
     /// <param name="taskId"></param>
     /// <param name="model"></param>
     /// <response code="404">Task or task status not found.</response> 
-    [HttpPost("{taskId:guid}/update-status")]
-    [Authorize(Policy.ProjectTransitionTasks)]
+    [HttpPost("{taskId:guid}/status")]
+    [Authorize(Policy.ProjectEditTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskStatus(Guid taskId, UpdateTaskStatusDto model)
     {
@@ -96,8 +96,8 @@ public class TasksController : ControllerBase
     /// <param name="taskId"></param>
     /// <param name="model"></param>
     /// <response code="404">Task not found.</response> 
-    [HttpPost("{taskId:guid}/update-priority")]
-    [Authorize(Policy.ProjectModifyTasks)]
+    [HttpPost("{taskId:guid}/priority")]
+    [Authorize(Policy.ProjectEditProject)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskPriority(Guid taskId, UpdateTaskPriorityDto model)
     {
@@ -111,12 +111,27 @@ public class TasksController : ControllerBase
     /// <param name="taskId"></param>
     /// <param name="model"></param>
     /// <response code="404">Task or project member not found.</response> 
-    [HttpPost("{taskId:guid}/update-assignee")]
-    [Authorize(Policy.ProjectAssignTasks)]
+    [HttpPost("{taskId:guid}/assignee")]
+    [Authorize(Policy.ProjectEditTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskAssignee(Guid taskId, UpdateTaskAssigneeDto model)
     {
         var result = await _mediator.Send(new UpdateTaskAssigneeCommand(taskId, model));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
+    /// Update a task's title.
+    /// </summary>
+    /// <param name="taskId"></param>
+    /// <param name="model"></param>
+    /// <response code="404">Task not found.</response> 
+    [HttpPost("{taskId:guid}/title")]
+    [Authorize(Policy.ProjectEditTasks)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> UpdateTaskTitle(Guid taskId, UpdateTaskTitleDto model)
+    {
+        var result = await _mediator.Send(new UpdateTaskTitleCommand(taskId, model));
         return result.ToHttpResult();
     }
 
@@ -126,8 +141,8 @@ public class TasksController : ControllerBase
     /// <param name="taskId"></param>
     /// <param name="model"></param>
     /// <response code="404">Task not found.</response> 
-    [HttpPost("{taskId:guid}/update-description")]
-    [Authorize(Policy.ProjectAssignTasks)]
+    [HttpPost("{taskId:guid}/description")]
+    [Authorize(Policy.ProjectEditTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskDescription(Guid taskId, UpdateTaskDescriptionDto model)
     {
@@ -142,11 +157,11 @@ public class TasksController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Task not found.</response> 
     [HttpPost("{taskId:guid}/comments")]
-    [Authorize(Policy.ProjectAddComments)]
+    [Authorize(Policy.ProjectEditTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddTaskComment(Guid taskId, AddTaskCommentDto model)
     {
-        var result = await _mediator.Send(new AddTaskCommentCommand(taskId, User.GetUserAuthenticationId(), model));
+        var result = await _mediator.Send(new AddTaskCommentCommand(taskId, User.GetUserId(), model));
         return result.ToHttpResult();
     }
 
@@ -186,12 +201,12 @@ public class TasksController : ControllerBase
     /// <param name="taskId"></param>
     /// <param name="model"></param>
     /// <response code="404">Task not found.</response>
-    [HttpPost("{taskId:guid}/log_time")]
-    [Authorize(Policy.ProjectLogTimeOnTasks)]
+    [HttpPost("{taskId:guid}/logged-time")]
+    [Authorize(Policy.ProjectEditTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> LogTaskTime(Guid taskId, LogTaskTimeDto model)
     {
-        var result = await _mediator.Send(new LogTaskTimeCommand(User.GetUserAuthenticationId(), taskId, model));
+        var result = await _mediator.Send(new LogTaskTimeCommand(User.GetUserId(), taskId, model));
         return result.ToHttpResult();
     }
 
@@ -201,8 +216,8 @@ public class TasksController : ControllerBase
     /// <param name="taskId"></param>
     /// <param name="model"></param>
     /// <response code="404">Task not found.</response>
-    [HttpPost("{taskId:guid}/update-estimated-time")]
-    [Authorize(Policy.ProjectEstimateTasks)]
+    [HttpPost("{taskId:guid}/estimated-time")]
+    [Authorize(Policy.ProjectEditTasks)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskEstimatedTime(Guid taskId, UpdateTaskEstimatedTimeDto model)
     {
@@ -217,7 +232,7 @@ public class TasksController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Task relationship manager not found.</response>
     [HttpPost("relationships/hierarchical")]
-    [Authorize(Policy.ProjectModifyTasks)]
+    [Authorize(Policy.ProjectEditProject)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddHierarchicalTaskRelationship([FromHeader] Guid projectId, AddHierarchicalTaskRelationshipDto model)
     {

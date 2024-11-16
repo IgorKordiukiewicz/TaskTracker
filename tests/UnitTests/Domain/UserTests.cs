@@ -1,6 +1,4 @@
 ﻿using Domain.Users;
-using System.Security.Cryptography;
-using Web.Client.Pages;
 
 namespace UnitTests.Domain;
 
@@ -9,16 +7,14 @@ public class UserTests
     [Fact]
     public void Create_ShouldCreateUserWithGivenParameters()
     {
-        var authenticationId = "12345";
         var email = "UserName";
         var firstName = "FirstName";
         var lastName = "LastName";
 
-        var user = User.Create(authenticationId, email, firstName, lastName);
+        var user = User.Create(Guid.NewGuid(), email, firstName, lastName);
 
         using (new AssertionScope())
         {
-            user.AuthenticationId.Should().Be(authenticationId);
             user.Email.Should().Be(email);
             user.Id.Should().NotBeEmpty();
             user.FirstName.Should().Be(firstName);
@@ -32,7 +28,7 @@ public class UserTests
         var firstName = "FirstName";
         var lastName = "LastName";
 
-        var user = User.Create("123", "email", firstName, lastName);
+        var user = User.Create(Guid.NewGuid(), "email", firstName, lastName);
 
         user.FullName.Should().Be($"{firstName} {lastName}");
     }
@@ -40,7 +36,7 @@ public class UserTests
     [Fact]
     public void UpdateName_ShouldUpdateBothFirstAndLastNames()
     {
-        var user = User.Create("123", "email", "first", "last");
+        var user = User.Create(Guid.NewGuid(), "email", "first", "last");
         var newFirstName = user.FirstName + "A";
         var newLastName = user.LastName + "A";
 
