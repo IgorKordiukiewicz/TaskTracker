@@ -11,6 +11,12 @@ export default defineNuxtConfig({
     './assets/css/main.css' 
   ],
   modules: ['@primevue/nuxt-module', '@nuxtjs/tailwindcss', '@nuxtjs/supabase', '@pinia/nuxt'],
+  components: [
+    { 
+      path: '~/components',
+      pathPrefix: false
+    }
+  ],
   supabase: {
     redirectOptions: {
       login: '/account/login',

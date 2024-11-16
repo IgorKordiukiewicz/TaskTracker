@@ -1,4 +1,3 @@
-import { TaskActivity } from './../../.nuxt/components.d';
 import type { TaskPriority, TaskProperty } from "../enums";
 
 export interface TasksVM {
