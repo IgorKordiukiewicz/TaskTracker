@@ -4,8 +4,8 @@
       <p class="text-lg">Workflow</p>
       <Button icon="pi pi-chevron-down" severity="primary" label="Actions" @click="toggleCreateMenu" aria-haspopup="true" aria-controls="overlay_menu" icon-pos="right" />
       <Menu ref="createMenu" :model="createMenuItems" :popup="true" />
-      <AddWorkflowStatusDialog ref="addWorkflowStatusDialog" :workflow-id="workflow.id" :project-id="projectId" @on-add="updateWorkflow" />
-      <AddWorkflowTransitionDialog ref="addWorkflowTransitionDialog" :workflow="workflow" :project-id="projectId" @on-add="updateWorkflow" />
+      <AddWorkflowStatusDialog ref="addWorkflowStatusDialog" :workflow-id="workflow.id" :project-id="projectId" @on-add="(name) => updateDiagram({ newStatusName: name })" />
+      <AddWorkflowTransitionDialog ref="addWorkflowTransitionDialog" :workflow="workflow" :project-id="projectId" @on-add="(value) => updateDiagram({ newTransition: value})" />
     </div>
     <div class="w-full h-full mt-4 shadow bg-white" style="height: calc(100% - 1rem - 28px);"> <!-- 150 is temp-->
         <VueFlow
@@ -20,7 +20,7 @@
           <StatusNode :id="props.id" :data="props.data" />
         </template>
         <template #edge-transition="props">
-          <TransitionEdge v-bind="props" />
+          <TransitionEdge v-bind="props" ref="transitionEdges" />
         </template>
       </VueFlow>
     </div>
@@ -28,13 +28,14 @@
 </template>
 
 <script setup lang="ts">
-import { type Node, type Edge, MarkerType, Panel, Position, ConnectionMode, type NodePositionChange } from '@vue-flow/core';
+import { type Node, type Edge, MarkerType, Panel, Position, ConnectionMode, type NodePositionChange, useVueFlow } from '@vue-flow/core';
 import { VueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background';
 import type { WorkflowTransitionVM } from '~/types/viewModels/workflows';
 
 const route = useRoute();
 const workflowsService = useWorkflowsService();
+const vueFlow = useVueFlow();
 
 const projectId = ref(route.params.id as string);
 
@@ -47,6 +48,7 @@ const nodes = ref<Node[]>();
 // TODO: NodeToolbar in custom node on click?
 
 const edges = ref<Edge[]>();
+const transitionEdges = useTemplateRef('transitionEdges');
 
 const createMenuItems = ref([
   {
@@ -77,24 +79,27 @@ function initializeDiagram() {
   }
 
   // Nodes
-  nodes.value = [];
+  //nodes.value = [];
+  const newNodes: Node[] = [];
   for(const status of workflow.value.statuses) {
-    nodes.value.push({ id: status.id, type: 'status', data: { label: status.name }, position: { x: 0, y: 0 } });
+    newNodes.push({ id: status.id, type: 'status', data: { label: status.name }, position: { x: 0, y: 0 } });
     // TODO: set position, set Initial flag
   }
 
+  vueFlow.setNodes(newNodes);
+
   // Edges
-  edges.value = [];
+  //edges.value = [];
+  const newEdges: Edge[] = [];
   const edgesCreatedByTransitionId = new Map(workflow.value.transitions.map(x => [getTransitionKey(x), false]));
   for(const transition of workflow.value.transitions) {
-    console.log(edgesCreatedByTransitionId.get(getTransitionKey(transition)));
     if(edgesCreatedByTransitionId.get(getTransitionKey(transition))) {
       continue;
     }
 
-    const isBidirectional = edgesCreatedByTransitionId.get(getReverseTransitionKey(transition));
+    const isBidirectional = edgesCreatedByTransitionId.has(getReverseTransitionKey(transition));
 
-    edges.value.push({ id: getTransitionKey(transition), source: transition.fromStatusId, target: transition.toStatusId, 
+    newEdges.push({ id: getTransitionKey(transition), source: transition.fromStatusId, target: transition.toStatusId, 
       type: 'transition', data: { bidirectional: isBidirectional },
       markerEnd: MarkerType.ArrowClosed, 
       markerStart: isBidirectional ? MarkerType.ArrowClosed : undefined });
@@ -104,6 +109,10 @@ function initializeDiagram() {
       edgesCreatedByTransitionId.set(getReverseTransitionKey(transition), true);
     }
   }
+
+  vueFlow.setEdges(newEdges);
+
+  // setEdges ?
 }
 
 function getTransitionKey(transition: WorkflowTransitionVM) {
@@ -114,9 +123,40 @@ function getReverseTransitionKey(transition: WorkflowTransitionVM) {
   return `${transition.toStatusId}${transition.fromStatusId}`;
 }
 
-async function updateWorkflow() {
+async function updateDiagram(options: { 
+  newStatusName?: string, 
+  newTransition?: { fromId: string, toId: string } 
+}) {
   workflow.value = await workflowsService.getWorkflow(projectId.value);
-  initializeDiagram();
+  if(!workflow.value) {
+    return;
+  }
+
+  if(options.newStatusName) {
+    const newStatus = workflow.value.statuses.find(x => x.name === options.newStatusName)!;
+    vueFlow.addNodes({ id: newStatus.id, type: 'status', data: { label: newStatus.name }, position: { x: 0, y: 0 } })
+  }
+
+  if(options.newTransition) {
+    const newTransitionKey = `${options.newTransition.fromId}${options.newTransition.toId}`;
+    const newTransition = workflow.value.transitions
+      .find(x => getTransitionKey(x) === newTransitionKey)!;
+    const reverseTransitionExists = workflow.value.transitions
+      .some(x => getReverseTransitionKey(x) === newTransitionKey);
+      // Update existing
+      if(reverseTransitionExists) {
+        const existingEdge = vueFlow.findEdge(getReverseTransitionKey(newTransition))!;
+        existingEdge.data.bidirectional = true;
+        existingEdge.markerStart = MarkerType.ArrowClosed;
+        vueFlow.updateEdgeData(existingEdge.id, existingEdge.data);
+      }
+      // Add new 
+      else {
+        vueFlow.addEdges({ id: getTransitionKey(newTransition), source: newTransition.fromStatusId, target: newTransition.toStatusId, 
+          type: 'transition', data: { bidirectional: false },
+          markerEnd: MarkerType.ArrowClosed });
+      }
+  }
 }
 
 </script>

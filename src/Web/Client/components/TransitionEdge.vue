@@ -10,11 +10,12 @@
 </template>
 
 <script setup lang="ts">
-import { StraightEdge, useVueFlow, type NodePositionChange } from '@vue-flow/core';
+import { StraightEdge, useVueFlow, type EdgeAddChange, type NodePositionChange } from '@vue-flow/core';
 
-const props = defineProps(['sourceX', 'sourceY', 'targetX', 'targetY', 'sourcePosition', 'targetPosition', 'source', 'target', 'data' ]);
+defineExpose({ updateEdgePositions });
+
+const props = defineProps(['id', 'sourceX', 'sourceY', 'targetX', 'targetY', 'sourcePosition', 'targetPosition', 'source', 'target', 'data' ]);
 const bidirectional = ref(props.data.bidirectional);
-//
 
 const fixedTargetX = ref(props.targetX);
 const fixedTargetY = ref(props.targetY);
@@ -24,6 +25,10 @@ const fixedSourceY = ref(props.sourceY);
 const { getNodes, onNodesChange, onNodesInitialized } = useVueFlow();
 
 onNodesInitialized((_) => {
+    updateEdgePositions();
+})
+
+onMounted(() => {
     updateEdgePositions();
 })
 

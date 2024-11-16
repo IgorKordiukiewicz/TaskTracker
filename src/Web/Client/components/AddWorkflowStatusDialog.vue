@@ -29,6 +29,6 @@ async function addStatus() {
     const model = new AddWorkflowStatusDto();
     model.name = name.value;
     await workflowsService.addStatus(props.workflowId, props.projectId, model);
-    emit('onAdd');
+    emit('onAdd', model.name);
 }
 </script>

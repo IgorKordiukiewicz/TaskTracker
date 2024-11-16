@@ -60,6 +60,6 @@ async function addTransition() {
     model.fromStatusId = selectedFromStatus.value;
     model.toStatusId = selectedToStatus.value;
     await workflowsService.addTransition(props.workflow.id, props.projectId, model);
-    emit('onAdd');
+    emit('onAdd', { fromId: model.fromStatusId, toId: model.toStatusId });
 }
 </script>
