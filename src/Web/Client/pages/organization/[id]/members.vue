@@ -1,9 +1,9 @@
 <template>
-    <OrganizationLayout>
+    <div>
         <MembersList v-if="members && roles" :members="members.members" :roles="roles.roles" 
         @on-update-member-role="updateMemberRole" @on-remove-member="removeMember">
         </MembersList>
-    </OrganizationLayout>
+    </div>
 </template>
 
 <script setup lang="ts">

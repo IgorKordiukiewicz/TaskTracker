@@ -1,5 +1,5 @@
 <template>
-    <OrganizationLayout>
+    <div>
         <div class="flex justify-between items-center">
             <p class="text-lg">Invitations</p>
             <div class="flex gap-2 items-center">
@@ -42,7 +42,7 @@
         </DataTable>
         <Menu ref="menu" :model="menuItems" :popup="true" />
         <ConfirmDialog></ConfirmDialog>
-    </OrganizationLayout>
+    </div>
 </template>
 
 <script setup lang="ts">

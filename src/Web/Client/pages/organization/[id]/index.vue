@@ -1,5 +1,5 @@
 <template>
-    <OrganizationLayout>
+    <div>
         <div class="flex justify-between items-center">
             <p class="text-lg">Projects</p>
             <Button icon="pi pi-plus" severity="primary" label="Create" @click="openCreateProjectDialog" />
@@ -12,7 +12,7 @@
                 </span>
             </div>
         </div>
-    </OrganizationLayout>
+    </div>
 </template>
 
 <script setup lang="ts">

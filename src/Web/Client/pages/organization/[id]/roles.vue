@@ -1,8 +1,8 @@
 <template>
-    <OrganizationLayout>
+    <div>
         <RolesEditor v-if="roles" :roles="roles.roles" :permissions="permissions" 
         @on-update-role-permissions="updateRolePermissions" @on-update-role-name="updateRoleName" @on-delete-role="deleteRole" @on-create-role="createRole"></RolesEditor>
-    </OrganizationLayout>
+    </div>
 </template>
 
 <script setup lang="ts">
