@@ -286,6 +286,29 @@ public class TasksTests
     }
 
     [Fact]
+    public async System.Threading.Tasks.Task UpdateTitle_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateTaskTitleCommand(Guid.NewGuid(), new("abc")));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateTitle_ShouldSucceed_WhenTaskExists()
+    {
+        var task = (await _factory.CreateTasks())[0];
+        var newTitle = task.Title + "A";
+
+        var result = await _fixture.SendRequest(new UpdateTaskTitleCommand(task.Id, new(newTitle)));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<Task>(x => x.Id == task.Id)).Title.Should().Be(newTitle);
+        }
+    }
+
+    [Fact]
     public async System.Threading.Tasks.Task UpdateDescription_ShouldFail_WhenTaskDoesNotExist()
     {
         var result = await _fixture.SendRequest(new UpdateTaskDescriptionCommand(Guid.NewGuid(), new("abc")));
@@ -363,7 +386,7 @@ public class TasksTests
         var user = (await _factory.CreateUsers())[0];
 
         var result = await _fixture.SendRequest(new LogTaskTimeCommand(user.Id, Guid.NewGuid(), 
-            new(1, DateOnly.FromDateTime(DateTime.Now))));
+            new(1, DateTime.Now)));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -376,7 +399,7 @@ public class TasksTests
         var timeLogsBefore = await _fixture.CountAsync<TaskTimeLog>();
 
         var result = await _fixture.SendRequest(new LogTaskTimeCommand(user.Id, task.Id, 
-            new(1, DateOnly.FromDateTime(DateTime.Now))));
+            new(1, DateTime.Now)));
 
         using (new AssertionScope())
         {

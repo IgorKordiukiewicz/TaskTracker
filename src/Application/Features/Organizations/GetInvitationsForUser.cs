@@ -1,5 +1,4 @@
-﻿using Domain.Users;
-using Shared.Enums;
+﻿using Shared.Enums;
 
 namespace Application.Features.Organizations;
 
@@ -26,11 +25,7 @@ internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrg
     {
         var user = await _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == request.UserId);
-        if(user is null)
-        {
-            return Result.Fail<UserOrganizationInvitationsVM>(new NotFoundError<User>(request.UserId)); // TODO: delete check
-        }
+            .FirstAsync(x => x.Id == request.UserId);
 
         var invitations = await _dbContext.OrganizationInvitations
             .Where(x => x.UserId == user.Id && x.State == OrganizationInvitationState.Pending)

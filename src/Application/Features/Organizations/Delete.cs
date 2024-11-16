@@ -49,15 +49,15 @@ internal class DeleteOrganizationHandler : IRequestHandler<DeleteOrganizationCom
                 .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
 
             await _dbContext.Workflows
-                .Where(x => projectsIds.Contains(x.Id))
+                .Where(x => projectsIds.Contains(x.ProjectId))
                 .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
 
             await _dbContext.Tasks
-                .Where(x => projectsIds.Contains(x.Id))
+                .Where(x => projectsIds.Contains(x.ProjectId))
                 .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
 
             await _dbContext.TaskRelationshipManagers
-                .Where(x => projectsIds.Contains(x.Id))
+                .Where(x => projectsIds.Contains(x.ProjectId))
                 .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
 
             await transaction.CommitAsync();

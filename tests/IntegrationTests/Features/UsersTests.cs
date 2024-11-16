@@ -23,16 +23,6 @@ public class UsersTests
     }
 
     [Fact]
-    public async Task GetUser_ShouldFail_WhenUserWithGivenAuthIdDoesntExist()
-    {
-        await _factory.CreateUsers();
-
-        var result = await _fixture.SendRequest(new GetUserQuery(Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
     public async Task GetUser_ShouldReturnUserData_WhenUserWithGivenAuthIdEixsts()
     {
         // TODO: Check if permissions are correctly returned
@@ -49,9 +39,7 @@ public class UsersTests
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                FullName = user.FullName,
-                PermissionsByOrganization = new Dictionary<Guid, OrganizationPermissions>(),
-                PermissionsByProject = new Dictionary<Guid, ProjectPermissions>()
+                FullName = user.FullName
             });
         }
     }
@@ -152,17 +140,7 @@ public class UsersTests
     {
         var project = (await _factory.CreateProjects())[0];
 
-        var result = await _fixture.SendRequest(new GetUsersAvailableForProjectQuery(project.OrganizationId, Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task GetUsersAvailableForProject_ShouldFail_WhenOrganizationDoesNotExist()
-    {
-        var project = (await _factory.CreateProjects())[0];
-
-        var result = await _fixture.SendRequest(new GetUsersAvailableForProjectQuery(Guid.NewGuid(), project.Id));
+        var result = await _fixture.SendRequest(new GetUsersAvailableForProjectQuery(Guid.NewGuid()));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -182,7 +160,7 @@ public class UsersTests
             db.Add(project);
         });
 
-        var result = await _fixture.SendRequest(new GetUsersAvailableForProjectQuery(org.Id, project.Id));
+        var result = await _fixture.SendRequest(new GetUsersAvailableForProjectQuery(project.Id));
 
         using(new AssertionScope())
         {
@@ -196,14 +174,6 @@ public class UsersTests
                 }
             });
         }
-    }
-
-    [Fact]
-    public async Task UpdateUserName_ShouldFail_WhenUserWithGivenAuthIdDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new UpdateUserNameCommand(Guid.NewGuid(), new("first", "last")));
-
-        result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
@@ -225,15 +195,7 @@ public class UsersTests
     }
 
     [Fact]
-    public async Task GetAllUsersPresentationData_ShouldFail_WhenUserDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetAllUsersPresentationDataQuery(Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task GetAllUsersPresentationData_ShouldReturnPresentationDataForAllUsersTheUserCanSee_WhenUserExists()
+    public async Task GetAllUsersPresentationData_ShouldReturnPresentationDataForAllUsersTheUserCanSee()
     {
         var users =  await _factory.CreateUsers(3);
         var organization = Organization.Create("org", users[0].Id);
@@ -250,7 +212,7 @@ public class UsersTests
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            result.Value.Data.Select(x => x.UserId).Should().BeEquivalentTo(new[]
+            result.Value.Users.Select(x => x.UserId).Should().BeEquivalentTo(new[]
             {
                 users[0].Id, users[1].Id
             });

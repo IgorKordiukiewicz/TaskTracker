@@ -4,11 +4,9 @@ using Domain.Common;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Users;
-using Hangfire;
-using NSubstitute;
+using Domain.Workflows;
 using Shared.Enums;
 using Shared.ViewModels;
-using System.Linq.Expressions;
 
 namespace IntegrationTests.Features;
 
@@ -31,7 +29,7 @@ public class OrganizationsTests
     {
         await _factory.CreateUsers();
 
-        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new(new("org"), Guid.NewGuid())));
+        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new("org"), Guid.NewGuid()));
 
         result.IsFailed.Should().BeTrue();
     }
@@ -41,7 +39,7 @@ public class OrganizationsTests
     {
         var user = (await _factory.CreateUsers())[0];
 
-        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new(new("org"), user.Id)));
+        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new("org"), user.Id));
 
         using(new AssertionScope())
         {
@@ -192,14 +190,6 @@ public class OrganizationsTests
                 },
             });
         }
-    }
-
-    [Fact]
-    public async Task GetInvitationsForUser_ShouldFail_WhenUserDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetOrganizationInvitationsForUserQuery(Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
@@ -528,6 +518,114 @@ public class OrganizationsTests
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.FirstAsync<OrganizationRole>(x => x.Id == roleId)).Permissions.Should().Be(newPermissions);
+        }
+    }
+
+    [Fact]
+    public async Task DeleteOrganization_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new DeleteOrganizationCommand(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task DeleteOrganization_ShouldSucceedAndMarkRequiredRootsAsDeleted_WhenOrganizationExists()
+    {
+        var task = (await _factory.CreateTasks())[0];
+        var project = await _fixture.FirstAsync<Project>(x => x.Id == task.ProjectId);
+        var workflowId = await _fixture.FirstAsync<Workflow>(x => x.ProjectId == project.Id);
+        var taskRelationshipManager = await _fixture.FirstAsync<Domain.Tasks.TaskRelationshipManager>(x => x.ProjectId == project.Id);
+        var organization = await _fixture.FirstAsync<Organization>(x => x.Id == project.OrganizationId);
+
+        var user = User.Create(Guid.NewGuid(), "aaa@mail.com", "bbb", "ccc");
+        var organizationInvitation = organization.CreateInvitation(user.Id).Value;
+        await _fixture.SeedDb(db =>
+        {
+            db.Add(user);
+            db.Add(organizationInvitation);
+        });
+
+        var result = await _fixture.SendRequest(new DeleteOrganizationCommand(organization.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<Organization>(x => x.Id == organization.Id)).Should().Be(0);
+            (await _fixture.CountAsync<OrganizationInvitation>(x => x.OrganizationId == organization.Id)).Should().Be(0);
+            (await _fixture.CountAsync<Project>(x => x.Id == project.Id)).Should().Be(0);
+            (await _fixture.CountAsync<Domain.Tasks.Task>(x => x.Id == task.Id)).Should().Be(0);
+            (await _fixture.CountAsync<Workflow>(x => x.Id == workflowId.Id)).Should().Be(0);
+            (await _fixture.CountAsync<Domain.Tasks.TaskRelationshipManager>(x => x.Id == taskRelationshipManager.Id)).Should().Be(0);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateName_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateOrganizationNameCommand(Guid.NewGuid(), new("abc")));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UpdateName_ShouldSucceedAndUpdateName_WhenOrganizationExists()
+    {
+        var organization = (await _factory.CreateOrganizations())[0];
+        var newName = organization.Name + "A";
+
+        var result = await _fixture.SendRequest(new UpdateOrganizationNameCommand(organization.Id, new(newName)));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.FirstAsync<Organization>(x => x.Id == organization.Id)).Name.Should().Be(newName);
+        }
+    }
+
+    [Fact]
+    public async Task GetSettings_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetOrganizationSettingsQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetSettings_ShouldReturnSettings_WhenOrganizationExists()
+    {
+        var organization = (await _factory.CreateOrganizations())[0];
+
+        var result = await _fixture.SendRequest(new GetOrganizationSettingsQuery(organization.Id));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().Be(new OrganizationSettingsVM(organization.Name, organization.OwnerId));
+        }
+    }
+
+    [Fact]
+    public async Task GetUserPermissions_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetUserOrganizationPermissionsQuery(Guid.NewGuid(), Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetUserPermissions_ShouldSucceedAndReturnUserPermissions_WhenOrganizationExists()
+    {
+        var organization = (await _factory.CreateOrganizations())[0];
+        var member = await _fixture.FirstAsync<OrganizationMember>();
+        var role = await _fixture.FirstAsync<OrganizationRole>(x => x.Id == member.RoleId);
+
+        var result = await _fixture.SendRequest(new GetUserOrganizationPermissionsQuery(member.UserId, organization.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Permissions.Should().Be(role.Permissions);
         }
     }
 

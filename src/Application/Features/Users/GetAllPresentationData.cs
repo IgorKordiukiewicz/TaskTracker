@@ -4,13 +4,6 @@ namespace Application.Features.Users;
 
 public record GetAllUsersPresentationDataQuery(Guid UserId) : IRequest<Result<UsersPresentationDataVM>>;
 
-internal class GetAllUsersPresentationDataQueryValidator : AbstractValidator<GetAllUsersPresentationDataQuery>
-{
-    public GetAllUsersPresentationDataQueryValidator()
-    {
-        RuleFor(x => x.UserId).NotEmpty();
-    }
-}
 
 internal class GetAllUsersPresentationDataHandler : IRequestHandler<GetAllUsersPresentationDataQuery, Result<UsersPresentationDataVM>>
 {

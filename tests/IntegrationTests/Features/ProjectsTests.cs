@@ -1,4 +1,5 @@
-﻿using Application.Features.Projects;
+﻿using Application.Features.Organizations;
+using Application.Features.Projects;
 using Domain.Common;
 using Domain.Organizations;
 using Domain.Projects;
@@ -174,7 +175,15 @@ public class ProjectsTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Members.Should().BeEquivalentTo(new[]
             {
-                new ProjectMemberVM(project.Members[0].Id, user.Id, user.FullName, project.Members[0].RoleId)
+                new ProjectMemberVM
+                {
+                    Id = project.Members[0].Id,
+                    UserId = user.Id,
+                    Name = user.FullName,
+                    Email = user.Email,
+                    RoleId = project.Members[0].RoleId,
+                    RoleName = "Administrator"
+                }
             });
         }
     }
@@ -440,7 +449,7 @@ public class ProjectsTests
     }
 
     [Fact]
-    public async Task UpdateProjectName_ShouldReturnSettings_WhenProjectExists()
+    public async Task UpdateProjectName_ShouldSucceedUpdateName_WhenProjectExists()
     {
         var project = (await _factory.CreateProjects())[0];
         var newName = project.Name + "A";
@@ -479,6 +488,30 @@ public class ProjectsTests
             (await _fixture.CountAsync<Domain.Tasks.Task>(x => x.Id == task.Id)).Should().Be(0);
             (await _fixture.CountAsync<Workflow>(x => x.Id == workflowId.Id)).Should().Be(0);
             (await _fixture.CountAsync<Domain.Tasks.TaskRelationshipManager>(x => x.Id == taskRelationshipManager.Id)).Should().Be(0);
+        }
+    }
+
+    [Fact]
+    public async Task GetUserPermissions_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetUserProjectPermissionsQuery(Guid.NewGuid(), Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetUserPermissions_ShouldSucceedAndReturnUserPermissions_WhenProjectExists()
+    {
+        var project = (await _factory.CreateProjects())[0];
+        var member = await _fixture.FirstAsync<ProjectMember>();
+        var role = await _fixture.FirstAsync<ProjectRole>(x => x.Id == member.RoleId);
+
+        var result = await _fixture.SendRequest(new GetUserProjectPermissionsQuery(member.UserId, project.Id));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Permissions.Should().Be(role.Permissions);
         }
     }
 
