@@ -29,11 +29,12 @@
 </template>
 
 <script setup lang="ts">
-import { type Node, type Edge, MarkerType, Panel, Position, ConnectionMode, type NodePositionChange, useVueFlow, type NodeSelectionChange, type EdgeSelectionChange } from '@vue-flow/core';
+import { type Node, type Edge, MarkerType, Panel, Position, ConnectionMode, type NodePositionChange, useVueFlow, type NodeSelectionChange, type EdgeSelectionChange, type XYPosition } from '@vue-flow/core';
 import { VueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background';
 import type { WorkflowTransitionVM } from '~/types/viewModels/workflows';
 import { ChangeInitialWorkflowStatusDto, DeleteWorkflowStatusDto, DeleteWorkflowTransitionDto } from '~/types/dtos/workflows';
+import { TaskStatusDeletionEligibility } from '~/types/enums';
 
 const route = useRoute();
 const workflowsService = useWorkflowsService();
@@ -49,7 +50,6 @@ const createMenu = ref();
 const addWorkflowStatusDialog = ref();
 const addWorkflowTransitionDialog = ref();
 const nodes = ref<Node[]>();
-// TODO: NodeToolbar in custom node on click?
 
 const edges = ref<Edge[]>();
 const transitionEdges = useTemplateRef('transitionEdges');
@@ -83,7 +83,7 @@ const createMenuItems = ref([
       {
         label: 'Make Initial',
         icon: 'pi pi-asterisk',
-        visible: isSelectedNodeNotInitial,
+        disabled: isSelectedNodeInitial,
         command: () => {
           const statusName = selectedNode.value.data.label;
           confirm.require({
@@ -104,6 +104,7 @@ const createMenuItems = ref([
       {
         label: 'Delete',
         icon: 'pi pi-trash',
+        disabled: shouldSelectedNodeDeletionBeBlocked,
         command: () => {
           const statusName = selectedNode.value.data.label;
           confirm.require({
@@ -153,6 +154,12 @@ onNodesChange((changes) => {
     selectedEdge.value = null;
     selectedNode.value = vueFlow.findNode((change as NodeSelectionChange).id);
   }
+
+  // Save positions
+  if(changes.some(x => x.type === 'position' || x.type === 'add' || x.type === 'remove')) {
+    const nodesPositions = vueFlow.getNodes.value.map(x => ({id: x.id, position: x.position, }));
+    localStorage.setItem(getLocalStorageKey(), JSON.stringify(nodesPositions));
+  }
 })
 
 onEdgesChange((changes) => {
@@ -166,8 +173,6 @@ function isNodeSelected() {
   return selectedNode.value;
 }
 
-//<i class="fa-solid fa-1"></i>
-
 function isEdgeSelected() {
   return selectedEdge.value;
 }
@@ -176,8 +181,8 @@ function isNodeOrEdgeSelected() {
   return isNodeSelected() || isEdgeSelected();
 }
 
-function isSelectedNodeNotInitial() {
-  return isNodeSelected() && !selectedNode.value.data.initial;
+function isSelectedNodeInitial() {
+  return isNodeSelected() && selectedNode.value.data.initial;
 }
 
 function isEdgeSelectedBidirectional() {
@@ -200,6 +205,19 @@ function getSelectedEdgeNodeNames() {
   return { source: sourceNode, target: targetNode };
 }
 
+function shouldSelectedNodeDeletionBeBlocked() {
+  if(!selectedNode.value) {
+    return true;
+  }
+
+  const status = workflow.value!.statuses.find(x => x.id === selectedNode.value.id)!;
+  return status.deletionEligibility != TaskStatusDeletionEligibility.Eligible;
+}
+
+function getLocalStorageKey() {
+  return `workflow-${workflow.value?.id}`;
+}
+
 function toggleCreateMenu(event: Event) {
   createMenu.value.toggle(event);
 }
@@ -209,11 +227,17 @@ function initializeDiagram() {
     return;
   }
 
+  const nodePositions: { id: string, position: XYPosition }[] = JSON.parse(localStorage.getItem(getLocalStorageKey()) ?? '[]');
+  const positionByNodeId = new Map(nodePositions.map(x => [x.id as string, x.position]));
+
   // Nodes
   const newNodes: Node[] = [];
+  let yPosition = 0;
   for(const status of workflow.value.statuses) {
-    newNodes.push({ id: status.id, type: 'status', data: { label: status.name, initial: status.initial }, position: { x: 0, y: 0 } });
-    // TODO: set position, set Initial flag
+    const position = positionByNodeId.has(status.id) ? positionByNodeId.get(status.id)! : { x: 0, y: yPosition };
+    yPosition += 80;
+
+    newNodes.push({ id: status.id, type: 'status', data: { label: status.name, initial: status.initial }, position: position });
   }
 
   vueFlow.setNodes(newNodes);
