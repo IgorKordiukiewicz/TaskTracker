@@ -27,8 +27,8 @@
                     </div>
                 </div>
             </Popover>
-            <span @click="toggle">
-                <Avatar :label="avatarLabel" shape="circle" aria-haspopup="true" aria-controls="user_menu" class="cursor-pointer" />
+            <span @click="toggle" v-if="userId">
+                <UserAvatar :user-id="userId" aria-haspopup="true" aria-controls="user_menu" class="cursor-pointer" />
             </span>
             <Menu ref="menu" id="user_menu" :popup="true" :model="items" />
         </div>
@@ -40,6 +40,8 @@ const emit = defineEmits([ 'toggleSidebar' ])
 
 const auth = useAuth();
 const organizationsService = useOrganizationsService();
+
+const userId = ref(auth.getUserId());
 
 const menu = ref();
 const items = ref([
@@ -59,10 +61,6 @@ const items = ref([
 const notificationsPopover = ref();
 
 const invitations = ref(await organizationsService.getUserInvitations());
-
-const avatarLabel = computed(() => {
-    return auth.getUser()?.email?.at(0)?.toUpperCase() ?? "";
-})
 
 const toggle = (event: Event) => {
     menu.value.toggle(event);

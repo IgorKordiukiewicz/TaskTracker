@@ -115,6 +115,7 @@ public class UsersController : ControllerBase
     /// <response code="404">User not found.</response> 
     [HttpGet("presentation")]
     [Authorize]
+    [ProducesResponseType(typeof(UsersPresentationDataVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetAllUsersPresentationData()
     {

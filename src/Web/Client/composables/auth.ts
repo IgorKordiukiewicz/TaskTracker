@@ -69,6 +69,9 @@ export const useAuth = () => {
         },
         getUser() {
             return supabaseUser.value;
+        },
+        getUserId() {
+            return supabaseUser.value?.id;
         }
     }
 }

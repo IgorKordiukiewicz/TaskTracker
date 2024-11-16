@@ -1,6 +1,6 @@
 <template>
     <div class="flex items-start gap-3">
-        <Avatar label="AA" shape="circle" />
+        <UserAvatar :user-id="comment.authorId" />
         <div class="flex flex-col">
             <div class="flex items-center gap-2">
                 <p class="font-semibold">

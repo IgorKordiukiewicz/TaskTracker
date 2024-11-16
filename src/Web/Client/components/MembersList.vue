@@ -16,7 +16,7 @@
             <Column header="Name" sortable filter-field="name" sort-field="name">
                 <template #body="slotProps">
                     <div class="flex gap-4 items-center">
-                        <Avatar label="AA" shape="circle" /> <!--TODO-->
+                        <UserAvatar :user-id="slotProps.data.userId" />
                         <p>{{ slotProps.data.name }}</p>
                     </div>
                 </template>

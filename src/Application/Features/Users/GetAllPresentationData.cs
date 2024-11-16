@@ -33,7 +33,10 @@ internal class GetAllUsersPresentationDataHandler : IRequestHandler<GetAllUsersP
 
         var presentationData = await _dbContext.UsersPresentationData
             .Where(x => possibleUsersIds.Contains(x.UserId))
-            .Select(x => new UserPresentationDataVM(x.UserId, x.AvatarColor))
+            .Join(_dbContext.Users,
+            presentationData => presentationData.UserId,
+            user => user.Id,
+            (presentationData, user) => new UserPresentationDataVM(user.Id, user.FirstName, user.LastName, presentationData.AvatarColor))
             .ToListAsync();
 
         return Result.Ok(new UsersPresentationDataVM(presentationData));

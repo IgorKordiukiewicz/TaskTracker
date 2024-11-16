@@ -58,7 +58,7 @@
                 <Column header="Assignee" style="width: 240px;" sortable sortField="assigneeId" filter-field="assigneeId" :show-filter-match-modes="false">
                     <template #body="{ data }">
                         <div class="flex gap-3 items-center" v-if="data.assigneeId">
-                            <Avatar label="AA" shape="circle" />
+                            <UserAvatar :user-id="data.assigneeId" />
                             <p>{{ getMemberName(data.assigneeId) }}</p>
                         </div>
                         <div v-else>
