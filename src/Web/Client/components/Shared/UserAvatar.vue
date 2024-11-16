@@ -1,12 +1,13 @@
 <template>
-    <Avatar :label="avatarLabel" shape="circle" :style="{background: avatarBackground }" style="color: #ffffff" />
+    <Avatar :label="avatarLabel" shape="circle" :style="{background: avatarBackground }" style="color: #ffffff" :size="avatarSize" />
 </template>
 
 <script setup lang="ts">
 import { useUsersPresentationData } from '~/composables/usersPresentationData';
 
 const props = defineProps({
-    userId: { type: String, required: true }
+    userId: { type: String, required: true },
+    large: { type: Boolean, default: false }
 })
 
 const usersPresentationData = useUsersPresentationData();
@@ -27,5 +28,9 @@ const avatarBackground = computed(() => {
     }
 
     return data.value.avatarColor;
+})
+
+const avatarSize = computed(() => {
+    return props.large ? "xlarge" : "normal";
 })
 </script>

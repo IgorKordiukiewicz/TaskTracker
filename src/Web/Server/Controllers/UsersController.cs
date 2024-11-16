@@ -36,7 +36,7 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Get the user's data along with their permissions.
+    /// Get the user's data.
     /// </summary>
     /// <response code="404">User not found.</response> 
     [HttpGet("me")] // without /data the endpoint is not called
@@ -94,11 +94,9 @@ public class UsersController : ControllerBase
     /// <summary>
     /// Update a user's first and last name.
     /// </summary>
-    /// <param name="userId"></param>
     /// <param name="model"></param>
-    /// <response code="404">User not found.</response> 
     [HttpPost("me/update-name")]
-    [Authorize(Policy.UserSelf)]
+    [Authorize]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateUserName([FromBody] UpdateUserNameDto model)
     {

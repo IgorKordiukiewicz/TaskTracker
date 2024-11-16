@@ -31,6 +31,7 @@
                 <UserAvatar :user-id="userId" aria-haspopup="true" aria-controls="user_menu" class="cursor-pointer" />
             </span>
             <Menu ref="menu" id="user_menu" :popup="true" :model="items" />
+            <ProfileDialog ref="profileDialog" />
         </div>
     </div>
 </template>
@@ -47,7 +48,10 @@ const menu = ref();
 const items = ref([
     { 
         label: 'Profile', 
-        icon: 'pi pi-user' 
+        icon: 'pi pi-user' ,
+        command: () => {
+            profileDialog.value.show();
+        }
     },
     { 
         label: 'Logout', 
@@ -58,6 +62,7 @@ const items = ref([
     }
 ])
 
+const profileDialog = ref();
 const notificationsPopover = ref();
 
 const invitations = ref(await organizationsService.getUserInvitations());

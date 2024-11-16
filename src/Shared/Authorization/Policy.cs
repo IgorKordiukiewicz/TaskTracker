@@ -17,8 +17,6 @@ public static class Policy
     public const string ProjectEditMembers = nameof(ProjectEditMembers);
     public const string ProjectEditRoles = nameof(ProjectEditRoles);
     public const string ProjectEditProject = nameof(ProjectEditProject);
-
-    public const string UserSelf = nameof(UserSelf);
 }
 
 public static class PolicyExtensions
@@ -37,7 +35,5 @@ public static class PolicyExtensions
         options.AddPolicy(Policy.ProjectEditMembers, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.EditMembers)));
         options.AddPolicy(Policy.ProjectEditRoles, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.EditRoles)));
         options.AddPolicy(Policy.ProjectEditProject, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.EditProject)));
-
-        options.AddPolicy(Policy.UserSelf, policy => policy.Requirements.Add(new UserSelfRequirement()));
     }
 }

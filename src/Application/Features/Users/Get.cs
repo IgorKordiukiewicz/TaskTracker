@@ -20,29 +20,13 @@ internal class GetUserHandler : IRequestHandler<GetUserQuery, Result<UserVM>>
             .Where(x => x.Id == request.Id)
             .SingleAsync();
 
-        var permissionsByOrganization = await _dbContext.Organizations
-            .Include(x => x.Members)
-            .Include(x => x.Roles)
-            .Where(x => x.Members.Any(xx => xx.UserId == user.Id))
-            .Select(x => new { x.Id, x.Roles.First(xx => xx.Id == x.Members.First(xxx => xxx.UserId == user.Id).RoleId).Permissions })
-            .ToDictionaryAsync(k => k.Id, v => v.Permissions);
-
-        var permissionsByProject = await _dbContext.Projects
-            .Include(x => x.Members)
-            .Include(x => x.Roles)
-            .Where(x => x.Members.Any(xx => xx.UserId == user.Id))
-            .Select(x => new { x.Id, x.Roles.First(xx => xx.Id == x.Members.First(xxx => xxx.UserId == user.Id).RoleId).Permissions })
-            .ToDictionaryAsync(k => k.Id, v => v.Permissions);
-
         return Result.Ok(new UserVM
         {
             Id = user.Id,
             FirstName = user.FirstName,
             LastName = user.LastName,
             FullName = user.FullName,
-            Email = user.Email,
-            PermissionsByOrganization = permissionsByOrganization,
-            PermissionsByProject = permissionsByProject
+            Email = user.Email
         });
     }
 }

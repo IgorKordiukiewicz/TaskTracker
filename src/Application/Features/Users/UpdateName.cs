@@ -24,11 +24,7 @@ internal class UpdateUserNameHandler : IRequestHandler<UpdateUserNameCommand, Re
 
     public async Task<Result> Handle(UpdateUserNameCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetById(request.Id);
-        if(user is null)
-        {
-            return Result.Fail(new NotFoundError<User>(request.Id));
-        }
+        var user = (await _userRepository.GetById(request.Id))!;
 
         user.UpdateName(request.Model.FirstName, request.Model.LastName);
         await _userRepository.Update(user);

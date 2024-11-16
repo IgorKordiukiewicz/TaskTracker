@@ -17,3 +17,11 @@ export interface UserPresentationDataVM {
     lastName: string;
     avatarColor: string;
 }
+
+export interface UserDetailsVM {
+    id: string;
+    firstName: string;
+    lastName: string;
+    fullName: string;
+    email: string;
+}

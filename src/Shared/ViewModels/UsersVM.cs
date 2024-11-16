@@ -9,8 +9,6 @@ public record UserVM
     public required string LastName { get; init; }
     public required string FullName { get; init; }
     public required string Email { get; init; }
-    public required IReadOnlyDictionary<Guid, OrganizationPermissions> PermissionsByOrganization { get; init; }
-    public required IReadOnlyDictionary<Guid, ProjectPermissions> PermissionsByProject { get; init; }
 }
 
 public record UsersSearchVM(IReadOnlyList<UserSearchVM> Users);

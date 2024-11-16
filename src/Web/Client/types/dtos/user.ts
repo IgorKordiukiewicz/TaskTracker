@@ -9,3 +9,8 @@ export class UserRegistrationDto {
         this.lastName = lastName;
     }
 }
+
+export class UpdateUserDto {
+    firstName: string = '';
+    lastName: string = '';
+}
