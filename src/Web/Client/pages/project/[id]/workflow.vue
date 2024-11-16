@@ -33,7 +33,7 @@ import { type Node, type Edge, MarkerType, Panel, Position, ConnectionMode, type
 import { VueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background';
 import type { WorkflowTransitionVM } from '~/types/viewModels/workflows';
-import { DeleteWorkflowStatusDto } from '~/types/dtos/workflows';
+import { DeleteWorkflowStatusDto, DeleteWorkflowTransitionDto } from '~/types/dtos/workflows';
 
 const route = useRoute();
 const workflowsService = useWorkflowsService();
@@ -85,7 +85,6 @@ const createMenuItems = ref([
         icon: 'pi pi-trash',
         command: () => {
           const statusName = selectedNode.value.data.label;
-          const statusId = selectedNode.value.id;
           confirm.require({
               message: `Are you sure you want to delete the ${statusName} status?`,
               header: 'Confirm action',
@@ -97,12 +96,7 @@ const createMenuItems = ref([
                   label: 'Confirm',
                   severity: 'danger'
               },
-              accept: async () => {
-                const model = new DeleteWorkflowStatusDto();
-                model.statusId = statusId
-                await workflowsService.deleteStatus(workflow.value!.id, projectId.value, model);
-                await updateDiagram({ deletedStatusId: statusId });
-              }
+              accept: async () => await deleteStatus()
           })
         }
       }
@@ -113,8 +107,19 @@ const createMenuItems = ref([
     visible: isEdgeSelected,
     items: [
       {
-        label: 'Delete',
+        label: getSelectedTransitionName,
         icon: 'pi pi-trash',
+        command: async () => {
+          await confirmDeleteTransition();
+        }
+      },
+      {
+        label: getSelectedReverseTransitionName,
+        icon: 'pi pi-trash',
+        visible: isEdgeSelectedBidirectional,
+        command: async () => {
+          await confirmDeleteTransition(true);
+        }
       }
     ]
   }
@@ -148,6 +153,26 @@ function isNodeOrEdgeSelected() {
   return isNodeSelected() || isEdgeSelected();
 }
 
+function isEdgeSelectedBidirectional() {
+  return selectedEdge.value && selectedEdge.value.data.bidirectional;
+}
+
+function getSelectedTransitionName() {
+  const nodes = getSelectedEdgeNodeNames();
+  return `Delete (${nodes.source} -> ${nodes.target})`;
+}
+
+function getSelectedReverseTransitionName() {
+  const nodes = getSelectedEdgeNodeNames();
+  return `Delete2 (${nodes.target} -> ${nodes.source})`;
+}
+
+function getSelectedEdgeNodeNames() {
+  const sourceNode = vueFlow.findNode(selectedEdge.value.source)?.data.label;
+  const targetNode = vueFlow.findNode(selectedEdge.value.target)?.data.label;
+  return { source: sourceNode, target: targetNode };
+}
+
 function toggleCreateMenu(event: Event) {
   createMenu.value.toggle(event);
 }
@@ -158,7 +183,6 @@ function initializeDiagram() {
   }
 
   // Nodes
-  //nodes.value = [];
   const newNodes: Node[] = [];
   for(const status of workflow.value.statuses) {
     newNodes.push({ id: status.id, type: 'status', data: { label: status.name }, position: { x: 0, y: 0 } });
@@ -168,7 +192,6 @@ function initializeDiagram() {
   vueFlow.setNodes(newNodes);
 
   // Edges
-  //edges.value = [];
   const newEdges: Edge[] = [];
   const edgesCreatedByTransitionId = new Map(workflow.value.transitions.map(x => [getTransitionKey(x), false]));
   for(const transition of workflow.value.transitions) {
@@ -190,8 +213,6 @@ function initializeDiagram() {
   }
 
   vueFlow.setEdges(newEdges);
-
-  // setEdges ?
 }
 
 function getTransitionKey(transition: WorkflowTransitionVM) {
@@ -205,7 +226,8 @@ function getReverseTransitionKey(transition: WorkflowTransitionVM) {
 async function updateDiagram(options: { 
   newStatusName?: string, 
   newTransition?: { fromId: string, toId: string },
-  deletedStatusId?: string 
+  deletedStatusId?: string,
+  deletedTransition?: { fromId: string, toId: string }
 }) {
   workflow.value = await workflowsService.getWorkflow(projectId.value);
   if(!workflow.value) {
@@ -241,6 +263,70 @@ async function updateDiagram(options: {
   if(options.deletedStatusId) {
     vueFlow.removeNodes(options.deletedStatusId);
   }
+
+  if(options.deletedTransition) {
+    const transitionKey = getTransitionKey({ fromStatusId: options.deletedTransition.fromId, toStatusId: options.deletedTransition.toId });
+    const reverseTransitionKey = getTransitionKey({ fromStatusId: options.deletedTransition.toId, toStatusId: options.deletedTransition.fromId });
+    let existingEdge = vueFlow.findEdge(transitionKey);
+    let usingReverse = false;
+    if(!existingEdge) {
+      existingEdge = vueFlow.findEdge(reverseTransitionKey);
+      usingReverse = true;
+    }
+
+    if(!existingEdge) {
+      return;
+    }
+
+    if(existingEdge.data.bidirectional) {
+      existingEdge.data.bidirectional = false;
+      if(usingReverse) {
+        existingEdge.markerStart = undefined;
+      }
+      else {
+        existingEdge.markerEnd = undefined;
+      }
+      existingEdge.source = options.deletedTransition.toId;
+      existingEdge.target = options.deletedTransition.fromId;
+      vueFlow.updateEdgeData(existingEdge.id, existingEdge.data);
+    }
+    else {
+      vueFlow.removeEdges(existingEdge);
+    }
+  }
+}
+
+async function deleteStatus() {
+  const statusId = selectedNode.value.id;
+  const model = new DeleteWorkflowStatusDto();
+  model.statusId = statusId;
+  await workflowsService.deleteStatus(workflow.value!.id, projectId.value, model);
+  await updateDiagram({ deletedStatusId: statusId });
+}
+
+async function confirmDeleteTransition(reverse: boolean = false) {
+  const nodesNames = getSelectedEdgeNodeNames();
+  confirm.require({
+      message: `Are you sure you want to delete the ${reverse ? nodesNames.target : nodesNames.source} to ${reverse ? nodesNames.source : nodesNames.target} transition?`,
+      header: 'Confirm action',
+      rejectProps: {
+          label: 'Cancel',
+          severity: 'secondary'
+      },
+      acceptProps: {
+          label: 'Confirm',
+          severity: 'danger'
+      },
+      accept: async () => await deleteTransition(reverse)
+  })
+}
+
+async function deleteTransition(reverse: boolean = false) {
+  const model = new DeleteWorkflowTransitionDto();
+  model.fromStatusId = reverse ? selectedEdge.value.target : selectedEdge.value.source;
+  model.toStatusId = reverse ? selectedEdge.value.source : selectedEdge.value.target;
+  await workflowsService.deleteTransition(workflow.value!.id, projectId.value, model);
+  await updateDiagram({ deletedTransition: { fromId: model.fromStatusId, toId: model.toStatusId }})
 }
 
 </script>

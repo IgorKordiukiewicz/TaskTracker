@@ -10,3 +10,8 @@ export class AddWorkflowTransitionDto {
 export class DeleteWorkflowStatusDto {
     statusId: string = '';
 }
+
+export class DeleteWorkflowTransitionDto {
+    fromStatusId: string = '';
+    toStatusId: string = '';
+}
