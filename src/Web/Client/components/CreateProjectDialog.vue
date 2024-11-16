@@ -1,5 +1,5 @@
 <template>
-    <ActionDialog header="Create a project" submit-label="Create" @submit="createProject" ref="dialog">
+    <ActionDialog header="Create a project" submit-label="Create" @submit="createProject" ref="dialog" :submit-disabled="submitDisabled">
         <LabeledInput label="Name">
             <InputText v-model="model.name" autocomplete="off" class="w-full" />
         </LabeledInput>
@@ -19,6 +19,10 @@ const projectsService = useProjectsService();
 
 const dialog = ref();
 const model = ref(new CreateProjectDto());
+
+const submitDisabled = computed(() => {
+    return !model.value.name;
+})
 
 function show() {
     dialog.value.show();

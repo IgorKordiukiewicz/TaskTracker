@@ -12,7 +12,7 @@
             <label for="password1" class="block text-900 font-medium mb-2">Password</label>
             <Password id="password1" v-model="password" :feedback="false" class="w-full mb-5" inputClass="w-full" placeholder="Your password" toggleMask />
 
-            <Button label="Sign In" icon="pi pi-user" class="w-full mb-6" @click="login"></Button>
+            <Button label="Sign In" icon="pi pi-user" class="w-full mb-6" @click="login" :disabled="buttonDisabled"></Button>
             <div class="flex justify-center align-center">
                 <a class="text-sm cursor-pointer underline" @click="navigateTo('/account/forgot-password')">Forgot your password?</a>
             </div>
@@ -31,6 +31,10 @@ const auth = useAuth();
 
 const email = ref();
 const password = ref();
+
+const buttonDisabled = computed(() => {
+    return !email.value || !password.value;
+})
 
 async function login() {
     await auth.login(email.value, password.value);

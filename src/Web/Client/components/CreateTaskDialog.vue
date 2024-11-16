@@ -1,5 +1,5 @@
 <template>
-    <ActionDialog header="Create a task" submit-label="Create" @submit="createTask" ref="dialog">
+    <ActionDialog header="Create a task" submit-label="Create" @submit="createTask" ref="dialog" :submit-disabled="submitDisabled">
         <LabeledInput label="Title">
             <InputText v-model="model.title" autocomplete="off" class="w-full" />
         </LabeledInput>
@@ -39,6 +39,10 @@ const priorities = ref([
     { key: TaskPriority.Urgent, name: TaskPriority[TaskPriority.Urgent] },
 ]);
 const selectedPriority = ref({ key: TaskPriority.Normal, name: TaskPriority[TaskPriority.Normal] });
+
+const submitDisabled = computed(() => {
+    return !model.value.title;
+})
 
 function show() {
     dialog.value.show();

@@ -12,7 +12,7 @@
             <label for="password" class="block text-900 font-medium mb-2">Password</label>
             <Password id="password" v-model="password" :feedback="false" class="w-full mb-5" inputClass="w-full" placeholder="Your password" toggleMask />
 
-            <Button label="Sign Up" icon="pi pi-user" class="w-full" @click="register"></Button>
+            <Button label="Sign Up" icon="pi pi-user" class="w-full" @click="register" :disabled="buttonDisabled"></Button>
         </div>
     </AccountLayout>
 </template>
@@ -26,6 +26,10 @@ const auth = useAuth();
 
 const email = ref();
 const password = ref();
+
+const buttonDisabled = computed(() => {
+    return !email.value || !password.value;
+})
 
 async function register() {
     await auth.register(email.value, password.value);

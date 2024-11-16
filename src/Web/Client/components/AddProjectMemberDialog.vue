@@ -1,5 +1,5 @@
 <template>
-    <ActionDialog header="Add a member" submit-label="Confirm" @submit="addMember" ref="dialog">
+    <ActionDialog header="Add a member" submit-label="Confirm" @submit="addMember" ref="dialog" :submit-disabled="submitDisabled">
         <LabeledInput label="User">
             <AutoComplete v-model="selectedUser" option-label="email" :suggestions="filteredUsers" @complete="searchUsers"  :inputStyle="{ 'width': '100%' }" dropdown />
         </LabeledInput>
@@ -25,6 +25,10 @@ const dialog = ref();
 
 const selectedUser = ref();
 const filteredUsers = ref();
+
+const submitDisabled = computed(() => {
+    return !selectedUser.value;
+})
 
 function show() {
     dialog.value.show();

@@ -1,5 +1,5 @@
 <template>
-    <ActionDialog header="Add a new transition" submit-label="Add" ref="dialog" @submit="addTransition">
+    <ActionDialog header="Add a new transition" submit-label="Add" ref="dialog" @submit="addTransition" :submit-disabled="submitDisabled">
         <LabeledInput label="From Status">
             <Select v-model="selectedFromStatus" :options="availableFromStatuses" option-label="name" option-value="id" />
         </LabeledInput>
@@ -27,6 +27,10 @@ const workflowsService = useWorkflowsService();
 const dialog = ref();
 const selectedFromStatus = ref();
 const selectedToStatus = ref();
+
+const submitDisabled = computed(() => {
+    return !selectedFromStatus.value || !selectedToStatus.value;
+})
 
 const availableFromStatuses = computed(() => {
     const result: WorkflowStatusVM[] = [];

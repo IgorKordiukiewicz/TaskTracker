@@ -1,5 +1,5 @@
 <template>
-    <ActionDialog header="Create an organization" submit-label="Create" @submit="createOrganization" ref="dialog">
+    <ActionDialog header="Create an organization" submit-label="Create" @submit="createOrganization" ref="dialog" :submit-disabled="submitDisabled">
         <LabeledInput label="Name">
             <InputText v-model="model.name" autocomplete="off" class="w-full" />
         </LabeledInput>
@@ -16,6 +16,10 @@ const organizationsService = useOrganizationsService();
 
 const dialog = ref();
 const model = ref(new CreateOrganizationDto());
+
+const submitDisabled = computed(() => {
+    return !model.value.name;
+})
 
 function show() {
     dialog.value.show();

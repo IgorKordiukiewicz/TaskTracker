@@ -1,5 +1,5 @@
 <template>
-    <ActionDialog header="Add a new status" submit-label="Add" ref="dialog" @submit="addStatus">
+    <ActionDialog header="Add a new status" submit-label="Add" ref="dialog" @submit="addStatus" :submit-disabled="submitDisabled">
         <LabeledInput label="Name">
             <InputText v-model="name" autocomplete="off" class="w-full" />
         </LabeledInput>
@@ -20,6 +20,10 @@ const workflowsService = useWorkflowsService();
 
 const dialog = ref();
 const name = ref();
+
+const submitDisabled = computed(() => {
+    return !name.value;
+})
 
 function show() {
     dialog.value.show();

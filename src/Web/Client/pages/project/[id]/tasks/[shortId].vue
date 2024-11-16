@@ -214,7 +214,7 @@ function openLogTimeDialog() {
 }
 
 function openEstimatedTimeDialog() {
-    estimatedTimeDialog.value.show();
+    estimatedTimeDialog.value.show(details.value!.estimatedTime ? timeParser.fromMinutes(details.value!.estimatedTime) : null);
 }
 
 function openUpdateTitleDialog() {

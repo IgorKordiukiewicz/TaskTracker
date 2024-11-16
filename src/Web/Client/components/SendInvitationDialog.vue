@@ -1,5 +1,5 @@
 <template>
-    <ActionDialog header="Send an invitation" submit-label="Send" @submit="sendInvitation" ref="dialog">
+    <ActionDialog header="Send an invitation" submit-label="Send" @submit="sendInvitation" ref="dialog" :submit-disabled="submitDisabled">
         <LabeledInput label="User">
             <AutoComplete v-model="selectedUser" option-label="email" :suggestions="filteredUsers" @complete="searchUsers" :inputStyle="{ 'width': '100%' }" />
         </LabeledInput>
@@ -23,6 +23,10 @@ const dialog = ref();
 
 const selectedUser = ref();
 const filteredUsers = ref();
+
+const submitDisabled = computed(() => {
+    return !selectedUser.value;
+})
 
 function show() {
     dialog.value.show();

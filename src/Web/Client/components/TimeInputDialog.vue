@@ -1,7 +1,8 @@
 <template>
-    <ActionDialog :header="props.header" submit-label="Confirm" @submit="submit" ref="dialog">
+    <ActionDialog :header="props.header" submit-label="Confirm" @submit="submit" ref="dialog" :submit-disabled="submitDisabled">
         <LabeledInput label="Time">
-            <InputText class="w-full" v-model="input" :invalid="!isInputValid" />
+            <InputText id="timeinput" class="w-full" v-model="input" />
+            <p class="text-sm">Input has to be in format: {0}d {1}h {2}m</p>
         </LabeledInput>
     </ActionDialog>
 </template>
@@ -17,12 +18,14 @@ const timeParser = useTimeParser();
 
 const dialog = ref();
 const input = ref();
+const initialValue = ref();
 
-const isInputValid = computed(() => {
-    return timeParser.tryToMinutes(input.value).result;
+const submitDisabled = computed(() => {
+    return !timeParser.tryToMinutes(input.value).result || (initialValue.value && initialValue.value === input.value);
 })
 
-function show() {
+function show(initValue?: string) {
+    initialValue.value = initValue;
     dialog.value.show();
 }
 

@@ -60,6 +60,7 @@ const menuItems = ref([
     {
         label: 'Edit name',
         icon: 'pi pi-pencil',
+        disabled: isSelectedRoleModifiable,
         command: () => {
             updateRoleNameDialog.value.show(selectedRole.value);
         }
@@ -67,6 +68,7 @@ const menuItems = ref([
     {
         label: 'Delete',
         icon: 'pi pi-trash',
+        disabled: isSelectedRoleModifiable,
         command: () => {
             const roleId = selectedRole.value.id;
             confirm.require({
@@ -92,6 +94,10 @@ function openCreateRoleDialog() {
 
 function hasPermission(permission: number, permissions: number) {
     return (permissions & permission) === permission;
+}
+
+function isSelectedRoleModifiable() {
+    return !selectedRole.value?.modifiable;
 }
 
 function createRole(model: CreateRoleDto) {

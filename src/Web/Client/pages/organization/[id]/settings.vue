@@ -11,7 +11,7 @@
                     <InputText v-model="name" :disabled="!nameEditActive" class="w-80" />
                     <template v-if="nameEditActive">
                         <Button severity="secondary" text icon="pi pi-times" @click="cancelNameEdit" />
-                        <Button severity="primary" text icon="pi pi-check" @click="updateName" :disabled="!name" />
+                        <Button severity="primary" text icon="pi pi-check" @click="updateName" :disabled="updateNameSaveDisabled" />
                     </template>
                     <template v-else>
                         <Button severity="secondary" text icon="pi pi-pencil" @click="activateNameEdit" />
@@ -45,6 +45,10 @@ const settings = ref(await organizationsService.getSettings(organizationId.value
 
 const name = ref(settings.value?.name);
 const nameEditActive = ref(false);
+
+const updateNameSaveDisabled = computed(() => {
+    return !name.value || name.value === settings.value?.name;
+})
 
 function activateNameEdit() {
     nameEditActive.value = true;

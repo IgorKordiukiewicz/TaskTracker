@@ -1,5 +1,5 @@
 <template>
-    <ActionDialog header="Create a role" submit-label="Create" @submit="createRole" ref="dialog">
+    <ActionDialog header="Create a role" submit-label="Create" @submit="createRole" ref="dialog" :submit-disabled="submitDisabled">
         <LabeledInput label="Name">
             <InputText id="title" v-model="model.name" autocomplete="off" class="w-full" />
         </LabeledInput>
@@ -22,6 +22,10 @@ const selectedPermissions = ref();
 
 const dialog = ref();
 const model = ref(new CreateRoleDto());
+
+const submitDisabled = computed(() => {
+    return !model.value.name;
+})
 
 function show() {
     dialog.value.show();
