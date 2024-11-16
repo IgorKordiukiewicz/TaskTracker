@@ -11,9 +11,9 @@
                         <i class="pi pi-bell" style="font-size: 1.25rem;" />
                     </OverlayBadge>
                 </template>
-                <tempalte v-else>
+                <template v-else>
                     <i class="pi pi-bell" style="font-size: 1.25rem;" />
-                </tempalte>
+                </template>
             </span>
             <Popover ref="notificationsPopover">
                 <div class="flex flex-col gap-3 w-72" v-if="invitations">
