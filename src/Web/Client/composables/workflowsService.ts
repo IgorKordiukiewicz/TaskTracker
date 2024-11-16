@@ -1,4 +1,4 @@
-import type { AddWorkflowStatusDto, AddWorkflowTransitionDto, DeleteWorkflowStatusDto, DeleteWorkflowTransitionDto } from "~/types/dtos/workflows";
+import type { AddWorkflowStatusDto, AddWorkflowTransitionDto, ChangeInitialWorkflowStatusDto, DeleteWorkflowStatusDto, DeleteWorkflowTransitionDto } from "~/types/dtos/workflows";
 import type { WorkflowVM } from "~/types/viewModels/workflows";
 
 export const useWorkflowsService = () => {
@@ -19,6 +19,9 @@ export const useWorkflowsService = () => {
         },
         async deleteTransition(id: string, projectId: string, model: DeleteWorkflowTransitionDto) {
             await api.sendPostRequest(`workflows/${id}/transitions/delete`, model, { 'ProjectId': projectId });
+        },
+        async changeInitialStatus(id: string, projectId: string, model: ChangeInitialWorkflowStatusDto) {
+            await api.sendPostRequest(`workflows/${id}/initial-status`, model, { 'ProjectId': projectId });
         }
     }
 }

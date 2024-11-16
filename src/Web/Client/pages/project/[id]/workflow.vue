@@ -33,7 +33,7 @@ import { type Node, type Edge, MarkerType, Panel, Position, ConnectionMode, type
 import { VueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background';
 import type { WorkflowTransitionVM } from '~/types/viewModels/workflows';
-import { DeleteWorkflowStatusDto, DeleteWorkflowTransitionDto } from '~/types/dtos/workflows';
+import { ChangeInitialWorkflowStatusDto, DeleteWorkflowStatusDto, DeleteWorkflowTransitionDto } from '~/types/dtos/workflows';
 
 const route = useRoute();
 const workflowsService = useWorkflowsService();
@@ -80,6 +80,27 @@ const createMenuItems = ref([
     label: `Selected Status`,
     visible: isNodeSelected,
     items: [
+      {
+        label: 'Make Initial',
+        icon: 'pi pi-asterisk',
+        visible: isSelectedNodeNotInitial,
+        command: () => {
+          const statusName = selectedNode.value.data.label;
+          confirm.require({
+              message: `Are you sure you want to make the ${statusName} status initial?`,
+              header: 'Confirm action',
+              rejectProps: {
+                  label: 'Cancel',
+                  severity: 'secondary'
+              },
+              acceptProps: {
+                  label: 'Confirm',
+                  severity: 'primary'
+              },
+              accept: async () => await changeInitialStatus()
+          })
+        }
+      },
       {
         label: 'Delete',
         icon: 'pi pi-trash',
@@ -145,12 +166,18 @@ function isNodeSelected() {
   return selectedNode.value;
 }
 
+//<i class="fa-solid fa-1"></i>
+
 function isEdgeSelected() {
   return selectedEdge.value;
 }
 
 function isNodeOrEdgeSelected() {
   return isNodeSelected() || isEdgeSelected();
+}
+
+function isSelectedNodeNotInitial() {
+  return isNodeSelected() && !selectedNode.value.data.initial;
 }
 
 function isEdgeSelectedBidirectional() {
@@ -185,7 +212,7 @@ function initializeDiagram() {
   // Nodes
   const newNodes: Node[] = [];
   for(const status of workflow.value.statuses) {
-    newNodes.push({ id: status.id, type: 'status', data: { label: status.name }, position: { x: 0, y: 0 } });
+    newNodes.push({ id: status.id, type: 'status', data: { label: status.name, initial: status.initial }, position: { x: 0, y: 0 } });
     // TODO: set position, set Initial flag
   }
 
@@ -227,8 +254,10 @@ async function updateDiagram(options: {
   newStatusName?: string, 
   newTransition?: { fromId: string, toId: string },
   deletedStatusId?: string,
-  deletedTransition?: { fromId: string, toId: string }
+  deletedTransition?: { fromId: string, toId: string },
+  newInitialStatusId?: string
 }) {
+  const oldInitialStatusId = workflow.value?.statuses.find(x => x.initial)?.id;
   workflow.value = await workflowsService.getWorkflow(projectId.value);
   if(!workflow.value) {
     return;
@@ -294,6 +323,21 @@ async function updateDiagram(options: {
       vueFlow.removeEdges(existingEdge);
     }
   }
+
+  if(options.newInitialStatusId) {
+    if(!oldInitialStatusId) {
+      return;
+    }
+
+    const currentInitialNode = vueFlow.findNode(oldInitialStatusId)!;
+    currentInitialNode.data.initial = false;
+
+    const newInitialNode = vueFlow.findNode(options.newInitialStatusId)!;
+    newInitialNode.data.initial = true;
+
+    vueFlow.updateNodeData(currentInitialNode.id, currentInitialNode.data);
+    vueFlow.updateNodeData(newInitialNode.id, newInitialNode.data);
+  }
 }
 
 async function deleteStatus() {
@@ -327,6 +371,14 @@ async function deleteTransition(reverse: boolean = false) {
   model.toStatusId = reverse ? selectedEdge.value.source : selectedEdge.value.target;
   await workflowsService.deleteTransition(workflow.value!.id, projectId.value, model);
   await updateDiagram({ deletedTransition: { fromId: model.fromStatusId, toId: model.toStatusId }})
+}
+
+async function changeInitialStatus() {
+  const statusId = selectedNode.value.id;
+  const model = new ChangeInitialWorkflowStatusDto();
+  model.statusId = statusId;
+  await workflowsService.changeInitialStatus(workflow.value!.id, projectId.value, model);
+  await updateDiagram({ newInitialStatusId: statusId});
 }
 
 </script>

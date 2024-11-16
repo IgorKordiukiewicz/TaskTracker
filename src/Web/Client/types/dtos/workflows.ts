@@ -15,3 +15,7 @@ export class DeleteWorkflowTransitionDto {
     fromStatusId: string = '';
     toStatusId: string = '';
 }
+
+export class ChangeInitialWorkflowStatusDto {
+    statusId: string = '';
+}
