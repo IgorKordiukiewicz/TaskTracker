@@ -17,3 +17,16 @@ body {
     width: 100%;
     height: 100%;
 }
+
+.block-list-item {
+    width: calc(20% - 0.6rem);
+}
+
+.navbar-item-icon {
+    height: 16px;
+    color: var(--p-menu-item-icon-color);
+}
+
+.settings-label-caption {
+    color: rgb(100, 116, 139);
+}

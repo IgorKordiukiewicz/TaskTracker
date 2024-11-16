@@ -1,9 +1,6 @@
 <template>
     <AccountLayout>
-        <div class="text-center mb-5">
-            <div class="text-900 text-3xl font-medium mb-3">Complete Registration</div>
-        </div>
-
+        <AccountPageTitle title="Complete Registration"></AccountPageTitle>
         <div>
             <label for="firstName" class="block text-900 font-medium mb-2">First Name</label>
             <InputText id="firstName" v-model="firstName" type="text" class="w-full mb-3" placeholder="Your first name" />

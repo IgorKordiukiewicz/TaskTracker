@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { StraightEdge, useVueFlow, type EdgeAddChange, type NodePositionChange } from '@vue-flow/core';
+import { StraightEdge, useVueFlow, type NodePositionChange } from '@vue-flow/core';
 
 defineExpose({ updateEdgePositions });
 
@@ -23,6 +23,7 @@ const fixedSourceX = ref(props.sourceX);
 const fixedSourceY = ref(props.sourceY);
 
 const { getNodes, onNodesChange, onNodesInitialized } = useVueFlow();
+const geometry = useGeometry();
 
 onNodesInitialized((_) => {
     updateEdgePositions();
@@ -55,52 +56,14 @@ function updateEdgePositions() {
 
     // TODO: dont use hardcoded values?
     const nodeSize = { x: 160, y: 52 };
-    const nearestTarget = pointOnRect(targetNode.position.x, targetNode.position.y, nodeSize.x, nodeSize.y, 
+    const nearestTarget = geometry.getIntersectionPointOnRectangle(targetNode.position.x, targetNode.position.y, nodeSize.x, nodeSize.y, 
         sourceNode.position.x + nodeSize.x / 2, sourceNode.position.y  + nodeSize.y / 2);
-    const nearestSource = pointOnRect(sourceNode.position.x, sourceNode.position.y, nodeSize.x, nodeSize.y, 
+    const nearestSource = geometry.getIntersectionPointOnRectangle(sourceNode.position.x, sourceNode.position.y, nodeSize.x, nodeSize.y, 
         targetNode.position.x + nodeSize.x / 2, targetNode.position.y  + nodeSize.y / 2);
 
     fixedTargetX.value = nearestTarget[0];
     fixedTargetY.value = nearestTarget[1];
     fixedSourceX.value = nearestSource[0];
     fixedSourceY.value = nearestSource[1];
-}
-
-function pointOnRect(left: number, top: number, width: number, height: number, x: number, y: number) { // for target - get source coords
-    const right = left + width;
-    const bottom = top + height;
-    const midX = (left + right) / 2;
-    const midY = (top + bottom) / 2;
-
-    const m = (midY - y) / (midX - x);
-
-    if (x <= midX) { // left
-		var minXy = m * (left - x) + y;
-		if (top <= minXy && minXy <= bottom)
-			return [left,minXy];
-	}
-
-	if (x >= midX) { // right
-		var maxXy = m * (right - x) + y;
-		if (top <= maxXy && maxXy <= bottom)
-			return [right, maxXy];
-	}
-
-	if (y <= midY) { // top
-		var minYx = (top - y) / m + x;
-		if (left <= minYx && minYx <= right)
-			return [minYx, top];
-	}
-
-	if (y >= midY) { // bottom
-		var maxYx = (bottom - y) / m + x;
-		if (left <= maxYx && maxYx <= right)
-			return [maxYx, bottom];
-	}
-
-	// edge case when finding midpoint intersection: m = 0/0 = NaN
-	if (x === midX && y === midY) return [x, y];
-
-    return [,];
 }
 </script>

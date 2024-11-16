@@ -17,7 +17,6 @@ export const useUsersPresentationData = () => {
 
         const data = sessionStorage.getItem(getStorageKey(userId));
         if(!data) {
-            console.log('REQUEST');
             const result = await usersService.getPresentationData();
             if(!result) {
                 return [];

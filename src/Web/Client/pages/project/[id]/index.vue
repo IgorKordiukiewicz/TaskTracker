@@ -49,10 +49,10 @@
                 </Column>
                 <Column header="Priority" style="width: 200px;" sortable sortField="priority" filter-field="priority" :show-filter-match-modes="false">
                     <template #body="{ data }">
-                        <Tag class="w-28" :value="TaskPriority[data.priority]" :severity="getPrioritySeverity(data.priority)"></Tag>
+                        <TaskPriorityTag :priority="data.priority" />
                     </template>
                     <template #filter="{ filterModel }">
-                        <MultiSelect v-model="filterModel.value" :options="priorities" option-label="name" option-value="key"></MultiSelect>
+                        <MultiSelect v-model="filterModel.value" :options="allTaskPriorities" option-label="name" option-value="key"></MultiSelect>
                     </template>
                 </Column>
                 <Column header="Assignee" style="width: 240px;" sortable sortField="assigneeId" filter-field="assigneeId" :show-filter-match-modes="false">
@@ -75,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { ProjectPermissions, TaskPriority } from '~/types/enums';
+import { allTaskPriorities, ProjectPermissions, TaskPriority } from '~/types/enums';
 import { FilterMatchMode } from '@primevue/core/api';
 import type { DataTableRowClickEvent } from 'primevue/datatable';
 
@@ -87,17 +87,11 @@ const permissions = usePermissions();
 const createTaskDialog = ref();
 
 const projectId = ref(route.params.id as string);
-const tasks = ref(await tasksService.getTasks(projectId.value));
+const tasks = ref();
+await updateTasks();
 const members = ref(await projectsService.getMembers(projectId.value));
 
 await permissions.checkProjectPermissions(projectId.value);
-
-const priorities = ref([
-    { key: TaskPriority.Low, name: TaskPriority[TaskPriority.Low] },
-    { key: TaskPriority.Normal, name: TaskPriority[TaskPriority.Normal] },
-    { key: TaskPriority.High, name: TaskPriority[TaskPriority.High] },
-    { key: TaskPriority.Urgent, name: TaskPriority[TaskPriority.Urgent] },
-]); // TODO: refactor?
 
 const filters = ref();
 
@@ -132,21 +126,6 @@ initFilters();
 
 function resetFilters() {
     initFilters();
-}
-
-function getPrioritySeverity(priority: TaskPriority) {
-    switch (+priority) {
-        case TaskPriority.Urgent: 
-            return "danger";
-        case TaskPriority.High:
-            return "warn";
-        case TaskPriority.Normal:
-            return "info";
-        case TaskPriority.Low:
-            return "success";
-        default: 
-            return "primary";
-    }
 }
 
 function openTaskDetails(event: DataTableRowClickEvent) {

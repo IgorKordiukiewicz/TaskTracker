@@ -4,11 +4,11 @@
             <template v-if="node.children">
                 <li class="flex justify-between items-center p-3 rounded">
                         <div class="flex gap-3 items-center">
-                            <i :class="node.icon" style="height: 16px; color: var(--p-menu-item-icon-color)"></i>
+                            <i :class="node.icon" class="navbar-item-icon"></i>
                             <span>{{ node.title }}</span>
                         </div>
                     </li>
-                    <li v-for="childNode in node.children" class="ml-3 pl-2" style="border-left: 2px solid #d1d7e0;">
+                    <li v-for="childNode in node.children" class="ml-3 pl-2 navbar-child-border">
                         <NavBarItem :title="childNode.title" :icon="childNode.icon" :link="childNode.link[0] + id + childNode.link[1]" :include-index="false" v-if="showItem(childNode.permission)" />
                     </li>
             </template>
@@ -25,8 +25,16 @@ import { OrganizationPermissions, ProjectPermissions } from '~/types/enums';
 const route = useRoute();
 const permissions = usePermissions();
 
+const organizationView = computed(() => {
+    return route.path.startsWith('/organization');
+})
+
+const projectView = computed(() => {
+    return route.path.startsWith('/project');
+})
+
 const id = computed(() => {
-    if(route.path.startsWith('/organization') || route.path.startsWith('/project')) {
+    if(organizationView || projectView) {
         return route.params.id as string;
     }
     else {
@@ -34,18 +42,18 @@ const id = computed(() => {
     }
 })
 
-if(route.path.startsWith('/organization')) {
+if(organizationView) {
     await permissions.checkOrganizationPermissions(id.value);
 }
-else if(route.path.startsWith('/project')) {
+else if(projectView) {
     await permissions.checkProjectPermissions(id.value);
 }
 
 const nodes = computed(() => {
-    if(route.path.startsWith('/organization')) {
+    if(organizationView.value) {
         return organizationNodes.value;
     }
-    else if(route.path.startsWith('/project')) {
+    else if(projectView) {
         return projectNodes.value;
     }
     else {
@@ -146,14 +154,7 @@ function showItem(permissionRequired?: number) {
 </script>
 
 <style scoped>
-
-.toggle {
-    transition-property: transform;
-    transition-duration: .3s;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-details[open] .toggle {
-    transform: rotate(180deg);
+.navbar-child-border {
+    border-left: 2px solid #d1d7e0;
 }
 </style>

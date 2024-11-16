@@ -6,10 +6,10 @@
             <CreateRoleDialog :permissions="permissions" @on-create="createRole" ref="createRoleDialog" />
         </div>
         <div class="bg-white w-full shadow mt-4">
-            <table class="w-full" style="border-spacing: 5000px;">
+            <table class="w-full">
                 <thead>
                     <tr>
-                        <th style="width: 200px;"></th>
+                        <th class="w-40"></th>
                         <th v-for="permission in permissions" class="pb-2">
                             {{ permission.label }}
                         </th>

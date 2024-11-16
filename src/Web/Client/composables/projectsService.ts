@@ -49,7 +49,7 @@ export const useProjectsService = () => {
             await api.sendPostRequest(`projects/${id}/name`, model);
         },
         async deleteProject(id: string) {
-            await api.sendPostRequest(`projects/${id}/delete`, '');
+            await api.sendPostRequest(`projects/${id}/delete`, undefined);
         },
         async getUserPermissions(id: string) {
             return await api.sendGetRequest<UserProjectPermissionsVM>(`projects/${id}/permissions`);

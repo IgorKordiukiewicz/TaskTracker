@@ -1,10 +1,9 @@
 <template>
     <AccountLayout>
-        <div class="text-center mb-5">
-            <div class="text-900 text-3xl font-medium mb-3">Sign Up</div>
+        <AccountPageTitle title="Sign Up">
             <span class="text-600 font-medium line-height-3">Already have an account?</span>
             <a class="font-medium ml-2 underline cursor-pointer" href="/account/login">Sign In!</a>
-        </div>
+        </AccountPageTitle>
         <div>
             <label for="email" class="block text-900 font-medium mb-2">Email</label>
             <InputText id="email" v-model="email" type="email" class="w-full mb-3" placeholder="Your email address" />

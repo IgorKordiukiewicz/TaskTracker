@@ -35,13 +35,13 @@ export const useOrganizationsService = () => {
             return await api.sendGetRequest<UserOrganizationInvitationsVM>('organizations/invitations');
         },
         async acceptInvitation(invitationId: string) {
-            await api.sendPostRequest(`organizations/invitations/${invitationId}/accept`, '');
+            await api.sendPostRequest(`organizations/invitations/${invitationId}/accept`, undefined);
         },
         async declineInvitation(invitationId: string) {
-            await api.sendPostRequest(`organizations/invitations/${invitationId}/decline`, '');
+            await api.sendPostRequest(`organizations/invitations/${invitationId}/decline`, undefined);
         },
         async cancelInvitation(id: string, invitationId: string) {
-            await api.sendPostRequest(`organizations/invitations/${invitationId}/cancel`, '',  { 'OrganizationId': id });
+            await api.sendPostRequest(`organizations/invitations/${invitationId}/cancel`, undefined,  { 'OrganizationId': id });
         },
         async createRole(id: string, model: CreateRoleDto) {
             await api.sendPostRequest(`organizations/${id}/roles`, model);
@@ -65,7 +65,7 @@ export const useOrganizationsService = () => {
             await api.sendPostRequest(`organizations/${id}/name`, model);
         },
         async deleteOrganization(id: string) {
-            await api.sendPostRequest(`organizations/${id}/delete`, '');
+            await api.sendPostRequest(`organizations/${id}/delete`, undefined);
         },
         async getUserPermissions(id: string) {
             return await api.sendGetRequest<UserOrganizationPermissionsVM>(`organizations/${id}/permissions`);

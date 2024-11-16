@@ -22,9 +22,10 @@ const addProjectMemberDialog = ref();
 
 await permissions.checkProjectPermissions(projectId.value);
 
-const members = ref(await projectsService.getMembers(projectId.value));
+const members = ref();
 const roles = ref(await projectsService.getRoles(projectId.value));
-const availableUsers = ref(await usersService.getAvailableForProject(projectId.value));
+const availableUsers = ref();
+await updateMembers();
 
 const canEditMembers = computed(() => {
     return permissions.hasPermission(ProjectPermissions.EditMembers);

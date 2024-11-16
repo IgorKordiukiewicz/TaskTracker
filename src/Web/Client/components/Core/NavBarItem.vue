@@ -1,6 +1,6 @@
 <template>
     <a class="flex items-center cursor-pointer p-3 hover:bg-surface-100 rounded gap-3" :href="props.link" :class="{ 'bg-surface-100': selected }">
-        <i :class="props.icon" style="height: 16px; color: var(--p-menu-item-icon-color)"></i>
+        <i :class="props.icon" class="navbar-item-icon"></i>
         <span>
             {{ props.title }}
         </span>

@@ -5,7 +5,7 @@
             <div class="flex justify-between items-center">
                 <div>
                     <p class="font-semibold mb-1">Name</p>
-                    <p style="color: rgb(100, 116, 139);" class="text-sm">The name of the project.</p>
+                    <p class="text-sm settings-label-caption">The name of the project.</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <InputText v-model="projectName" :disabled="!nameEditActive" class="w-80" />
@@ -22,7 +22,7 @@
             <div class="flex justify-between items-center">
                 <div>
                     <p class="font-semibold mb-1">Delete Project</p>
-                    <p style="color: rgb(100, 116, 139);" class="text-sm">This will permanently delete the project.</p>
+                    <p class="text-sm settings-label-caption">This will permanently delete the project.</p>
                 </div>
                 <div >
                     <Button severity="danger" label="Delete" @click="deleteProject" />
@@ -43,7 +43,8 @@ const confirm = useConfirm();
 const permissions = usePermissions();
 
 const projectId = ref(route.params.id as string);
-const settings = ref(await projectsService.getSettings(projectId.value));
+const settings = ref();
+await updateSettings();
 
 await permissions.checkProjectPermissions(projectId.value);
 

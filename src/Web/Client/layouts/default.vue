@@ -7,7 +7,7 @@
         <div class="w-full max-h-screen">
             <AppBar @toggle-sidebar="toggleSidebar" />
             <Toast />
-            <div class="bg-slate-100 p-4 overflow-y-auto" style="height: calc(100vh - 3.5rem);">
+            <div class="bg-slate-100 p-4 overflow-y-auto main-content">
                 <slot />        
             </div>
         </div>
@@ -21,3 +21,9 @@ function toggleSidebar() {
     sidebarVisible.value = !sidebarVisible.value;
 }
 </script>
+
+<style>
+.main-content {
+    height: calc(100vh - 3.5rem);
+}
+</style>

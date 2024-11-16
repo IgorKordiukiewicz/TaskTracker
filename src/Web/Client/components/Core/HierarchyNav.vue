@@ -23,7 +23,6 @@ async function getBreadcrumbs() {
             return;
         }
         items.value = [
-            //{ icon: 'pi pi-home', url: '/' },
             { label: navData.organization.name, url: `/organization/${navData.organization.id}/` },
             { label: navData.project.name, url: `/project/${navData.project.id}/` }
         ];
@@ -36,7 +35,6 @@ async function getBreadcrumbs() {
             return;
         }
         items.value = [
-            //{ icon: 'pi pi-home', url: '/' },
             { label: navData.organization.name, url: `/organization/${navData.organization.id}/` }
         ];
     }

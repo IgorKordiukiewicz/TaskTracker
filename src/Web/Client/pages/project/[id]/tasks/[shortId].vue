@@ -73,7 +73,7 @@
                     </LabeledInput>
                     <LabeledInput label="Priority">
                         <template v-if="canEditTasks">
-                            <Select v-model="selectedPriority" :options="priorities" option-label="name" option-value="key" class="w-full" @change="updatePriority" />
+                            <Select v-model="selectedPriority" :options="allTaskPriorities" option-label="name" option-value="key" class="w-full" @change="updatePriority" />
                         </template>
                         <template v-else>
                             <InputText readonly :value="readOnlyPriorityDisplay" />
@@ -129,7 +129,8 @@
 <script setup lang="ts">
 import { $dt } from '@primevue/themes';
 import { AddTaskCommentDto, AddTaskLoggedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
-import { ProjectPermissions, TaskPriority } from '~/types/enums';
+import { allTaskPriorities, ProjectPermissions, TaskPriority } from '~/types/enums';
+import type { TaskVM } from '~/types/viewModels/tasks';
 
 const route = useRoute();
 const tasksService = useTasksService();
@@ -139,27 +140,18 @@ const permissions = usePermissions();
 
 const projectId = ref(route.params.id as string);
 const taskShortId = ref(+(route.params.shortId as string));
-const details = ref(await tasksService.getTask(taskShortId.value, projectId.value));
+const details = ref<TaskVM | undefined>();
 const members = ref(await projectsService.getMembers(projectId.value)); // TODO: pass from tasks list page?
-const comments = ref(details.value 
-    ? await tasksService.getComments(details.value.id, projectId.value)
-    : null);
-const activities = ref(details.value 
-    ? await tasksService.getActivities(details.value.id, projectId.value)
-    : null);
+const comments = ref();
+const activities = ref();
+await updateDetails();
+await updateComments();
 
 await permissions.checkProjectPermissions(projectId.value);
 
 const logTimeDialog = ref();
 const estimatedTimeDialog = ref();
 const updateTitleDialog = ref();
-
-const priorities = ref([
-    { key: TaskPriority.Low, name: TaskPriority[TaskPriority.Low] },
-    { key: TaskPriority.Normal, name: TaskPriority[TaskPriority.Normal] },
-    { key: TaskPriority.High, name: TaskPriority[TaskPriority.High] },
-    { key: TaskPriority.Urgent, name: TaskPriority[TaskPriority.Urgent] },
-]);
 
 const statuses = ref(details.value?.possibleNextStatuses.map(x => ({
     id: x.id, name: x.name }))

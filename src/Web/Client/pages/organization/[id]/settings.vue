@@ -5,7 +5,7 @@
             <div class="flex justify-between items-center">
                 <div>
                     <p class="font-semibold mb-1">Name</p>
-                    <p style="color: rgb(100, 116, 139);" class="text-sm">The name of the organization.</p>
+                    <p class="text-sm settings-label-caption">The name of the organization.</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <InputText v-model="name" :disabled="!nameEditActive" class="w-80" />
@@ -22,7 +22,7 @@
             <div class="flex justify-between items-center">
                 <div>
                     <p class="font-semibold mb-1">Delete Organization</p>
-                    <p style="color: rgb(100, 116, 139);" class="text-sm">This will permanently delete the organization and all its projects.</p>
+                    <p class="text-sm settings-label-caption">This will permanently delete the organization and all its projects.</p>
                 </div>
                 <div >
                     <Button severity="danger" label="Delete" @click="deleteOrganization" />
@@ -43,7 +43,8 @@ const confirm = useConfirm();
 const permissions = usePermissions();
 
 const organizationId = ref(route.params.id as string);
-const settings = ref(await organizationsService.getSettings(organizationId.value));
+const settings = ref();
+await updateSettings();
 
 await permissions.checkOrganizationPermissions(organizationId.value);
 

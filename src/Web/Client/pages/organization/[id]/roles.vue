@@ -14,7 +14,8 @@ const organizationsService = useOrganizationsService();
 const permissions = usePermissions();
 
 const organizationId = ref(route.params.id as string);
-const roles = ref(await organizationsService.getRoles(organizationId.value));
+const roles = ref();
+await updateRoles();
 
 await permissions.checkOrganizationPermissions(organizationId.value);
 

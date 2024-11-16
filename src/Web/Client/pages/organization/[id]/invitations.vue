@@ -16,27 +16,27 @@
         removable-sort filter-display="menu" :global-filter-fields="['userEmail' ]" v-model:filters="filters">
             <Column header="Email" field="userEmail" sortable></Column>
             <Column header="Finalized At" sortable sortField="finalizedAt">
-                <template #body="slotProps">
-                    {{ formatDate(slotProps.data.finalizedAt) }}
+                <template #body="{ data }">
+                    {{ formatDate(data.finalizedAt) }}
                 </template>
             </Column>
             <Column header="State" filter-field="state" :show-filter-match-modes="false">
-                <template #body="slotProps">
-                    <Tag class="w-24" :value="OrganizationInvitationState[slotProps.data.state]" :severity="getStateSeverity(slotProps.data.state)"></Tag>
+                <template #body="{ data }">
+                    <Tag class="w-24" :value="OrganizationInvitationState[data.state]" :severity="getStateSeverity(data.state)"></Tag>
                 </template>
                 <template #filter="{ filterModel }">
-                    <MultiSelect v-model="filterModel.value" :options="states" option-label="name" option-value="key"></MultiSelect>
+                    <MultiSelect v-model="filterModel.value" :options="allInvitationStates" option-label="name" option-value="key"></MultiSelect>
                 </template>
             </Column>
             <Column header="Created At" sortable sortField="createdAt">
-                <template #body="slotProps">
-                    {{ formatDate(slotProps.data.createdAt) }}
+                <template #body="{ data }">
+                    {{ formatDate(data.createdAt) }}
                 </template>
             </Column>
             <Column header="" style="width: 10px;">
-                <template #body="slotProps">
-                    <Button type="button" icon="pi pi-ellipsis-v" text severity="secondary" @click="(e) => toggleMenu(e, slotProps.data.id)" 
-                        :disabled="isMenuButtonDisabled(slotProps.data.state)" />
+                <template #body="{ data }">
+                    <Button type="button" icon="pi pi-ellipsis-v" text severity="secondary" @click="(e) => toggleMenu(e, data.id)" 
+                        :disabled="isMenuButtonDisabled(data.state)" />
                 </template>             
         </Column>
         </DataTable>
@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { OrganizationInvitationState, OrganizationPermissions } from '~/types/enums';
+import { OrganizationInvitationState, OrganizationPermissions, allInvitationStates } from '~/types/enums';
 import { FilterMatchMode } from '@primevue/core/api';
 import { usePermissions } from '~/stores/permissions';
 
@@ -56,7 +56,8 @@ const confirm = useConfirm();
 const permissions = usePermissions();
 
 const organizationId = ref(route.params.id as string);
-const invitations = ref(await organizationsService.getInvitations(organizationId.value));
+const invitations = ref();
+await updateInvitations();
 
 await permissions.checkOrganizationPermissions(organizationId.value);
 
@@ -92,13 +93,6 @@ const menuItems = ref([
         ]
     }
 ])
-
-const states = ref([
-    { key: OrganizationInvitationState.Pending, name: OrganizationInvitationState[OrganizationInvitationState.Pending] },
-    { key: OrganizationInvitationState.Accepted, name: OrganizationInvitationState[OrganizationInvitationState.Accepted] },
-    { key: OrganizationInvitationState.Declined, name: OrganizationInvitationState[OrganizationInvitationState.Declined] },
-    { key: OrganizationInvitationState.Canceled, name: OrganizationInvitationState[OrganizationInvitationState.Canceled] },
-]);
 
 const initFilters = () => {
     filters.value = {

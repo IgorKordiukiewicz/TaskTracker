@@ -22,12 +22,26 @@ export enum OrganizationInvitationState
     Canceled
 }
 
+export const allInvitationStates = [
+    { key: OrganizationInvitationState.Pending, name: OrganizationInvitationState[OrganizationInvitationState.Pending] },
+    { key: OrganizationInvitationState.Accepted, name: OrganizationInvitationState[OrganizationInvitationState.Accepted] },
+    { key: OrganizationInvitationState.Declined, name: OrganizationInvitationState[OrganizationInvitationState.Declined] },
+    { key: OrganizationInvitationState.Canceled, name: OrganizationInvitationState[OrganizationInvitationState.Canceled] },
+]
+
 export enum TaskPriority {
     Low,
     Normal,
     High,
     Urgent
 }
+
+export const allTaskPriorities = [
+    { key: TaskPriority.Low, name: TaskPriority[TaskPriority.Low] },
+    { key: TaskPriority.Normal, name: TaskPriority[TaskPriority.Normal] },
+    { key: TaskPriority.High, name: TaskPriority[TaskPriority.High] },
+    { key: TaskPriority.Urgent, name: TaskPriority[TaskPriority.Urgent] },
+]
 
 export enum TaskProperty
 {

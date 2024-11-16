@@ -22,7 +22,8 @@ const canEditMembers = computed(() => {
     return permissions.hasPermission(OrganizationPermissions.EditMembers);
 })
 
-const members = ref(await organizationsService.getMembers(organizationId.value));
+const members = ref();
+await updateMembers();
 const roles = ref(await organizationsService.getRoles(organizationId.value));
 
 async function updateMembers() {

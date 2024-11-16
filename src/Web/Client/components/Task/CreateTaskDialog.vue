@@ -7,7 +7,7 @@
             <InputText id="description" v-model="model.description" autocomplete="off" class="w-full" />
         </LabeledInput>
         <LabeledInput label="Priority">
-            <Select v-model="selectedPriority" :options="priorities" option-label="name" class="w-full" />
+            <Select v-model="selectedPriority" :options="allTaskPriorities" option-label="name" class="w-full" />
         </LabeledInput>
         <LabeledInput label="Assignee">
             <Select v-model="model.assigneeMemberId" :options="props.members.members" option-label="name" option-value="id" class="w-full" showClear />
@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { CreateTaskDto } from '~/types/dtos/tasks';
-import { TaskPriority } from '~/types/enums';
+import { allTaskPriorities, TaskPriority } from '~/types/enums';
 import type { ProjectMembersVM } from '~/types/viewModels/projects';
 
 defineExpose({ show });
@@ -32,13 +32,7 @@ const tasksService = useTasksService();
 const dialog = ref();
 const model = ref(new CreateTaskDto());
 
-const priorities = ref([
-    { key: TaskPriority.Low, name: TaskPriority[TaskPriority.Low] },
-    { key: TaskPriority.Normal, name: TaskPriority[TaskPriority.Normal] },
-    { key: TaskPriority.High, name: TaskPriority[TaskPriority.High] },
-    { key: TaskPriority.Urgent, name: TaskPriority[TaskPriority.Urgent] },
-]);
-const selectedPriority = ref({ key: TaskPriority.Normal, name: TaskPriority[TaskPriority.Normal] });
+const selectedPriority = ref(allTaskPriorities.find(x => x.key == TaskPriority.Normal)!);
 
 const submitDisabled = computed(() => {
     return !model.value.title;
@@ -53,7 +47,7 @@ async function createTask() {
     await tasksService.createTask(props.projectId, model.value);
 
     model.value = new CreateTaskDto();
-    selectedPriority.value = { key: TaskPriority.Normal, name: TaskPriority[TaskPriority.Normal] }; // TODO: Refactor priority select
+    selectedPriority.value = allTaskPriorities.find(x => x.key == TaskPriority.Normal)!;
 
     emit('onCreate');
 }

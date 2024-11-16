@@ -14,7 +14,8 @@ const projectsService = useProjectsService();
 const permissions = usePermissions();
 
 const projectId = ref(route.params.id as string);
-const roles = ref(await projectsService.getRoles(projectId.value));
+const roles = ref();
+await updateRoles();
 
 await permissions.checkProjectPermissions(projectId.value);
 

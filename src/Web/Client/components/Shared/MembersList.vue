@@ -14,21 +14,21 @@
         <DataTable :value="members" class="mt-4 shadow" paginator :rows="10" :rows-per-page-options="[10, 25, 50]"
         removable-sort filter-display="menu" :global-filter-fields="[ 'name', 'email' ]" v-model:filters="filters">
             <Column header="Name" sortable filter-field="name" sort-field="name">
-                <template #body="slotProps">
+                <template #body="{ data }">
                     <div class="flex gap-4 items-center">
-                        <UserAvatar :user-id="slotProps.data.userId" />
-                        <p>{{ slotProps.data.name }}</p>
+                        <UserAvatar :user-id="data.userId" />
+                        <p>{{ data.name }}</p>
                     </div>
                 </template>
             </Column>
             <Column field="email" header="Email" sortable></Column>
             <Column field="roleName" header="Role" filter-field="roleName" :show-filter-match-modes="false">
-                <template #body="slotProps">
+                <template #body="{ data }">
                     <template v-if="canEditMembers">
-                        <RoleSelect :roles="roles" :member="slotProps.data" @on-update="updateMemberRole" />
+                        <RoleSelect :roles="roles" :member="data" @on-update="updateMemberRole" />
                     </template>
                     <template v-else>
-                        <p>{{ slotProps.data.roleName }}</p>
+                        <p>{{ data.roleName }}</p>
                     </template>
                 </template>
                 <template #filter="{ filterModel }">
@@ -36,8 +36,8 @@
                 </template>
             </Column>
             <Column header="" style="width: 1px;" v-if="canEditMembers">
-                <template #body="slotProps">
-                    <Button type="button" icon="pi pi-ellipsis-v" text severity="secondary" @click="(e) => toggleMenu(e, slotProps.data.id)" />
+                <template #body="{ data }">
+                    <Button type="button" icon="pi pi-ellipsis-v" text severity="secondary" @click="(e) => toggleMenu(e, data.id)" />
                     <Menu ref="menu" :model="menuItems" :popup="true" />
                 </template>             
             </Column>

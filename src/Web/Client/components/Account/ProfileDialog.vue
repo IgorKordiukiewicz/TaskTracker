@@ -7,7 +7,7 @@
                 <p>{{ userDetails.email }}</p>
             </div>
         </div>
-        <Divider style="margin-bottom: 0.5rem; margin-top: 0.5rem;" />
+        <Divider class="profile-divider" />
         <LabeledInput label="First Name">
             <InputText v-model="model.firstName" autocomplete="off" class="w-full" />
         </LabeledInput>
@@ -57,3 +57,10 @@ async function updateUser() {
     await updateUserDetails();
 }
 </script>
+
+<style scoped>
+.profile-divider {
+    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
+}
+</style>

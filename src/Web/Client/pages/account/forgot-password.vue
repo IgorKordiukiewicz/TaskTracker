@@ -1,8 +1,6 @@
 <template>
     <AccountLayout>
-        <div class="text-center mb-5">
-            <div class="text-900 text-3xl font-medium mb-3">Forgot Password</div>
-        </div>
+        <AccountPageTitle title="Forgot Password"></AccountPageTitle>
         <div>
             <label for="email1" class="block text-900 font-medium mb-2">Email</label>
             <InputText id="email1" v-model="email" type="email" class="w-full mb-3" placeholder="Your email adress" />

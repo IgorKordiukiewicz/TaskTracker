@@ -1,5 +1,5 @@
 <template>
-    <Avatar :label="avatarLabel" shape="circle" :style="{background: avatarBackground }" style="color: #ffffff" :size="avatarSize" />
+    <Avatar :label="avatarLabel" shape="circle" :style="{ background: avatarBackground }" :size="avatarSize" class="text-white" />
 </template>
 
 <script setup lang="ts">

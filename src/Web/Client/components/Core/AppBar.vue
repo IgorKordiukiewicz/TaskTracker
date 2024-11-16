@@ -8,11 +8,11 @@
             <span class="cursor-pointer" style="color: rgb(100, 116, 139);" @click="toggleNotifications">
                 <template v-if="invitations && invitations.invitations.length > 0">
                     <OverlayBadge class="cursor-pointer">
-                        <i class="pi pi-bell" style="font-size: 1.25rem;" />
+                        <i class="pi pi-bell text-xl" />
                     </OverlayBadge>
                 </template>
                 <template v-else>
-                    <i class="pi pi-bell" style="font-size: 1.25rem;" />
+                    <i class="pi pi-bell text-xl" />
                 </template>
             </span>
             <Popover ref="notificationsPopover">
@@ -65,7 +65,8 @@ const items = ref([
 const profileDialog = ref();
 const notificationsPopover = ref();
 
-const invitations = ref(await organizationsService.getUserInvitations());
+const invitations = ref();
+await updateInvitations();
 
 const toggle = (event: Event) => {
     menu.value.toggle(event);
