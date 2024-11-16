@@ -6,6 +6,7 @@
       <Menu ref="createMenu" :model="createMenuItems" :popup="true" />
       <AddWorkflowStatusDialog ref="addWorkflowStatusDialog" :workflow-id="workflow.id" :project-id="projectId" @on-add="(name) => updateDiagram({ newStatusName: name })" />
       <AddWorkflowTransitionDialog ref="addWorkflowTransitionDialog" :workflow="workflow" :project-id="projectId" @on-add="(value) => updateDiagram({ newTransition: value})" />
+      <ConfirmDialog></ConfirmDialog>
     </div>
     <div class="w-full h-full mt-4 shadow bg-white" style="height: calc(100% - 1rem - 28px);"> <!-- 150 is temp-->
         <VueFlow
@@ -28,14 +29,17 @@
 </template>
 
 <script setup lang="ts">
-import { type Node, type Edge, MarkerType, Panel, Position, ConnectionMode, type NodePositionChange, useVueFlow } from '@vue-flow/core';
+import { type Node, type Edge, MarkerType, Panel, Position, ConnectionMode, type NodePositionChange, useVueFlow, type NodeSelectionChange, type EdgeSelectionChange } from '@vue-flow/core';
 import { VueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background';
 import type { WorkflowTransitionVM } from '~/types/viewModels/workflows';
+import { DeleteWorkflowStatusDto } from '~/types/dtos/workflows';
 
 const route = useRoute();
 const workflowsService = useWorkflowsService();
 const vueFlow = useVueFlow();
+const { onNodesChange, onEdgesChange } = useVueFlow();
+const confirm = useConfirm();
 
 const projectId = ref(route.params.id as string);
 
@@ -50,13 +54,16 @@ const nodes = ref<Node[]>();
 const edges = ref<Edge[]>();
 const transitionEdges = useTemplateRef('transitionEdges');
 
+const selectedNode = ref();
+const selectedEdge = ref();
+
 const createMenuItems = ref([
   {
     label: 'Add Status',
     icon: "pi pi-plus",
     command: () => {
       addWorkflowStatusDialog.value.show();
-    }
+    },
   },
   {
     label: 'Add Transition',
@@ -65,9 +72,81 @@ const createMenuItems = ref([
       addWorkflowTransitionDialog.value.show(); // TODO: disable button if no possible from transitions are available
     }
   },
+  {
+    separator: true,
+    visible: isNodeOrEdgeSelected
+  },
+  {
+    label: `Selected Status`,
+    visible: isNodeSelected,
+    items: [
+      {
+        label: 'Delete',
+        icon: 'pi pi-trash',
+        command: () => {
+          const statusName = selectedNode.value.data.label;
+          const statusId = selectedNode.value.id;
+          confirm.require({
+              message: `Are you sure you want to delete the ${statusName} status?`,
+              header: 'Confirm action',
+              rejectProps: {
+                  label: 'Cancel',
+                  severity: 'secondary'
+              },
+              acceptProps: {
+                  label: 'Confirm',
+                  severity: 'danger'
+              },
+              accept: async () => {
+                const model = new DeleteWorkflowStatusDto();
+                model.statusId = statusId
+                await workflowsService.deleteStatus(workflow.value!.id, projectId.value, model);
+                await updateDiagram({ deletedStatusId: statusId });
+              }
+          })
+        }
+      }
+    ]
+  },
+  {
+    label: `Selected Transition`,
+    visible: isEdgeSelected,
+    items: [
+      {
+        label: 'Delete',
+        icon: 'pi pi-trash',
+      }
+    ]
+  }
 ])
 
 initializeDiagram();
+
+onNodesChange((changes) => {
+  for(const change of changes.filter(x => x.type === 'select' && x.selected)) {
+    selectedEdge.value = null;
+    selectedNode.value = vueFlow.findNode((change as NodeSelectionChange).id);
+  }
+})
+
+onEdgesChange((changes) => {
+  for(const change of changes.filter(x => x.type === 'select' && x.selected)) {
+    selectedNode.value = null;
+    selectedEdge.value = vueFlow.findEdge((change as EdgeSelectionChange).id);
+  }
+})
+
+function isNodeSelected() {
+  return selectedNode.value;
+}
+
+function isEdgeSelected() {
+  return selectedEdge.value;
+}
+
+function isNodeOrEdgeSelected() {
+  return isNodeSelected() || isEdgeSelected();
+}
 
 function toggleCreateMenu(event: Event) {
   createMenu.value.toggle(event);
@@ -125,7 +204,8 @@ function getReverseTransitionKey(transition: WorkflowTransitionVM) {
 
 async function updateDiagram(options: { 
   newStatusName?: string, 
-  newTransition?: { fromId: string, toId: string } 
+  newTransition?: { fromId: string, toId: string },
+  deletedStatusId?: string 
 }) {
   workflow.value = await workflowsService.getWorkflow(projectId.value);
   if(!workflow.value) {
@@ -156,6 +236,10 @@ async function updateDiagram(options: {
           type: 'transition', data: { bidirectional: false },
           markerEnd: MarkerType.ArrowClosed });
       }
+  }
+
+  if(options.deletedStatusId) {
+    vueFlow.removeNodes(options.deletedStatusId);
   }
 }
 
