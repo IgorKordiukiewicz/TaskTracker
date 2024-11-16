@@ -1,21 +1,19 @@
 <template>
-    <div class="flex items-center justify-center h-screen bg-primary-200">
-        <div class="surface-card p-6 shadow-md rounded w-1/4 bg-gray-50">
-            <div class="text-center mb-5">
-                <div class="text-900 text-3xl font-medium mb-3">Complete Registration</div>
-            </div>
-
-            <div>
-                <label for="firstName" class="block text-900 font-medium mb-2">First Name</label>
-                <InputText id="firstName" v-model="firstName" type="text" class="w-full mb-3" placeholder="Your first name" />
-
-                <label for="lastName" class="block text-900 font-medium mb-2">Last Name</label>
-                <InputText id="lastName" v-model="lastName" type="text" class="w-full mb-5" placeholder="Your last name" />
-
-                <Button label="Continue" icon="pi pi-user" class="w-full mb-6" @click="completeRegistration"></Button>
-            </div>
+    <AccountLayout>
+        <div class="text-center mb-5">
+            <div class="text-900 text-3xl font-medium mb-3">Complete Registration</div>
         </div>
-    </div>
+
+        <div>
+            <label for="firstName" class="block text-900 font-medium mb-2">First Name</label>
+            <InputText id="firstName" v-model="firstName" type="text" class="w-full mb-3" placeholder="Your first name" />
+
+            <label for="lastName" class="block text-900 font-medium mb-2">Last Name</label>
+            <InputText id="lastName" v-model="lastName" type="text" class="w-full mb-5" placeholder="Your last name" />
+
+            <Button label="Continue" icon="pi pi-user" class="w-full mb-6" @click="completeRegistration"></Button>
+        </div>
+    </AccountLayout>
 </template>
 
 <script setup lang="ts">
@@ -29,6 +27,6 @@ const firstName = ref();
 const lastName = ref();
 
 async function completeRegistration() {
-    await auth.register(firstName.value, lastName.value);
+    await auth.completeRegistration(firstName.value, lastName.value);
 }
 </script>

@@ -8,8 +8,7 @@ export const useAuth = () => {
 
     return {
         async login(email: string, password: string) {
-            try
-            {
+            try {
                 const result = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
@@ -27,12 +26,27 @@ export const useAuth = () => {
                     navigateTo('/');
                 }
             }
-            catch(error)
-            {
-                console.log(error);
+            catch(error) {
+                console.log(error); // TODO
             }
         },
-        async register(firstName: string, lastName: string) {
+        async register(email: string, password: string) {
+            try {
+                const result = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password
+                });
+                if(result.error) {
+                    throw new Error(result.error.message);
+                }
+
+                navigateTo('/account/login');
+            }
+            catch(error) {
+                console.log(error); // TODO
+            }
+        },
+        async completeRegistration(firstName: string, lastName: string) {
             const email = (await supabaseClient.auth.getUser()).data.user?.email;
             const model = new UserRegistrationDto(email!, firstName, lastName);
             await api.sendPostRequest('users/me/register', model);

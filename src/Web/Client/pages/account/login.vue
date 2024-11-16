@@ -1,26 +1,23 @@
 <template>
-    <div class="flex items-center justify-center h-screen bg-primary-200">
-        <div class="surface-card p-6 shadow-md rounded w-1/4 bg-gray-50">
-            <div class="text-center mb-5">
-                <div class="text-900 text-3xl font-medium mb-3">Sign In</div>
-                <span class="text-600 font-medium line-height-3">Don't have an account?</span>
-                <a class="font-medium ml-2 underline cursor-pointer">Create today!</a>
-            </div>
+    <AccountLayout>
+        <div class="text-center mb-5">
+            <div class="text-900 text-3xl font-medium mb-3">Sign In</div>
+            <span class="text-600 font-medium line-height-3">Don't have an account?</span>
+            <a class="font-medium ml-2 underline cursor-pointer" href="/account/register">Create today!</a>
+        </div>
+        <div>
+            <label for="email1" class="block text-900 font-medium mb-2">Email</label>
+            <InputText id="email1" v-model="email" type="email" class="w-full mb-3" placeholder="Your email adress" />
 
-            <div>
-                <label for="email1" class="block text-900 font-medium mb-2">Email</label>
-                <InputText id="email1" v-model="email" type="email" class="w-full mb-3" placeholder="Your email adress" />
+            <label for="password1" class="block text-900 font-medium mb-2">Password</label>
+            <Password id="password1" v-model="password" :feedback="false" class="w-full mb-5" inputClass="w-full" placeholder="Your password" toggleMask />
 
-                <label for="password1" class="block text-900 font-medium mb-2">Password</label>
-                <Password id="password1" v-model="password" :feedback="false" class="w-full mb-5" inputClass="w-full" placeholder="Your password" toggleMask />
-
-                <Button label="Sign In" icon="pi pi-user" class="w-full mb-6" @click="login"></Button>
-                <div class="flex justify-center align-center">
-                    <a class="text-sm cursor-pointer underline" @click="navigateTo('/account/forgot-password')">Forgot your password?</a>
-                </div>
+            <Button label="Sign In" icon="pi pi-user" class="w-full mb-6" @click="login"></Button>
+            <div class="flex justify-center align-center">
+                <a class="text-sm cursor-pointer underline" @click="navigateTo('/account/forgot-password')">Forgot your password?</a>
             </div>
         </div>
-    </div>
+    </AccountLayout>
 </template>
 
 <script setup lang="ts">
