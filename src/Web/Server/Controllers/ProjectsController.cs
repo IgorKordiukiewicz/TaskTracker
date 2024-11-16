@@ -1,4 +1,5 @@
-﻿using Application.Features.Projects;
+﻿using Application.Features.Organizations;
+using Application.Features.Projects;
 
 namespace Web.Server.Controllers;
 
@@ -74,7 +75,7 @@ public class ProjectsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/members")]
-    [Authorize(Policy.ProjectEditTasks)]
+    [Authorize(Policy.ProjectEditMembers)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberDto model)
     {
@@ -120,7 +121,7 @@ public class ProjectsController : ControllerBase
     /// <param name="model"></param>
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/members/role")]
-    [Authorize(Policy.ProjectEditTasks)]
+    [Authorize(Policy.ProjectEditMembers)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateMemberRoleMember(Guid projectId, [FromBody] UpdateMemberRoleDto model)
     {
@@ -149,7 +150,7 @@ public class ProjectsController : ControllerBase
     /// <param name="projectId"></param>
     /// <response code="404">Project not found.</response>
     [HttpGet("{projectId:guid}/roles")]
-    [Authorize(Policy.ProjectEditRoles)]
+    [Authorize(Policy.ProjectMember)]
     [ProducesResponseType(typeof(RolesVM<ProjectPermissions>), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetProjectRoles(Guid projectId)
@@ -259,6 +260,21 @@ public class ProjectsController : ControllerBase
     public async Task<IActionResult> DeleteProject(Guid projectId)
     {
         var result = await _mediator.Send(new DeleteProjectCommand(projectId));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
+    /// Get user's permission in a given project.
+    /// </summary>
+    /// <param name="projectId"></param>
+    /// <response code="404">Project not found.</response>
+    [HttpGet("{projectId:guid}/permissions")]
+    [Authorize(Policy.ProjectMember)]
+    [ProducesResponseType(typeof(UserProjectPermissionsVM), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetUserProjectPermissions(Guid projectId)
+    {
+        var result = await _mediator.Send(new GetUserProjectPermissionsQuery(User.GetUserId(), projectId));
         return result.ToHttpResult();
     }
 }

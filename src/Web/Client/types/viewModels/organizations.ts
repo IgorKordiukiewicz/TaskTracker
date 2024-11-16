@@ -58,3 +58,7 @@ export interface OrganizationSettingsVM {
     name: string;
     ownerId: string;
 }
+
+export interface UserOrganizationPermissionsVM {
+    permissions: OrganizationPermissions;
+}

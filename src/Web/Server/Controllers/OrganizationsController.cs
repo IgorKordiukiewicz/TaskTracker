@@ -184,11 +184,10 @@ public class OrganizationsController : ControllerBase
     /// Update role of an organization member.
     /// </summary>
     /// <param name="organizationId"></param>
-    /// <param name="memberId"></param>
     /// <param name="model"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpPost("{organizationId:guid}/members/role")]
-    [Authorize(Policy.OrganizationEditRoles)]
+    [Authorize(Policy.OrganizationEditMembers)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateMemberRole(Guid organizationId, [FromBody] UpdateMemberRoleDto model)
     {
@@ -202,7 +201,7 @@ public class OrganizationsController : ControllerBase
     /// <param name="organizationId"></param>
     /// <response code="404">Organization not found.</response> 
     [HttpGet("{organizationId:guid}/roles")]
-    [Authorize(Policy.OrganizationEditRoles)]
+    [Authorize(Policy.OrganizationMember)]
     [ProducesResponseType(typeof(RolesVM<OrganizationPermissions>), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetOrganizationRoles(Guid organizationId)
@@ -291,7 +290,7 @@ public class OrganizationsController : ControllerBase
     /// </summary>
     /// <param name="organizationId"></param>
     /// <param name="model"></param>
-    /// <response code="404">Project not found.</response>
+    /// <response code="404">Organization not found.</response>
     [HttpPost("{organizationId:guid}/name")]
     [Authorize(Policy.OrganizationEditOrganization)]
     [ProducesResponseType(404)]
@@ -309,9 +308,24 @@ public class OrganizationsController : ControllerBase
     [HttpPost("{organizationId:guid}/delete")]
     [Authorize(Policy.OrganizationOwner)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> DeleteProject(Guid organizationId)
+    public async Task<IActionResult> DeleteOrganization(Guid organizationId)
     {
         var result = await _mediator.Send(new DeleteOrganizationCommand(organizationId));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
+    /// Get user's permission in a given organization.
+    /// </summary>
+    /// <param name="organizationId"></param>
+    /// <response code="404">Organization not found.</response>
+    [HttpGet("{organizationId:guid}/permissions")]
+    [Authorize(Policy.OrganizationMember)]
+    [ProducesResponseType(typeof(UserOrganizationPermissionsVM), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetUserOrganizationPermissions(Guid organizationId)
+    {
+        var result = await _mediator.Send(new GetUserOrganizationPermissionsQuery(User.GetUserId(), organizationId));
         return result.ToHttpResult();
     }
 }

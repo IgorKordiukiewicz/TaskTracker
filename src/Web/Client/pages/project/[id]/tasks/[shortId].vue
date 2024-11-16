@@ -7,7 +7,7 @@
                 </p>
             </div>
             <div class="flex gap-1 items-center">
-                <Button icon="pi pi-pencil" text severity="secondary" label="Title" @click="openUpdateTitleDialog" />
+                <Button icon="pi pi-pencil" text severity="secondary" label="Title" @click="openUpdateTitleDialog" v-if="canEditTasks" />
                 <Button icon="pi pi-chevron-left" text severity="secondary" label="Back" @click="navigateTo(`/project/${projectId}/`)" />
             </div>
             <UpdateTaskTitleDialog ref="updateTitleDialog" :id="details.id" :project-id="projectId" @on-update="updateDetails" />
@@ -28,13 +28,13 @@
                         </div>
                     </div>
                     <div>
-                        <Textarea v-model="descriptionEditValue" rows="5" :fluid="true" :auto-resize="true" style="resize: none;" />
+                        <Textarea v-model="descriptionEditValue" rows="5" :fluid="true" :auto-resize="true" style="resize: none;" :readonly="!canEditTasks" />
                     </div>
 
                 </div>
                 <div class="bg-white w-full shadow p-4 flex flex-col gap-3" v-if="comments">
                     <TogglableSection title="Comments" icon="pi pi-comments">
-                        <div class="flex gap-2 items-center mt-1">
+                        <div class="flex gap-2 items-center mt-1" v-if="canEditTasks">
                             <InputText v-model="newCommentContent" class="w-full" placeholder="Add a comment" />
                             <Button icon="pi pi-send" label="Send" :disabled="!newCommentContent" @click="addComment" />
                         </div>
@@ -64,13 +64,28 @@
                         </p>
                     </div>
                     <LabeledInput label="Status">
-                        <Select v-model="selectedStatusId" :options="statuses" option-label="name" option-value="id" class="w-full" @change="updateStatus" />
+                        <template v-if="canEditTasks">
+                            <Select v-model="selectedStatusId" :options="statuses" option-label="name" option-value="id" class="w-full" @change="updateStatus" />
+                        </template>
+                        <template v-else>
+                            <InputText readonly :value="readOnlyStatusDisplay" />
+                        </template>
                     </LabeledInput>
                     <LabeledInput label="Priority">
-                        <Select v-model="selectedPriority" :options="priorities" option-label="name" option-value="key" class="w-full" @change="updatePriority" />
+                        <template v-if="canEditTasks">
+                            <Select v-model="selectedPriority" :options="priorities" option-label="name" option-value="key" class="w-full" @change="updatePriority" />
+                        </template>
+                        <template v-else>
+                            <InputText readonly :value="readOnlyPriorityDisplay" />
+                        </template>
                     </LabeledInput>
                     <LabeledInput label="Assignee">
-                        <Select v-model="selectedAssigneeUserId" :options="members.members" option-label="name" option-value="userId" class="w-full" showClear @change="updateAssignee" />
+                        <template v-if="canEditTasks">
+                            <Select v-model="selectedAssigneeUserId" :options="members.members" option-label="name" option-value="userId" class="w-full" showClear @change="updateAssignee" />
+                        </template>
+                        <template v-else>
+                            <InputText readonly :value="readOnlyAssigneeDisplay" />
+                        </template>
                     </LabeledInput>
                 </div>
                 <div class="bg-white w-full shadow p-4">
@@ -81,7 +96,7 @@
                                 Time Tracking
                             </p>
                         </div>
-                        <div class="flex gap-3">
+                        <div class="flex gap-3" v-if="canEditTasks">
                             <Button severity="secondary" text icon="pi pi-plus" style="height: 24px; width: 24px;" @click="openLogTimeDialog"  />
                             <Button severity="secondary" text icon="pi pi-pencil" style="height: 24px; width: 24px;" @click="openEstimatedTimeDialog" />
                         </div>
@@ -114,12 +129,13 @@
 <script setup lang="ts">
 import { $dt } from '@primevue/themes';
 import { AddTaskCommentDto, AddTaskLoggedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
-import { TaskPriority } from '~/types/enums';
+import { ProjectPermissions, TaskPriority } from '~/types/enums';
 
 const route = useRoute();
 const tasksService = useTasksService();
 const projectsService = useProjectsService();
 const timeParser = useTimeParser();
+const permissions = usePermissions();
 
 const projectId = ref(route.params.id as string);
 const taskShortId = ref(+(route.params.shortId as string));
@@ -131,6 +147,8 @@ const comments = ref(details.value
 const activities = ref(details.value 
     ? await tasksService.getActivities(details.value.id, projectId.value)
     : null);
+
+await permissions.checkProjectPermissions(projectId.value);
 
 const logTimeDialog = ref();
 const estimatedTimeDialog = ref();
@@ -156,6 +174,10 @@ const selectedAssigneeUserId = ref(details.value?.assigneeId);
 const selectedStatusId = ref(details.value?.status.id);
 const newCommentContent = ref();
 
+const canEditTasks = computed(() => {
+    return permissions.hasPermission(ProjectPermissions.EditTasks);
+})
+
 const loggedTimeDisplay = computed(() => {
     return details.value ? timeParser.fromMinutes(details.value?.totalTimeLogged) : '';
 })
@@ -168,6 +190,18 @@ const remainingTimeDisplay = computed(() => {
     return details.value?.estimatedTime
         ? `Remaining: ${timeParser.fromMinutes(details.value.estimatedTime - details.value.totalTimeLogged)}`
         : '-';
+})
+
+const readOnlyStatusDisplay = computed(() => {
+    return details.value!.status.name;
+})
+
+const readOnlyPriorityDisplay = computed(() => {
+    return TaskPriority[details.value!.priority];
+})
+
+const readOnlyAssigneeDisplay = computed(() => {
+    return members.value!.members.find(x => x.id === details.value!.assigneeId)?.name ?? '-';
 })
 
 const timeKnobValue = computed(() => {

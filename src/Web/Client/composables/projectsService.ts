@@ -1,6 +1,6 @@
 import type { AddProjectMemberDto, CreateProjectDto, UpdateProjectNameDto } from "~/types/dtos/projects";
 import type { CreateRoleDto, DeleteRoleDto, RemoveMemberDto, UpdateMemberRoleDto, UpdateRoleNameDto, UpdateRolePermissionsDto } from "~/types/dtos/shared";
-import type { ProjectRolesVM, ProjectMembersVM, ProjectNavDataVM, ProjectsVM, ProjectSettingsVM } from "~/types/viewModels/projects";
+import type { ProjectRolesVM, ProjectMembersVM, ProjectNavDataVM, ProjectsVM, ProjectSettingsVM, UserProjectPermissionsVM } from "~/types/viewModels/projects";
 
 export const useProjectsService = () => {
     const api = useApi();
@@ -50,6 +50,9 @@ export const useProjectsService = () => {
         },
         async deleteProject(id: string) {
             await api.sendPostRequest(`projects/${id}/delete`, '');
+        },
+        async getUserPermissions(id: string) {
+            return await api.sendGetRequest<UserProjectPermissionsVM>(`projects/${id}/permissions`);
         }
     }
 }

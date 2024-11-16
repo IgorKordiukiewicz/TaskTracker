@@ -72,6 +72,9 @@ export const useAuth = () => {
         },
         getUserId() {
             return supabaseUser.value?.id;
+        },
+        hasPermission(permission: number, permissions: number) {
+            return (permissions & permission) === permission;
         }
     }
 }

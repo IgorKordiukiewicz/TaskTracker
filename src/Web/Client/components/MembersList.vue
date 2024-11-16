@@ -24,13 +24,18 @@
             <Column field="email" header="Email" sortable></Column>
             <Column field="roleName" header="Role" filter-field="roleName" :show-filter-match-modes="false">
                 <template #body="slotProps">
-                    <RoleSelect :roles="roles" :member="slotProps.data" @on-update="updateMemberRole" />
+                    <template v-if="canEditMembers">
+                        <RoleSelect :roles="roles" :member="slotProps.data" @on-update="updateMemberRole" />
+                    </template>
+                    <template v-else>
+                        <p>{{ slotProps.data.roleName }}</p>
+                    </template>
                 </template>
                 <template #filter="{ filterModel }">
                     <MultiSelect v-model="filterModel.value" :options="roles" option-label="name" option-value="name"></MultiSelect>
                 </template>
             </Column>
-            <Column header="" style="width: 1px;">
+            <Column header="" style="width: 1px;" v-if="canEditMembers">
                 <template #body="slotProps">
                     <Button type="button" icon="pi pi-ellipsis-v" text severity="secondary" @click="(e) => toggleMenu(e, slotProps.data.id)" />
                     <Menu ref="menu" :model="menuItems" :popup="true" />
@@ -49,7 +54,8 @@ import { FilterMatchMode } from '@primevue/core/api';
 
 const props = defineProps({
     members: { type: Object as PropType<MemberVM[]>, required: true },
-    roles: { type: Object as PropType<RoleVM[]>, required: true }
+    roles: { type: Object as PropType<RoleVM[]>, required: true },
+    canEditMembers: { type: Boolean, required: true }
 })
 
 const emit = defineEmits([

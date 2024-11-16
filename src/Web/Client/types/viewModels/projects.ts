@@ -33,3 +33,7 @@ export interface ProjectRoleVM extends RoleVM {
 export interface ProjectSettingsVM {
     name: string;
 }
+
+export interface UserProjectPermissionsVM {
+    permissions: ProjectPermissions;
+}

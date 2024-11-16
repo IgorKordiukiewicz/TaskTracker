@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="permissions && canViewPage">
         <div class="flex justify-between items-center">
             <p class="text-lg">Invitations</p>
             <div class="flex gap-2 items-center">
@@ -46,15 +46,19 @@
 </template>
 
 <script setup lang="ts">
-import { OrganizationInvitationState } from '~/types/enums';
+import { OrganizationInvitationState, OrganizationPermissions } from '~/types/enums';
 import { FilterMatchMode } from '@primevue/core/api';
+import { usePermissions } from '~/stores/permissions';
 
 const route = useRoute();
 const organizationsService = useOrganizationsService();
 const confirm = useConfirm();
+const permissions = usePermissions();
 
 const organizationId = ref(route.params.id as string);
 const invitations = ref(await organizationsService.getInvitations(organizationId.value));
+
+await permissions.checkOrganizationPermissions(organizationId.value);
 
 const filters = ref();
 
@@ -103,6 +107,10 @@ const initFilters = () => {
     }
 }
 initFilters();
+
+const canViewPage = computed(() => {
+    return permissions.hasPermission(OrganizationPermissions.EditMembers);
+})
 
 function resetFilters() {
     initFilters();

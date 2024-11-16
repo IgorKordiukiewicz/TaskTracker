@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="canViewPage">
         <p class="text-lg">Settings</p>
         <div class="bg-white w-full shadow mt-4 p-4 flex flex-col gap-1" v-if="settings">
             <div class="flex justify-between items-center">
@@ -35,16 +35,24 @@
 
 <script setup lang="ts">
 import { UpdateOrganizationNameDto } from '~/types/dtos/organizations';
+import { OrganizationPermissions } from '~/types/enums';
 
 const route = useRoute();
 const organizationsService = useOrganizationsService();
 const confirm = useConfirm();
+const permissions = usePermissions();
 
 const organizationId = ref(route.params.id as string);
 const settings = ref(await organizationsService.getSettings(organizationId.value));
 
+await permissions.checkOrganizationPermissions(organizationId.value);
+
 const name = ref(settings.value?.name);
 const nameEditActive = ref(false);
+
+const canViewPage = computed(() => {
+    return permissions.hasPermission(OrganizationPermissions.EditOrganization);
+})
 
 const updateNameSaveDisabled = computed(() => {
     return !name.value || name.value === settings.value?.name;

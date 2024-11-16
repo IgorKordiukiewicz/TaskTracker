@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <RolesEditor v-if="roles" :roles="roles.roles" :permissions="permissions" 
+    <div v-if="canViewPage">
+        <RolesEditor v-if="roles" :roles="roles.roles" :permissions="allPermissions" 
         @on-update-role-permissions="updateRolePermissions" @on-update-role-name="updateRoleName" @on-delete-role="deleteRole" @on-create-role="createRole"></RolesEditor>
     </div>
 </template>
@@ -11,15 +11,22 @@ import { OrganizationPermissions } from '~/types/enums';
 
 const route = useRoute();
 const organizationsService = useOrganizationsService();
+const permissions = usePermissions();
 
 const organizationId = ref(route.params.id as string);
 const roles = ref(await organizationsService.getRoles(organizationId.value));
 
-const permissions = ref([
+await permissions.checkOrganizationPermissions(organizationId.value);
+
+const allPermissions = ref([
     { label: 'Projects', value: OrganizationPermissions.EditProjects },
     { label: 'Members', value: OrganizationPermissions.EditMembers },
     { label: 'Roles', value: OrganizationPermissions.EditRoles }
 ])
+
+const canViewPage = computed(() => {
+    return permissions.hasPermission(OrganizationPermissions.EditRoles);
+})
 
 async function updateRoles() {
     roles.value = await organizationsService.getRoles(organizationId.value);

@@ -8,7 +8,7 @@
                     <InputIcon class="pi pi-search" />
                     <InputText v-model="filters['global'].value" placeholder="Search" />
                 </IconField>
-                <Button icon="pi pi-plus" severity="primary" label="Create" @click="openCreateTaskDialog" />
+                <Button icon="pi pi-plus" severity="primary" label="Create" @click="openCreateTaskDialog" v-if="canCreateTasks" />
                 <CreateTaskDialog v-if="members" ref="createTaskDialog" :projectId="projectId" :members="members" @on-create="updateTasks" />
             </div>
         </div>
@@ -75,19 +75,22 @@
 </template>
 
 <script setup lang="ts">
-import { TaskPriority } from '~/types/enums';
+import { ProjectPermissions, TaskPriority } from '~/types/enums';
 import { FilterMatchMode } from '@primevue/core/api';
 import type { DataTableRowClickEvent } from 'primevue/datatable';
 
 const route = useRoute();
 const tasksService = useTasksService();
 const projectsService = useProjectsService();
+const permissions = usePermissions();
 
 const createTaskDialog = ref();
 
 const projectId = ref(route.params.id as string);
 const tasks = ref(await tasksService.getTasks(projectId.value));
 const members = ref(await projectsService.getMembers(projectId.value));
+
+await permissions.checkProjectPermissions(projectId.value);
 
 const priorities = ref([
     { key: TaskPriority.Low, name: TaskPriority[TaskPriority.Low] },
@@ -97,6 +100,10 @@ const priorities = ref([
 ]); // TODO: refactor?
 
 const filters = ref();
+
+const canCreateTasks = computed(() => {
+    return permissions.hasPermission(ProjectPermissions.EditTasks);
+})
 
 async function updateTasks() {
     tasks.value = await tasksService.getTasks(projectId.value);

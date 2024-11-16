@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-full" v-if="workflow">
+  <div class="w-full h-full" v-if="canViewPage && workflow">
     <div class="flex justify-between items-center">
       <p class="text-lg">Workflow</p>
       <Button icon="pi pi-chevron-down" severity="primary" label="Actions" @click="toggleCreateMenu" aria-haspopup="true" aria-controls="overlay_menu" icon-pos="right" />
@@ -34,17 +34,19 @@ import { VueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background';
 import type { WorkflowTransitionVM } from '~/types/viewModels/workflows';
 import { ChangeInitialWorkflowStatusDto, DeleteWorkflowStatusDto, DeleteWorkflowTransitionDto } from '~/types/dtos/workflows';
-import { TaskStatusDeletionEligibility } from '~/types/enums';
+import { ProjectPermissions, TaskStatusDeletionEligibility } from '~/types/enums';
 
 const route = useRoute();
 const workflowsService = useWorkflowsService();
 const vueFlow = useVueFlow();
 const { onNodesChange, onEdgesChange } = useVueFlow();
 const confirm = useConfirm();
+const permissions = usePermissions();
 
 const projectId = ref(route.params.id as string);
-
 const workflow = ref(await workflowsService.getWorkflow(projectId.value));
+
+await permissions.checkProjectPermissions(projectId.value);
 
 const createMenu = ref();
 const addWorkflowStatusDialog = ref();
@@ -52,7 +54,6 @@ const addWorkflowTransitionDialog = ref();
 const nodes = ref<Node[]>();
 
 const edges = ref<Edge[]>();
-const transitionEdges = useTemplateRef('transitionEdges');
 
 const selectedNode = ref();
 const selectedEdge = ref();
@@ -146,6 +147,10 @@ const createMenuItems = ref([
     ]
   }
 ])
+
+const canViewPage = computed(() => {
+  return permissions.hasPermission(ProjectPermissions.EditProject);
+})
 
 initializeDiagram();
 

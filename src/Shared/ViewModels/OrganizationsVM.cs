@@ -18,4 +18,6 @@ public record UserOrganizationInvitationVM(Guid Id, string OrganizationName);
 
 public record OrganizationSettingsVM(string Name, Guid OwnerId);
 
+public record UserOrganizationPermissionsVM(OrganizationPermissions Permissions);
+
 

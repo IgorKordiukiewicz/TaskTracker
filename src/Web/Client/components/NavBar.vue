@@ -9,18 +9,21 @@
                         </div>
                     </li>
                     <li v-for="childNode in node.children" class="ml-3 pl-2" style="border-left: 2px solid #d1d7e0;">
-                        <NavBarItem :title="childNode.title" :icon="childNode.icon" :link="childNode.link[0] + id + childNode.link[1]" :include-index="false" />
+                        <NavBarItem :title="childNode.title" :icon="childNode.icon" :link="childNode.link[0] + id + childNode.link[1]" :include-index="false" v-if="showItem(childNode.permission)" />
                     </li>
             </template>
             <template v-else>
-                <NavBarItem :title="node.title" :icon="node.icon" :link="node.link[0] + id + node.link[1]" :include-index="node.includeIndex" />
+                <NavBarItem :title="node.title" :icon="node.icon" :link="node.link[0] + id + node.link[1]" :include-index="node.includeIndex" v-if="showItem(node.permission)" />
             </template>
         </li>
     </ul>
 </template>
 
 <script setup lang="ts">
+import { OrganizationPermissions, ProjectPermissions } from '~/types/enums';
+
 const route = useRoute();
+const permissions = usePermissions();
 
 const id = computed(() => {
     if(route.path.startsWith('/organization') || route.path.startsWith('/project')) {
@@ -30,6 +33,13 @@ const id = computed(() => {
         return '';
     }
 })
+
+if(route.path.startsWith('/organization')) {
+    await permissions.checkOrganizationPermissions(id.value);
+}
+else if(route.path.startsWith('/project')) {
+    await permissions.checkProjectPermissions(id.value);
+}
 
 const nodes = computed(() => {
     if(route.path.startsWith('/organization')) {
@@ -57,24 +67,27 @@ const organizationNodes = ref([
             {
                 title: 'Members',
                 icon: 'pi pi-user',
-                link: [ '/organization/', '/members' ]
+                link: [ '/organization/', '/members' ],
             },
             {
                 title: 'Invitations',
                 icon: 'pi pi-user-plus',
-                link: [ '/organization/', '/invitations' ]
+                link: [ '/organization/', '/invitations' ],
+                permission: OrganizationPermissions.EditMembers as number
             },
             {
                 title: 'Roles',
                 icon: 'pi pi-user-edit',
-                link: [ '/organization/', '/roles' ]
+                link: [ '/organization/', '/roles' ],
+                permission: OrganizationPermissions.EditRoles as number
             },
         ]
     },
     {
         title: 'Settings',
         icon: 'pi pi-cog',
-        link: [ '/organization/', '/settings' ]
+        link: [ '/organization/', '/settings' ],
+        permission: OrganizationPermissions.EditOrganization as number
     }
 ]);
 
@@ -97,19 +110,22 @@ const projectNodes = ref([
             {
                 title: 'Roles',
                 icon: 'pi pi-user-edit',
-                link: [ '/project/', '/roles' ]
+                link: [ '/project/', '/roles' ],
+                permission: ProjectPermissions.EditRoles as number
             }
         ]
     },
     {
         title: 'Workflow',
         icon: 'pi pi-arrow-right-arrow-left',
-        link: [ '/project/', '/workflow' ]
+        link: [ '/project/', '/workflow' ],
+        permission: ProjectPermissions.EditProject as number
     },
     {
         title: 'Settings',
         icon: 'pi pi-cog',
-        link: [ '/project/', '/settings' ]
+        link: [ '/project/', '/settings' ],
+        permission: ProjectPermissions.EditProject as number
     }
 ]);
 
@@ -119,9 +135,14 @@ const indexNodes = ref([
         icon: 'pi pi-home',
         includeIndex: true,
         link: [ '', '' ],
-        children: null
+        children: null,
+        permission: undefined
     }
 ])
+
+function showItem(permissionRequired?: number) {
+    return !permissionRequired || permissions.hasPermission(permissionRequired);
+}
 </script>
 
 <style scoped>

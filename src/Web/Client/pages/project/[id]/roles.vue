@@ -1,6 +1,8 @@
 <template>
-    <RolesEditor v-if="roles" :roles="roles.roles" :permissions="permissions"
-    @on-update-role-permissions="updateRolePermissions" @on-update-role-name="updateRoleName" @on-delete-role="deleteRole" @on-create-role="createRole"></RolesEditor>
+    <div v-if="canViewPage">
+        <RolesEditor v-if="roles" :roles="roles.roles" :permissions="allPermissions"
+        @on-update-role-permissions="updateRolePermissions" @on-update-role-name="updateRoleName" @on-delete-role="deleteRole" @on-create-role="createRole"></RolesEditor>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -9,16 +11,23 @@ import { ProjectPermissions } from '~/types/enums';
 
 const route = useRoute();
 const projectsService = useProjectsService();
+const permissions = usePermissions();
 
 const projectId = ref(route.params.id as string);
 const roles = ref(await projectsService.getRoles(projectId.value));
 
-const permissions = ref([
+await permissions.checkProjectPermissions(projectId.value);
+
+const allPermissions = ref([
     { label: 'Tasks', value: ProjectPermissions.EditTasks },
     { label: 'Members', value: ProjectPermissions.EditMembers },
     { label: 'Roles', value: ProjectPermissions.EditRoles },
     { label: 'Project', value: ProjectPermissions.EditProject },
 ])
+
+const canViewPage = computed(() => {
+    return permissions.hasPermission(ProjectPermissions.EditRoles);
+})
 
 async function updateRoles() {
     roles.value = await projectsService.getRoles(projectId.value);
