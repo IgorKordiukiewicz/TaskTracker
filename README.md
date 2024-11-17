@@ -1,10 +1,10 @@
 # TaskTracker
-Task/issue tracker made with ASP.NET Core & Blazor WASM.
+Task/issue tracker made with ASP.NET Core & Vue.
 ### Technologies & Patterns
 * ASP.NET Core 7
-* Blazor WASM
+* Vue & Nuxt 3
 * Entity Framework Core
-* Auth0
+* Supabase
 * xUnit
 * MediatR
 * Hangfire
@@ -24,8 +24,8 @@ Task/issue tracker made with ASP.NET Core & Blazor WASM.
 * Custom members roles
 * Organization membership invitations
 ### Screenshots
-![chrome_PhTZbDitZd](https://github.com/IgorKordiukiewicz/TaskTracker/assets/25117425/ae341dec-ad24-4dd0-9dc4-3e71fcadf241)
-![chrome_urwwg4mwSa](https://github.com/IgorKordiukiewicz/TaskTracker/assets/25117425/ac8f9969-7e4a-4e6e-bb57-b40971169161)
-![chrome_mWu0cF4Eea](https://github.com/IgorKordiukiewicz/TaskTracker/assets/25117425/6bbf0a4e-c8ca-4a45-be38-5856d33e1000)
-![chrome_4TqCFM9WNu](https://github.com/IgorKordiukiewicz/TaskTracker/assets/25117425/f091da6f-5372-4e54-b8d1-e70b6399129d)
-![chrome_y3ig2PPQF6](https://github.com/IgorKordiukiewicz/TaskTracker/assets/25117425/bc4e0a9c-a283-4f64-96dd-d94a2b013e88)
+![tasks](https://github.com/user-attachments/assets/c16441aa-1e6d-4192-9ff6-d41d4256d864)
+![taskDetails](https://github.com/user-attachments/assets/50f2959e-7651-4a4c-a70c-0a3983e32f17)
+![workflow](https://github.com/user-attachments/assets/036843b7-523c-4c1e-b631-83a79bfceec1)
+![roles](https://github.com/user-attachments/assets/602ff299-e5d2-42f1-b944-1cea5ad26ee5)
+![invitations](https://github.com/user-attachments/assets/3c003744-41a9-4082-9b67-718b2de2212a)
