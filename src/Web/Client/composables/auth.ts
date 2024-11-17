@@ -5,6 +5,7 @@ export const useAuth = () => {
     const supabaseUser = useSupabaseUser();
     const api = useApi();
     const toast = useToast();
+    const config = useRuntimeConfig();
 
     return {
         async login(email: string, password: string) {
@@ -54,7 +55,7 @@ export const useAuth = () => {
         },
         async sendResetPasswordEmail(email: string) {
             await supabaseClient.auth.resetPasswordForEmail(email, {
-                redirectTo: 'http://localhost:3000/account/reset-password'
+                redirectTo: `${config.public.url}account/reset-password`
             });
         },
         async updatePassword(newPassword: string) {

@@ -1,11 +1,12 @@
 export const useApi = () => {
     const client = useSupabaseClient();
     const toast = useToast();
+    const config = useRuntimeConfig();
 
     return {
         async sendPostRequest<T>(url: string, body: T, customHeaders?: Record<string, string>) {
             try {
-                const { data, error } = await useFetch(`https://localhost:7075/${url}`, {
+                const { data, error } = await useFetch(`${config.public.apiUrl}${url}`, {
                     method: 'POST',
                     body: JSON.stringify(body),
                     headers: { 
@@ -24,7 +25,7 @@ export const useApi = () => {
         },
         async sendGetRequest<T>(url: string, customHeaders?: Record<string, string>) {
             try {
-                const { data, error } = await useFetch<T>(`https://localhost:7075/${url}`, {
+                const { data, error } = await useFetch<T>(`${config.public.apiUrl}${url}`, {
                     headers: { 
                         ...getHeaders(await getAccessToken()),
                         ...customHeaders

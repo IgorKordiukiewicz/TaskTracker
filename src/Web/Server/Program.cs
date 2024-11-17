@@ -3,8 +3,14 @@ using Hangfire;
 using Infrastructure;
 using Serilog;
 using System.Reflection;
+using Web.Server.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var configurationSettingsSection = builder.Configuration.GetSection("ConfigurationSettings");
+builder.Services.Configure<ConfigurationSettings>(configurationSettingsSection);
+var configurationSettings = configurationSettingsSection.Get<ConfigurationSettings>()
+    ?? throw new InvalidOperationException("ConfigurationSettings is not correct.");
 
 builder.Host.UseSerilog((context, services, configuration) =>
 {
@@ -36,7 +42,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Web.Client", builder =>
     {
         builder
-        .SetIsOriginAllowed(origin => origin.Contains("localhost:3000")) // TODO: move to appsettings
+        .SetIsOriginAllowed(origin => origin.Contains(configurationSettings.Domain))
         .AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials();

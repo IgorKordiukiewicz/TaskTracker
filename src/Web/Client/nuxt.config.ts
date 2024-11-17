@@ -6,6 +6,12 @@ export default defineNuxtConfig({
   ssr: false,
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
+  runtimeConfig: {
+    public: {
+      apiUrl: 'https://localhost:7075/',
+      url: 'http://localhost:3000/'
+    }
+  },
   css: [ 
     'primeicons/primeicons.css', 
     './assets/css/main.css' 
