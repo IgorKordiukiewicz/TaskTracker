@@ -1,5 +1,4 @@
 ﻿using Domain.Organizations;
-using Shared.Enums;
 
 namespace Application.Features.Organizations;
 

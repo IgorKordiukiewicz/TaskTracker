@@ -1,4 +1,4 @@
-﻿namespace Shared.ViewModels;
+﻿namespace Application.Models.ViewModels;
 
 public interface IMemberVM
 {

@@ -1,6 +1,5 @@
 ﻿using Domain.Common;
 using Domain.Projects;
-using Shared.Enums;
 
 namespace UnitTests.Domain;
 

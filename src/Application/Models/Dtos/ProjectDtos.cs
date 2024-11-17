@@ -1,4 +1,4 @@
-﻿namespace Shared.Dtos;
+﻿namespace Application.Models.Dtos;
 
 public record CreateProjectDto(Guid OrganizationId, string Name);
 

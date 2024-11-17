@@ -1,11 +1,10 @@
 ﻿using Application.Features.Tasks;
+using Application.Models.Dtos;
+using Application.Models.ViewModels;
 using Domain.Projects;
 using Domain.Tasks;
 using Domain.Users;
 using Domain.Workflows;
-using Shared.Dtos;
-using Shared.Enums;
-using Shared.ViewModels;
 using Task = Domain.Tasks.Task;
 using TaskStatus = Domain.Workflows.TaskStatus;
 

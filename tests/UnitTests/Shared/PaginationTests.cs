@@ -1,4 +1,4 @@
-﻿using Shared.Dtos;
+﻿using Application.Models.Dtos;
 
 namespace UnitTests.Shared;
 

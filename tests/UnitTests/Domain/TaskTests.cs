@@ -1,5 +1,4 @@
 ﻿using Domain.Workflows;
-using Shared.Enums;
 using Task = Domain.Tasks.Task;
 
 namespace UnitTests.Domain;

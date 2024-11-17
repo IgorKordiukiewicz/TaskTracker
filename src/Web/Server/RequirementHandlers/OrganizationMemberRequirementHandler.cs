@@ -1,7 +1,19 @@
-﻿using Infrastructure;
+﻿using Domain.Enums;
+using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace Web.Server.RequirementHandlers;
+
+public class OrganizationMemberRequirement : MemberRequirement<OrganizationPermissions>
+{
+    public bool Owner { get; init; }
+
+    public OrganizationMemberRequirement(OrganizationPermissions? permissions = null, bool owner = false)
+    {
+        Permissions = permissions;
+        Owner = owner;
+    }
+}
 
 public class OrganizationMemberRequirementHandler : MemberRequirementHandler<OrganizationMemberRequirement>
 {

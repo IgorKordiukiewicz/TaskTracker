@@ -1,6 +1,4 @@
-﻿using Shared.Enums;
-
-namespace Shared.ViewModels;
+﻿namespace Application.Models.ViewModels;
 
 public record OrganizationInvitationsVM(IReadOnlyList<OrganizationInvitationVM> Invitations);
 public record OrganizationInvitationVM(Guid Id, string UserEmail, OrganizationInvitationState State, DateTime CreatedAt, DateTime? FinalizedAt);

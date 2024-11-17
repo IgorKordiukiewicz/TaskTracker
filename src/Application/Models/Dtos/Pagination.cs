@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Shared.Dtos;
+namespace Application.Models.Dtos;
 
 public class Pagination
 {

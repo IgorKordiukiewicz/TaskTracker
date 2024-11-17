@@ -1,10 +1,8 @@
-﻿using Infrastructure.Models;
-using Application.Features.Users;
+﻿using Application.Features.Users;
+using Application.Models.ViewModels;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Users;
-using Shared.Enums;
-using Shared.ViewModels;
 
 namespace IntegrationTests.Features;
 
@@ -25,7 +23,6 @@ public class UsersTests
     [Fact]
     public async Task GetUser_ShouldReturnUserData_WhenUserWithGivenAuthIdEixsts()
     {
-        // TODO: Check if permissions are correctly returned
         var user = (await _factory.CreateUsers())[0];
 
         var result = await _fixture.SendRequest(new GetUserQuery(user.Id));

@@ -1,6 +1,4 @@
-﻿using Shared.Enums;
-
-namespace Domain.Projects;
+﻿namespace Domain.Projects;
 
 public class ProjectRole : Role<ProjectPermissions>
 {

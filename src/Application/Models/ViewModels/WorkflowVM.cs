@@ -1,6 +1,4 @@
-﻿using Shared.Enums;
-
-namespace Shared.ViewModels;
+﻿namespace Application.Models.ViewModels;
 
 public record WorkflowVM(Guid Id, IReadOnlyList<WorkflowTaskStatusVM> Statuses, IReadOnlyList<WorkflowTaskStatusTransitionVM> Transitions);
 public record WorkflowTaskStatusVM

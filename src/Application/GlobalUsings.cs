@@ -1,9 +1,10 @@
 ﻿global using Application.Errors;
+global using Application.Models.Dtos;
+global using Application.Models.ViewModels;
+global using Domain.Enums;
 global using FluentResults;
 global using FluentValidation;
-global using MediatR;
-global using Microsoft.EntityFrameworkCore;
-global using Shared.Dtos;
-global using Shared.ViewModels;
 global using Infrastructure;
 global using Infrastructure.Repositories;
+global using MediatR;
+global using Microsoft.EntityFrameworkCore;

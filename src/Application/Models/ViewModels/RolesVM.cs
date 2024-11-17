@@ -1,4 +1,4 @@
-﻿namespace Shared.ViewModels;
+﻿namespace Application.Models.ViewModels;
 
 public record RolesVM<TPermissions>(IReadOnlyList<RoleVM<TPermissions>> Roles) 
     where TPermissions : struct, Enum;

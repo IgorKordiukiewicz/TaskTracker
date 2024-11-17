@@ -1,4 +1,4 @@
-﻿namespace Shared.Dtos;
+﻿namespace Application.Models.Dtos;
 
 public record CreateOrganizationDto(string Name);
 

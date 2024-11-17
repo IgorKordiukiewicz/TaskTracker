@@ -1,4 +1,4 @@
-﻿namespace Shared.Enums;
+﻿namespace Domain.Enums;
 
 public enum OrganizationInvitationState
 {

@@ -1,8 +1,6 @@
-﻿using AutoFixture.Kernel;
-using Domain.Common;
+﻿using Domain.Common;
 using Domain.Organizations;
 using Domain.Projects;
-using Shared.Enums;
 
 namespace UnitTests.Domain;
 

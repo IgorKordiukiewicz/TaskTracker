@@ -1,4 +1,4 @@
-﻿namespace Shared.ViewModels;
+﻿namespace Application.Models.ViewModels;
 
 public record NavigationItemVM(Guid Id, string Name);
 

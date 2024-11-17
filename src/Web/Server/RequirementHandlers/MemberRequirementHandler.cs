@@ -3,6 +3,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Web.Server.RequirementHandlers;
 
+public abstract class MemberRequirement<TPermissions> : IAuthorizationRequirement
+    where TPermissions : struct, Enum
+{
+    public TPermissions? Permissions { get; init; }
+}
+
 public abstract class MemberRequirementHandler<TAuthorizationRequirement> : AuthorizationHandler<TAuthorizationRequirement>
     where TAuthorizationRequirement : IAuthorizationRequirement
 {

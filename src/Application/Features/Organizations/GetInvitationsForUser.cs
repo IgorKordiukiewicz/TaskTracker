@@ -1,6 +1,4 @@
-﻿using Shared.Enums;
-
-namespace Application.Features.Organizations;
+﻿namespace Application.Features.Organizations;
 
 public record GetOrganizationInvitationsForUserQuery(Guid UserId) : IRequest<Result<UserOrganizationInvitationsVM>>;
 

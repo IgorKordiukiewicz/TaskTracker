@@ -1,4 +1,4 @@
-﻿namespace Shared.Dtos;
+﻿namespace Application.Models.Dtos;
 
 public record UserRegistrationDto(string Email, string FirstName, string LastName, string AvatarColor);
 

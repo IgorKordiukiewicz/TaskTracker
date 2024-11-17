@@ -3,6 +3,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Web.Server.RequirementHandlers;
 
+public class ProjectMemberRequirement : MemberRequirement<ProjectPermissions>
+{
+    public ProjectMemberRequirement(ProjectPermissions? permissions = null)
+    {
+        Permissions = permissions;
+    }
+}
+
 public class ProjectMemberRequirementHandler : MemberRequirementHandler<ProjectMemberRequirement>
 {
     public ProjectMemberRequirementHandler(AppDbContext dbContext, IHttpContextAccessor contextAccessor)

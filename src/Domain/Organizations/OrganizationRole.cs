@@ -1,6 +1,4 @@
-﻿using Shared.Enums;
-
-namespace Domain.Organizations;
+﻿namespace Domain.Organizations;
 
 public class OrganizationRole : Role<OrganizationPermissions>
 {

@@ -1,6 +1,4 @@
-﻿using Shared.Enums;
-
-namespace Domain.Tasks;
+﻿namespace Domain.Tasks;
 
 public class TaskActivity : ValueObject
 {

@@ -1,6 +1,4 @@
-﻿using Shared.Enums;
-
-namespace Shared.ViewModels;
+﻿namespace Application.Models.ViewModels;
 
 public record UserVM
 {

@@ -1,12 +1,10 @@
-﻿using Application.Features.Organizations;
-using Application.Features.Projects;
+﻿using Application.Features.Projects;
+using Application.Models.ViewModels;
 using Domain.Common;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Users;
 using Domain.Workflows;
-using Shared.Enums;
-using Shared.ViewModels;
 
 namespace IntegrationTests.Features;
 

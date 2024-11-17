@@ -1,5 +1,4 @@
 ﻿using Domain.Projects;
-using Shared.Enums;
 
 namespace Application.Features.Projects;
 

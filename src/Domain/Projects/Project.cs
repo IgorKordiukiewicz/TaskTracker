@@ -1,4 +1,4 @@
-﻿using Shared.Enums;
+﻿using Domain.Enums;
 
 namespace Domain.Projects;
 
