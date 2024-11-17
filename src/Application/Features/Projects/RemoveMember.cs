@@ -1,4 +1,5 @@
 ﻿using Domain.Projects;
+using Infrastructure.Extensions;
 
 namespace Application.Features.Projects;
 
@@ -40,23 +41,13 @@ internal class RemoveProjectMemberHandler : IRequestHandler<RemoveProjectMemberC
             return Result.Fail(result.Errors);
         }
 
-        using var transaction = await _dbContext.Database.BeginTransactionAsync();
-
-        try
+        return await _dbContext.ExecuteTransaction(async () =>
         {
             await _projectRepository.Update(project);
 
             await _dbContext.Tasks
                 .Where(x => x.ProjectId == project.Id && x.AssigneeId == userId!.Value)
                 .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.AssigneeId, (Guid?)null));
-
-            await transaction.CommitAsync();
-        }
-        catch(Exception ex)
-        {
-            return Result.Fail(new InternalError("SQL Transaction failure").CausedBy(ex));
-        }
-
-        return Result.Ok();
+        });
     }
 }

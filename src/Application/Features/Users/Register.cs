@@ -1,4 +1,5 @@
 ﻿using Domain.Users;
+using Infrastructure.Extensions;
 
 namespace Application.Features.Users;
 
@@ -35,9 +36,7 @@ internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result
 
         var user = User.Create(request.Id, request.Model.Email, request.Model.FirstName, request.Model.LastName);
 
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
-
-        try
+        return await _dbContext.ExecuteTransaction(async () =>
         {
             await _userRepository.Add(user);
 
@@ -47,14 +46,6 @@ internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result
                 AvatarColor = request.Model.AvatarColor
             });
             await _dbContext.SaveChangesAsync();
-
-            await transaction.CommitAsync();
-        }
-        catch(Exception ex)
-        {
-            return Result.Fail(new InternalError("SQL Transaction failure").CausedBy(ex));
-        }
-        
-        return Result.Ok();
+        });
     }
 }

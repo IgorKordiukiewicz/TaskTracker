@@ -13,7 +13,7 @@ public class Project : Entity, IAggregateRoot
     private readonly List<ProjectRole> _roles = new();
     public IReadOnlyList<ProjectRole> Roles => _roles.AsReadOnly();
 
-    public RolesManager<ProjectRole, ProjectPermissions> RolesManager { get; init; }
+    public RolesManager<ProjectRole, ProjectPermissions> RolesManager { get; private init; }
 
     private Project(Guid id)
         : base(id)

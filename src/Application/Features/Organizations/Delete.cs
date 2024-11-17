@@ -1,4 +1,5 @@
 ﻿using Domain.Organizations;
+using Infrastructure.Extensions;
 
 namespace Application.Features.Organizations;
 
@@ -32,13 +33,11 @@ internal class DeleteOrganizationHandler : IRequestHandler<DeleteOrganizationCom
             .Select(x => x.Id)
             .ToListAsync();
 
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
-
-        try
+        return await _dbContext.ExecuteTransaction(async () =>
         {
             await _dbContext.Organizations
-                .Where(x => x.Id == request.OrganizationId)
-                .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
+               .Where(x => x.Id == request.OrganizationId)
+               .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
 
             await _dbContext.OrganizationInvitations
                 .Where(x => x.OrganizationId == request.OrganizationId)
@@ -59,13 +58,7 @@ internal class DeleteOrganizationHandler : IRequestHandler<DeleteOrganizationCom
             await _dbContext.TaskRelationshipManagers
                 .Where(x => projectsIds.Contains(x.ProjectId))
                 .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
-
-            await transaction.CommitAsync();
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(new InternalError("SQL Transaction failure").CausedBy(ex));
-        }
+        });
 
         return Result.Ok();
     }

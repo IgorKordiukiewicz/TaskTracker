@@ -2,6 +2,7 @@
 using Domain.Projects;
 using Domain.Tasks;
 using Domain.Workflows;
+using Infrastructure.Extensions;
 
 namespace Application.Features.Projects;
 
@@ -44,16 +45,22 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
         {
             return Result.Fail<Guid>(new ApplicationError("Project with the same name already exists in this organization."));
         }
-        // TODO: Transaction?
 
         var project = Project.Create(request.Model.Name, request.Model.OrganizationId, request.UserId);
-        await _projectRepository.Add(project);
-
         var workflow = Workflow.Create(project.Id);
-        await _workflowRepository.Add(workflow);
-
         var taskRelationshipManager = new TaskRelationshipManager(project.Id);
-        await _taskRelationshipManagerRepository.Add(taskRelationshipManager);
+
+        var result = await _dbContext.ExecuteTransaction(async () =>
+        {           
+            await _projectRepository.Add(project);
+            await _workflowRepository.Add(workflow);
+            await _taskRelationshipManagerRepository.Add(taskRelationshipManager);
+        });
+
+        if(result.IsFailed)
+        {
+            return Result.Fail<Guid>(result.Errors);
+        }
 
         return project.Id;
     }

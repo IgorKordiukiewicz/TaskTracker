@@ -1,4 +1,5 @@
 ﻿using Domain.Projects;
+using Infrastructure.Extensions;
 
 namespace Application.Features.Projects;
 
@@ -28,13 +29,11 @@ internal class DeleteProjectHandler : IRequestHandler<DeleteProjectCommand, Resu
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
-
-        try
+        return await _dbContext.ExecuteTransaction(async () =>
         {
             await _dbContext.Projects
-                .Where(x => x.Id == request.ProjectId)
-                .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
+               .Where(x => x.Id == request.ProjectId)
+               .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
 
             await _dbContext.Workflows
                 .Where(x => x.ProjectId == request.ProjectId)
@@ -47,14 +46,6 @@ internal class DeleteProjectHandler : IRequestHandler<DeleteProjectCommand, Resu
             await _dbContext.TaskRelationshipManagers
                 .Where(x => x.ProjectId == request.ProjectId)
                 .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
-
-            await transaction.CommitAsync();
-        }
-        catch(Exception ex)
-        {
-            return Result.Fail(new InternalError("SQL Transaction failure").CausedBy(ex));
-        }
-
-        return Result.Ok();
+        });
     }
 }
