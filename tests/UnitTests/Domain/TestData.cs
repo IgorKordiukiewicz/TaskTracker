@@ -22,6 +22,7 @@ public class TestRole : Role<TestPermissions>
 public class TestMember : IHasRole
 {
     public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid UserId { get; set; } = Guid.NewGuid();
 
     public Guid RoleId { get; set; }
 

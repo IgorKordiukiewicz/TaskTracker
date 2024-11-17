@@ -247,11 +247,37 @@ public class OrganizationTests
 
         var result = organization.RemoveMember(memberId);
 
-        using(new AssertionScope())
+        using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
             organization.Members.Count.Should().Be(1);
         }
+    }
+
+    [Fact]
+    public void CanUpdateMemberRole_ShouldReturnTrue_WhenMemberIsNotTheOwner()
+    {
+        var organization = Organization.Create("Name", Guid.NewGuid());
+        var userId = Guid.NewGuid();
+        var invitation = organization.CreateInvitation(userId).Value;
+        organization.AcceptInvitation(invitation.Id);
+        var member = organization.Members.First(x => x.UserId == userId);
+
+        var result = organization.CanUpdateMemberRole(member);
+
+        result.Value.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CanUpdateMemberRole_ShouldReturnFalse_WhenMemberIsTheOwner()
+    {
+        var ownerId = Guid.NewGuid();
+        var organization = Organization.Create("Name", ownerId);
+        var member = organization.Members.First(x => x.UserId == ownerId);
+
+        var result = organization.CanUpdateMemberRole(member);
+
+        result.Value.Should().BeFalse();
     }
 
     [Fact]

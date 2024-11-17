@@ -187,6 +187,18 @@ public class RolesManagerTests
     }
 
     [Fact]
+    public void UpdateMemberRole_ShouldFail_WhenCustomCheckFails()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+        var members = new List<TestMember>() { new(Guid.NewGuid()) };
+
+        var result = rolesManager.UpdateMemberRole(members[0].Id, roles[1].Id, members, (m) => { return (false, string.Empty); });
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
     public void UpdateMemberRole_ShouldSucceed_WhenMemberAndRoleExist()
     {
         var roles = CreateTestRoles();

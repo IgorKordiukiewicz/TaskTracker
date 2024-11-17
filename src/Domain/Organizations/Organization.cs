@@ -111,6 +111,16 @@ public class Organization : Entity, IAggregateRoot
         return Result.Ok();
     }
 
+    public (bool Value, string Reason) CanUpdateMemberRole(IHasRole member)
+    {
+        if(member.UserId == OwnerId)
+        {
+            return (false, "Can't update role of the organization owner.");
+        }
+
+        return (true, string.Empty);
+    }
+
     private Result<OrganizationInvitation> GetPendingInvitation(Guid invitationId)
     {
         var invitation = _invitations.FirstOrDefault(x => x.Id == invitationId);

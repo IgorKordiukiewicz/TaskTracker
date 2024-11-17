@@ -3,6 +3,7 @@
 public interface IHasRole
 {
     Guid Id { get; }
+    Guid UserId { get; }
     Guid RoleId { get; }
     void UpdateRole(Guid roleId);
 }
@@ -77,12 +78,21 @@ public class RolesManager<TRole, TPermissions>
         return Result.Ok();
     }
 
-    public Result UpdateMemberRole(Guid memberId, Guid roleId, IReadOnlyCollection<IHasRole> members)
+    public Result UpdateMemberRole(Guid memberId, Guid roleId, IReadOnlyCollection<IHasRole> members, Func<IHasRole, (bool Value, string Reason)>? customMemberCheck = null)
     {
         var member = members.FirstOrDefault(x => x.Id == memberId);
         if(member is null)
         {
             return Result.Fail(new DomainError("Member with this ID does not exist."));
+        }
+
+        if(customMemberCheck is not null)
+        {
+            var (value, reason) = customMemberCheck(member);
+            if(!value)
+            {
+                return Result.Fail(new DomainError(reason));
+            }
         }
 
         if (!_roles.Any(x => x.Id == roleId))

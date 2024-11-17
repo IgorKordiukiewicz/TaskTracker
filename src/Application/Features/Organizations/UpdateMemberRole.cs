@@ -31,7 +31,7 @@ internal class UpdateOrganizationMemberRoleHandler : IRequestHandler<UpdateOrgan
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
         }
 
-        var result = organization.RolesManager.UpdateMemberRole(request.Model.MemberId, request.Model.RoleId, organization.Members);
+        var result = organization.RolesManager.UpdateMemberRole(request.Model.MemberId, request.Model.RoleId, organization.Members, organization.CanUpdateMemberRole);
         if (result.IsFailed)
         {
             return Result.Fail(result.Errors);
