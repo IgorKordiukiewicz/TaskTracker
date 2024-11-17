@@ -21,6 +21,9 @@ public class RolesManager<TRole, TPermissions>
         _createNewRoleFunc = createNewRoleFunc;
     }
 
+    public Guid? GetOwnerRoleId()
+        => _roles.FirstOrDefault(x => x.Type == RoleType.Owner)?.Id;
+
     public Guid GetAdminRoleId()
         => _roles.Single(x => x.Type == RoleType.Admin).Id;
 
@@ -78,7 +81,7 @@ public class RolesManager<TRole, TPermissions>
         return Result.Ok();
     }
 
-    public Result UpdateMemberRole(Guid memberId, Guid roleId, IReadOnlyCollection<IHasRole> members, Func<IHasRole, (bool Value, string Reason)>? customMemberCheck = null)
+    public Result UpdateMemberRole(Guid memberId, Guid roleId, IReadOnlyCollection<IHasRole> members)
     {
         var member = members.FirstOrDefault(x => x.Id == memberId);
         if(member is null)
@@ -86,18 +89,21 @@ public class RolesManager<TRole, TPermissions>
             return Result.Fail(new DomainError("Member with this ID does not exist."));
         }
 
-        if(customMemberCheck is not null)
+        var currentRole = _roles.First(x => x.Id == member.RoleId);
+        if (currentRole.Type == RoleType.Owner)
         {
-            var (value, reason) = customMemberCheck(member);
-            if(!value)
-            {
-                return Result.Fail(new DomainError(reason));
-            }
+            return Result.Fail(new DomainError("Member's current role can not be assigned from."));
         }
 
-        if (!_roles.Any(x => x.Id == roleId))
+        var role = _roles.FirstOrDefault(x => x.Id == roleId);
+        if(role is null)
         {
             return Result.Fail(new DomainError("Role wih this ID does not exist."));
+        }
+
+        if(role.Type == RoleType.Owner)
+        {
+            return Result.Fail(new DomainError("This role can not be assigned."));
         }
 
         member.UpdateRole(roleId);

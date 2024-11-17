@@ -19,6 +19,7 @@ public class OrganizationRole : Role<OrganizationPermissions>
     {
         return new OrganizationRole[]
         {
+            new("Owner", organizationId, EnumHelpers.GetAllFlags<OrganizationPermissions>(), RoleType.Owner),
             new("Administrator", organizationId, EnumHelpers.GetAllFlags<OrganizationPermissions>(), RoleType.Admin),
             new("Read-Only", organizationId, OrganizationPermissions.None, RoleType.ReadOnly),
         };

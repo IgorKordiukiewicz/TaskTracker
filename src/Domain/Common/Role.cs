@@ -5,9 +5,11 @@ public enum RoleType
     Custom,
     Admin,
     ReadOnly,
+    Owner
 }
 
-public abstract class Role<TPermissions> : Entity 
+public abstract class 
+    Role<TPermissions> : Entity 
     where TPermissions: struct, Enum
 {
     public string Name { get; set; }
@@ -28,4 +30,8 @@ public abstract class Role<TPermissions> : Entity
 
     public bool IsModifiable()
         => Type == RoleType.Custom;
+
+    public bool IsOwner()
+        => Type == RoleType.Owner;
+
 }

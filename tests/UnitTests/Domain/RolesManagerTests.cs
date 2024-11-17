@@ -175,6 +175,18 @@ public class RolesManagerTests
     }
 
     [Fact]
+    public void UpdateMemberRole_ShouldFail_WhenCurrentRoleIsOwner()
+    {
+        var roles = CreateTestRoles();
+        var rolesManager = CreateRolesManager(roles);
+        var members = new List<TestMember>() { new(roles.First(x => x.Type == RoleType.Owner).Id) };
+
+        var result = rolesManager.UpdateMemberRole(members[0].Id, roles[1].Id, members);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
     public void UpdateMemberRole_ShouldFail_WhenRoleDoesNotExist()
     {
         var roles = CreateTestRoles();
@@ -187,15 +199,15 @@ public class RolesManagerTests
     }
 
     [Fact]
-    public void UpdateMemberRole_ShouldFail_WhenCustomCheckFails()
+    public void UpdateMemberRole_ShouldFail_WhenRoleIsOwnerRole()
     {
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
-        var members = new List<TestMember>() { new(Guid.NewGuid()) };
+        var members = new List<TestMember>() { new(roles[0].Id) };
 
-        var result = rolesManager.UpdateMemberRole(members[0].Id, roles[1].Id, members, (m) => { return (false, string.Empty); });
+        var result = rolesManager.UpdateMemberRole(members[0].Id, roles.First(x => x.Type == RoleType.Owner).Id, members);
 
-        result.IsFailed.Should().BeTrue();
+        result.IsSuccess.Should().BeTrue();
     }
 
     [Fact]
@@ -257,6 +269,7 @@ public class RolesManagerTests
             new("b", default, RoleType.Custom),
             new("c", default, RoleType.Custom),
             new("d", default, RoleType.ReadOnly),
+            new("e", default, RoleType.Owner)
         };
 
     private static RolesManager<TestRole, TestPermissions> CreateRolesManager(List<TestRole> roles)

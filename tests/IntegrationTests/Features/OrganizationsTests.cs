@@ -388,7 +388,8 @@ public class OrganizationsTests
                 Id = role.Id,
                 Name = role.Name,
                 Permissions = role.Permissions,
-                Modifiable = role.Type == RoleType.Custom
+                Modifiable = role.IsModifiable(),
+                Owner = role.IsOwner()
             });
         }
 

@@ -10,4 +10,5 @@ public record RoleVM<TPermissions>
     public required string Name { get; init; }
     public required TPermissions Permissions { get; init; }
     public required bool Modifiable { get; init; }
+    public required bool Owner { get; init; }
 }

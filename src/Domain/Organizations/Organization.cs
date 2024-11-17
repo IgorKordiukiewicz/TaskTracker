@@ -34,7 +34,7 @@ public class Organization : Entity, IAggregateRoot
 
         result._roles.AddRange(OrganizationRole.CreateDefaultRoles(result.Id));
 
-        _ = result.AddMember(ownerId, result.RolesManager.GetAdminRoleId());
+        _ = result.AddMember(ownerId, result.RolesManager.GetOwnerRoleId()!.Value);
 
         return result;
     }
@@ -109,16 +109,6 @@ public class Organization : Entity, IAggregateRoot
 
         _members.Remove(member);
         return Result.Ok();
-    }
-
-    public (bool Value, string Reason) CanUpdateMemberRole(IHasRole member)
-    {
-        if(member.UserId == OwnerId)
-        {
-            return (false, "Can't update role of the organization owner.");
-        }
-
-        return (true, string.Empty);
     }
 
     private Result<OrganizationInvitation> GetPendingInvitation(Guid invitationId)

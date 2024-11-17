@@ -37,7 +37,7 @@
             </Column>
             <Column header="" style="width: 1px;" v-if="canEditMembers">
                 <template #body="{ data }">
-                    <Button type="button" icon="pi pi-ellipsis-v" text severity="secondary" @click="(e) => toggleMenu(e, data.id)" />
+                    <Button type="button" icon="pi pi-ellipsis-v" text severity="secondary" @click="(e) => toggleMenu(e, data.id)" v-if="!isOwnerRole(data.roleId)"/>
                     <Menu ref="menu" :model="menuItems" :popup="true" />
                 </template>             
             </Column>
@@ -108,6 +108,10 @@ initFilters();
 
 function resetFilters() {
     initFilters();
+}
+
+function isOwnerRole(roleId: string) {
+    return props.roles.find(x => x.id === roleId)?.owner ?? false;
 }
 
 function updateMemberRole(model: UpdateMemberRoleDto) {

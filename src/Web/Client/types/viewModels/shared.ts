@@ -17,4 +17,5 @@ export interface RoleVM {
     name: string;
     permissions: number;
     modifiable: boolean;
+    owner: boolean;
 }
