@@ -31,9 +31,7 @@ internal class DeleteTaskHandler : IRequestHandler<DeleteTaskCommand, Result>
 
         return await _dbContext.ExecuteTransaction(async () =>
         {
-            await _dbContext.Tasks
-               .Where(x => x.Id == request.TaskId)
-               .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
+            await _dbContext.Tasks.DeleteAll(x => x.Id == request.TaskId);
         });
     }
 }

@@ -1,9 +1,11 @@
-﻿using FluentResults;
+﻿using Azure.Core;
+using FluentResults;
 using Infrastructure.Errors;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Extensions;
 
-public static class DbContextExtensions
+public static class DbExtensions
 {
     public static async Task<Result> ExecuteTransaction(this AppDbContext dbContext, Func<Task> action)
     {
@@ -21,5 +23,13 @@ public static class DbContextExtensions
         {
             return Result.Fail(new InfrastructureError("SQL Transaction failure").CausedBy(ex));
         }
+    }
+
+    public static async Task DeleteAll<TEntity>(this DbSet<TEntity> entities, Expression<Func<TEntity, bool>> predicate)
+        where TEntity : class
+    {
+        await entities
+            .Where(predicate)
+            .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
     }
 }

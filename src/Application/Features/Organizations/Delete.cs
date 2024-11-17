@@ -35,31 +35,12 @@ internal class DeleteOrganizationHandler : IRequestHandler<DeleteOrganizationCom
 
         return await _dbContext.ExecuteTransaction(async () =>
         {
-            await _dbContext.Organizations
-               .Where(x => x.Id == request.OrganizationId)
-               .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
-
-            await _dbContext.OrganizationInvitations
-                .Where(x => x.OrganizationId == request.OrganizationId)
-                .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
-
-            await _dbContext.Projects
-                .Where(x => projectsIds.Contains(x.Id))
-                .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
-
-            await _dbContext.Workflows
-                .Where(x => projectsIds.Contains(x.ProjectId))
-                .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
-
-            await _dbContext.Tasks
-                .Where(x => projectsIds.Contains(x.ProjectId))
-                .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
-
-            await _dbContext.TaskRelationshipManagers
-                .Where(x => projectsIds.Contains(x.ProjectId))
-                .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
+            await _dbContext.Organizations.DeleteAll(x => x.Id == request.OrganizationId);
+            await _dbContext.OrganizationInvitations.DeleteAll(x => x.OrganizationId == request.OrganizationId);
+            await _dbContext.Projects.DeleteAll(x => projectsIds.Contains(x.Id));
+            await _dbContext.Workflows.DeleteAll(x => projectsIds.Contains(x.ProjectId));
+            await _dbContext.Tasks.DeleteAll(x => projectsIds.Contains(x.ProjectId));
+            await _dbContext.TaskRelationshipManagers.DeleteAll(x => projectsIds.Contains(x.ProjectId));
         });
-
-        return Result.Ok();
     }
 }

@@ -31,21 +31,10 @@ internal class DeleteProjectHandler : IRequestHandler<DeleteProjectCommand, Resu
 
         return await _dbContext.ExecuteTransaction(async () =>
         {
-            await _dbContext.Projects
-               .Where(x => x.Id == request.ProjectId)
-               .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
-
-            await _dbContext.Workflows
-                .Where(x => x.ProjectId == request.ProjectId)
-                .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
-
-            await _dbContext.Tasks
-                .Where(x => x.ProjectId == request.ProjectId)
-                .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
-
-            await _dbContext.TaskRelationshipManagers
-                .Where(x => x.ProjectId == request.ProjectId)
-                .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
+            await _dbContext.Projects.DeleteAll(x => x.Id == request.ProjectId);
+            await _dbContext.Workflows.DeleteAll(x => x.ProjectId == request.ProjectId);
+            await _dbContext.Tasks.DeleteAll(x => x.ProjectId == request.ProjectId);
+            await _dbContext.TaskRelationshipManagers.DeleteAll(x => x.ProjectId == request.ProjectId);
         });
     }
 }
