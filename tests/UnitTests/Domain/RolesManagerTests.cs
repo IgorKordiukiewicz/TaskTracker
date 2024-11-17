@@ -207,7 +207,7 @@ public class RolesManagerTests
 
         var result = rolesManager.UpdateMemberRole(members[0].Id, roles.First(x => x.Type == RoleType.Owner).Id, members);
 
-        result.IsSuccess.Should().BeTrue();
+        result.IsFailed.Should().BeTrue();
     }
 
     [Fact]

@@ -7,10 +7,12 @@
                 </p>
             </div>
             <div class="flex gap-1 items-center">
-                <Button icon="pi pi-pencil" text severity="secondary" label="Title" @click="openUpdateTitleDialog" v-if="canEditTasks" />
+                <Button icon="pi pi-chevron-down" severity="primary" label="Actions" @click="toggleActionsMenu" aria-haspopup="true" icon-pos="right" v-if="canEditTasks"  />
+                <Menu ref="actionsMenu" :model="actionsMenuItems" :popup="true" />
                 <Button icon="pi pi-chevron-left" text severity="secondary" label="Back" @click="navigateTo(`/project/${projectId}/`)" />
             </div>
             <UpdateTaskTitleDialog ref="updateTitleDialog" :id="details.id" :project-id="projectId" @on-update="updateDetails" />
+            <ConfirmDialog></ConfirmDialog>
         </div>
         <div class="flex gap-4 w-100 mt-4" v-if="details && members">
             <div class="flex flex-col gap-4 w-3/4">
@@ -137,6 +139,7 @@ const tasksService = useTasksService();
 const projectsService = useProjectsService();
 const timeParser = useTimeParser();
 const permissions = usePermissions();
+const confirm = useConfirm();
 
 const projectId = ref(route.params.id as string);
 const taskShortId = ref(+(route.params.shortId as string));
@@ -152,6 +155,7 @@ await permissions.checkProjectPermissions(projectId.value);
 const logTimeDialog = ref();
 const estimatedTimeDialog = ref();
 const updateTitleDialog = ref();
+const actionsMenu = ref();
 
 const statuses = ref(details.value?.possibleNextStatuses.map(x => ({
     id: x.id, name: x.name }))
@@ -159,6 +163,35 @@ const statuses = ref(details.value?.possibleNextStatuses.map(x => ({
         { id: details.value.status.id, name: details.value.status.name }
     ]
 ))
+
+const actionsMenuItems = ref([
+    { 
+        label: 'Edit Title',
+        icon: 'pi pi-pencil',
+        command: () => {
+            updateTitleDialog.value.show(details.value!.title);
+        }
+    },
+    {
+        label: 'Delete',
+        icon: 'pi pi-trash',
+        command: () => {
+            confirm.require({
+                message: `Are you sure you want to delete the task?`,
+                header: 'Confirm action',
+                rejectProps: {
+                    label: 'Cancel',
+                    severity: 'secondary'
+                },
+                acceptProps: {
+                    label: 'Confirm',
+                    severity: 'danger'
+                },
+                accept: async () => await deleteTask()
+            })
+        }
+    }
+])
 
 const descriptionEditValue = ref(details.value?.description);
 const selectedPriority = ref(details.value?.priority);
@@ -212,6 +245,10 @@ const timeKnobColor = computed(() => {
     return '#ef4444';
 })
 
+function toggleActionsMenu(event: Event) {
+    actionsMenu.value.toggle(event);
+}
+
 function isScrollHidden(scrollPanelId: string, contentId: string) {
     const scrollPanel = document.getElementById(scrollPanelId);
     const content = document.getElementById(contentId);
@@ -241,10 +278,6 @@ function openLogTimeDialog() {
 
 function openEstimatedTimeDialog() {
     estimatedTimeDialog.value.show(details.value!.estimatedTime ? timeParser.fromMinutes(details.value!.estimatedTime) : null);
-}
-
-function openUpdateTitleDialog() {
-    updateTitleDialog.value.show(details.value!.title);
 }
 
 async function updateDescription() {
@@ -310,6 +343,11 @@ async function addLoggedTime(minutes: number) {
     model.minutes = minutes;
     await tasksService.addLoggedTime(details.value!.id, projectId.value, model);
     await updateDetails();
+}
+
+async function deleteTask() {
+    await tasksService.deleteTask(details.value!.id, projectId.value);
+    navigateTo(`/project/${projectId.value}`);
 }
 </script>
 

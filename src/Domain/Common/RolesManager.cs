@@ -89,19 +89,19 @@ public class RolesManager<TRole, TPermissions>
             return Result.Fail(new DomainError("Member with this ID does not exist."));
         }
 
-        var currentRole = _roles.First(x => x.Id == member.RoleId);
-        if (currentRole.Type == RoleType.Owner)
-        {
-            return Result.Fail(new DomainError("Member's current role can not be assigned from."));
-        }
-
         var role = _roles.FirstOrDefault(x => x.Id == roleId);
         if(role is null)
         {
             return Result.Fail(new DomainError("Role wih this ID does not exist."));
         }
 
-        if(role.Type == RoleType.Owner)
+        var currentRole = _roles.First(x => x.Id == member.RoleId);
+        if (currentRole.Type == RoleType.Owner)
+        {
+            return Result.Fail(new DomainError("Member's current role can not be assigned from."));
+        }
+
+        if (role.Type == RoleType.Owner)
         {
             return Result.Fail(new DomainError("This role can not be assigned."));
         }

@@ -43,6 +43,9 @@ export const useTasksService = () => {
         },
         async updateTitle(id: string, projectId: string, model: UpdateTaskTitleDto) {
             await api.sendPostRequest(`tasks/${id}/title`, model, { 'ProjectId': projectId });
+        },
+        async deleteTask(id: string, projectId: string) {
+            await api.sendPostRequest(`tasks/${id}/delete`, undefined, { 'ProjectId': projectId });
         }
     }
 }

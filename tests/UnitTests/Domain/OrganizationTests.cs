@@ -20,13 +20,13 @@ public class OrganizationTests
             result.Id.Should().NotBeEmpty();
 
             // Ensure default roles are created
-            result.Roles.Count.Should().Be(2);
-            result.Roles.Select(x => x.Type).Should().BeEquivalentTo(new RoleType[] { RoleType.Admin, RoleType.ReadOnly });
-            var adminRoleId = result.Roles.First(x => x.Type == RoleType.Admin).Id;
+            result.Roles.Count.Should().Be(3);
+            result.Roles.Select(x => x.Type).Should().BeEquivalentTo(new RoleType[] { RoleType.Owner, RoleType.Admin, RoleType.ReadOnly });
+            var ownerRoleId = result.Roles.First(x => x.Type == RoleType.Owner).Id;
 
             result.Members.Count.Should().Be(1);
             result.Members[0].UserId.Should().Be(ownerId);
-            result.Members[0].RoleId.Should().Be(adminRoleId);
+            result.Members[0].RoleId.Should().Be(ownerRoleId);
         }
     }
 

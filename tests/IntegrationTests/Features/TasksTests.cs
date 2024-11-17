@@ -331,6 +331,28 @@ public class TasksTests
     }
 
     [Fact]
+    public async System.Threading.Tasks.Task Delete_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new DeleteTaskCommand(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Delete_ShouldSucceed_WhenTaskExists()
+    {
+        var task = (await _factory.CreateTasks())[0];
+
+        var result = await _fixture.SendRequest(new DeleteTaskCommand(task.Id));
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<Task>()).Should().Be(0);
+        }
+    }
+
+    [Fact]
     public async System.Threading.Tasks.Task GetActivities_ShouldFail_WhenTaskDoesNotExist()
     {
         var result = await _fixture.SendRequest(new GetTaskActivitiesQuery(Guid.NewGuid()));

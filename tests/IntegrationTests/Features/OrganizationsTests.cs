@@ -254,7 +254,7 @@ public class OrganizationsTests
                     Name = user.FullName,
                     Email = user.Email,
                     RoleId = organization.Members[0].RoleId,
-                    RoleName = "Administrator",
+                    RoleName = "Owner",
                     Owner = true
                 }
             });
@@ -483,16 +483,27 @@ public class OrganizationsTests
     [Fact]
     public async Task UpdateMemberRole_ShouldUpdateMemberRoleId_WhenOrganizationExists()
     {
-        var organization = (await _factory.CreateOrganizations())[0];
-        var member = organization.Members[0];
-        var newRoleId = organization.Roles.First(x => x.Id != member.RoleId).Id;
+        var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
+        var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
+        var organization = Organization.Create("org", user1.Id);
+        var invitation = organization.CreateInvitation(user2.Id).Value;
+        organization.AcceptInvitation(invitation.Id);
+        var member2 = organization.Members.First(x => x.UserId == user2.Id);
 
-        var result = await _fixture.SendRequest(new UpdateOrganizationMemberRoleCommand(organization.Id, new(member.Id, newRoleId)));
+        await _fixture.SeedDb(db =>
+        {
+            db.AddRange(user1, user2);
+            db.Add(organization);
+        });
+
+        var newRoleId = organization.Roles.First(x => x.Id != member2.RoleId && x.Type != RoleType.Owner).Id;
+
+        var result = await _fixture.SendRequest(new UpdateOrganizationMemberRoleCommand(organization.Id, new(member2.Id, newRoleId)));
 
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            (await _fixture.FirstAsync<OrganizationMember>(x => x.Id == member.Id)).RoleId.Should().Be(newRoleId);
+            (await _fixture.FirstAsync<OrganizationMember>(x => x.Id == member2.Id)).RoleId.Should().Be(newRoleId);
         }
     }
 

@@ -151,6 +151,20 @@ public class TasksController : ControllerBase
     }
 
     /// <summary>
+    /// Delete a task.
+    /// </summary>
+    /// <param name="taskId"></param>
+    /// <response code="404">Task not found.</response> 
+    [HttpPost("{taskId:guid}/delete")]
+    [Authorize(Policy.ProjectEditTasks)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> DeleteTask(Guid taskId)
+    {
+        var result = await _mediator.Send(new DeleteTaskCommand(taskId));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
     /// Add a new task comment.
     /// </summary>
     /// <param name="taskId"></param>
