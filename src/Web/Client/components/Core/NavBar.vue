@@ -42,10 +42,10 @@ const id = computed(() => {
     }
 })
 
-if(organizationView) {
+if(organizationView.value) {
     await permissions.checkOrganizationPermissions(id.value);
 }
-else if(projectView) {
+else if(projectView.value) {
     await permissions.checkProjectPermissions(id.value);
 }
 
@@ -53,7 +53,7 @@ const nodes = computed(() => {
     if(organizationView.value) {
         return organizationNodes.value;
     }
-    else if(projectView) {
+    else if(projectView.value) {
         return projectNodes.value;
     }
     else {
