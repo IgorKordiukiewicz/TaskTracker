@@ -8,6 +8,9 @@ using Web.Server.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile("appsettings.json");
+builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true);
+
 var configurationSettingsSection = builder.Configuration.GetSection("ConfigurationSettings");
 builder.Services.Configure<ConfigurationSettings>(configurationSettingsSection);
 var configurationSettings = configurationSettingsSection.Get<ConfigurationSettings>()
