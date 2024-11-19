@@ -1,5 +1,6 @@
 using Application;
 using Hangfire;
+using Hangfire.PostgreSql;
 using Infrastructure;
 using Serilog;
 using System.Reflection;
@@ -25,7 +26,7 @@ builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
-    .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
+    .UsePostgreSqlStorage(x => x.UseNpgsqlConnection(builder.Configuration.GetConnectionString("HangfireConnection"))));
 builder.Services.AddHangfireServer();
 
 builder.Services.AddApplicationServices();

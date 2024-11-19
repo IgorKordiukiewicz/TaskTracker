@@ -1,7 +1,5 @@
-﻿using Azure.Core;
-using FluentResults;
+﻿using FluentResults;
 using Infrastructure.Errors;
-using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Extensions;
 
