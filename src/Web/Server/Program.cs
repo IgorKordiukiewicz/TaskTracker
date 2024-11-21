@@ -6,6 +6,7 @@ using Serilog;
 using System.Reflection;
 using Web.Server.Configuration;
 using Microsoft.Extensions.Logging.ApplicationInsights;
+using HangfireBasicAuthenticationFilter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,7 +81,17 @@ app.MapControllers();
 
 app.UseCors("Web.Client");
 
-app.UseHangfireDashboard();
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[]
+    {
+        new HangfireCustomBasicAuthenticationFilter()
+        {
+            User = "admin",
+            Pass = builder.Configuration.GetSection("Authentication:HangfirePassword").Value
+        }
+    }
+});
 
 app.Run();
 
