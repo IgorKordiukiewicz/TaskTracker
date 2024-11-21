@@ -20,19 +20,38 @@ resource "azurerm_resource_group" "rg" {
 }
 
 resource "azurerm_service_plan" "serviceplan" {
-    name = "${var.baseName}-serviceplan"
-    location = var.location
-    resource_group_name = azurerm_resource_group.rg.name
-    sku_name = "F1"
-    os_type = "Windows"
+  name = "${var.baseName}-serviceplan"
+  location = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+  sku_name = "F1"
+  os_type = "Windows"
 }
 
 resource "azurerm_windows_web_app" "api" {
-    name = "${var.baseName}-api"
-    location = var.location
-    resource_group_name = azurerm_resource_group.rg.name
-    service_plan_id = azurerm_service_plan.serviceplan.id
-    site_config {
-        always_on = false
-    }
+  name = "${var.baseName}-api"
+  location = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+  service_plan_id = azurerm_service_plan.serviceplan.id
+  site_config {
+      always_on = false
+  }
+
+  app_settings = {
+    "ConnectionStrings__AppInsightsConnection" = azurerm_application_insights.appinsights.connection_string
+  }
+}
+
+resource "azurerm_log_analytics_workspace" "law" {
+  name = "${var.baseName}-law"
+  location = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+  sku = "PerGB2018"
+}
+
+resource "azurerm_application_insights" "appinsights" {
+  name = "${var.baseName}-appinsights"
+  location = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+  application_type = "web"
+  workspace_id = azurerm_log_analytics_workspace.law.id
 }

@@ -5,6 +5,7 @@ using Infrastructure;
 using Serilog;
 using System.Reflection;
 using Web.Server.Configuration;
+using Microsoft.Extensions.Logging.ApplicationInsights;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,11 +13,6 @@ var configurationSettingsSection = builder.Configuration.GetSection("Configurati
 builder.Services.Configure<ConfigurationSettings>(configurationSettingsSection);
 var configurationSettings = configurationSettingsSection.Get<ConfigurationSettings>()
     ?? throw new InvalidOperationException("ConfigurationSettings is not correct.");
-
-builder.Host.UseSerilog((context, services, configuration) =>
-{
-    configuration.WriteTo.File("log.txt", rollingInterval: RollingInterval.Month, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning);
-});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => options.IncludeXmlComments(
@@ -37,6 +33,13 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 builder.Services.AddHttpContextAccessor();
+
+builder.Logging.AddApplicationInsights(
+    configureTelemetryConfiguration: (config) =>
+        config.ConnectionString = builder.Configuration.GetConnectionString("AppInsightsConnection"),
+        configureApplicationInsightsLoggerOptions: (options) => { }
+    );
+builder.Logging.AddFilter<ApplicationInsightsLoggerProvider>(null, LogLevel.Trace);
 
 builder.Services.AddCors(options =>
 {
