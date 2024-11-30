@@ -8,6 +8,8 @@ env:
 on:
   push:
     branches: [ "master" ]
+    paths-ignore:
+      - 'src/Web/Client/**' 
   workflow_dispatch:
 
 permissions:
