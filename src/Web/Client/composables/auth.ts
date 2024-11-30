@@ -6,6 +6,7 @@ export const useAuth = () => {
     const api = useApi();
     const toast = useToast();
     const config = useRuntimeConfig();
+    const colorGenerator = useColorGenerator();
 
     return {
         async login(email: string, password: string) {
@@ -49,7 +50,11 @@ export const useAuth = () => {
         },
         async completeRegistration(firstName: string, lastName: string) {
             const email = (await supabaseClient.auth.getUser()).data.user?.email;
-            const model = new UserRegistrationDto(email!, firstName, lastName);
+            const model = new UserRegistrationDto();
+            model.email = email!;
+            model.firstName = firstName;
+            model.lastName = lastName;
+            model.avatarColor = colorGenerator.generateAvatarColor();
             await api.sendPostRequest('users/me/register', model);
             navigateTo('/');
         },
