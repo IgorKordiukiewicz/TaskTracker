@@ -46,14 +46,5 @@ jobs:
         env:
           SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsaWdla3FjZGlnZ3ZkbGd6aGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAzODExNzMsImV4cCI6MjA0NTk1NzE3M30.VByOPJbR0n0VK2PKDIaH3PZOxRC55AYr9TriyHqmCeI"
           SUPABASE_URL: "https://fligekqcdiggvdlgzhki.supabase.co"
-
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          action: "close"
+          NUXT_PUBLIC_API_URL: "https://tasktracker-api.azurewebsites.net"
+          NUXT_PUBLIC_URL: "https://thankful-plant-046fce203.5.azurestaticapps.net"
