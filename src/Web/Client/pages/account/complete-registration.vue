@@ -28,9 +28,6 @@ const buttonDisabled = computed(() => {
 })
 
 async function completeRegistration() {
-    const result = await auth.completeRegistration(firstName.value, lastName.value);
-    if(!result) {
-
-    }
+    await auth.completeRegistration(firstName.value, lastName.value);
 }
 </script>

@@ -60,16 +60,8 @@ export const useAuth = () => {
             model.firstName = firstName;
             model.lastName = lastName;
             model.avatarColor = colorGenerator.generateAvatarColor();
-            try {
-                await api.sendPostRequest('users/me/register', model);
-
-                navigateTo('/');
-                return true;
-            }
-            catch(error) {
-                handleError(error);
-                return false;
-            }
+            await api.sendPostRequest('users/me/register', model);
+            navigateTo('/');
         },
         async sendResetPasswordEmail(email: string) {
             await supabaseClient.auth.resetPasswordForEmail(email, {
