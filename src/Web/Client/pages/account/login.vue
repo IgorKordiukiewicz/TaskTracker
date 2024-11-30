@@ -36,7 +36,11 @@ const buttonDisabled = computed(() => {
 })
 
 async function login() {
-    await auth.login(email.value, password.value);
+    const result = await auth.login(email.value, password.value);
+    if(!result) {
+        email.value = '';
+        password.value = '';
+    }
 }
 
 </script>

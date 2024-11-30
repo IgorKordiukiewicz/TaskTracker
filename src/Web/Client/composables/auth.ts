@@ -4,9 +4,9 @@ export const useAuth = () => {
     const supabaseClient = useSupabaseClient();
     const supabaseUser = useSupabaseUser();
     const api = useApi();
-    const toast = useToast();
     const config = useRuntimeConfig();
     const colorGenerator = useColorGenerator();
+    const toast = useToast();
 
     return {
         async login(email: string, password: string) {
@@ -27,9 +27,12 @@ export const useAuth = () => {
                 else {
                     navigateTo('/');
                 }
+
+                return true;
             }
             catch(error) {
-                console.log(error); // TODO
+                handleError(error);
+                return false;
             }
         },
         async register(email: string, password: string) {
@@ -43,9 +46,11 @@ export const useAuth = () => {
                 }
 
                 navigateTo('/account/login');
+                return true;
             }
             catch(error) {
-                console.log(error); // TODO
+                handleError(error);
+                return false;
             }
         },
         async completeRegistration(firstName: string, lastName: string) {
@@ -55,8 +60,16 @@ export const useAuth = () => {
             model.firstName = firstName;
             model.lastName = lastName;
             model.avatarColor = colorGenerator.generateAvatarColor();
-            await api.sendPostRequest('users/me/register', model);
-            navigateTo('/');
+            try {
+                await api.sendPostRequest('users/me/register', model);
+
+                navigateTo('/');
+                return true;
+            }
+            catch(error) {
+                handleError(error);
+                return false;
+            }
         },
         async sendResetPasswordEmail(email: string) {
             await supabaseClient.auth.resetPasswordForEmail(email, {
@@ -79,5 +92,10 @@ export const useAuth = () => {
         getUserId() {
             return supabaseUser.value?.id;
         }
+    }
+
+    // TODO: Refactor to not duplicate between auth and api composables
+    function handleError(error: any) {
+        toast.add({ severity: 'error', 'summary': 'Request Error', detail: error?.message, life: 2000 });
     }
 }

@@ -31,6 +31,10 @@ const buttonDisabled = computed(() => {
 })
 
 async function register() {
-    await auth.register(email.value, password.value);
+    const result = await auth.register(email.value, password.value);
+    if(!result) {
+        email.value = '';
+        password.value = '';
+    }
 }
 </script>
