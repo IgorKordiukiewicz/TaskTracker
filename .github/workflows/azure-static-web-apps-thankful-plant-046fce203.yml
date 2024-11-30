@@ -40,6 +40,9 @@ jobs:
           action: "upload"
           app_location: "/src/Web/Client" # App source code path
           github_id_token: ${{ steps.idtoken.outputs.result }}
+          api_location: ""
+          output_location: "dist/"
+          app_build_command: "npm run generate"
         env:
           SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsaWdla3FjZGlnZ3ZkbGd6aGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAzODExNzMsImV4cCI6MjA0NTk1NzE3M30.VByOPJbR0n0VK2PKDIaH3PZOxRC55AYr9TriyHqmCeI"
           SUPABASE_URL: "https://fligekqcdiggvdlgzhki.supabase.co"
