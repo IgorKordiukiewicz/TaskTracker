@@ -35,9 +35,9 @@ resource "random_password" "hangfire_password" {
 
 resource "supabase_project" "supabase" {
   organization_id = var.supabase_organization
-  name = "TaskTracker1"
+  name = var.supabase_name
   database_password = random_password.db_password.result
-  region = "eu-central-1"
+  region = var.supabase_location
 
   lifecycle {
     ignore_changes = [database_password]
@@ -46,12 +46,12 @@ resource "supabase_project" "supabase" {
 
 resource "azurerm_resource_group" "rg" {
   name     = "${var.baseName}-rg"
-  location = var.location
+  location = var.azure_location
 }
 
 resource "azurerm_service_plan" "serviceplan" {
   name = "${var.baseName}-serviceplan"
-  location = var.location
+  location = var.azure_location
   resource_group_name = azurerm_resource_group.rg.name
   sku_name = "F1"
   os_type = "Windows"
@@ -59,9 +59,10 @@ resource "azurerm_service_plan" "serviceplan" {
 
 resource "azurerm_windows_web_app" "api" {
   name = "${var.baseName}-api"
-  location = var.location
+  location = var.azure_location
   resource_group_name = azurerm_resource_group.rg.name
   service_plan_id = azurerm_service_plan.serviceplan.id
+
   site_config {
       always_on = false
   }
@@ -72,18 +73,25 @@ resource "azurerm_windows_web_app" "api" {
     "Authentication__Issuer" = format("https://%s.supabase.co/auth/v1", supabase_project.supabase.id)
     "Authentication__HangfirePassword" = random_password.hangfire_password.result
   }
+
+  lifecycle {
+    ignore_changes = [ 
+      app_settings["Authentication__JwtSecret"],
+      app_settings["ConfigurationSettings__Domain"]
+     ]
+  }
 }
 
 resource "azurerm_log_analytics_workspace" "law" {
   name = "${var.baseName}-law"
-  location = var.location
+  location = var.azure_location
   resource_group_name = azurerm_resource_group.rg.name
   sku = "PerGB2018"
 }
 
 resource "azurerm_application_insights" "appinsights" {
   name = "${var.baseName}-appinsights"
-  location = var.location
+  location = var.azure_location
   resource_group_name = azurerm_resource_group.rg.name
   application_type = "web"
   workspace_id = azurerm_log_analytics_workspace.law.id
