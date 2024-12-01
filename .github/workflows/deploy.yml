@@ -22,12 +22,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up .NET Core
+      - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Set up dependency caching for faster builds
+      - name: Set up dependency caching
         uses: actions/cache@v3
         with:
           path: ~/.nuget/packages
@@ -35,13 +35,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Build with dotnet
+      - name: Build
         run: dotnet build --configuration Release
 
-      - name: dotnet publish
+      - name: Test
+        run: dotnet test --filter FullyQualifiedName!~IntegrationTests --no-build --configuration Release
+
+      - name: Publish
         run: dotnet publish -c Release -o "${{env.GITHUB_WORKSPACE}}\myapp"
 
-      - name: Upload artifact for deployment job
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: .net-app
