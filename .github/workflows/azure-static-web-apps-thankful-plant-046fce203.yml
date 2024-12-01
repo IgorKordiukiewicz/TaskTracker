@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - 'src/Web/Client/**'
+      - '.github/workflows/azure-static-web-apps-thankful-plant-046fce203.yml'
 
 jobs:
   build_and_deploy_job:
