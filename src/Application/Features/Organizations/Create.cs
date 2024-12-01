@@ -26,14 +26,14 @@ internal class CreateOrganizationHandler : IRequestHandler<CreateOrganizationCom
 
     public async Task<Result<Guid>> Handle(CreateOrganizationCommand request, CancellationToken cancellationToken)
     {
-        if (!await _context.Users.AnyAsync(x => x.Id == request.OwnerId))
+        if (!await _context.Users.AnyAsync(x => x.Id == request.OwnerId, cancellationToken))
         {
             return Result.Fail(new NotFoundError<User>(request.OwnerId));
         }
 
         var organization = Organization.Create(request.Model.Name, request.OwnerId);
 
-        await _organizationRepository.Add(organization);
+        await _organizationRepository.Add(organization, cancellationToken);
 
         return organization.Id;
     }

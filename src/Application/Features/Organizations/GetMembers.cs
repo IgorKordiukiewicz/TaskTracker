@@ -25,7 +25,7 @@ internal class GetOrganizationMembersHandler : IRequestHandler<GetOrganizationMe
     {
         var organization = await _dbContext.Organizations
             .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Id == request.OrganizationId);
+            .SingleOrDefaultAsync(x => x.Id == request.OrganizationId, cancellationToken);
         if (organization is null)
         {
             return Result.Fail<OrganizationMembersVM>(new NotFoundError<Organization>(request.OrganizationId));
@@ -33,7 +33,7 @@ internal class GetOrganizationMembersHandler : IRequestHandler<GetOrganizationMe
 
         var roleNameById = await _dbContext.OrganizationRoles
             .Where(x => x.OrganizationId == request.OrganizationId)
-            .ToDictionaryAsync(k => k.Id, v => v.Name);
+            .ToDictionaryAsync(k => k.Id, v => v.Name, cancellationToken);
 
         var members = (await _dbContext.Organizations
             .Include(x => x.Members)
@@ -52,7 +52,7 @@ internal class GetOrganizationMembersHandler : IRequestHandler<GetOrganizationMe
                 RoleName = roleNameById[member.RoleId],
                 Owner = user.Id == organization.OwnerId
             })
-            .ToListAsync())
+            .ToListAsync(cancellationToken))
             .OrderBy(x => x.Name)
             .ToList();
 

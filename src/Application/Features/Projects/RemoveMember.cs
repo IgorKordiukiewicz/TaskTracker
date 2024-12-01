@@ -27,7 +27,7 @@ internal class RemoveProjectMemberHandler : IRequestHandler<RemoveProjectMemberC
 
     public async Task<Result> Handle(RemoveProjectMemberCommand request, CancellationToken cancellationToken)
     {
-        var project = await _projectRepository.GetById(request.ProjectId);
+        var project = await _projectRepository.GetById(request.ProjectId, cancellationToken);
         if (project is null)
         {
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
@@ -43,11 +43,11 @@ internal class RemoveProjectMemberHandler : IRequestHandler<RemoveProjectMemberC
 
         return await _dbContext.ExecuteTransaction(async () =>
         {
-            await _projectRepository.Update(project);
+            await _projectRepository.Update(project, cancellationToken);
 
             await _dbContext.Tasks
                 .Where(x => x.ProjectId == project.Id && x.AssigneeId == userId!.Value)
-                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.AssigneeId, (Guid?)null));
+                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.AssigneeId, (Guid?)null), cancellationToken);
         });
     }
 }

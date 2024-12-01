@@ -23,14 +23,14 @@ internal class GetProjectMembersHandler : IRequestHandler<GetProjectMembersQuery
 
     public async Task<Result<ProjectMembersVM>> Handle(GetProjectMembersQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId))
+        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
         {
             return Result.Fail<ProjectMembersVM>(new NotFoundError<Project>(request.ProjectId));
         }
 
         var roleNameById = await _dbContext.ProjectRoles
             .Where(x => x.ProjectId == request.ProjectId)
-            .ToDictionaryAsync(k => k.Id, v => v.Name);
+            .ToDictionaryAsync(k => k.Id, v => v.Name, cancellationToken);
 
         var members = (await _dbContext.Projects
             .Include(x => x.Members)
@@ -48,7 +48,7 @@ internal class GetProjectMembersHandler : IRequestHandler<GetProjectMembersQuery
                 RoleId = member.RoleId,
                 RoleName = roleNameById[member.RoleId],
             })
-            .ToListAsync())
+            .ToListAsync(cancellationToken))
             .OrderBy(x => x.Name)
             .ToList();
 

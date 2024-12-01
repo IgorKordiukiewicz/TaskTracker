@@ -23,7 +23,7 @@ internal class GetUserProjectPermissionsHandler : IRequestHandler<GetUserProject
 
     public async Task<Result<UserProjectPermissionsVM>> Handle(GetUserProjectPermissionsQuery request, CancellationToken cancellationToken)
     {
-        if (!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId))
+        if (!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
         {
             return Result.Fail<UserProjectPermissionsVM>(new NotFoundError<Project>(request.ProjectId));
         }
@@ -34,12 +34,12 @@ internal class GetUserProjectPermissionsHandler : IRequestHandler<GetUserProject
             .SelectMany(x => x.Members)
             .Where(x => x.UserId == request.UserId)
             .Select(x => x.RoleId)
-            .FirstAsync();
+            .FirstAsync(cancellationToken);
 
         var permissions = await _dbContext.ProjectRoles
             .Where(x => x.ProjectId == request.ProjectId && x.Id == userRoleId)
             .Select(x => x.Permissions)
-            .FirstAsync();
+            .FirstAsync(cancellationToken);
 
         return new UserProjectPermissionsVM(permissions);
     }

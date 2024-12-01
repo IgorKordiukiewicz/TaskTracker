@@ -30,7 +30,7 @@ internal class RemoveOrganizationMemberHandler : IRequestHandler<RemoveOrganizat
 
     public async Task<Result> Handle(RemoveOrganizationMemberCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _organizationRepository.GetById(request.OrganizationId);
+        var organization = await _organizationRepository.GetById(request.OrganizationId, cancellationToken);
         if (organization is null)
         {
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
@@ -44,9 +44,9 @@ internal class RemoveOrganizationMemberHandler : IRequestHandler<RemoveOrganizat
             return Result.Fail(result.Errors);
         }
 
-        await _organizationRepository.Update(organization);
+        await _organizationRepository.Update(organization, cancellationToken);
 
-        _jobClient.Enqueue(() => _jobsService.RemoveUserFromOrganizationProjects(userId!.Value, request.OrganizationId));
+        _jobClient.Enqueue(() => _jobsService.RemoveUserFromOrganizationProjects(userId!.Value, request.OrganizationId, cancellationToken));
 
         return Result.Ok();
     }

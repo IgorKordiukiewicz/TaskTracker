@@ -26,7 +26,7 @@ internal class GetProjectOrganizationHandler : IRequestHandler<GetProjectOrganiz
         var organizationId = await _dbContext.Projects
             .Where(x => x.Id == request.ProjectId)
             .Select(x => x.OrganizationId)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
         if(organizationId == default)
         {
             return Result.Fail<ProjectOrganizationVM>(new NotFoundError<Project>(request.ProjectId));

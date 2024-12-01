@@ -27,7 +27,7 @@ internal class AddHierarchicalTaskRelationshipHandler : IRequestHandler<AddHiera
 
     public async Task<Result> Handle(AddHierarchicalTaskRelationshipCommand request, CancellationToken cancellationToken)
     {
-        var relationshipManager = await _relationshipManagerRepository.GetBy(x => x.ProjectId == request.ProjectId);
+        var relationshipManager = await _relationshipManagerRepository.GetBy(x => x.ProjectId == request.ProjectId, cancellationToken);
         if (relationshipManager is null)
         {
             return Result.Fail(new NotFoundError<TaskRelationshipManager>($"project ID: {request.ProjectId}"));
@@ -36,7 +36,7 @@ internal class AddHierarchicalTaskRelationshipHandler : IRequestHandler<AddHiera
         var projectTasksIds = await _dbContext.Tasks
             .Where(x => x.ProjectId == request.ProjectId)
             .Select(x => x.Id)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         var result = relationshipManager.AddHierarchicalRelationship(request.Model.ParentId, request.Model.ChildId, projectTasksIds);
         if(result.IsFailed)
@@ -44,7 +44,7 @@ internal class AddHierarchicalTaskRelationshipHandler : IRequestHandler<AddHiera
             return Result.Fail(result.Errors);
         }
 
-        await _relationshipManagerRepository.Update(relationshipManager);
+        await _relationshipManagerRepository.Update(relationshipManager, cancellationToken);
         return Result.Ok();
     }
 }

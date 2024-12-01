@@ -23,7 +23,7 @@ internal class GetUserOrganizationPermissionsHandler : IRequestHandler<GetUserOr
 
     public async Task<Result<UserOrganizationPermissionsVM>> Handle(GetUserOrganizationPermissionsQuery request, CancellationToken cancellationToken)
     {
-        if (!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
+        if (!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId, cancellationToken))
         {
             return Result.Fail<UserOrganizationPermissionsVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
@@ -34,12 +34,12 @@ internal class GetUserOrganizationPermissionsHandler : IRequestHandler<GetUserOr
             .SelectMany(x => x.Members)
             .Where(x => x.UserId == request.UserId)
             .Select(x => x.RoleId)
-            .FirstAsync();
+            .FirstAsync(cancellationToken);
 
         var permissions = await _dbContext.OrganizationRoles
             .Where(x => x.OrganizationId == request.OrganizationId && x.Id == userRoleId)
             .Select(x => x.Permissions)
-            .FirstAsync();
+            .FirstAsync(cancellationToken);
 
         return new UserOrganizationPermissionsVM(permissions);
     }

@@ -5,7 +5,7 @@ namespace Application.Common;
 
 public interface IJobsService
 {
-    Task RemoveUserFromOrganizationProjects(Guid userId, Guid organizationId);
+    Task RemoveUserFromOrganizationProjects(Guid userId, Guid organizationId, CancellationToken cancellationToken = default);
 }
 
 public class JobsService : IJobsService
@@ -21,23 +21,23 @@ public class JobsService : IJobsService
         _logger = logger;
     }
 
-    public async Task RemoveUserFromOrganizationProjects(Guid userId, Guid organizationId)
+    public async Task RemoveUserFromOrganizationProjects(Guid userId, Guid organizationId, CancellationToken cancellationToken = default)
     {
         var projectsAndMembers = await _dbContext.Projects
             .Where(x => x.OrganizationId == organizationId && x.Members.Any(xx => xx.UserId == userId))
             .Select(v => new { ProjectId = v.Id, MemberId = v.Members.First(x => x.UserId == userId).Id })
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         foreach (var projectAndMember in projectsAndMembers)
         {
-            var result = await _mediator.Send(new RemoveProjectMemberCommand(projectAndMember.ProjectId, new(projectAndMember.MemberId)));
+            var result = await _mediator.Send(new RemoveProjectMemberCommand(projectAndMember.ProjectId, new(projectAndMember.MemberId)), cancellationToken);
             if(result.IsFailed)
             {
                 _logger.LogCritical("Removing user (ID: {@userId}) from organization (ID: {@organizationId}) failed!", userId, organizationId);
                 // TODO: throw?
             }
 
-            var count = await _dbContext.ProjectMembers.CountAsync();
+            var count = await _dbContext.ProjectMembers.CountAsync(cancellationToken);
         }
     }
 }

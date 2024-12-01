@@ -26,7 +26,7 @@ internal class GetOrganizationNavDataHandler : IRequestHandler<GetOrganizationNa
         var navData = await _dbContext.Organizations
             .Where(x => x.Id == request.OrganizationId)
             .Select(x => new NavigationItemVM(x.Id, x.Name))
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(cancellationToken);
 
         if(navData is null)
         {

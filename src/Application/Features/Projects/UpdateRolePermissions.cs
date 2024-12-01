@@ -25,7 +25,7 @@ internal class UpdateProjectRolePermissionsHandler : IRequestHandler<UpdateProje
 
     public async Task<Result> Handle(UpdateProjectRolePermissionsCommand request, CancellationToken cancellationToken)
     {
-        var project = await _projectRepository.GetById(request.ProjectId);
+        var project = await _projectRepository.GetById(request.ProjectId, cancellationToken);
         if(project is null)
         {
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
@@ -37,7 +37,7 @@ internal class UpdateProjectRolePermissionsHandler : IRequestHandler<UpdateProje
             return Result.Fail(result.Errors);
         }
 
-        await _projectRepository.Update(project);
+        await _projectRepository.Update(project, cancellationToken);
         return Result.Ok();
     }
 }

@@ -18,7 +18,7 @@ internal class GetUserHandler : IRequestHandler<GetUserQuery, Result<UserVM>>
         var user = await _dbContext.Users
             .AsNoTracking()
             .Where(x => x.Id == request.Id)
-            .SingleAsync();
+            .SingleAsync(cancellationToken);
 
         return Result.Ok(new UserVM
         {

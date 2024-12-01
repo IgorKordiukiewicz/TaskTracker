@@ -23,7 +23,7 @@ internal class GetProjectNavDataHandler : IRequestHandler<GetProjectNavDataQuery
 
     public async Task<Result<ProjectNavigationVM>> Handle(GetProjectNavDataQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId))
+        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
         {
             return Result.Fail<ProjectNavigationVM>(new NotFoundError<Project>(request.ProjectId));
         }
@@ -34,7 +34,7 @@ internal class GetProjectNavDataHandler : IRequestHandler<GetProjectNavDataQuery
             project => project.OrganizationId,
             organization => organization.Id,
             (project, organization) => new ProjectNavigationVM(new(project.Id, project.Name), new(organization.Id, organization.Name)))
-            .SingleAsync();
+            .SingleAsync(cancellationToken);
 
         return navData;
     }

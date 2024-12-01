@@ -25,7 +25,7 @@ internal class UpdateOrganizationRoleNameHandler : IRequestHandler<UpdateOrganiz
 
     public async Task<Result> Handle(UpdateOrganizationRoleNameCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _organizationRepository.GetById(request.OrganizationId);
+        var organization = await _organizationRepository.GetById(request.OrganizationId, cancellationToken);
         if (organization is null)
         {
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
@@ -37,7 +37,7 @@ internal class UpdateOrganizationRoleNameHandler : IRequestHandler<UpdateOrganiz
             return Result.Fail(result.Errors);
         }
 
-        await _organizationRepository.Update(organization);
+        await _organizationRepository.Update(organization, cancellationToken);
         return Result.Ok();
     }
 }

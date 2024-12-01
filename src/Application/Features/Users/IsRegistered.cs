@@ -21,6 +21,6 @@ internal class IsUserRegisteredHandler : IRequestHandler<IsUserRegisteredQuery, 
 
     public async Task<Result<bool>> Handle(IsUserRegisteredQuery request, CancellationToken cancellationToken)
     {
-        return await _dbContext.Users.AnyAsync(x => x.Id == request.Id);
+        return await _dbContext.Users.AnyAsync(x => x.Id == request.Id, cancellationToken);
     }
 }

@@ -2,5 +2,5 @@
 
 public class ConfigurationSettings
 {
-    public string Domain { get; init; }
+    public required string Domain { get; init; }
 }

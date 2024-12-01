@@ -24,14 +24,14 @@ internal class UpdateProjectNameHandler : IRequestHandler<UpdateProjectNameComma
 
     public async Task<Result> Handle(UpdateProjectNameCommand request, CancellationToken cancellationToken)
     {
-        var project = await _projectRepository.GetById(request.ProjectId);
+        var project = await _projectRepository.GetById(request.ProjectId, cancellationToken);
         if(project is null)
         {
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
         project.Name = request.Model.Name;
-        await _projectRepository.Update(project);
+        await _projectRepository.Update(project, cancellationToken);
 
         return Result.Ok();
     }

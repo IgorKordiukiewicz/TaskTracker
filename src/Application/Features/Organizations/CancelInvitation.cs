@@ -23,7 +23,7 @@ internal class CancelOrganizationInvitationHandler : IRequestHandler<CancelOrgan
 
     public async Task<Result> Handle(CancelOrganizationInvitationCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _organizationRepository.GetBy(x => x.Invitations.Any(xx => xx.Id == request.InvitationId));
+        var organization = await _organizationRepository.GetBy(x => x.Invitations.Any(xx => xx.Id == request.InvitationId), cancellationToken);
         if (organization is null)
         {
             return Result.Fail(new NotFoundError<Organization>($"invitation ID: {request.InvitationId}"));
@@ -35,7 +35,7 @@ internal class CancelOrganizationInvitationHandler : IRequestHandler<CancelOrgan
             return Result.Fail(result.Errors);
         }
 
-        await _organizationRepository.Update(organization);
+        await _organizationRepository.Update(organization, cancellationToken);
         return Result.Ok();
     }
 }

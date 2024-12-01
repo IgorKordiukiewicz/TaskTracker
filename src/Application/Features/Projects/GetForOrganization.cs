@@ -23,7 +23,7 @@ internal class GetProjectsForOrganizationHandler : IRequestHandler<GetProjectsFo
 
     public async Task<Result<ProjectsVM>> Handle(GetProjectsForOrganizationQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
+        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId, cancellationToken))
         {
             return Result.Fail<ProjectsVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
@@ -37,7 +37,7 @@ internal class GetProjectsForOrganizationHandler : IRequestHandler<GetProjectsFo
                 Name = x.Name,
             })
             .OrderBy(x => x.Name)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return Result.Ok(new ProjectsVM(projects));
     }

@@ -23,7 +23,7 @@ internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrg
     {
         var user = await _dbContext.Users
             .AsNoTracking()
-            .FirstAsync(x => x.Id == request.UserId);
+            .FirstAsync(x => x.Id == request.UserId, cancellationToken);
 
         var invitations = await _dbContext.OrganizationInvitations
             .Where(x => x.UserId == user.Id && x.State == OrganizationInvitationState.Pending)
@@ -31,7 +31,7 @@ internal class GetOrganizationInvitationsForUserHandler : IRequestHandler<GetOrg
             invitation => invitation.OrganizationId,
             organization => organization.Id,
             (invitation, organization) => new UserOrganizationInvitationVM(invitation.Id, organization.Name))
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return Result.Ok(new UserOrganizationInvitationsVM(invitations));
     }

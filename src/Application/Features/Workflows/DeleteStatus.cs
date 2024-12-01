@@ -27,13 +27,13 @@ internal class DeleteWorkflowStatusHandler : IRequestHandler<DeleteWorkflowStatu
 
     public async Task<Result> Handle(DeleteWorkflowStatusCommand request, CancellationToken cancellationToken)
     {
-        var workflow = await _workflowRepository.GetById(request.WorkflowId);
+        var workflow = await _workflowRepository.GetById(request.WorkflowId, cancellationToken);
         if(workflow is null)
         {
             return Result.Fail(new NotFoundError<Workflow>(request.WorkflowId));
         }
 
-        if(await _dbContext.Tasks.AnyAsync(x => x.ProjectId == workflow.ProjectId && x.StatusId == request.Model.StatusId))
+        if(await _dbContext.Tasks.AnyAsync(x => x.ProjectId == workflow.ProjectId && x.StatusId == request.Model.StatusId, cancellationToken))
         {
             return Result.Fail(new DomainError("Status in use can't be deleted."));
         }
@@ -44,7 +44,7 @@ internal class DeleteWorkflowStatusHandler : IRequestHandler<DeleteWorkflowStatu
             return result;
         }
 
-        await _workflowRepository.Update(workflow);
+        await _workflowRepository.Update(workflow, cancellationToken);
         return Result.Ok();
     }
 }

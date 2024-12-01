@@ -23,7 +23,7 @@ internal class GetProjectRolesHandler : IRequestHandler<GetProjectRolesQuery, Re
 
     public async Task<Result<RolesVM<ProjectPermissions>>> Handle(GetProjectRolesQuery request, CancellationToken cancellationToken)
     {
-        if (!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId))
+        if (!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
         {
             return Result.Fail<RolesVM<ProjectPermissions>>(new NotFoundError<Project>(request.ProjectId));
         }
@@ -39,7 +39,7 @@ internal class GetProjectRolesHandler : IRequestHandler<GetProjectRolesQuery, Re
                 Owner = x.IsOwner()
             })
             .OrderBy(x => x.Name)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return Result.Ok(new RolesVM<ProjectPermissions>(roles));
     }

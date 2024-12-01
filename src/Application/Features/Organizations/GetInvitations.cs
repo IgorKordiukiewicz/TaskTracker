@@ -23,7 +23,7 @@ internal class GetOrganizationInvitationsHandler : IRequestHandler<GetOrganizati
 
     public async Task<Result<OrganizationInvitationsVM>> Handle(GetOrganizationInvitationsQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
+        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId, cancellationToken))
         {
             return Result.Fail<OrganizationInvitationsVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
@@ -39,7 +39,7 @@ internal class GetOrganizationInvitationsHandler : IRequestHandler<GetOrganizati
         var invitations = await query
             .OrderByDescending(x => x.Invitation.CreatedAt)
             .Select(x => new OrganizationInvitationVM(x.Invitation.Id, x.User.Email, x.Invitation.State, x.Invitation.CreatedAt, x.Invitation.FinalizedAt))
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return Result.Ok(new OrganizationInvitationsVM(invitations));
     }

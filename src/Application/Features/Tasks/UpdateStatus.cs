@@ -26,13 +26,13 @@ internal class UpdateTaskStatusHandler : IRequestHandler<UpdateTaskStatusCommand
 
     public async Task<Result> Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
     {
-        var task = await _taskRepository.GetById(request.TaskId);
+        var task = await _taskRepository.GetById(request.TaskId, cancellationToken);
         if(task is null)
         {
             return Result.Fail(new NotFoundError<Domain.Tasks.Task>(request.TaskId));
         }
 
-        var workflow = await _workflowRepository.GetBy(x => x.ProjectId == task.ProjectId);
+        var workflow = await _workflowRepository.GetBy(x => x.ProjectId == task.ProjectId, cancellationToken);
         if(!workflow!.DoesStatusExist(request.Model.StatusId))
         {
             return Result.Fail(new NotFoundError<Domain.Workflows.TaskStatus>(request.Model.StatusId));
@@ -44,7 +44,7 @@ internal class UpdateTaskStatusHandler : IRequestHandler<UpdateTaskStatusCommand
             return Result.Fail(result.Errors);
         }
 
-        await _taskRepository.Update(task);
+        await _taskRepository.Update(task, cancellationToken);
 
         return Result.Ok();
     }

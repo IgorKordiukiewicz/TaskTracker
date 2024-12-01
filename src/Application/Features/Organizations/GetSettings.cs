@@ -23,7 +23,7 @@ internal class GetOrganizationSettingsHandler : IRequestHandler<GetOrganizationS
 
     public async Task<Result<OrganizationSettingsVM>> Handle(GetOrganizationSettingsQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
+        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId, cancellationToken))
         {
             return Result.Fail<OrganizationSettingsVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
@@ -31,6 +31,6 @@ internal class GetOrganizationSettingsHandler : IRequestHandler<GetOrganizationS
         return await _dbContext.Organizations
             .Where(x => x.Id == request.OrganizationId)
             .Select(x => new OrganizationSettingsVM(x.Name, x.OwnerId))
-            .FirstAsync();
+            .FirstAsync(cancellationToken);
     }
 }

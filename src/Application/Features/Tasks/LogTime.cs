@@ -28,7 +28,7 @@ internal class LogTaskTimeHandler : IRequestHandler<LogTaskTimeCommand, Result>
 
     public async Task<Result> Handle(LogTaskTimeCommand request, CancellationToken cancellationToken)
     {
-        var task = await _taskRepository.GetById(request.TaskId);
+        var task = await _taskRepository.GetById(request.TaskId, cancellationToken);
         if (task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
@@ -36,7 +36,7 @@ internal class LogTaskTimeHandler : IRequestHandler<LogTaskTimeCommand, Result>
         
         task.LogTime(request.Model.Minutes, DateOnly.FromDateTime(request.Model.Day), request.UserId);
         
-        await _taskRepository.Update(task);
+        await _taskRepository.Update(task, cancellationToken);
         return Result.Ok();
     }
 }

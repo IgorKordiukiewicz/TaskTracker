@@ -24,10 +24,10 @@ internal class UpdateUserNameHandler : IRequestHandler<UpdateUserNameCommand, Re
 
     public async Task<Result> Handle(UpdateUserNameCommand request, CancellationToken cancellationToken)
     {
-        var user = (await _userRepository.GetById(request.Id))!;
+        var user = (await _userRepository.GetById(request.Id, cancellationToken))!;
 
         user.UpdateName(request.Model.FirstName, request.Model.LastName);
-        await _userRepository.Update(user);
+        await _userRepository.Update(user, cancellationToken);
 
         return Result.Ok();
     }

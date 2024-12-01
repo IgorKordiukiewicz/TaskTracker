@@ -28,7 +28,7 @@ internal class GetUsersAvailableForProjectHandler : IRequestHandler<GetUsersAvai
             .Include(x => x.Members)
             .Where(x => x.Id == request.ProjectId)
             .Select(x => x.Members.Select(xx => xx.UserId))
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellationToken);
         if (projectMembersUserIds is null)
         {
             return Result.Fail<UsersSearchVM>(new NotFoundError<Project>(request.ProjectId));
@@ -37,13 +37,13 @@ internal class GetUsersAvailableForProjectHandler : IRequestHandler<GetUsersAvai
         var organizationId = await _dbContext.Projects
             .Where(x => x.Id == request.ProjectId)
             .Select(x => x.OrganizationId)
-            .FirstAsync();
+            .FirstAsync(cancellationToken);
 
         var organizationMembersUserIds = await _dbContext.Organizations
             .Include(x => x.Members)
             .Where(x => x.Id == organizationId)
             .Select(x => x.Members.Select(xx => xx.UserId))
-            .FirstAsync();
+            .FirstAsync(cancellationToken);
 
         var usersIds = organizationMembersUserIds.Except(projectMembersUserIds)
             .ToHashSet();
@@ -55,7 +55,7 @@ internal class GetUsersAvailableForProjectHandler : IRequestHandler<GetUsersAvai
                 Id = x.Id,
                 Email = x.Email,
             })
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return new UsersSearchVM(users);
     }

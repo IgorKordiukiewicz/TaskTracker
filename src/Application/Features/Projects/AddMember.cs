@@ -26,7 +26,7 @@ internal class AddProjectMemberHandler : IRequestHandler<AddProjectMemberCommand
 
     public async Task<Result> Handle(AddProjectMemberCommand request, CancellationToken cancellationToken)
     {
-        var project = await _projectRepository.GetById(request.ProjectId);
+        var project = await _projectRepository.GetById(request.ProjectId, cancellationToken);
         if(project is null)
         {
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
@@ -34,7 +34,7 @@ internal class AddProjectMemberHandler : IRequestHandler<AddProjectMemberCommand
 
         var isUserAMember = await _dbContext.Organizations
             .Include(x => x.Members)
-            .AnyAsync(x => x.Id == project.OrganizationId && x.Members.Any(xx => xx.UserId == request.Model.UserId));
+            .AnyAsync(x => x.Id == project.OrganizationId && x.Members.Any(xx => xx.UserId == request.Model.UserId), cancellationToken);
         if (!isUserAMember)
         {
             return Result.Fail(new ApplicationError("User is not a member of the project's organization."));
@@ -46,7 +46,7 @@ internal class AddProjectMemberHandler : IRequestHandler<AddProjectMemberCommand
             return Result.Fail(result.Errors);
         }
 
-        await _projectRepository.Update(project);
+        await _projectRepository.Update(project, cancellationToken);
 
         return Result.Ok();
     }

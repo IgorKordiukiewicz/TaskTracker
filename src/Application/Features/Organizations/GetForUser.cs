@@ -30,7 +30,7 @@ internal class GetOrganizationsForUserHandler : IRequestHandler<GetOrganizations
                 Name = x.Name,
             })
             .OrderBy(x => x.Name)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return Result.Ok<OrganizationsForUserVM>(new(organizations));
     }

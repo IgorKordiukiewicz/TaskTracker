@@ -24,14 +24,14 @@ internal class DeleteTaskHandler : IRequestHandler<DeleteTaskCommand, Result>
 
     public async Task<Result> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId))
+        if(!await _dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId, cancellationToken))
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
         return await _dbContext.ExecuteTransaction(async () =>
         {
-            await _dbContext.Tasks.DeleteAll(x => x.Id == request.TaskId);
+            await _dbContext.Tasks.DeleteAll(x => x.Id == request.TaskId, cancellationToken);
         });
     }
 }

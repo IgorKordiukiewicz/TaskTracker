@@ -24,14 +24,14 @@ internal class UpdateTaskEstimatedTimeHandler : IRequestHandler<UpdateTaskEstima
 
     public async Task<Result> Handle(UpdateTaskEstimatedTimeCommand request, CancellationToken cancellationToken)
     {
-        var task = await _taskRepository.GetById(request.TaskId);
+        var task = await _taskRepository.GetById(request.TaskId, cancellationToken);
         if (task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
         
         task.UpdateEstimatedTime(request.Model.Minutes);
-        await _taskRepository.Update(task);
+        await _taskRepository.Update(task, cancellationToken);
 
         return Result.Ok();
     }

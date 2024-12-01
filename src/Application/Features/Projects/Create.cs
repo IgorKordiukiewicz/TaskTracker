@@ -36,12 +36,12 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
 
     public async Task<Result<Guid>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.Model.OrganizationId))
+        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.Model.OrganizationId, cancellationToken))
         {
             return Result.Fail<Guid>(new NotFoundError<Organization>(request.Model.OrganizationId));
         }
 
-        if(await _projectRepository.Exists(x => x.OrganizationId == request.Model.OrganizationId && x.Name == request.Model.Name))
+        if(await _projectRepository.Exists(x => x.OrganizationId == request.Model.OrganizationId && x.Name == request.Model.Name, cancellationToken))
         {
             return Result.Fail<Guid>(new ApplicationError("Project with the same name already exists in this organization."));
         }
@@ -52,9 +52,9 @@ internal class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Resu
 
         var result = await _dbContext.ExecuteTransaction(async () =>
         {           
-            await _projectRepository.Add(project);
-            await _workflowRepository.Add(workflow);
-            await _taskRelationshipManagerRepository.Add(taskRelationshipManager);
+            await _projectRepository.Add(project, cancellationToken);
+            await _workflowRepository.Add(workflow, cancellationToken);
+            await _taskRelationshipManagerRepository.Add(taskRelationshipManager, cancellationToken);
         });
 
         if(result.IsFailed)

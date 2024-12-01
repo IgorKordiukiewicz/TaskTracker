@@ -24,7 +24,7 @@ internal class ChangeInitialWorkflowStatusHandler : IRequestHandler<ChangeInitia
 
     public async Task<Result> Handle(ChangeInitialWorkflowStatusCommand request, CancellationToken cancellationToken)
     {
-        var workflow = await _workflowRepository.GetById(request.WorkflowId);
+        var workflow = await _workflowRepository.GetById(request.WorkflowId, cancellationToken);
         if (workflow is null)
         {
             return Result.Fail(new NotFoundError<Workflow>(request.WorkflowId));
@@ -36,7 +36,7 @@ internal class ChangeInitialWorkflowStatusHandler : IRequestHandler<ChangeInitia
             return Result.Fail(result.Errors);
         }
 
-        await _workflowRepository.Update(workflow);
+        await _workflowRepository.Update(workflow, cancellationToken);
         return Result.Ok();
     }
 }

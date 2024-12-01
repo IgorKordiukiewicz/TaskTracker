@@ -29,7 +29,7 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
 
     public async Task<Result<Guid>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId))
+        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
         {
             return Result.Fail<Guid>(new NotFoundError<Project>(request.ProjectId));
         }
@@ -40,7 +40,7 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
             var member = (await _dbContext.Projects
                 .AsNoTracking()
                 .Include(x => x.Members)
-                .SingleAsync(x => x.Id == request.ProjectId))
+                .SingleAsync(x => x.Id == request.ProjectId, cancellationToken))
                 .Members.SingleOrDefault(x => x.Id == request.Model.AssigneeMemberId);
             if (member is null)
             {
@@ -52,18 +52,18 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
 
         var shortId = (await _dbContext.Tasks
             .Where(x => x.ProjectId == request.ProjectId)
-            .CountAsync()) + 1;
+            .CountAsync(cancellationToken)) + 1;
 
         var initialTaskStatus = await _dbContext.Workflows
             .Include(x => x.Statuses)
             .Where(x => x.ProjectId == request.ProjectId)
             .SelectMany(x => x.Statuses)
-            .FirstAsync(x => x.Initial);
+            .FirstAsync(x => x.Initial, cancellationToken);
 
         var task = Task.Create(shortId, request.ProjectId, request.Model.Title, request.Model.Description, 
             initialTaskStatus.Id, assigneeId, request.Model.Priority);
 
-        await _taskRepository.Add(task);
+        await _taskRepository.Add(task, cancellationToken);
 
         return task.Id;
     }

@@ -24,7 +24,7 @@ internal class DeleteProjectRoleHandler : IRequestHandler<DeleteOrganizationRole
 
     public async Task<Result> Handle(DeleteOrganizationRoleCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _organizationRepository.GetById(request.OrganizationId);
+        var organization = await _organizationRepository.GetById(request.OrganizationId, cancellationToken);
         if (organization is null)
         {
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
@@ -36,7 +36,7 @@ internal class DeleteProjectRoleHandler : IRequestHandler<DeleteOrganizationRole
             return Result.Fail(result.Errors);
         }
 
-        await _organizationRepository.Update(organization);
+        await _organizationRepository.Update(organization, cancellationToken);
         return Result.Ok();
     }
 }

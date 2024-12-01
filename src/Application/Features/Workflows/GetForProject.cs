@@ -27,7 +27,7 @@ internal class GetWorkflowForProjectHandler : IRequestHandler<GetWorkflowForProj
             .AsNoTracking()
             .Include(x => x.Statuses)
             .Include(x => x.Transitions)
-            .SingleOrDefaultAsync(x => x.ProjectId == request.ProjectId);
+            .SingleOrDefaultAsync(x => x.ProjectId == request.ProjectId, cancellationToken);
         if(workflow is null)
         {
             return Result.Fail<WorkflowVM>(new NotFoundError<Workflow>($"project ID: {request.ProjectId}"));

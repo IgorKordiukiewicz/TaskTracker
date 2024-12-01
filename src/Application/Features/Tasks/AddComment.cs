@@ -30,7 +30,7 @@ internal class AddTaskCommentHandler : IRequestHandler<AddTaskCommentCommand, Re
 
     public async Task<Result> Handle(AddTaskCommentCommand request, CancellationToken cancellationToken)
     {
-        var task = await _taskRepository.GetById(request.TaskId);
+        var task = await _taskRepository.GetById(request.TaskId, cancellationToken);
         if(task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
@@ -38,7 +38,7 @@ internal class AddTaskCommentHandler : IRequestHandler<AddTaskCommentCommand, Re
 
         task.AddComment(request.Model.Content, request.UserId, _dateTimeProvider.Now());
 
-        await _taskRepository.Update(task);
+        await _taskRepository.Update(task, cancellationToken);
         return Result.Ok();
     }
 }

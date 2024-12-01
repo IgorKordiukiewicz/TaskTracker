@@ -22,7 +22,7 @@ internal class GetAllUsersPresentationDataHandler : IRequestHandler<GetAllUsersP
             .Where(x => x.Members.Any(xx => xx.UserId == request.UserId))
             .SelectMany(x => x.Members.Select(xx => xx.UserId))
             .Distinct()
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         var presentationData = await _dbContext.UsersPresentationData
             .Where(x => possibleUsersIds.Contains(x.UserId))
@@ -30,7 +30,7 @@ internal class GetAllUsersPresentationDataHandler : IRequestHandler<GetAllUsersP
             presentationData => presentationData.UserId,
             user => user.Id,
             (presentationData, user) => new UserPresentationDataVM(user.Id, user.FirstName, user.LastName, presentationData.AvatarColor))
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return Result.Ok(new UsersPresentationDataVM(presentationData));
     }

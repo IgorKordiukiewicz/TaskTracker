@@ -27,7 +27,7 @@ internal class UpdateTaskAssigneeHandler : IRequestHandler<UpdateTaskAssigneeCom
 
     public async Task<Result> Handle(UpdateTaskAssigneeCommand request, CancellationToken cancellationToken)
     {
-        var task = await _taskRepository.GetById(request.TaskId);
+        var task = await _taskRepository.GetById(request.TaskId, cancellationToken);
         if(task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
@@ -38,7 +38,7 @@ internal class UpdateTaskAssigneeHandler : IRequestHandler<UpdateTaskAssigneeCom
             var member = (await _dbContext.Projects
                 .AsNoTracking()
                 .Include(x => x.Members)
-                .SingleAsync(x => x.Id == task.ProjectId))
+                .SingleAsync(x => x.Id == task.ProjectId, cancellationToken))
                 .Members.SingleOrDefault(x => x.Id == request.Model.MemberId);
             if (member is null)
             {
@@ -52,7 +52,7 @@ internal class UpdateTaskAssigneeHandler : IRequestHandler<UpdateTaskAssigneeCom
             task.Unassign();
         }
 
-        await _taskRepository.Update(task);
+        await _taskRepository.Update(task, cancellationToken);
         
         return Result.Ok();
     }

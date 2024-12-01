@@ -24,14 +24,14 @@ internal class UpdateTaskPriorityHandler : IRequestHandler<UpdateTaskPriorityCom
 
     public async Task<Result> Handle(UpdateTaskPriorityCommand request, CancellationToken cancellationToken)
     {
-        var task = await _taskRepository.GetById(request.TaskId);
+        var task = await _taskRepository.GetById(request.TaskId, cancellationToken);
         if(task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
         task.UpdatePriority(request.Model.Priority);
-        await _taskRepository.Update(task);
+        await _taskRepository.Update(task, cancellationToken);
 
         return Result.Ok();
     }

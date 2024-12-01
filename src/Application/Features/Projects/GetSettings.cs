@@ -23,7 +23,7 @@ internal class GetProjectSettingsHandler : IRequestHandler<GetProjectSettingsQue
 
     public async Task<Result<ProjectSettingsVM>> Handle(GetProjectSettingsQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId)) 
+        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken)) 
         {
             return Result.Fail<ProjectSettingsVM>(new NotFoundError<Project>(request.ProjectId));
         }
@@ -31,6 +31,6 @@ internal class GetProjectSettingsHandler : IRequestHandler<GetProjectSettingsQue
         return await _dbContext.Projects
             .Where(x => x.Id == request.ProjectId)
             .Select(x => new ProjectSettingsVM(x.Name))
-            .FirstAsync();
+            .FirstAsync(cancellationToken);
     }
 }

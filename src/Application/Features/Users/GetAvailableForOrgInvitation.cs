@@ -52,7 +52,7 @@ internal class GetUsersAvailableForOrganizationInvitationHandler : IRequestHandl
                 Id = x.Id,
                 Email = x.Email,
             })
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return Result.Ok(new UsersSearchVM(users));
     }

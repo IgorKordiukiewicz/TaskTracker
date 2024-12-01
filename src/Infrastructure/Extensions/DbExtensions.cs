@@ -23,11 +23,11 @@ public static class DbExtensions
         }
     }
 
-    public static async Task DeleteAll<TEntity>(this DbSet<TEntity> entities, Expression<Func<TEntity, bool>> predicate)
+    public static async Task DeleteAll<TEntity>(this DbSet<TEntity> entities, Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
         where TEntity : class
     {
         await entities
             .Where(predicate)
-            .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true));
+            .ExecuteUpdateAsync(x => x.SetProperty(p => EF.Property<bool>(p, "IsDeleted"), true), cancellationToken);
     }
 }

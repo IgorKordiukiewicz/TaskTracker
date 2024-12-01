@@ -23,7 +23,7 @@ internal class GetTaskActivitiesHandler : IRequestHandler<GetTaskActivitiesQuery
 
     public async Task<Result<TaskActivitiesVM>> Handle(GetTaskActivitiesQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId))
+        if(!await _dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId, cancellationToken))
         {
             return Result.Fail<TaskActivitiesVM>(new NotFoundError<Domain.Tasks.Task>(request.TaskId));
         }
@@ -32,7 +32,7 @@ internal class GetTaskActivitiesHandler : IRequestHandler<GetTaskActivitiesQuery
             .AsNoTracking()
             .Where(x => x.TaskId == request.TaskId)
             .OrderByDescending(x => x.OccurredAt)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         var userIds = new HashSet<Guid>();
         var statusIds = new HashSet<Guid>();
@@ -50,11 +50,11 @@ internal class GetTaskActivitiesHandler : IRequestHandler<GetTaskActivitiesQuery
 
         var userNameById = await _dbContext.Users
             .Where(x => userIds.Contains(x.Id))
-            .ToDictionaryAsync(k => k.Id, v => v.FullName);
+            .ToDictionaryAsync(k => k.Id, v => v.FullName, cancellationToken);
 
         var statusNameById = await _dbContext.TaskStatuses
             .Where(x => statusIds.Contains(x.Id))
-            .ToDictionaryAsync(k => k.Id, v => v.Name);
+            .ToDictionaryAsync(k => k.Id, v => v.Name, cancellationToken);
 
         var updatedActivities = new List<TaskActivityVM>();
         foreach(var activity in activities)

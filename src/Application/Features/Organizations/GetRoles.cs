@@ -23,7 +23,7 @@ internal class GetOrganizationRolesHandler : IRequestHandler<GetOrganizationRole
 
     public async Task<Result<RolesVM<OrganizationPermissions>>> Handle(GetOrganizationRolesQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
+        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId, cancellationToken))
         {
             return Result.Fail<RolesVM<OrganizationPermissions>>(new NotFoundError<Organization>(request.OrganizationId));
         }
@@ -39,7 +39,7 @@ internal class GetOrganizationRolesHandler : IRequestHandler<GetOrganizationRole
                 Owner = x.IsOwner()
             })
             .OrderBy(x => x.Name)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return Result.Ok(new RolesVM<OrganizationPermissions>(roles));
     }

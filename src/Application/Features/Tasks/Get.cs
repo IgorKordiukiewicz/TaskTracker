@@ -30,7 +30,7 @@ internal class GetTasksHandler : IRequestHandler<GetTasksQuery, Result<TasksVM>>
             .Include(x => x.Statuses)
             .Include(x => x.Transitions)
             .Where(x => x.ProjectId == request.ProjectId)
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(cancellationToken);
 
         if(workflow is null)
         {
@@ -64,7 +64,7 @@ internal class GetTasksHandler : IRequestHandler<GetTasksQuery, Result<TasksVM>>
                 Status = status.Id,
             })
             .OrderByDescending(x => x.ShortId)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         var allTaskStatuses = workflow.Statuses
             .Select(x => new TaskStatusDetailedVM(x.Id, x.Name, x.DisplayOrder))

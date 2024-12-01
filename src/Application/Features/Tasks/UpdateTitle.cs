@@ -24,14 +24,14 @@ internal class UpdateTaskTitleHandler : IRequestHandler<UpdateTaskTitleCommand, 
 
     public async Task<Result> Handle(UpdateTaskTitleCommand request, CancellationToken cancellationToken)
     {
-        var task = await _repository.GetById(request.TaskId);
+        var task = await _repository.GetById(request.TaskId, cancellationToken);
         if (task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
         task.UpdateTitle(request.Model.Title);
-        await _repository.Update(task);
+        await _repository.Update(task, cancellationToken);
 
         return Result.Ok();
     }

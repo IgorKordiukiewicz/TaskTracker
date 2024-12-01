@@ -21,7 +21,7 @@ internal class GetTaskCommentsHandler : IRequestHandler<GetTaskCommentsQuery, Re
 
     public async Task<Result<TaskCommentsVM>> Handle(GetTaskCommentsQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId)) 
+        if(!await _dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId, cancellationToken)) 
         {
             return Result.Fail<TaskCommentsVM>(new NotFoundError<Domain.Tasks.Task>(request.TaskId));
         }
@@ -33,7 +33,7 @@ internal class GetTaskCommentsHandler : IRequestHandler<GetTaskCommentsQuery, Re
             comment => comment.AuthorId,
             user => user.Id,
             (comment, user) => new TaskCommentVM(comment.Content, user.Id, user.FullName, comment.CreatedAt))
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return Result.Ok(new TaskCommentsVM(comments));
     }

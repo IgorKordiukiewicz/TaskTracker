@@ -29,7 +29,7 @@ internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result
 
     public async Task<Result> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
-        if(await _userRepository.Exists(x => x.Id == request.Id))
+        if(await _userRepository.Exists(x => x.Id == request.Id, cancellationToken))
         {
             return Result.Fail(new ApplicationError("User is already registered in the database."));
         }
@@ -38,14 +38,14 @@ internal class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Result
 
         return await _dbContext.ExecuteTransaction(async () =>
         {
-            await _userRepository.Add(user);
+            await _userRepository.Add(user, cancellationToken);
 
             _dbContext.UsersPresentationData.Add(new()
             {
                 UserId = user.Id,
                 AvatarColor = request.Model.AvatarColor
             });
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
         });
     }
 }

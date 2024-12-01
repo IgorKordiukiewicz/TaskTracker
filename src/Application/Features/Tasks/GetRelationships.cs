@@ -58,7 +58,7 @@ internal class GetTaskRelationshipsHandler : IRequestHandler<GetTaskRelationship
             )
             SELECT * FROM RecursiveTaskHierarchy", request.TaskId)
             .IgnoreQueryFilters()
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         var childrenByParent = childrenRelationships
             .GroupBy(x => x.ParentId)
@@ -71,7 +71,7 @@ internal class GetTaskRelationshipsHandler : IRequestHandler<GetTaskRelationship
         return new TaskRelationshipsVM(parentId, childrenHierarchy);
     }
 
-    private TaskHierarchyVM BuildHierarchy(Guid parentId, IReadOnlyDictionary<Guid, List<TaskHierarchicalRelationship>> childrenByParent)
+    private static TaskHierarchyVM BuildHierarchy(Guid parentId, IReadOnlyDictionary<Guid, List<TaskHierarchicalRelationship>> childrenByParent)
     {
         var childrenHierarchies = new List<TaskHierarchyVM>();
 
