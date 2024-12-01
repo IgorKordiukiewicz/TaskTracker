@@ -1,5 +1,5 @@
 variable "azure_subscription_id" {
-    type = string
+  type = string
 }
 
 variable "baseName" {
@@ -10,4 +10,12 @@ variable "baseName" {
 variable "location" {
   default     = "westeurope"
   description = "Location of the resources."
+}
+
+variable "supabase_token" {
+  type = string
+}
+
+variable "supabase_organization" {
+  type = string
 }
