@@ -18,6 +18,12 @@ internal class GetAllUsersPresentationDataHandler(AppDbContext dbContext)
             .Distinct()
             .ToListAsync(cancellationToken);
 
+        // Ensure at least the current user is included
+        if(possibleUsersIds.Count == 0)
+        {
+            possibleUsersIds.Add(request.UserId);
+        }
+
         var presentationData = await dbContext.UsersPresentationData
             .Where(x => possibleUsersIds.Contains(x.UserId))
             .Join(dbContext.Users,
