@@ -105,23 +105,7 @@ const createMenuItems = ref([
       {
         label: 'Delete',
         icon: 'pi pi-trash',
-        disabled: shouldSelectedNodeDeletionBeBlocked,
-        command: () => {
-          const statusName = selectedNode.value.data.label;
-          confirm.require({
-              message: `Are you sure you want to delete the ${statusName} status?`,
-              header: 'Confirm action',
-              rejectProps: {
-                  label: 'Cancel',
-                  severity: 'secondary'
-              },
-              acceptProps: {
-                  label: 'Confirm',
-                  severity: 'danger'
-              },
-              accept: async () => await deleteStatus()
-          })
-        }
+        command: onDeleteStatusButtonClicked
       }
     ]
   },
@@ -201,22 +185,13 @@ function getSelectedTransitionName() {
 
 function getSelectedReverseTransitionName() {
   const nodes = getSelectedEdgeNodeNames();
-  return `Delete2 (${nodes.target} -> ${nodes.source})`;
+  return `Delete (${nodes.target} -> ${nodes.source})`;
 }
 
 function getSelectedEdgeNodeNames() {
   const sourceNode = vueFlow.findNode(selectedEdge.value.source)?.data.label;
   const targetNode = vueFlow.findNode(selectedEdge.value.target)?.data.label;
   return { source: sourceNode, target: targetNode };
-}
-
-function shouldSelectedNodeDeletionBeBlocked() {
-  if(!selectedNode.value) {
-    return true;
-  }
-
-  const status = workflow.value!.statuses.find(x => x.id === selectedNode.value.id)!;
-  return status.deletionEligibility != TaskStatusDeletionEligibility.Eligible;
 }
 
 function getLocalStorageKey() {
@@ -410,4 +385,36 @@ async function changeInitialStatus() {
   await updateDiagram({ newInitialStatusId: statusId});
 }
 
+async function onDeleteStatusButtonClicked() {
+  const status = workflow.value!.statuses.find(x => x.id === selectedNode.value.id)!;
+  if(status.deletionEligibility != TaskStatusDeletionEligibility.Eligible) {
+    const reason = status.deletionEligibility == TaskStatusDeletionEligibility.InUse ? 'in use' : 'the initial status'
+    confirm.require({
+      message: `Status ${status.name} can't be deleted because it is ${reason}.`,
+      header: 'Information',
+      rejectClass: 'invisible',
+      acceptProps: {
+        label: 'Ok',
+        severity: 'secondary'
+      }
+    })
+  }
+  else {
+    confirm.require({
+      message: `Are you sure you want to delete the ${status.name} status?`,
+      header: 'Confirm action',
+      rejectProps: {
+          label: 'Cancel',
+          severity: 'secondary'
+      },
+      acceptProps: {
+          label: 'Confirm',
+          severity: 'danger'
+      },
+      accept: async () => await deleteStatus()
+   })
+  }
+
+  
+}
 </script>
