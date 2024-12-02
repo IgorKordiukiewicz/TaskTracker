@@ -102,8 +102,8 @@
                             <Button severity="secondary" text icon="pi pi-plus" style="height: 24px; width: 24px;" @click="openLogTimeDialog"  />
                             <Button severity="secondary" text icon="pi pi-pencil" style="height: 24px; width: 24px;" @click="openEstimatedTimeDialog" />
                         </div>
-                        <TimeInputDialog ref="estimatedTimeDialog" header="Edit estimated time" @on-submit="updateEstimatedTime" />
-                        <TimeInputDialog ref="logTimeDialog" header="Log time" @on-submit="addLoggedTime" />
+                        <UpdateEstimatedTimeDialog ref="estimatedTimeDialog" @on-submit="updateEstimatedTime" />
+                        <LogTimeDialog ref="logTimeDialog" @on-submit="addLoggedTime" />
                     </div>
                     <div class="flex gap-2 items-center w-full mt-4">
                         <div class="flex flex-col gap-1 items-center w-full">
@@ -130,6 +130,7 @@
 
 <script setup lang="ts">
 import { $dt } from '@primevue/themes';
+import UpdateEstimatedTimeDialog from '~/components/Task/UpdateEstimatedTimeDialog.vue';
 import { AddTaskCommentDto, AddTaskLoggedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
 import { allTaskPriorities, ProjectPermissions, TaskPriority } from '~/types/enums';
 import type { TaskVM } from '~/types/viewModels/tasks';
@@ -338,9 +339,7 @@ async function updateEstimatedTime(minutes: number) {
     await updateDetails();
 }
 
-async function addLoggedTime(minutes: number) {
-    const model = new AddTaskLoggedTimeDto();
-    model.minutes = minutes;
+async function addLoggedTime(model: AddTaskLoggedTimeDto) {
     await tasksService.addLoggedTime(details.value!.id, projectId.value, model);
     await updateDetails();
 }
