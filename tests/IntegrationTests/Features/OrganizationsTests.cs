@@ -162,13 +162,13 @@ public class OrganizationsTests
     }
 
     [Fact]
-    public async Task GetForUser_ShouldReturnOrganizationsUserIsAMemberOf()
+    public async Task Get_ShouldReturnOrganizationsUserIsAMemberOf()
     {
         var organizations = await _factory.CreateOrganizations(2);
         var user = await _fixture.FirstAsync<User>();
         _ = await _factory.CreateOrganizations(); // organizations for different user
 
-        var result = await _fixture.SendRequest(new GetOrganizationsForUserQuery(user.Id));
+        var result = await _fixture.SendRequest(new GetOrganizationsQuery(user.Id));
 
         using (new AssertionScope())
         {
@@ -176,12 +176,12 @@ public class OrganizationsTests
             var orgs = result.Value.Organizations;
             orgs.Should().BeEquivalentTo(new[]
             {
-                new OrganizationForUserVM()
+                new OrganizationVM()
                 {
                     Id = organizations[0].Id,
                     Name = organizations[0].Name,
                 },
-                new OrganizationForUserVM()
+                new OrganizationVM()
                 {
                     Id = organizations[1].Id,
                     Name = organizations[1].Name

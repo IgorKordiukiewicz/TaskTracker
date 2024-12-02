@@ -40,10 +40,10 @@ public class OrganizationsController(IMediator mediator)
     /// Get a list of organizations the user belongs to.
     /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(OrganizationsForUserVM), 200)]
+    [ProducesResponseType(typeof(OrganizationsVM), 200)]
     public async Task<IActionResult> GetOrganizations()
     {
-        var result = await mediator.Send(new GetOrganizationsForUserQuery(User.GetUserId()));
+        var result = await mediator.Send(new GetOrganizationsQuery(User.GetUserId()));
         return result.ToHttpResult();
     }
 
