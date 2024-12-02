@@ -56,6 +56,6 @@ export const useApi = () => {
     }
 
     function handleError(error: any) {
-        toast.add({ severity: 'error', 'summary': 'Request Error', detail: error?.message, life: 2000 });
+        toast.add({ severity: 'error', 'summary': 'Error', detail: error?.message, life: 2000 });
     }
 }
