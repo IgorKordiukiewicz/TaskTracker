@@ -33,6 +33,16 @@ public class OrganizationsTests
     }
 
     [Fact]
+    public async Task Create_ShouldFail_WhenOrganizationWithSameNameAlreadyExists()
+    {
+        var organization = (await _factory.CreateOrganizations())[0];
+
+        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new(organization.Name), organization.OwnerId));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
     public async Task Create_ShouldCreateNewOrganization_WhenOwnerExists()
     {
         var user = (await _factory.CreateUsers())[0];
@@ -166,7 +176,6 @@ public class OrganizationsTests
     {
         var organizations = await _factory.CreateOrganizations(2);
         var user = await _fixture.FirstAsync<User>();
-        _ = await _factory.CreateOrganizations(); // organizations for different user
 
         var result = await _fixture.SendRequest(new GetOrganizationsQuery(user.Id));
 

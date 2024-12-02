@@ -23,6 +23,11 @@ internal class CreateOrganizationHandler(AppDbContext context, IRepository<Organ
             return Result.Fail(new NotFoundError<User>(request.OwnerId));
         }
 
+        if(await organizationRepository.Exists(x => x.Name == request.Model.Name, cancellationToken))
+        {
+            return Result.Fail<Guid>(new ApplicationError("Organization with the same name already exists."));
+        }
+
         var organization = Organization.Create(request.Model.Name, request.OwnerId);
 
         await organizationRepository.Add(organization, cancellationToken);
