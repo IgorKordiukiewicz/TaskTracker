@@ -1,4 +1,5 @@
-﻿using Domain.Organizations;
+﻿using Application.Common;
+using Domain.Organizations;
 
 namespace Application.Features.Organizations;
 
@@ -12,7 +13,7 @@ internal class AcceptOrganizationInvitationCommandValidator : AbstractValidator<
     }
 }
 
-internal class AcceptOrganizationInvitationHandler(IRepository<Organization> organizationRepository) 
+internal class AcceptOrganizationInvitationHandler(IRepository<Organization> organizationRepository, IDateTimeProvider dateTimeProvider) 
     : IRequestHandler<AcceptOrganizationInvitationCommand, Result>
 {
     public async Task<Result> Handle(AcceptOrganizationInvitationCommand request, CancellationToken cancellationToken)
@@ -23,7 +24,7 @@ internal class AcceptOrganizationInvitationHandler(IRepository<Organization> org
             return Result.Fail(new NotFoundError<Organization>($"invitation ID: {request.InvitationId}"));
         }
 
-        var result = organization.AcceptInvitation(request.InvitationId);
+        var result = organization.AcceptInvitation(request.InvitationId, dateTimeProvider.Now());
 
         if (result.IsFailed)
         {

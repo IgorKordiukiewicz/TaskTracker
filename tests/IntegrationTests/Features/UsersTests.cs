@@ -112,9 +112,9 @@ public class UsersTests
     {
         var users = await _factory.CreateUsers(4);
         var org = Organization.Create("org", users[0].Id);
-        _ = org.CreateInvitation(users[2].Id);
-        var invitation = org.CreateInvitation(users[1].Id).Value;
-        org.DeclineInvitation(invitation.Id);
+        _ = org.CreateInvitation(users[2].Id, DateTime.Now);
+        var invitation = org.CreateInvitation(users[1].Id, DateTime.Now).Value;
+        org.DeclineInvitation(invitation.Id, DateTime.Now);
 
         await _fixture.SeedDb(db =>
         {
@@ -147,8 +147,8 @@ public class UsersTests
     {
         var users = await _factory.CreateUsers(3);
         var org = Organization.Create("org", users[0].Id);
-        var invitation = org.CreateInvitation(users[1].Id).Value;
-        _ = org.AcceptInvitation(invitation.Id);
+        var invitation = org.CreateInvitation(users[1].Id, DateTime.Now).Value;
+        _ = org.AcceptInvitation(invitation.Id, DateTime.Now);
         var project = Project.Create("project", org.Id, users[0].Id);
 
         await _fixture.SeedDb(db =>
@@ -196,8 +196,8 @@ public class UsersTests
     {
         var users =  await _factory.CreateUsers(3);
         var organization = Organization.Create("org", users[0].Id);
-        var invitation = organization.CreateInvitation(users[1].Id).Value;
-        _ = organization.AcceptInvitation(invitation.Id);
+        var invitation = organization.CreateInvitation(users[1].Id, DateTime.Now).Value;
+        _ = organization.AcceptInvitation(invitation.Id, DateTime.Now);
 
         await _fixture.SeedDb(db =>
         {

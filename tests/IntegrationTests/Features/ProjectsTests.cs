@@ -75,8 +75,8 @@ public class ProjectsTests
         var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
         var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
-        var invitation = organization.CreateInvitation(user2.Id).Value;
-        _ = organization.AcceptInvitation(invitation.Id);
+        var invitation = organization.CreateInvitation(user2.Id, DateTime.Now).Value;
+        _ = organization.AcceptInvitation(invitation.Id, DateTime.Now);
         var project1 = Project.Create("project1", organization.Id, user1.Id);
         var project2 = Project.Create("project2", organization.Id, user1.Id);
         var project3 = Project.Create("project3", organization.Id, user2.Id);

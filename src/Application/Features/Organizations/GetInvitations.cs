@@ -32,7 +32,7 @@ internal class GetOrganizationInvitationsHandler(AppDbContext dbContext)
 
         var invitations = await query
             .OrderByDescending(x => x.Invitation.CreatedAt)
-            .Select(x => new OrganizationInvitationVM(x.Invitation.Id, x.User.Email, x.Invitation.State, x.Invitation.CreatedAt, x.Invitation.FinalizedAt))
+            .Select(x => new OrganizationInvitationVM(x.Invitation.Id, x.User.Email, x.Invitation.State, x.Invitation.CreatedAt, x.Invitation.FinalizedAt, x.Invitation.ExpirationDate))
             .ToListAsync(cancellationToken);
 
         return Result.Ok(new OrganizationInvitationsVM(invitations));

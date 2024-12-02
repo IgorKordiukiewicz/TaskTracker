@@ -207,8 +207,8 @@ public class OrganizationsTests
         var org1 = Organization.Create("org1", user1.Id);
         var org2 = Organization.Create("org2", user2.Id);
         var org3 = Organization.Create("org3", user1.Id);
-        var invitation1 = org1.CreateInvitation(user2.Id).Value;
-        var invitation2 = org3.CreateInvitation(user2.Id).Value;
+        var invitation1 = org1.CreateInvitation(user2.Id, DateTime.Now).Value;
+        var invitation2 = org3.CreateInvitation(user2.Id, DateTime.Now).Value;
 
         await _fixture.SeedDb(db =>
         {
@@ -284,8 +284,8 @@ public class OrganizationsTests
         var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
         var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
-        var invitation = organization.CreateInvitation(user2.Id).Value;
-        organization.AcceptInvitation(invitation.Id);
+        var invitation = organization.CreateInvitation(user2.Id, DateTime.Now).Value;
+        organization.AcceptInvitation(invitation.Id, DateTime.Now);
 
         await _fixture.SeedDb(db =>
         {
@@ -321,11 +321,11 @@ public class OrganizationsTests
         var user3 = User.Create(Guid.NewGuid(), "user3", "firstName", "lastName");
         var user4 = User.Create(Guid.NewGuid(), "user4", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
-        var acceptedInvitation = organization.CreateInvitation(user2.Id);
-        acceptedInvitation.Value.Accept();
-        var declinedInvitation = organization.CreateInvitation(user3.Id);
-        declinedInvitation.Value.Decline();
-        var pendingInvitation = organization.CreateInvitation(user4.Id);
+        var acceptedInvitation = organization.CreateInvitation(user2.Id, DateTime.Now);
+        acceptedInvitation.Value.Accept(DateTime.Now);
+        var declinedInvitation = organization.CreateInvitation(user3.Id, DateTime.Now);
+        declinedInvitation.Value.Decline(DateTime.Now);
+        var pendingInvitation = organization.CreateInvitation(user4.Id, DateTime.Now);
 
         await _fixture.SeedDb(db =>
         {
@@ -495,8 +495,8 @@ public class OrganizationsTests
         var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
         var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
-        var invitation = organization.CreateInvitation(user2.Id).Value;
-        organization.AcceptInvitation(invitation.Id);
+        var invitation = organization.CreateInvitation(user2.Id, DateTime.Now).Value;
+        organization.AcceptInvitation(invitation.Id, DateTime.Now);
         var member2 = organization.Members.First(x => x.UserId == user2.Id);
 
         await _fixture.SeedDb(db =>
@@ -558,7 +558,7 @@ public class OrganizationsTests
         var organization = await _fixture.FirstAsync<Organization>(x => x.Id == project.OrganizationId);
 
         var user = User.Create(Guid.NewGuid(), "aaa@mail.com", "bbb", "ccc");
-        var organizationInvitation = organization.CreateInvitation(user.Id).Value;
+        var organizationInvitation = organization.CreateInvitation(user.Id, DateTime.Now).Value;
         await _fixture.SeedDb(db =>
         {
             db.Add(user);
@@ -653,7 +653,7 @@ public class OrganizationsTests
         var user1 = User.Create(Guid.NewGuid(), "user1","firstName", "lastName");
         var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
-        var invitation = organization.CreateInvitation(user2.Id).Value;
+        var invitation = organization.CreateInvitation(user2.Id, DateTime.Now).Value;
 
         await _fixture.SeedDb(db =>
         {

@@ -24,8 +24,8 @@ public class JobsServiceTests
     {
         var users = await _factory.CreateUsers(2);
         var org = Organization.Create("org", users[0].Id);
-        var invitation = org.CreateInvitation(users[1].Id).Value;
-        invitation.Accept();
+        var invitation = org.CreateInvitation(users[1].Id, DateTime.Now).Value;
+        invitation.Accept(DateTime.Now);
         var projects = new List<Project>();
         for(int i = 0; i < 2; ++i)
         {
@@ -45,5 +45,25 @@ public class JobsServiceTests
         await _fixture.ExecuteOnService<IJobsService>(x => x.RemoveUserFromOrganizationProjects(users[1].Id, org.Id));
 
         (await _fixture.CountAsync<ProjectMember>()).Should().Be(projectMembersCountBefore - projects.Count);
+    }
+
+    [Fact]
+    public async Task ExpireOrganizationsInvitations_ShouldExpireAllExpiredInvitations()
+    {
+        var users = await _factory.CreateUsers(2);
+        var org1 = Organization.Create("org1", users[0].Id);
+        var org2 = Organization.Create("org2", users[0].Id);
+        var invitationDate = new DateTime(2010, 1, 1);
+        var invitation1 = org1.CreateInvitation(users[1].Id, invitationDate, 10);
+        var invitation2 = org2.CreateInvitation(users[1].Id, invitationDate, 10);
+
+        await _fixture.SeedDb(db =>
+        {
+            db.AddRange(org1, org2);
+        });
+
+        await _fixture.ExecuteOnService<IJobsService>(x => x.ExpireOrganizationsInvitations());
+
+        (await _fixture.CountAsync<OrganizationInvitation>(x => x.State == OrganizationInvitationState.Expired)).Should().Be(2);
     }
 }

@@ -19,7 +19,8 @@ export enum OrganizationInvitationState
     Pending,
     Accepted,
     Declined,
-    Canceled
+    Canceled,
+    Expired
 }
 
 export const allInvitationStates = [

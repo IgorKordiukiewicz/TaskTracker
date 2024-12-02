@@ -1,4 +1,5 @@
 ﻿using Application.Features.Projects;
+using Domain.Organizations;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Common;
@@ -6,9 +7,11 @@ namespace Application.Common;
 public interface IJobsService
 {
     Task RemoveUserFromOrganizationProjects(Guid userId, Guid organizationId, CancellationToken cancellationToken = default);
+    Task ExpireOrganizationsInvitations(CancellationToken cancellationToken = default);
 }
 
-public class JobsService(AppDbContext dbContext, IMediator mediator, ILogger<JobsService> logger) 
+public class JobsService(AppDbContext dbContext, IMediator mediator, ILogger<JobsService> logger, 
+    IDateTimeProvider dateTimeProvider, IRepository<Organization> organizationRepository) 
     : IJobsService
 {
     public async Task RemoveUserFromOrganizationProjects(Guid userId, Guid organizationId, CancellationToken cancellationToken = default)
@@ -28,6 +31,23 @@ public class JobsService(AppDbContext dbContext, IMediator mediator, ILogger<Job
             }
 
             var count = await dbContext.ProjectMembers.CountAsync(cancellationToken);
+        }
+    }
+
+    public async Task ExpireOrganizationsInvitations(CancellationToken cancellationToken = default)
+    {
+        var now = dateTimeProvider.Now();
+        var organizationsIds = await dbContext.OrganizationInvitations
+            .Where(x => x.ExpirationDate.HasValue && x.ExpirationDate.Value < now)
+            .Select(x => x.OrganizationId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        foreach(var organizationId in organizationsIds)
+        {
+            var organization = (await organizationRepository.GetById(organizationId, cancellationToken))!;
+            organization.ExpireInvitations(now);
+            await organizationRepository.Update(organization, cancellationToken);
         }
     }
 }

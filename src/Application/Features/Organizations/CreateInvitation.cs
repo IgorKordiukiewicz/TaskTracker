@@ -11,6 +11,7 @@ internal class CreateOrganizationInvitationCommandValidator : AbstractValidator<
     {
         RuleFor(x => x.OrganizationId).NotEmpty();
         RuleFor(x => x.Model.UserId).NotEmpty();
+        RuleFor(x => x.Model.ExpirationDays).Must(x => x > 0).When(x => x.Model.ExpirationDays is not null);
     }
 }
 
@@ -30,7 +31,7 @@ internal class CreateOrganizationInvitationHandler(AppDbContext dbContext, IRepo
             return Result.Fail(new NotFoundError<User>(request.Model.UserId));
         }
 
-        var invitationResult = organization.CreateInvitation(request.Model.UserId);
+        var invitationResult = organization.CreateInvitation(request.Model.UserId, DateTime.Now, request.Model.ExpirationDays);
         if (invitationResult.IsFailed)
         {
             return Result.Fail(invitationResult.Errors);

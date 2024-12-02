@@ -43,6 +43,7 @@ export interface OrganizationInvitationVM {
     state: OrganizationInvitationState;
     createdAt: Date;
     finalizedAt: Date;
+    expirationDate?: Date;
 }
 
 export interface UserOrganizationInvitationsVM {

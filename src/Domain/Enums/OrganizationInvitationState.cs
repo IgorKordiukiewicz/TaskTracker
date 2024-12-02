@@ -5,5 +5,6 @@ public enum OrganizationInvitationState
     Pending,
     Accepted,
     Declined,
-    Canceled
+    Canceled,
+    Expired
 }
