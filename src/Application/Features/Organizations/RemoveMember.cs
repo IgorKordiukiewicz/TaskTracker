@@ -15,22 +15,12 @@ internal class RemoveOrganizationMemberCommandValidator : AbstractValidator<Remo
     }
 }
 
-internal class RemoveOrganizationMemberHandler : IRequestHandler<RemoveOrganizationMemberCommand, Result>
+internal class RemoveOrganizationMemberHandler(IRepository<Organization> organizationRepository, IBackgroundJobClient jobClient, IJobsService jobsService) 
+    : IRequestHandler<RemoveOrganizationMemberCommand, Result>
 {
-    private readonly IRepository<Organization> _organizationRepository;
-    private readonly IBackgroundJobClient _jobClient;
-    private readonly IJobsService _jobsService;
-
-    public RemoveOrganizationMemberHandler(IRepository<Organization> organizationRepository, IBackgroundJobClient jobClient, IJobsService jobsService)
-    {
-        _organizationRepository = organizationRepository;
-        _jobClient = jobClient;
-        _jobsService = jobsService;
-    }
-
     public async Task<Result> Handle(RemoveOrganizationMemberCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _organizationRepository.GetById(request.OrganizationId, cancellationToken);
+        var organization = await organizationRepository.GetById(request.OrganizationId, cancellationToken);
         if (organization is null)
         {
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
@@ -44,9 +34,9 @@ internal class RemoveOrganizationMemberHandler : IRequestHandler<RemoveOrganizat
             return Result.Fail(result.Errors);
         }
 
-        await _organizationRepository.Update(organization, cancellationToken);
+        await organizationRepository.Update(organization, cancellationToken);
 
-        _jobClient.Enqueue(() => _jobsService.RemoveUserFromOrganizationProjects(userId!.Value, request.OrganizationId, cancellationToken));
+        jobClient.Enqueue(() => jobsService.RemoveUserFromOrganizationProjects(userId!.Value, request.OrganizationId, cancellationToken));
 
         return Result.Ok();
     }

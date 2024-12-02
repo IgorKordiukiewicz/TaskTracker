@@ -14,26 +14,18 @@ internal class AddHierarchicalTaskRelationshipCommandValidator : AbstractValidat
     }
 }
 
-internal class AddHierarchicalTaskRelationshipHandler : IRequestHandler<AddHierarchicalTaskRelationshipCommand, Result>
+internal class AddHierarchicalTaskRelationshipHandler(IRepository<TaskRelationshipManager> relationshipManagerRepository, AppDbContext dbContext) 
+    : IRequestHandler<AddHierarchicalTaskRelationshipCommand, Result>
 {
-    private readonly IRepository<TaskRelationshipManager> _relationshipManagerRepository;
-    private readonly AppDbContext _dbContext;
-
-    public AddHierarchicalTaskRelationshipHandler(IRepository<TaskRelationshipManager> relationshipManagerRepository, AppDbContext dbContext)
-    {
-        _relationshipManagerRepository = relationshipManagerRepository;
-        _dbContext = dbContext;
-    }
-
     public async Task<Result> Handle(AddHierarchicalTaskRelationshipCommand request, CancellationToken cancellationToken)
     {
-        var relationshipManager = await _relationshipManagerRepository.GetBy(x => x.ProjectId == request.ProjectId, cancellationToken);
+        var relationshipManager = await relationshipManagerRepository.GetBy(x => x.ProjectId == request.ProjectId, cancellationToken);
         if (relationshipManager is null)
         {
             return Result.Fail(new NotFoundError<TaskRelationshipManager>($"project ID: {request.ProjectId}"));
         }
 
-        var projectTasksIds = await _dbContext.Tasks
+        var projectTasksIds = await dbContext.Tasks
             .Where(x => x.ProjectId == request.ProjectId)
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);
@@ -44,7 +36,7 @@ internal class AddHierarchicalTaskRelationshipHandler : IRequestHandler<AddHiera
             return Result.Fail(result.Errors);
         }
 
-        await _relationshipManagerRepository.Update(relationshipManager, cancellationToken);
+        await relationshipManagerRepository.Update(relationshipManager, cancellationToken);
         return Result.Ok();
     }
 }

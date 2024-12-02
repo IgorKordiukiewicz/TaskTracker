@@ -14,26 +14,18 @@ internal class DeleteWorkflowStatusCommandValidator : AbstractValidator<DeleteWo
     }
 }
 
-internal class DeleteWorkflowStatusHandler : IRequestHandler<DeleteWorkflowStatusCommand, Result>
+internal class DeleteWorkflowStatusHandler(IRepository<Workflow> workflowRepository, AppDbContext dbContext) 
+    : IRequestHandler<DeleteWorkflowStatusCommand, Result>
 {
-    private readonly IRepository<Workflow> _workflowRepository;
-    private readonly AppDbContext _dbContext;
-
-    public DeleteWorkflowStatusHandler(IRepository<Workflow> workflowRepository, AppDbContext dbContext)
-    {
-        _workflowRepository = workflowRepository;
-        _dbContext = dbContext;
-    }
-
     public async Task<Result> Handle(DeleteWorkflowStatusCommand request, CancellationToken cancellationToken)
     {
-        var workflow = await _workflowRepository.GetById(request.WorkflowId, cancellationToken);
+        var workflow = await workflowRepository.GetById(request.WorkflowId, cancellationToken);
         if(workflow is null)
         {
             return Result.Fail(new NotFoundError<Workflow>(request.WorkflowId));
         }
 
-        if(await _dbContext.Tasks.AnyAsync(x => x.ProjectId == workflow.ProjectId && x.StatusId == request.Model.StatusId, cancellationToken))
+        if(await dbContext.Tasks.AnyAsync(x => x.ProjectId == workflow.ProjectId && x.StatusId == request.Model.StatusId, cancellationToken))
         {
             return Result.Fail(new DomainError("Status in use can't be deleted."));
         }
@@ -44,7 +36,7 @@ internal class DeleteWorkflowStatusHandler : IRequestHandler<DeleteWorkflowStatu
             return result;
         }
 
-        await _workflowRepository.Update(workflow, cancellationToken);
+        await workflowRepository.Update(workflow, cancellationToken);
         return Result.Ok();
     }
 }

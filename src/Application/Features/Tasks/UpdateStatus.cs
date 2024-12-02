@@ -13,26 +13,18 @@ internal class UpdateTaskStatusCommandValidator : AbstractValidator<UpdateTaskSt
     }
 }
 
-internal class UpdateTaskStatusHandler : IRequestHandler<UpdateTaskStatusCommand, Result>
+internal class UpdateTaskStatusHandler(IRepository<Domain.Tasks.Task> taskRepository, IRepository<Workflow> workflowRepository) 
+    : IRequestHandler<UpdateTaskStatusCommand, Result>
 {
-    private readonly IRepository<Workflow> _workflowRepository;
-    private readonly IRepository<Domain.Tasks.Task> _taskRepository;
-
-    public UpdateTaskStatusHandler(IRepository<Domain.Tasks.Task> taskRepository, IRepository<Workflow> workflowRepository)
-    {
-        _taskRepository = taskRepository;
-        _workflowRepository = workflowRepository;
-    }
-
     public async Task<Result> Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
     {
-        var task = await _taskRepository.GetById(request.TaskId, cancellationToken);
+        var task = await taskRepository.GetById(request.TaskId, cancellationToken);
         if(task is null)
         {
             return Result.Fail(new NotFoundError<Domain.Tasks.Task>(request.TaskId));
         }
 
-        var workflow = await _workflowRepository.GetBy(x => x.ProjectId == task.ProjectId, cancellationToken);
+        var workflow = await workflowRepository.GetBy(x => x.ProjectId == task.ProjectId, cancellationToken);
         if(!workflow!.DoesStatusExist(request.Model.StatusId))
         {
             return Result.Fail(new NotFoundError<Domain.Workflows.TaskStatus>(request.Model.StatusId));
@@ -44,7 +36,7 @@ internal class UpdateTaskStatusHandler : IRequestHandler<UpdateTaskStatusCommand
             return Result.Fail(result.Errors);
         }
 
-        await _taskRepository.Update(task, cancellationToken);
+        await taskRepository.Update(task, cancellationToken);
 
         return Result.Ok();
     }

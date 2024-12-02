@@ -6,22 +6,16 @@ namespace Web.Server.Controllers;
 /// <summary>
 /// 
 /// </summary>
+/// <remarks>
+/// 
+/// </remarks>
+/// <param name="mediator"></param>
 [ApiController]
 [Route("tasks")]
 [Authorize]
-public class TasksController : ControllerBase
+public class TasksController(IMediator mediator) 
+    : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="mediator"></param>
-    public TasksController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     /// <summary>
     /// Create a new task
     /// </summary>
@@ -36,7 +30,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> CreateTask([FromHeader] Guid projectId, [FromBody] CreateTaskDto model)
     {
-        var result = await _mediator.Send(new CreateTaskCommand(projectId, model));
+        var result = await mediator.Send(new CreateTaskCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -55,7 +49,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetTasks([FromHeader] Guid projectId, [FromQuery] IEnumerable<Guid> ids)
     {
-        var result = await _mediator.Send(new GetTasksQuery(projectId, OneOf<int, IEnumerable<Guid>>.FromT1(ids)));
+        var result = await mediator.Send(new GetTasksQuery(projectId, OneOf<int, IEnumerable<Guid>>.FromT1(ids)));
         return result.ToHttpResult();
     }
 
@@ -71,7 +65,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetTask([FromHeader] Guid projectId, int shortId)
     {
-        var result = await _mediator.Send(new GetTasksQuery(projectId, shortId));
+        var result = await mediator.Send(new GetTasksQuery(projectId, shortId));
         return result.ToHttpResult();
     }
 
@@ -86,7 +80,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskStatus(Guid taskId, UpdateTaskStatusDto model)
     {
-        var result = await _mediator.Send(new UpdateTaskStatusCommand(taskId, model));
+        var result = await mediator.Send(new UpdateTaskStatusCommand(taskId, model));
         return result.ToHttpResult();
     }
 
@@ -101,7 +95,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskPriority(Guid taskId, UpdateTaskPriorityDto model)
     {
-        var result = await _mediator.Send(new UpdateTaskPriorityCommand(taskId, model));
+        var result = await mediator.Send(new UpdateTaskPriorityCommand(taskId, model));
         return result.ToHttpResult();
     }
 
@@ -116,7 +110,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskAssignee(Guid taskId, UpdateTaskAssigneeDto model)
     {
-        var result = await _mediator.Send(new UpdateTaskAssigneeCommand(taskId, model));
+        var result = await mediator.Send(new UpdateTaskAssigneeCommand(taskId, model));
         return result.ToHttpResult();
     }
 
@@ -131,7 +125,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskTitle(Guid taskId, UpdateTaskTitleDto model)
     {
-        var result = await _mediator.Send(new UpdateTaskTitleCommand(taskId, model));
+        var result = await mediator.Send(new UpdateTaskTitleCommand(taskId, model));
         return result.ToHttpResult();
     }
 
@@ -146,7 +140,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskDescription(Guid taskId, UpdateTaskDescriptionDto model)
     {
-        var result = await _mediator.Send(new UpdateTaskDescriptionCommand(taskId, model));
+        var result = await mediator.Send(new UpdateTaskDescriptionCommand(taskId, model));
         return result.ToHttpResult();
     }
 
@@ -160,7 +154,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteTask(Guid taskId)
     {
-        var result = await _mediator.Send(new DeleteTaskCommand(taskId));
+        var result = await mediator.Send(new DeleteTaskCommand(taskId));
         return result.ToHttpResult();
     }
 
@@ -175,7 +169,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddTaskComment(Guid taskId, AddTaskCommentDto model)
     {
-        var result = await _mediator.Send(new AddTaskCommentCommand(taskId, User.GetUserId(), model));
+        var result = await mediator.Send(new AddTaskCommentCommand(taskId, User.GetUserId(), model));
         return result.ToHttpResult();
     }
 
@@ -190,7 +184,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetTaskComments(Guid taskId)
     {
-        var result = await _mediator.Send(new GetTaskCommentsQuery(taskId));
+        var result = await mediator.Send(new GetTaskCommentsQuery(taskId));
         return result.ToHttpResult();
     }
 
@@ -205,7 +199,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetTaskActivities(Guid taskId)
     {
-        var result = await _mediator.Send(new GetTaskActivitiesQuery(taskId));
+        var result = await mediator.Send(new GetTaskActivitiesQuery(taskId));
         return result.ToHttpResult();
     }
 
@@ -220,7 +214,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> LogTaskTime(Guid taskId, LogTaskTimeDto model)
     {
-        var result = await _mediator.Send(new LogTaskTimeCommand(User.GetUserId(), taskId, model));
+        var result = await mediator.Send(new LogTaskTimeCommand(User.GetUserId(), taskId, model));
         return result.ToHttpResult();
     }
 
@@ -235,7 +229,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateTaskEstimatedTime(Guid taskId, UpdateTaskEstimatedTimeDto model)
     {
-        var result = await _mediator.Send(new UpdateTaskEstimatedTimeCommand(taskId, model));
+        var result = await mediator.Send(new UpdateTaskEstimatedTimeCommand(taskId, model));
         return result.ToHttpResult();
     }
 
@@ -250,7 +244,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddHierarchicalTaskRelationship([FromHeader] Guid projectId, AddHierarchicalTaskRelationshipDto model)
     {
-        var result = await _mediator.Send(new AddHierarchicalTaskRelationshipCommand(projectId, model));
+        var result = await mediator.Send(new AddHierarchicalTaskRelationshipCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -264,7 +258,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetTaskRelationships(Guid taskId)
     {
-        var result = await _mediator.Send(new GetTaskRelationshipsQuery(taskId));
+        var result = await mediator.Send(new GetTaskRelationshipsQuery(taskId));
         return result.ToHttpResult();
     }
 }

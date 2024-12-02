@@ -10,18 +10,12 @@ internal class GetOrganizationsForUserQueryValidator : AbstractValidator<GetOrga
     }
 }
 
-internal class GetOrganizationsForUserHandler : IRequestHandler<GetOrganizationsForUserQuery, Result<OrganizationsForUserVM>>
+internal class GetOrganizationsForUserHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetOrganizationsForUserQuery, Result<OrganizationsForUserVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetOrganizationsForUserHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<OrganizationsForUserVM>> Handle(GetOrganizationsForUserQuery request, CancellationToken cancellationToken)
     {
-        var organizations = await _dbContext.Organizations
+        var organizations = await dbContext.Organizations
             .Include(x => x.Members)
             .Where(x => x.Members.Any(xx => xx.UserId == request.UserId))
             .Select(x => new OrganizationForUserVM()

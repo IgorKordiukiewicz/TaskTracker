@@ -9,23 +9,13 @@ public abstract class MemberRequirement<TPermissions> : IAuthorizationRequiremen
     public TPermissions? Permissions { get; init; }
 }
 
-public abstract class MemberRequirementHandler<TAuthorizationRequirement> : AuthorizationHandler<TAuthorizationRequirement>
+public abstract class MemberRequirementHandler<TAuthorizationRequirement>(AppDbContext dbContext, IHttpContextAccessor contextAccessor, string idKey) 
+    : AuthorizationHandler<TAuthorizationRequirement>
     where TAuthorizationRequirement : IAuthorizationRequirement
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IHttpContextAccessor _contextAccessor;
-    private readonly string _idKey;
-
-    protected MemberRequirementHandler(AppDbContext dbContext, IHttpContextAccessor contextAccessor, string idKey)
-    {
-        _dbContext = dbContext;
-        _contextAccessor = contextAccessor;
-        _idKey = idKey;
-    }
-
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, TAuthorizationRequirement requirement)
     {
-        var entityId = GetEntityId(_contextAccessor.HttpContext);
+        var entityId = GetEntityId(contextAccessor.HttpContext);
         if (entityId == default)
         {
             context.Fail();
@@ -33,14 +23,14 @@ public abstract class MemberRequirementHandler<TAuthorizationRequirement> : Auth
         }
 
         var userId = context.User.GetUserId();
-        var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
+        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
         if (user is null)
         {
             context.Fail();
             return;
         }
 
-        if(!await CheckRequirement(requirement, _dbContext, user.Id, entityId))
+        if(!await CheckRequirement(requirement, dbContext, user.Id, entityId))
         {
             context.Fail();
             return;
@@ -59,19 +49,19 @@ public abstract class MemberRequirementHandler<TAuthorizationRequirement> : Auth
             return default;
         }
 
-        var routeValue = httpContext.Request.RouteValues[_idKey]?.ToString() ?? string.Empty;
+        var routeValue = httpContext.Request.RouteValues[idKey]?.ToString() ?? string.Empty;
         if (Guid.TryParse(routeValue, out var routeId))
         {
             return routeId;
         }
 
-        var headerValue = httpContext.Request.Headers[_idKey].ToString() ?? string.Empty;
+        var headerValue = httpContext.Request.Headers[idKey].ToString() ?? string.Empty;
         if (Guid.TryParse(headerValue, out var headerId))
         {
             return headerId;
         }
 
-        var paramValue = httpContext.Request.Query[_idKey].FirstOrDefault() ?? string.Empty;
+        var paramValue = httpContext.Request.Query[idKey].FirstOrDefault() ?? string.Empty;
         if (Guid.TryParse(paramValue, out var paramId))
         {
             return paramId;

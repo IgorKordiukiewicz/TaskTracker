@@ -13,18 +13,12 @@ internal class GetUsersAvailableForProjectQueryValidator : AbstractValidator<Get
     }
 }
 
-internal class GetUsersAvailableForProjectHandler : IRequestHandler<GetUsersAvailableForProjectQuery, Result<UsersSearchVM>>
+internal class GetUsersAvailableForProjectHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetUsersAvailableForProjectQuery, Result<UsersSearchVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetUsersAvailableForProjectHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<UsersSearchVM>> Handle(GetUsersAvailableForProjectQuery request, CancellationToken cancellationToken)
     {
-        var projectMembersUserIds = await _dbContext.Projects
+        var projectMembersUserIds = await dbContext.Projects
             .Include(x => x.Members)
             .Where(x => x.Id == request.ProjectId)
             .Select(x => x.Members.Select(xx => xx.UserId))
@@ -34,12 +28,12 @@ internal class GetUsersAvailableForProjectHandler : IRequestHandler<GetUsersAvai
             return Result.Fail<UsersSearchVM>(new NotFoundError<Project>(request.ProjectId));
         }
 
-        var organizationId = await _dbContext.Projects
+        var organizationId = await dbContext.Projects
             .Where(x => x.Id == request.ProjectId)
             .Select(x => x.OrganizationId)
             .FirstAsync(cancellationToken);
 
-        var organizationMembersUserIds = await _dbContext.Organizations
+        var organizationMembersUserIds = await dbContext.Organizations
             .Include(x => x.Members)
             .Where(x => x.Id == organizationId)
             .Select(x => x.Members.Select(xx => xx.UserId))
@@ -48,7 +42,7 @@ internal class GetUsersAvailableForProjectHandler : IRequestHandler<GetUsersAvai
         var usersIds = organizationMembersUserIds.Except(projectMembersUserIds)
             .ToHashSet();
 
-        var users = await _dbContext.Users
+        var users = await dbContext.Users
             .Where(x => usersIds.Contains(x.Id))
             .Select(x => new UserSearchVM
             {

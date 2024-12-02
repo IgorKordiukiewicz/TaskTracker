@@ -12,23 +12,17 @@ internal class GetOrganizationSettingsQueryValidator : AbstractValidator<GetOrga
     }
 }
 
-internal class GetOrganizationSettingsHandler : IRequestHandler<GetOrganizationSettingsQuery, Result<OrganizationSettingsVM>>
+internal class GetOrganizationSettingsHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetOrganizationSettingsQuery, Result<OrganizationSettingsVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetOrganizationSettingsHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<OrganizationSettingsVM>> Handle(GetOrganizationSettingsQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId, cancellationToken))
+        if(!await dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId, cancellationToken))
         {
             return Result.Fail<OrganizationSettingsVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
-        return await _dbContext.Organizations
+        return await dbContext.Organizations
             .Where(x => x.Id == request.OrganizationId)
             .Select(x => new OrganizationSettingsVM(x.Name, x.OwnerId))
             .FirstAsync(cancellationToken);

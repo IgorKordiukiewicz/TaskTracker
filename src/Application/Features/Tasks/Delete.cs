@@ -13,25 +13,19 @@ internal class DeleteTaskCommandValidator : AbstractValidator<DeleteTaskCommand>
     }
 }
 
-internal class DeleteTaskHandler : IRequestHandler<DeleteTaskCommand, Result>
+internal class DeleteTaskHandler(AppDbContext dbContext) 
+    : IRequestHandler<DeleteTaskCommand, Result>
 {
-    private readonly AppDbContext _dbContext;
-
-    public DeleteTaskHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId, cancellationToken))
+        if(!await dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId, cancellationToken))
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
-        return await _dbContext.ExecuteTransaction(async () =>
+        return await dbContext.ExecuteTransaction(async () =>
         {
-            await _dbContext.Tasks.DeleteAll(x => x.Id == request.TaskId, cancellationToken);
+            await dbContext.Tasks.DeleteAll(x => x.Id == request.TaskId, cancellationToken);
         });
     }
 }

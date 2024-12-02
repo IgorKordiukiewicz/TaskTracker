@@ -135,7 +135,7 @@ public class UsersTests
     [Fact]
     public async Task GetUsersAvailableForProject_ShouldFail_WhenProjectDoesNotExist()
     {
-        var project = (await _factory.CreateProjects())[0];
+        _ = (await _factory.CreateProjects())[0];
 
         var result = await _fixture.SendRequest(new GetUsersAvailableForProjectQuery(Guid.NewGuid()));
 

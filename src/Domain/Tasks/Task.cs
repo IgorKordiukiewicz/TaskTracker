@@ -12,13 +12,13 @@ public class Task : Entity, IAggregateRoot
     public Guid? AssigneeId { get; private set; }
     public TaskPriority Priority { get; private set; } = TaskPriority.Normal;
     
-    private readonly List<TaskComment> _comments = new();
+    private readonly List<TaskComment> _comments = [];
     public IReadOnlyList<TaskComment> Comments => _comments.AsReadOnly();
 
-    private readonly List<TaskActivity> _activities = new();
+    private readonly List<TaskActivity> _activities = [];
     public IReadOnlyList<TaskActivity> Activities => _activities.AsReadOnly();
 
-    private readonly List<TaskTimeLog> _timeLogs = new();
+    private readonly List<TaskTimeLog> _timeLogs = [];
     public IReadOnlyList<TaskTimeLog> TimeLogs => _timeLogs.AsReadOnly();
 
     public int? EstimatedTime { get; private set; }

@@ -13,28 +13,22 @@ internal class DeleteProjectCommandValidator : AbstractValidator<DeleteProjectCo
     }
 }
 
-internal class DeleteProjectHandler : IRequestHandler<DeleteProjectCommand, Result>
+internal class DeleteProjectHandler(AppDbContext dbContext) 
+    : IRequestHandler<DeleteProjectCommand, Result>
 {
-    private readonly AppDbContext _dbContext;
-
-    public DeleteProjectHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result> Handle(DeleteProjectCommand request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
+        if(!await dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
         {
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
-        return await _dbContext.ExecuteTransaction(async () =>
+        return await dbContext.ExecuteTransaction(async () =>
         {
-            await _dbContext.Projects.DeleteAll(x => x.Id == request.ProjectId, cancellationToken);
-            await _dbContext.Workflows.DeleteAll(x => x.ProjectId == request.ProjectId, cancellationToken);
-            await _dbContext.Tasks.DeleteAll(x => x.ProjectId == request.ProjectId, cancellationToken);
-            await _dbContext.TaskRelationshipManagers.DeleteAll(x => x.ProjectId == request.ProjectId, cancellationToken);
+            await dbContext.Projects.DeleteAll(x => x.Id == request.ProjectId, cancellationToken);
+            await dbContext.Workflows.DeleteAll(x => x.ProjectId == request.ProjectId, cancellationToken);
+            await dbContext.Tasks.DeleteAll(x => x.ProjectId == request.ProjectId, cancellationToken);
+            await dbContext.TaskRelationshipManagers.DeleteAll(x => x.ProjectId == request.ProjectId, cancellationToken);
         });
     }
 }

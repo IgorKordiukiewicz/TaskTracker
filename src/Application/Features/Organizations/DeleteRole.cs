@@ -13,18 +13,12 @@ internal class DeleteOrganizationRoleCommandValidator : AbstractValidator<Delete
     }
 }
 
-internal class DeleteProjectRoleHandler : IRequestHandler<DeleteOrganizationRoleCommand, Result>
+internal class DeleteProjectRoleHandler(IRepository<Organization> organizationRepository) 
+    : IRequestHandler<DeleteOrganizationRoleCommand, Result>
 {
-    private readonly IRepository<Organization> _organizationRepository;
-
-    public DeleteProjectRoleHandler(IRepository<Organization> organizationRepository)
-    {
-        _organizationRepository = organizationRepository;
-    }
-
     public async Task<Result> Handle(DeleteOrganizationRoleCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _organizationRepository.GetById(request.OrganizationId, cancellationToken);
+        var organization = await organizationRepository.GetById(request.OrganizationId, cancellationToken);
         if (organization is null)
         {
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
@@ -36,7 +30,7 @@ internal class DeleteProjectRoleHandler : IRequestHandler<DeleteOrganizationRole
             return Result.Fail(result.Errors);
         }
 
-        await _organizationRepository.Update(organization, cancellationToken);
+        await organizationRepository.Update(organization, cancellationToken);
         return Result.Ok();
     }
 }

@@ -1,7 +1,6 @@
 ﻿namespace Application.Errors;
 
-public class ApplicationError : Error
+public class ApplicationError(string message) 
+    : Error(message)
 {
-    public ApplicationError(string message)
-        : base(message) { }
 }

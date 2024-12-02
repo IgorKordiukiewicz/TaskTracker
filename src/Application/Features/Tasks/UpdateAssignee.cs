@@ -14,20 +14,12 @@ internal class UpdateTaskAssigneeCommandValidator : AbstractValidator<UpdateTask
     }
 }
 
-internal class UpdateTaskAssigneeHandler : IRequestHandler<UpdateTaskAssigneeCommand, Result>
+internal class UpdateTaskAssigneeHandler(IRepository<Task> taskRepository, AppDbContext dbContext) 
+    : IRequestHandler<UpdateTaskAssigneeCommand, Result>
 {
-    private readonly IRepository<Task> _taskRepository;
-    private readonly AppDbContext _dbContext;
-
-    public UpdateTaskAssigneeHandler(IRepository<Task> taskRepository, AppDbContext dbContext)
-    {
-        _taskRepository = taskRepository;
-        _dbContext = dbContext;
-    }
-
     public async Task<Result> Handle(UpdateTaskAssigneeCommand request, CancellationToken cancellationToken)
     {
-        var task = await _taskRepository.GetById(request.TaskId, cancellationToken);
+        var task = await taskRepository.GetById(request.TaskId, cancellationToken);
         if(task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
@@ -35,7 +27,7 @@ internal class UpdateTaskAssigneeHandler : IRequestHandler<UpdateTaskAssigneeCom
 
         if(request.Model.MemberId is not null)
         {
-            var member = (await _dbContext.Projects
+            var member = (await dbContext.Projects
                 .AsNoTracking()
                 .Include(x => x.Members)
                 .SingleAsync(x => x.Id == task.ProjectId, cancellationToken))
@@ -52,7 +44,7 @@ internal class UpdateTaskAssigneeHandler : IRequestHandler<UpdateTaskAssigneeCom
             task.Unassign();
         }
 
-        await _taskRepository.Update(task, cancellationToken);
+        await taskRepository.Update(task, cancellationToken);
         
         return Result.Ok();
     }

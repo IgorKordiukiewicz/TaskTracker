@@ -15,30 +15,20 @@ internal class AddTaskCommentCommandValidator : AbstractValidator<AddTaskComment
     }
 }
 
-internal class AddTaskCommentHandler : IRequestHandler<AddTaskCommentCommand, Result>
+internal class AddTaskCommentHandler(IRepository<Task> taskRepository, IDateTimeProvider dateTimeProvider) 
+    : IRequestHandler<AddTaskCommentCommand, Result>
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IRepository<Task> _taskRepository;
-    private readonly IDateTimeProvider _dateTimeProvider;
-
-    public AddTaskCommentHandler(AppDbContext dbContext, IRepository<Task> taskRepository, IDateTimeProvider dateTimeProvider)
-    {
-        _taskRepository = taskRepository;
-        _dbContext = dbContext;
-        _dateTimeProvider = dateTimeProvider;
-    }
-
     public async Task<Result> Handle(AddTaskCommentCommand request, CancellationToken cancellationToken)
     {
-        var task = await _taskRepository.GetById(request.TaskId, cancellationToken);
+        var task = await taskRepository.GetById(request.TaskId, cancellationToken);
         if(task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
-        task.AddComment(request.Model.Content, request.UserId, _dateTimeProvider.Now());
+        task.AddComment(request.Model.Content, request.UserId, dateTimeProvider.Now());
 
-        await _taskRepository.Update(task, cancellationToken);
+        await taskRepository.Update(task, cancellationToken);
         return Result.Ok();
     }
 }

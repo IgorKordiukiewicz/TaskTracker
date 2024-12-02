@@ -59,7 +59,7 @@ public class RolesManagerTests
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
 
-        var result = rolesManager.DeleteRole(Guid.NewGuid(), Array.Empty<IHasRole>());
+        var result = rolesManager.DeleteRole(Guid.NewGuid(), []);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -71,7 +71,7 @@ public class RolesManagerTests
         var notModifiableRole = roles.First(x => x.Type != RoleType.Custom);
         var rolesManager = CreateRolesManager(roles);
 
-        var result = rolesManager.DeleteRole(notModifiableRole.Id, Array.Empty<IHasRole>());
+        var result = rolesManager.DeleteRole(notModifiableRole.Id, []);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -101,7 +101,7 @@ public class RolesManagerTests
         var rolesCountBefore = roles.Count;
         var roleToDelete = roles.First(x => x.Name == roleName);
 
-        var result = rolesManager.DeleteRole(roleToDelete.Id, Array.Empty<IHasRole>());
+        var result = rolesManager.DeleteRole(roleToDelete.Id, []);
 
         using (new AssertionScope())
         {
@@ -169,7 +169,7 @@ public class RolesManagerTests
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
 
-        var result = rolesManager.UpdateMemberRole(Guid.NewGuid(), Guid.NewGuid(), Array.Empty<IHasRole>());
+        var result = rolesManager.UpdateMemberRole(Guid.NewGuid(), Guid.NewGuid(), []);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -263,14 +263,14 @@ public class RolesManagerTests
     }
 
     private static List<TestRole> CreateTestRoles()
-        => new()
-        {
+        =>
+        [
             new("a", default, RoleType.Admin),
             new("b", default, RoleType.Custom),
             new("c", default, RoleType.Custom),
             new("d", default, RoleType.ReadOnly),
             new("e", default, RoleType.Owner)
-        };
+        ];
 
     private static RolesManager<TestRole, TestPermissions> CreateRolesManager(List<TestRole> roles)
         => new(roles, (name, permissions) => new TestRole(name, permissions));

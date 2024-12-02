@@ -4,18 +4,12 @@ namespace Application.Features.Users;
 
 public record GetUserQuery(Guid Id) : IRequest<Result<UserVM>>;
 
-internal class GetUserHandler : IRequestHandler<GetUserQuery, Result<UserVM>>
+internal class GetUserHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetUserQuery, Result<UserVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetUserHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<UserVM>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
-        var user = await _dbContext.Users
+        var user = await dbContext.Users
             .AsNoTracking()
             .Where(x => x.Id == request.Id)
             .SingleAsync(cancellationToken);

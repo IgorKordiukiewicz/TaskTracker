@@ -8,15 +8,8 @@ using Domain.Tasks;
 
 namespace IntegrationTests;
 
-public class EntitiesFactory
+public class EntitiesFactory(IntegrationTestsFixture fixture)
 {
-    private readonly IntegrationTestsFixture _fixture;
-
-    public EntitiesFactory(IntegrationTestsFixture fixture)
-    {
-        _fixture = fixture;
-    }
-
     public async Task<List<User>> CreateUsers(int count = 1)
     {
         var users = CreateEntities(count, i => User.Create(Guid.NewGuid(), $"user{i}", "firstName", "lastName"));
@@ -27,7 +20,7 @@ public class EntitiesFactory
             AvatarColor = "#000000"
         });
 
-        await _fixture.SeedDb(db =>
+        await fixture.SeedDb(db =>
         {
             db.AddRange(users);  
             db.AddRange(usersPresentationData);
@@ -42,7 +35,7 @@ public class EntitiesFactory
 
         var organizations = CreateEntities(count, i => Organization.Create($"org{i}", user.Id));
 
-        await _fixture.SeedDb(db =>
+        await fixture.SeedDb(db =>
         {
             db.AddRange(organizations);
         });
@@ -56,7 +49,7 @@ public class EntitiesFactory
 
         var projects = CreateEntities(count, i => Project.Create($"project{i}", organization.Id, organization.OwnerId));
 
-        await _fixture.SeedDb(db =>
+        await fixture.SeedDb(db =>
         {
             db.AddRange(projects);
         });
@@ -70,7 +63,7 @@ public class EntitiesFactory
 
         var workflows = CreateEntities(count, i => Workflow.Create(projects[i].Id));
 
-        await _fixture.SeedDb(db =>
+        await fixture.SeedDb(db =>
         {
             db.AddRange(workflows);
         });
@@ -84,7 +77,7 @@ public class EntitiesFactory
 
         var relationshipManagers = CreateEntities(count, i => new TaskRelationshipManager(workflows[i].ProjectId));
 
-        await _fixture.SeedDb(db =>
+        await fixture.SeedDb(db =>
         {
             db.AddRange(relationshipManagers);
         });
@@ -96,10 +89,10 @@ public class EntitiesFactory
     {
         var relationshipManager = (await CreateTaskRelationshipManagers())[0];
 
-        var initialStatus = await _fixture.FirstAsync<Domain.Workflows.TaskStatus>(x => x.Initial);
+        var initialStatus = await fixture.FirstAsync<Domain.Workflows.TaskStatus>(x => x.Initial);
         var tasks = CreateEntities(count, i => Task.Create(1, relationshipManager.ProjectId, $"title{i}", $"desc{i}", initialStatus.Id));
 
-        await _fixture.SeedDb(db =>
+        await fixture.SeedDb(db =>
         {
             db.AddRange(tasks);
         });

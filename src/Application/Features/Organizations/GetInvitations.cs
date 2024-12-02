@@ -12,26 +12,20 @@ internal class GetOrganizationInvitationsQueryValidator : AbstractValidator<GetO
     }
 }
 
-internal class GetOrganizationInvitationsHandler : IRequestHandler<GetOrganizationInvitationsQuery, Result<OrganizationInvitationsVM>>
+internal class GetOrganizationInvitationsHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetOrganizationInvitationsQuery, Result<OrganizationInvitationsVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetOrganizationInvitationsHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<OrganizationInvitationsVM>> Handle(GetOrganizationInvitationsQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId, cancellationToken))
+        if(!await dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId, cancellationToken))
         {
             return Result.Fail<OrganizationInvitationsVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
-        var query = _dbContext.OrganizationInvitations
+        var query = dbContext.OrganizationInvitations
             .AsNoTracking()
             .Where(x => x.OrganizationId == request.OrganizationId)
-            .Join(_dbContext.Users,
+            .Join(dbContext.Users,
             invitation => invitation.UserId,
             user => user.Id,
             (invitation, user) => new { Invitation = invitation, User = user });

@@ -12,23 +12,17 @@ internal class GetOrganizationRolesQueryValidator : AbstractValidator<GetOrganiz
     }
 }
 
-internal class GetOrganizationRolesHandler : IRequestHandler<GetOrganizationRolesQuery, Result<RolesVM<OrganizationPermissions>>>
+internal class GetOrganizationRolesHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetOrganizationRolesQuery, Result<RolesVM<OrganizationPermissions>>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetOrganizationRolesHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<RolesVM<OrganizationPermissions>>> Handle(GetOrganizationRolesQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId, cancellationToken))
+        if(!await dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId, cancellationToken))
         {
             return Result.Fail<RolesVM<OrganizationPermissions>>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
-        var roles = await _dbContext.OrganizationRoles
+        var roles = await dbContext.OrganizationRoles
             .Where(x => x.OrganizationId == request.OrganizationId)
             .Select(x => new RoleVM<OrganizationPermissions>()
             {

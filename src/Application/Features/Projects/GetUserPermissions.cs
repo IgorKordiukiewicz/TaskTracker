@@ -12,23 +12,17 @@ internal class GetUserProjectPermissionsQueryValidator : AbstractValidator<GetUs
     }
 }
 
-internal class GetUserProjectPermissionsHandler : IRequestHandler<GetUserProjectPermissionsQuery, Result<UserProjectPermissionsVM>>
+internal class GetUserProjectPermissionsHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetUserProjectPermissionsQuery, Result<UserProjectPermissionsVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetUserProjectPermissionsHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<UserProjectPermissionsVM>> Handle(GetUserProjectPermissionsQuery request, CancellationToken cancellationToken)
     {
-        if (!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
+        if (!await dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
         {
             return Result.Fail<UserProjectPermissionsVM>(new NotFoundError<Project>(request.ProjectId));
         }
 
-        var userRoleId = await _dbContext.Projects
+        var userRoleId = await dbContext.Projects
             .Include(x => x.Members)
             .Where(x => x.Id == request.ProjectId)
             .SelectMany(x => x.Members)
@@ -36,7 +30,7 @@ internal class GetUserProjectPermissionsHandler : IRequestHandler<GetUserProject
             .Select(x => x.RoleId)
             .FirstAsync(cancellationToken);
 
-        var permissions = await _dbContext.ProjectRoles
+        var permissions = await dbContext.ProjectRoles
             .Where(x => x.ProjectId == request.ProjectId && x.Id == userRoleId)
             .Select(x => x.Permissions)
             .FirstAsync(cancellationToken);

@@ -8,7 +8,8 @@ using Infrastructure.Models;
 
 namespace Infrastructure;
 
-public class AppDbContext : DbContext
+public class AppDbContext(DbContextOptions<AppDbContext> options) 
+    : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
 
@@ -33,10 +34,6 @@ public class AppDbContext : DbContext
     public DbSet<Workflow> Workflows { get; set; }
 
     public DbSet<UserPresentationData> UsersPresentationData { get; set; }
-
-    public AppDbContext(DbContextOptions<AppDbContext> options) 
-        : base(options)
-    { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

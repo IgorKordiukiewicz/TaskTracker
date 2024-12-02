@@ -8,36 +8,26 @@ public interface IJobsService
     Task RemoveUserFromOrganizationProjects(Guid userId, Guid organizationId, CancellationToken cancellationToken = default);
 }
 
-public class JobsService : IJobsService
+public class JobsService(AppDbContext dbContext, IMediator mediator, ILogger<JobsService> logger) 
+    : IJobsService
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IMediator _mediator;
-    private readonly ILogger<JobsService> _logger;
-
-    public JobsService(AppDbContext dbContext, IMediator mediator, ILogger<JobsService> logger)
-    {
-        _dbContext = dbContext;
-        _mediator = mediator;
-        _logger = logger;
-    }
-
     public async Task RemoveUserFromOrganizationProjects(Guid userId, Guid organizationId, CancellationToken cancellationToken = default)
     {
-        var projectsAndMembers = await _dbContext.Projects
+        var projectsAndMembers = await dbContext.Projects
             .Where(x => x.OrganizationId == organizationId && x.Members.Any(xx => xx.UserId == userId))
             .Select(v => new { ProjectId = v.Id, MemberId = v.Members.First(x => x.UserId == userId).Id })
             .ToListAsync(cancellationToken);
 
         foreach (var projectAndMember in projectsAndMembers)
         {
-            var result = await _mediator.Send(new RemoveProjectMemberCommand(projectAndMember.ProjectId, new(projectAndMember.MemberId)), cancellationToken);
+            var result = await mediator.Send(new RemoveProjectMemberCommand(projectAndMember.ProjectId, new(projectAndMember.MemberId)), cancellationToken);
             if(result.IsFailed)
             {
-                _logger.LogCritical("Removing user (ID: {@userId}) from organization (ID: {@organizationId}) failed!", userId, organizationId);
+                logger.LogCritical("Removing user (ID: {@userId}) from organization (ID: {@organizationId}) failed!", userId, organizationId);
                 // TODO: throw?
             }
 
-            var count = await _dbContext.ProjectMembers.CountAsync(cancellationToken);
+            var count = await dbContext.ProjectMembers.CountAsync(cancellationToken);
         }
     }
 }

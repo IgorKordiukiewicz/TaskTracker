@@ -12,18 +12,12 @@ internal class GetProjectOrganizationQueryValidator : AbstractValidator<GetProje
     }
 }
 
-internal class GetProjectOrganizationHandler : IRequestHandler<GetProjectOrganizationQuery, Result<ProjectOrganizationVM>>
+internal class GetProjectOrganizationHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetProjectOrganizationQuery, Result<ProjectOrganizationVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetProjectOrganizationHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<ProjectOrganizationVM>> Handle(GetProjectOrganizationQuery request, CancellationToken cancellationToken)
     {
-        var organizationId = await _dbContext.Projects
+        var organizationId = await dbContext.Projects
             .Where(x => x.Id == request.ProjectId)
             .Select(x => x.OrganizationId)
             .FirstOrDefaultAsync(cancellationToken);

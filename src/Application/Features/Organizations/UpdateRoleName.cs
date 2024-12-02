@@ -14,18 +14,12 @@ internal class UpdateOrganizationRoleNameCommandValidator : AbstractValidator<Up
     }
 }
 
-internal class UpdateOrganizationRoleNameHandler : IRequestHandler<UpdateOrganizationRoleNameCommand, Result>
+internal class UpdateOrganizationRoleNameHandler(IRepository<Organization> organizationRepository) 
+    : IRequestHandler<UpdateOrganizationRoleNameCommand, Result>
 {
-    private readonly IRepository<Organization> _organizationRepository;
-
-    public UpdateOrganizationRoleNameHandler(IRepository<Organization> organizationRepository)
-    {
-        _organizationRepository = organizationRepository;
-    }
-
     public async Task<Result> Handle(UpdateOrganizationRoleNameCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _organizationRepository.GetById(request.OrganizationId, cancellationToken);
+        var organization = await organizationRepository.GetById(request.OrganizationId, cancellationToken);
         if (organization is null)
         {
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
@@ -37,7 +31,7 @@ internal class UpdateOrganizationRoleNameHandler : IRequestHandler<UpdateOrganiz
             return Result.Fail(result.Errors);
         }
 
-        await _organizationRepository.Update(organization, cancellationToken);
+        await organizationRepository.Update(organization, cancellationToken);
         return Result.Ok();
     }
 }

@@ -4,7 +4,7 @@ public class TaskRelationshipManager : Entity, IAggregateRoot
 {
     public Guid ProjectId { get; init; }
 
-    private readonly List<TaskHierarchicalRelationship> _hierarchicalRelationships = new();
+    private readonly List<TaskHierarchicalRelationship> _hierarchicalRelationships = [];
     public IReadOnlyList<TaskHierarchicalRelationship> HierarchicalRelationships => _hierarchicalRelationships.AsReadOnly();
 
     public TaskRelationshipManager(Guid projectId) 

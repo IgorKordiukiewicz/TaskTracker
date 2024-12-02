@@ -13,25 +13,19 @@ internal class UpdateTaskPriorityCommandValidator : AbstractValidator<UpdateTask
     }
 }
 
-internal class UpdateTaskPriorityHandler : IRequestHandler<UpdateTaskPriorityCommand, Result>
+internal class UpdateTaskPriorityHandler(IRepository<Task> taskRepository) 
+    : IRequestHandler<UpdateTaskPriorityCommand, Result>
 {
-    private readonly IRepository<Task> _taskRepository;
-
-    public UpdateTaskPriorityHandler(IRepository<Task> taskRepository)
-    {
-        _taskRepository = taskRepository;
-    }
-
     public async Task<Result> Handle(UpdateTaskPriorityCommand request, CancellationToken cancellationToken)
     {
-        var task = await _taskRepository.GetById(request.TaskId, cancellationToken);
+        var task = await taskRepository.GetById(request.TaskId, cancellationToken);
         if(task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
         task.UpdatePriority(request.Model.Priority);
-        await _taskRepository.Update(task, cancellationToken);
+        await taskRepository.Update(task, cancellationToken);
 
         return Result.Ok();
     }

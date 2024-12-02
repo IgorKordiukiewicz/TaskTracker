@@ -14,18 +14,12 @@ internal class UpdateOrganizationMemberRoleCommandValidator : AbstractValidator<
     }
 }
 
-internal class UpdateOrganizationMemberRoleHandler : IRequestHandler<UpdateOrganizationMemberRoleCommand, Result>
+internal class UpdateOrganizationMemberRoleHandler(IRepository<Organization> organizationRepository) 
+    : IRequestHandler<UpdateOrganizationMemberRoleCommand, Result>
 {
-    private readonly IRepository<Organization> _organizationRepository;
-
-    public UpdateOrganizationMemberRoleHandler(IRepository<Organization> organizationRepository)
-    {
-        _organizationRepository = organizationRepository;
-    }
-
     public async Task<Result> Handle(UpdateOrganizationMemberRoleCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _organizationRepository.GetById(request.OrganizationId, cancellationToken);
+        var organization = await organizationRepository.GetById(request.OrganizationId, cancellationToken);
         if (organization is null)
         {
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
@@ -37,7 +31,7 @@ internal class UpdateOrganizationMemberRoleHandler : IRequestHandler<UpdateOrgan
             return Result.Fail(result.Errors);
         }
 
-        await _organizationRepository.Update(organization, cancellationToken);
+        await organizationRepository.Update(organization, cancellationToken);
         return Result.Ok();
     }
 }

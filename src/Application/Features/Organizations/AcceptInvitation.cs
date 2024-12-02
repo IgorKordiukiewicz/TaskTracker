@@ -12,19 +12,12 @@ internal class AcceptOrganizationInvitationCommandValidator : AbstractValidator<
     }
 }
 
-internal class AcceptOrganizationInvitationHandler : IRequestHandler<AcceptOrganizationInvitationCommand, Result>
+internal class AcceptOrganizationInvitationHandler(IRepository<Organization> organizationRepository) 
+    : IRequestHandler<AcceptOrganizationInvitationCommand, Result>
 {
-    private readonly IRepository<Organization> _organizationRepository;
-
-    public AcceptOrganizationInvitationHandler(IRepository<Organization> organizationRepository)
-    {
-        _organizationRepository = organizationRepository;
-    }
-
-
     public async Task<Result> Handle(AcceptOrganizationInvitationCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _organizationRepository.GetBy(x => x.Invitations.Any(xx => xx.Id == request.InvitationId), cancellationToken);
+        var organization = await organizationRepository.GetBy(x => x.Invitations.Any(xx => xx.Id == request.InvitationId), cancellationToken);
         if (organization is null)
         {
             return Result.Fail(new NotFoundError<Organization>($"invitation ID: {request.InvitationId}"));
@@ -37,7 +30,7 @@ internal class AcceptOrganizationInvitationHandler : IRequestHandler<AcceptOrgan
             return Result.Fail(result.Errors);
         }
 
-        await _organizationRepository.Update(organization, cancellationToken);
+        await organizationRepository.Update(organization, cancellationToken);
 
         return Result.Ok();
     }

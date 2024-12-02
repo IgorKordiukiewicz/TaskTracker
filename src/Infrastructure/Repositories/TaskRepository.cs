@@ -1,29 +1,23 @@
 ﻿namespace Infrastructure.Repositories;
 
-public class TaskRepository : IRepository<Domain.Tasks.Task>
+public class TaskRepository(AppDbContext dbContext) 
+    : IRepository<Domain.Tasks.Task>
 {
-    private readonly AppDbContext _dbContext;
-
-    public TaskRepository(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task Add(Domain.Tasks.Task entity, CancellationToken cancellationToken = default)
     {
-        _dbContext.Tasks.Add(entity);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        dbContext.Tasks.Add(entity);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<bool> Exists(Expression<Func<Domain.Tasks.Task, bool>> predicate, CancellationToken cancellationToken = default)
-        => await _dbContext.Tasks
+        => await dbContext.Tasks
         .Include(x => x.Comments)
         .Include(x => x.Activities)
         .Include(x => x.TimeLogs)
         .AnyAsync(predicate, cancellationToken);
 
     public async Task<Domain.Tasks.Task?> GetBy(Expression<Func<Domain.Tasks.Task, bool>> predicate, CancellationToken cancellationToken = default)
-        => await _dbContext.Tasks
+        => await dbContext.Tasks
         .Include(x => x.Comments)
         .Include(x => x.Activities)
         .Include(x => x.TimeLogs)
@@ -34,16 +28,16 @@ public class TaskRepository : IRepository<Domain.Tasks.Task>
 
     public async Task Update(Domain.Tasks.Task entity, CancellationToken cancellationToken = default)
     {
-        var oldEntity = await _dbContext.Tasks
+        var oldEntity = await dbContext.Tasks
             .AsNoTracking()
             .Include(x => x.Comments)
             .Include(x => x.Activities)
             .Include(x => x.TimeLogs)
             .SingleAsync(x => x.Id == entity.Id, cancellationToken);
         
-        _dbContext.AddRemoveChildEntities(entity.Comments,oldEntity.Comments.Select(x => x.Id));
-        _dbContext.AddRemoveChildValueObjects(entity.Activities, oldEntity.Activities);
-        _dbContext.AddRemoveChildValueObjects(entity.TimeLogs, oldEntity.TimeLogs);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        dbContext.AddRemoveChildEntities(entity.Comments,oldEntity.Comments.Select(x => x.Id));
+        dbContext.AddRemoveChildValueObjects(entity.Activities, oldEntity.Activities);
+        dbContext.AddRemoveChildValueObjects(entity.TimeLogs, oldEntity.TimeLogs);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 }

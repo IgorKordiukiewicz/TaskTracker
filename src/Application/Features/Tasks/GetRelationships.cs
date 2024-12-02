@@ -14,30 +14,24 @@ internal class GetTaskRelationshipsQueryValidator : AbstractValidator<GetTaskRel
     }
 }
 
-internal class GetTaskRelationshipsHandler : IRequestHandler<GetTaskRelationshipsQuery, Result<TaskRelationshipsVM>>
+internal class GetTaskRelationshipsHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetTaskRelationshipsQuery, Result<TaskRelationshipsVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetTaskRelationshipsHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<TaskRelationshipsVM>> Handle(GetTaskRelationshipsQuery request, CancellationToken cancellationToken)
     {
-        var task = await _dbContext.Tasks
+        var task = await dbContext.Tasks
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == request.TaskId);
+            .FirstOrDefaultAsync(x => x.Id == request.TaskId, cancellationToken);
         if(task is null)
         {
             return Result.Fail<TaskRelationshipsVM>(new NotFoundError<Task>(request.TaskId));
         }
 
-        var parentId = (await _dbContext.TaskHierarchicalRelationships
+        var parentId = (await dbContext.TaskHierarchicalRelationships
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.ChildId == request.TaskId))?.ParentId ?? null;
+            .FirstOrDefaultAsync(x => x.ChildId == request.TaskId, cancellationToken))?.ParentId ?? null;
 
-        var childrenRelationships = await _dbContext.TaskHierarchicalRelationships.FromSqlRaw(
+        var childrenRelationships = await dbContext.TaskHierarchicalRelationships.FromSqlRaw(
             @"
             WITH RecursiveTaskHierarchy AS (
                 SELECT 
@@ -64,7 +58,7 @@ internal class GetTaskRelationshipsHandler : IRequestHandler<GetTaskRelationship
             .GroupBy(x => x.ParentId)
             .ToDictionary(k => k.Key, v => v.ToList());
 
-        var childrenHierarchy = childrenRelationships.Any() 
+        var childrenHierarchy = childrenRelationships.Count != 0
             ? BuildHierarchy(request.TaskId, childrenByParent) 
             : null;
 

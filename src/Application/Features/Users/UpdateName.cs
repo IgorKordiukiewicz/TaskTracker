@@ -13,21 +13,15 @@ internal class UpdateUserNameCommandValidator : AbstractValidator<UpdateUserName
     }
 }
 
-internal class UpdateUserNameHandler : IRequestHandler<UpdateUserNameCommand, Result>
+internal class UpdateUserNameHandler(IRepository<User> userRepository) 
+    : IRequestHandler<UpdateUserNameCommand, Result>
 {
-    private readonly IRepository<User> _userRepository;
-
-    public UpdateUserNameHandler(IRepository<User> userRepository)
-    {
-        _userRepository = userRepository;
-    }
-
     public async Task<Result> Handle(UpdateUserNameCommand request, CancellationToken cancellationToken)
     {
-        var user = (await _userRepository.GetById(request.Id, cancellationToken))!;
+        var user = (await userRepository.GetById(request.Id, cancellationToken))!;
 
         user.UpdateName(request.Model.FirstName, request.Model.LastName);
-        await _userRepository.Update(user, cancellationToken);
+        await userRepository.Update(user, cancellationToken);
 
         return Result.Ok();
     }

@@ -13,26 +13,18 @@ internal class AddProjectMemberCommandValidator : AbstractValidator<AddProjectMe
     }
 }
 
-internal class AddProjectMemberHandler : IRequestHandler<AddProjectMemberCommand, Result>
+internal class AddProjectMemberHandler(AppDbContext dbContext, IRepository<Project> projectRepository) 
+    : IRequestHandler<AddProjectMemberCommand, Result>
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IRepository<Project> _projectRepository;
-
-    public AddProjectMemberHandler(AppDbContext dbContext, IRepository<Project> projectRepository)
-    {
-        _dbContext = dbContext;
-        _projectRepository = projectRepository;
-    }
-
     public async Task<Result> Handle(AddProjectMemberCommand request, CancellationToken cancellationToken)
     {
-        var project = await _projectRepository.GetById(request.ProjectId, cancellationToken);
+        var project = await projectRepository.GetById(request.ProjectId, cancellationToken);
         if(project is null)
         {
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
-        var isUserAMember = await _dbContext.Organizations
+        var isUserAMember = await dbContext.Organizations
             .Include(x => x.Members)
             .AnyAsync(x => x.Id == project.OrganizationId && x.Members.Any(xx => xx.UserId == request.Model.UserId), cancellationToken);
         if (!isUserAMember)
@@ -46,7 +38,7 @@ internal class AddProjectMemberHandler : IRequestHandler<AddProjectMemberCommand
             return Result.Fail(result.Errors);
         }
 
-        await _projectRepository.Update(project, cancellationToken);
+        await projectRepository.Update(project, cancellationToken);
 
         return Result.Ok();
     }

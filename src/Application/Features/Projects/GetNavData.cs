@@ -12,25 +12,19 @@ internal class GetProjectNavDataQueryValidator : AbstractValidator<GetProjectNav
     }
 }
 
-internal class GetProjectNavDataHandler : IRequestHandler<GetProjectNavDataQuery, Result<ProjectNavigationVM>>
+internal class GetProjectNavDataHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetProjectNavDataQuery, Result<ProjectNavigationVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetProjectNavDataHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<ProjectNavigationVM>> Handle(GetProjectNavDataQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
+        if(!await dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
         {
             return Result.Fail<ProjectNavigationVM>(new NotFoundError<Project>(request.ProjectId));
         }
 
-        var navData = await _dbContext.Projects
+        var navData = await dbContext.Projects
             .Where(x => x.Id == request.ProjectId)
-            .Join(_dbContext.Organizations,
+            .Join(dbContext.Organizations,
             project => project.OrganizationId,
             organization => organization.Id,
             (project, organization) => new ProjectNavigationVM(new(project.Id, project.Name), new(organization.Id, organization.Name)))

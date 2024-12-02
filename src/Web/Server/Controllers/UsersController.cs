@@ -5,25 +5,19 @@ namespace Web.Server.Controllers;
 /// <summary>
 /// 
 /// </summary>
+/// <remarks>
+/// 
+/// </remarks>
+/// <param name="mediator"></param>
 [ApiController]
 [Route("users")]
 [Authorize]
 [ProducesResponseType(400)]
 [ProducesResponseType(500)]
 [Produces("application/json")]
-public class UsersController : ControllerBase
+public class UsersController(IMediator mediator) 
+    : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="mediator"></param>
-    public UsersController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     /// <summary>
     /// Check whether the user has been already registered in the system.
     /// </summary>
@@ -31,7 +25,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(bool), 200)]
     public async Task<IActionResult> IsUserRegistered()
     {
-        var result = await _mediator.Send(new IsUserRegisteredQuery(User.GetUserId()));
+        var result = await mediator.Send(new IsUserRegisteredQuery(User.GetUserId()));
         return result.ToHttpResult();
     }
 
@@ -44,7 +38,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetUser()
     {
-        var result = await _mediator.Send(new GetUserQuery(User.GetUserId()));
+        var result = await mediator.Send(new GetUserQuery(User.GetUserId()));
         return result.ToHttpResult();
     }
 
@@ -55,7 +49,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(201)]
     public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDto model) 
     {
-        var result = await _mediator.Send(new RegisterUserCommand(User.GetUserId(), model));
+        var result = await mediator.Send(new RegisterUserCommand(User.GetUserId(), model));
         return result.ToHttpResult(201);
     }
 
@@ -71,7 +65,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetUsersNotInOrganization([FromQuery] string searchValue, [FromQuery] Guid organizationId)
     {
-        var result = await _mediator.Send(new GetUsersAvailableForOrganizationInvitationQuery(organizationId, searchValue));
+        var result = await mediator.Send(new GetUsersAvailableForOrganizationInvitationQuery(organizationId, searchValue));
         return result.ToHttpResult();
     }
 
@@ -87,7 +81,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetUsersAvailableForProject([FromQuery] Guid projectId)
     {
-        var result = await _mediator.Send(new GetUsersAvailableForProjectQuery(projectId));
+        var result = await mediator.Send(new GetUsersAvailableForProjectQuery(projectId));
         return result.ToHttpResult();
     }
 
@@ -100,7 +94,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateUserName([FromBody] UpdateUserNameDto model)
     {
-        var result = await _mediator.Send(new UpdateUserNameCommand(User.GetUserId(), model));
+        var result = await mediator.Send(new UpdateUserNameCommand(User.GetUserId(), model));
         return result.ToHttpResult();
     }
 
@@ -117,7 +111,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetAllUsersPresentationData()
     {
-        var result = await _mediator.Send(new GetAllUsersPresentationDataQuery(User.GetUserId()));
+        var result = await mediator.Send(new GetAllUsersPresentationDataQuery(User.GetUserId()));
         return result.ToHttpResult();
     }
 }

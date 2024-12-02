@@ -2,11 +2,9 @@
 
 namespace Application.Errors;
 
-public class ValidationError : ApplicationError
+public class ValidationError(IEnumerable<ValidationFailure> validationFailures) 
+    : ApplicationError(CreateMessage(validationFailures))
 {
-    public ValidationError(IEnumerable<ValidationFailure> validationFailures)
-        : base(CreateMessage(validationFailures)) { }
-
     private static string CreateMessage(IEnumerable<ValidationFailure> validationFailures)
     {
         var errorMessages = validationFailures.Select(x => x.ErrorMessage);

@@ -14,18 +14,12 @@ internal class GetTasksQueryValidator : AbstractValidator<GetTasksQuery>
     }
 }
 
-internal class GetTasksHandler : IRequestHandler<GetTasksQuery, Result<TasksVM>>
+internal class GetTasksHandler(AppDbContext context) 
+    : IRequestHandler<GetTasksQuery, Result<TasksVM>>
 {
-    private readonly AppDbContext _context;
-
-    public GetTasksHandler(AppDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<Result<TasksVM>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
     {
-        var workflow = await _context.Workflows
+        var workflow = await context.Workflows
             .AsNoTracking()
             .Include(x => x.Statuses)
             .Include(x => x.Transitions)
@@ -39,7 +33,7 @@ internal class GetTasksHandler : IRequestHandler<GetTasksQuery, Result<TasksVM>>
 
         var statusesById = workflow.Statuses.ToDictionary(x => x.Id, x => x);
 
-        IQueryable<Domain.Tasks.Task> query = _context.Tasks
+        IQueryable<Domain.Tasks.Task> query = context.Tasks
             .Include(x => x.TimeLogs)
             .Where(x => x.ProjectId == request.ProjectId);
 
@@ -48,7 +42,7 @@ internal class GetTasksHandler : IRequestHandler<GetTasksQuery, Result<TasksVM>>
             ids => query.Where(x => !ids.Any() || ids.Contains(x.Id)));
 
         var tasks = await query
-            .Join(_context.TaskStatuses, 
+            .Join(context.TaskStatuses, 
             x => x.StatusId,
             x => x.Id, 
             (task, status) => new

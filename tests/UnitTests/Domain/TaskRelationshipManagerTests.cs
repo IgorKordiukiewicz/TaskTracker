@@ -12,7 +12,7 @@ public class TaskRelationshipManagerTests
         var parentId = Guid.NewGuid();
         var childId = Guid.NewGuid();
 
-        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, new[] { parentId, childId });
+        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, [parentId, childId]);
 
         using(new AssertionScope())
         {
@@ -29,7 +29,7 @@ public class TaskRelationshipManagerTests
         var parentId = Guid.NewGuid();
         var childId = Guid.NewGuid();
 
-        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, new[] { childId });
+        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, [childId]);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -42,7 +42,7 @@ public class TaskRelationshipManagerTests
         var parentId = Guid.NewGuid();
         var childId = Guid.NewGuid();
 
-        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, new[] { parentId });
+        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, [parentId]);
 
         result.IsFailed.Should().BeTrue();
     }

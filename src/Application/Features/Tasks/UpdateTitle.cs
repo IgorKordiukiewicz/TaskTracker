@@ -13,25 +13,19 @@ internal class UpdateTaskTitleCommandValidator : AbstractValidator<UpdateTaskTit
     }
 }
 
-internal class UpdateTaskTitleHandler : IRequestHandler<UpdateTaskTitleCommand, Result>
+internal class UpdateTaskTitleHandler(IRepository<Task> repository) 
+    : IRequestHandler<UpdateTaskTitleCommand, Result>
 {
-    private readonly IRepository<Task> _repository;
-
-    public UpdateTaskTitleHandler(IRepository<Task> repository)
-    {
-        _repository = repository;
-    }
-
     public async Task<Result> Handle(UpdateTaskTitleCommand request, CancellationToken cancellationToken)
     {
-        var task = await _repository.GetById(request.TaskId, cancellationToken);
+        var task = await repository.GetById(request.TaskId, cancellationToken);
         if (task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
         task.UpdateTitle(request.Model.Title);
-        await _repository.Update(task, cancellationToken);
+        await repository.Update(task, cancellationToken);
 
         return Result.Ok();
     }

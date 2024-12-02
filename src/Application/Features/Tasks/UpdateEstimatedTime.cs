@@ -13,25 +13,19 @@ internal class UpdateTaskEstimatedTimeCommandValidator : AbstractValidator<Updat
     }
 }
 
-internal class UpdateTaskEstimatedTimeHandler : IRequestHandler<UpdateTaskEstimatedTimeCommand, Result>
+internal class UpdateTaskEstimatedTimeHandler(IRepository<Task> taskRepository) 
+    : IRequestHandler<UpdateTaskEstimatedTimeCommand, Result>
 {
-    private readonly IRepository<Task> _taskRepository;
-
-    public UpdateTaskEstimatedTimeHandler(IRepository<Task> taskRepository)
-    {
-        _taskRepository = taskRepository;
-    }
-
     public async Task<Result> Handle(UpdateTaskEstimatedTimeCommand request, CancellationToken cancellationToken)
     {
-        var task = await _taskRepository.GetById(request.TaskId, cancellationToken);
+        var task = await taskRepository.GetById(request.TaskId, cancellationToken);
         if (task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
         
         task.UpdateEstimatedTime(request.Model.Minutes);
-        await _taskRepository.Update(task, cancellationToken);
+        await taskRepository.Update(task, cancellationToken);
 
         return Result.Ok();
     }

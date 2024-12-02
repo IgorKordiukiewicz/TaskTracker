@@ -2,16 +2,10 @@
 
 namespace Application.Behaviors;
 
-public class ErrorLoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+public class ErrorLoggingBehavior<TRequest, TResponse>(ILogger<TRequest> logger) 
+    : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
-    private readonly ILogger<TRequest> _logger;
-
-    public ErrorLoggingBehavior(ILogger<TRequest> logger)
-    {
-        _logger = logger;
-    }
-
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         var response = await next();
@@ -25,7 +19,7 @@ public class ErrorLoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequ
         var error = errors?.FirstOrDefault();
         if (error is not null)
         {
-            _logger.LogError("Request: \"{@request}\" failed with error message: \"{@errorMessage}\"", request.ToString(), error.Message);
+            logger.LogError("Request: \"{@request}\" failed with error message: \"{@errorMessage}\"", request.ToString(), error.Message);
         }
 
         return response;

@@ -13,18 +13,12 @@ internal class AddWorkflowTaskStatusCommandValidator : AbstractValidator<AddWork
     }
 }
 
-internal class AddWorkflowTaskStatusHandler : IRequestHandler<AddWorkflowTaskStatusCommand, Result>
+internal class AddWorkflowTaskStatusHandler(IRepository<Workflow> workflowRepository) 
+    : IRequestHandler<AddWorkflowTaskStatusCommand, Result>
 {
-    private readonly IRepository<Workflow> _workflowRepository;
-
-    public AddWorkflowTaskStatusHandler(IRepository<Workflow> workflowRepository)
-    {
-        _workflowRepository = workflowRepository;
-    }
-
     public async Task<Result> Handle(AddWorkflowTaskStatusCommand request, CancellationToken cancellationToken)
     {
-        var workflow = await _workflowRepository.GetById(request.WorkflowId, cancellationToken);
+        var workflow = await workflowRepository.GetById(request.WorkflowId, cancellationToken);
         if (workflow is null)
         {
             return Result.Fail(new NotFoundError<Workflow>(request.WorkflowId));
@@ -36,7 +30,7 @@ internal class AddWorkflowTaskStatusHandler : IRequestHandler<AddWorkflowTaskSta
             return Result.Fail(result.Errors);
         }
 
-        await _workflowRepository.Update(workflow, cancellationToken);
+        await workflowRepository.Update(workflow, cancellationToken);
         return Result.Ok();
     }
 }

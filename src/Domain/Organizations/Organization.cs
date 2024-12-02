@@ -7,13 +7,13 @@ public class Organization : Entity, IAggregateRoot
     public Guid OwnerId { get; private init; } // User
 
 
-    private readonly List<OrganizationMember> _members = new();
+    private readonly List<OrganizationMember> _members = [];
     public IReadOnlyList<OrganizationMember> Members => _members.AsReadOnly();
 
-    private readonly List<OrganizationInvitation> _invitations = new();
+    private readonly List<OrganizationInvitation> _invitations = [];
     public IReadOnlyList<OrganizationInvitation> Invitations => _invitations.AsReadOnly();
 
-    private readonly List<OrganizationRole> _roles = new();
+    private readonly List<OrganizationRole> _roles = [];
     public IReadOnlyList<OrganizationRole> Roles => _roles.AsReadOnly();
 
     public RolesManager<OrganizationRole, OrganizationPermissions> RolesManager { get; init; }

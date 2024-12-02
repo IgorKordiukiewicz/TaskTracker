@@ -15,21 +15,12 @@ internal class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
     }
 }
 
-internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Guid>>
+internal class CreateTaskHandler(AppDbContext dbContext, IRepository<Task> taskRepository) 
+    : IRequestHandler<CreateTaskCommand, Result<Guid>>
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IRepository<Task> _taskRepository;
-
-    public CreateTaskHandler(AppDbContext dbContext, IRepository<Task> taskRepository)
-    {
-        _dbContext = dbContext;
-        _taskRepository = taskRepository;
-    }
-
-
     public async Task<Result<Guid>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
+        if(!await dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
         {
             return Result.Fail<Guid>(new NotFoundError<Project>(request.ProjectId));
         }
@@ -37,7 +28,7 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
         Guid? assigneeId = null;
         if(request.Model.AssigneeMemberId is not null)
         {
-            var member = (await _dbContext.Projects
+            var member = (await dbContext.Projects
                 .AsNoTracking()
                 .Include(x => x.Members)
                 .SingleAsync(x => x.Id == request.ProjectId, cancellationToken))
@@ -50,11 +41,11 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
             assigneeId = member.UserId;
         }
 
-        var shortId = (await _dbContext.Tasks
+        var shortId = (await dbContext.Tasks
             .Where(x => x.ProjectId == request.ProjectId)
             .CountAsync(cancellationToken)) + 1;
 
-        var initialTaskStatus = await _dbContext.Workflows
+        var initialTaskStatus = await dbContext.Workflows
             .Include(x => x.Statuses)
             .Where(x => x.ProjectId == request.ProjectId)
             .SelectMany(x => x.Statuses)
@@ -63,7 +54,7 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
         var task = Task.Create(shortId, request.ProjectId, request.Model.Title, request.Model.Description, 
             initialTaskStatus.Id, assigneeId, request.Model.Priority);
 
-        await _taskRepository.Add(task, cancellationToken);
+        await taskRepository.Add(task, cancellationToken);
 
         return task.Id;
     }

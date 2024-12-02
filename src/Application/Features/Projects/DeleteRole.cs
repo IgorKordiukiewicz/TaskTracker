@@ -13,18 +13,12 @@ internal class DeleteProjectRoleCommandValidator : AbstractValidator<DeleteProje
     }
 }
 
-internal class DeleteProjectRoleHandler : IRequestHandler<DeleteProjectRoleCommand, Result>
+internal class DeleteProjectRoleHandler(IRepository<Project> projectRepository) 
+    : IRequestHandler<DeleteProjectRoleCommand, Result>
 {
-    private readonly IRepository<Project> _projectRepository;
-
-    public DeleteProjectRoleHandler(IRepository<Project> projectRepository)
-    {
-        _projectRepository = projectRepository;
-    }
-
     public async Task<Result> Handle(DeleteProjectRoleCommand request, CancellationToken cancellationToken)
     {
-        var project = await _projectRepository.GetById(request.ProjectId, cancellationToken);
+        var project = await projectRepository.GetById(request.ProjectId, cancellationToken);
         if(project is null)
         {
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
@@ -36,7 +30,7 @@ internal class DeleteProjectRoleHandler : IRequestHandler<DeleteProjectRoleComma
             return Result.Fail(result.Errors);
         }
 
-        await _projectRepository.Update(project, cancellationToken);
+        await projectRepository.Update(project, cancellationToken);
         return Result.Ok();
     }
 }
