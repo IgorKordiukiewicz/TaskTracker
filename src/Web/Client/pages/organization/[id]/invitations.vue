@@ -1,5 +1,5 @@
 <template>
-    <div v-if="permissions && canViewPage">
+    <div v-if="permissions && canViewPage" class="h-full">
         <div class="flex justify-between items-center">
             <p class="text-lg">Invitations</p>
             <div class="flex gap-2 items-center">
@@ -12,7 +12,7 @@
                 <SendInvitationDialog ref="sendInvitationDialog" :organizationId="organizationId" @onCreate="updateInvitations" />
             </div>
         </div>
-        <DataTable v-if="invitations" :value="invitations.invitations" class="mt-4 shadow" paginator :rows="10" :rows-per-page-options="[10, 25, 50]"
+        <DataTable v-if="invitations" :value="invitations.invitations" class="mt-4 shadow" paginator :rows="10" :rows-per-page-options="[10, 25, 50]" :always-show-paginator="false"
         removable-sort filter-display="menu" :global-filter-fields="['userEmail' ]" v-model:filters="filters">
             <Column header="Email" field="userEmail" sortable></Column>
             <Column header="State" filter-field="state" :show-filter-match-modes="false">

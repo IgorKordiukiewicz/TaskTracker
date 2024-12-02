@@ -11,7 +11,7 @@
                 <slot />
             </div>
         </div>
-        <DataTable :value="members" class="mt-4 shadow" paginator :rows="10" :rows-per-page-options="[10, 25, 50]"
+        <DataTable :value="members" class="mt-4 shadow" paginator :rows="10" :rows-per-page-options="[10, 25, 50]" :always-show-paginator="false"
         removable-sort filter-display="menu" :global-filter-fields="[ 'name', 'email' ]" v-model:filters="filters">
             <Column header="Name" sortable filter-field="name" sort-field="name">
                 <template #body="{ data }">

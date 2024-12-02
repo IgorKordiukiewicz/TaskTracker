@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="h-full">
         <div class="flex justify-between items-center">
             <p class="text-lg">Tasks</p>
             <div class="flex gap-2 items-center">
@@ -14,7 +14,8 @@
         </div>
         <template v-if="tasks && members">
             <DataTable :value="tasks.tasks" class="mt-4 shadow" removable-sort data-key="shortId" :row-hover="true" :row-class="() => 'cursor-pointer'"
-            filter-display="menu" :global-filter-fields="['title' ,'description' ]" v-model:filters="filters" @row-click="openTaskDetails" paginator :rows="10" :rows-per-page-options="[10, 25, 50]">
+            filter-display="menu" :global-filter-fields="['title' ,'description' ]" v-model:filters="filters" @row-click="openTaskDetails" 
+            paginator :rows="10" :rows-per-page-options="[10, 25, 50]" :always-show-paginator="false">
                 <Column header="Id" field="shortId" style="width: 80px;" sortable filter-field="shortId" data-type="numeric" :show-filter-match-modes="false">
                     <template #body="{ data }">
                         {{  data.shortId }}
