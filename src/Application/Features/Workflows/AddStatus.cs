@@ -1,4 +1,6 @@
-﻿using Domain.Workflows;
+﻿using Application.Common;
+using Domain.Workflows;
+using Infrastructure.Extensions;
 
 namespace Application.Features.Workflows;
 
@@ -13,7 +15,7 @@ internal class AddWorkflowTaskStatusCommandValidator : AbstractValidator<AddWork
     }
 }
 
-internal class AddWorkflowTaskStatusHandler(IRepository<Workflow> workflowRepository) 
+internal class AddWorkflowTaskStatusHandler(IRepository<Workflow> workflowRepository, ITasksBoardLayoutService tasksBoardLayoutService, AppDbContext dbContext) 
     : IRequestHandler<AddWorkflowTaskStatusCommand, Result>
 {
     public async Task<Result> Handle(AddWorkflowTaskStatusCommand request, CancellationToken cancellationToken)
@@ -30,7 +32,19 @@ internal class AddWorkflowTaskStatusHandler(IRepository<Workflow> workflowReposi
             return Result.Fail(result.Errors);
         }
 
-        await workflowRepository.Update(workflow, cancellationToken);
+        var transactionResult = await dbContext.ExecuteTransaction(async () =>
+        {
+            await workflowRepository.Update(workflow, cancellationToken);
+            await tasksBoardLayoutService.HandleChanges(workflow.ProjectId,
+                layout => layout.AddStatus(workflow.Statuses.First(x => x.Name == request.Model.Name).Id), cancellationToken);
+        });
+
+        if(transactionResult.IsFailed)
+        {
+            return Result.Fail(transactionResult.Errors);
+        }
+        
+
         return Result.Ok();
     }
 }

@@ -1,5 +1,7 @@
-﻿using Domain.Errors;
+﻿using Application.Common;
+using Domain.Errors;
 using Domain.Workflows;
+using Infrastructure.Extensions;
 
 namespace Application.Features.Workflows;
 
@@ -14,7 +16,7 @@ internal class DeleteWorkflowStatusCommandValidator : AbstractValidator<DeleteWo
     }
 }
 
-internal class DeleteWorkflowStatusHandler(IRepository<Workflow> workflowRepository, AppDbContext dbContext) 
+internal class DeleteWorkflowStatusHandler(IRepository<Workflow> workflowRepository, AppDbContext dbContext, ITasksBoardLayoutService tasksBoardLayoutService) 
     : IRequestHandler<DeleteWorkflowStatusCommand, Result>
 {
     public async Task<Result> Handle(DeleteWorkflowStatusCommand request, CancellationToken cancellationToken)
@@ -36,7 +38,18 @@ internal class DeleteWorkflowStatusHandler(IRepository<Workflow> workflowReposit
             return result;
         }
 
-        await workflowRepository.Update(workflow, cancellationToken);
+        var transactionResult = await dbContext.ExecuteTransaction(async () =>
+        {
+            await workflowRepository.Update(workflow, cancellationToken);
+            await tasksBoardLayoutService.HandleChanges(workflow.ProjectId,
+                layout => layout.DeleteStatus(request.Model.StatusId), cancellationToken);
+        });
+       
+        if(transactionResult.IsFailed)
+        {
+            return Result.Fail(transactionResult.Errors);
+        }
+
         return Result.Ok();
     }
 }

@@ -261,4 +261,19 @@ public class TasksController(IMediator mediator)
         var result = await mediator.Send(new GetTaskRelationshipsQuery(taskId));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Update the layout of the board.
+    /// </summary>
+    /// <param name="model"></param>
+    /// <response code="404">Task not found.</response>
+    [HttpPost("update-board")]
+    [Authorize(Policy.ProjectEditTasks)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> UpdateTaskBoard([FromBody] UpdateTaskBoardDto model)
+    {
+        var result = await mediator.Send(new UpdateTaskBoardCommand(model));
+        return result.ToHttpResult();
+    }
 }

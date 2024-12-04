@@ -5,6 +5,7 @@ using Domain.Projects;
 using Domain.Tasks;
 using Domain.Users;
 using Domain.Workflows;
+using Infrastructure.Models;
 using Task = Domain.Tasks.Task;
 using TaskStatus = Domain.Workflows.TaskStatus;
 
@@ -91,14 +92,28 @@ public class TasksTests
     {
         var workflows = await _factory.CreateWorkflows(2);
 
+        var taskBoardLayouts = workflows.Select(x => new TasksBoardLayout()
+        {
+            ProjectId = x.ProjectId,
+            Columns = x.Statuses.Select(xx => new TasksBoardColumn()
+            {
+                StatusId = xx.Id,
+                TasksIds = []
+            }).ToArray()
+        }).ToList();
+
         var initialStatusId1 = workflows[0].Statuses.First(x => x.Initial).Id;
         var initialStatusId2 = workflows[1].Statuses.First(x => x.Initial).Id;
         var task1 = Task.Create(1, workflows[0].ProjectId, "title1", "desc1", initialStatusId1);
         var task2 = Task.Create(2, workflows[0].ProjectId, "title2", "desc2", initialStatusId1);
         var task3 = Task.Create(1, workflows[1].ProjectId, "title3", "desc3", initialStatusId2);
+
+        taskBoardLayouts[0].Columns.First(x => x.StatusId == initialStatusId1).TasksIds.AddRange([task1.Id, task2.Id]);
+
         await _fixture.SeedDb(db =>
         {
             db.AddRange(task1, task2, task3);
+            db.AddRange(taskBoardLayouts);
         });
 
         var result = await _fixture.SendRequest(new GetTasksQuery(workflows[0].ProjectId, useList ? new[] { task1.Id, task2.Id } : task1.ShortId));
@@ -108,6 +123,8 @@ public class TasksTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Tasks.Should().HaveCount(expectedCount);
             result.Value.AllTaskStatuses.Should().HaveCount(workflows[0].Statuses.Count);
+            result.Value.BoardColumns.Should().HaveCount(workflows[0].Statuses.Count);
+            result.Value.BoardColumns.SelectMany(x => x.TasksIds).Should().HaveCount(2);
         }
     }
 
@@ -525,5 +542,62 @@ public class TasksTests
             childrenHierarchy.Children[0].TaskId.Should().Be(tasks[2].Id);
             childrenHierarchy.Children[0].Children.Should().BeEmpty();
         }
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateTaskBoard_ShouldFail_WhenBoardLayoutDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateTaskBoardCommand(new(Guid.NewGuid(), [])));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateTaskBoard_ShouldFail_WhenLayoutStatusesDontMatchExistingTasks()
+    {
+        var tasks = await _factory.CreateTasks();
+        var workflow = await _fixture.FirstAsync<Workflow>();
+
+        var columns = workflow.Statuses
+            .Select(x => new UpdateTaskBoardColumnDto(x.Id, x.Id == tasks[0].StatusId ? [tasks[0].Id] : []))
+            .ToList();
+        columns.Add(new UpdateTaskBoardColumnDto(Guid.NewGuid(), []));
+        var model = new UpdateTaskBoardDto(tasks[0].ProjectId, columns);
+
+        var result = await _fixture.SendRequest(new UpdateTaskBoardCommand(model));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateTaskBoard_ShouldFail_WhenLayoutTasksDontMatchExistingTasks()
+    {
+        var tasks = await _factory.CreateTasks();
+        var workflow = await _fixture.FirstAsync<Workflow>();
+
+        var columns = workflow.Statuses
+            .Select(x => new UpdateTaskBoardColumnDto(x.Id, []))
+            .ToList();
+        var model = new UpdateTaskBoardDto(tasks[0].ProjectId, columns);
+
+        var result = await _fixture.SendRequest(new UpdateTaskBoardCommand(model));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateTaskBoard_ShouldSucceed_WhenModelValidationPassed()
+    {
+        var tasks = await _factory.CreateTasks(2);
+        var statuses = await _fixture.GetAsync<TaskStatus>();
+
+        var columns = statuses
+            .Select(x => new UpdateTaskBoardColumnDto(x.Id, x.Id == tasks[0].StatusId ? [tasks[1].Id, tasks[0].Id] : []))
+            .ToList();
+        var model = new UpdateTaskBoardDto(tasks[0].ProjectId, columns);
+
+        var result = await _fixture.SendRequest(new UpdateTaskBoardCommand(model));
+
+        result.IsSuccess.Should().BeTrue();
     }
 }

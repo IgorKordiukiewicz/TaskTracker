@@ -5,6 +5,7 @@ using Domain.Users;
 using Domain.Workflows;
 using Task = Domain.Tasks.Task;
 using Domain.Tasks;
+using Application.Models.ViewModels;
 
 namespace IntegrationTests;
 
@@ -89,12 +90,25 @@ public class EntitiesFactory(IntegrationTestsFixture fixture)
     {
         var relationshipManager = (await CreateTaskRelationshipManagers())[0];
 
+        var statuses = await fixture.GetAsync<Domain.Workflows.TaskStatus>();
+
         var initialStatus = await fixture.FirstAsync<Domain.Workflows.TaskStatus>(x => x.Initial);
         var tasks = CreateEntities(count, i => Task.Create(1, relationshipManager.ProjectId, $"title{i}", $"desc{i}", initialStatus.Id));
+
+        var tasksBoardLayout = new TasksBoardLayout()
+        {
+            ProjectId = relationshipManager.ProjectId,
+            Columns = statuses.Select(x => new TasksBoardColumn()
+            {
+                StatusId = x.Id,
+                TasksIds = x.Id == initialStatus.Id ? tasks.Select(xx => xx.Id).ToList() : []
+            }).ToArray()
+        };
 
         await fixture.SeedDb(db =>
         {
             db.AddRange(tasks);
+            db.Add(tasksBoardLayout);
         });
 
         return tasks;

@@ -1,4 +1,6 @@
-﻿using Domain.Projects;
+﻿using Application.Common;
+using Domain.Projects;
+using Infrastructure.Extensions;
 using Task = Domain.Tasks.Task;
 
 namespace Application.Features.Tasks;
@@ -15,7 +17,7 @@ internal class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
     }
 }
 
-internal class CreateTaskHandler(AppDbContext dbContext, IRepository<Task> taskRepository) 
+internal class CreateTaskHandler(AppDbContext dbContext, IRepository<Task> taskRepository, ITasksBoardLayoutService tasksBoardLayoutService) 
     : IRequestHandler<CreateTaskCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
@@ -54,7 +56,17 @@ internal class CreateTaskHandler(AppDbContext dbContext, IRepository<Task> taskR
         var task = Task.Create(shortId, request.ProjectId, request.Model.Title, request.Model.Description, 
             initialTaskStatus.Id, assigneeId, request.Model.Priority);
 
-        await taskRepository.Add(task, cancellationToken);
+        var result = await dbContext.ExecuteTransaction(async () =>
+        {
+            await taskRepository.Add(task, cancellationToken);
+            await tasksBoardLayoutService.HandleChanges(task.ProjectId, layout =>
+                layout.CreateTask(task.Id, task.StatusId), cancellationToken);
+        });
+        
+        if(result.IsFailed)
+        {
+            return Result.Fail<Guid>(result.Errors);
+        }
 
         return task.Id;
     }

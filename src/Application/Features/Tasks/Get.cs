@@ -19,6 +19,7 @@ internal class GetTasksHandler(AppDbContext context)
 {
     public async Task<Result<TasksVM>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
     {
+        // TODO: refactor (extract methods)
         var workflow = await context.Workflows
             .AsNoTracking()
             .Include(x => x.Statuses)
@@ -60,15 +61,25 @@ internal class GetTasksHandler(AppDbContext context)
             .OrderByDescending(x => x.ShortId)
             .ToListAsync(cancellationToken);
 
-        var allTaskStatuses = workflow.Statuses
-            .Select(x => new TaskStatusDetailedVM(x.Id, x.Name, x.DisplayOrder))
-            .ToList();
+        var boardLayout = await context.TasksBoardLayouts
+            .AsNoTracking()
+            .Where(x => x.ProjectId == request.ProjectId)
+            .SingleAsync(cancellationToken);
 
         var possibleNextStatusesByStatus = workflow.Statuses.ToDictionary(k => k.Id, _ => new List<Guid>());
         foreach(var (statusId, possibleNextStatuses) in possibleNextStatusesByStatus)
         {
             possibleNextStatuses.AddRange(workflow.Transitions.Where(x => x.FromStatusId == statusId).Select(x => x.ToStatusId));
         }
+
+        var allTaskStatuses = workflow.Statuses
+            .Select(x => new TaskStatusDetailedVM(x.Id, x.Name, x.DisplayOrder))
+            .OrderBy(x => x.DisplayOrder)
+            .ToList();
+
+        var boardColumns = boardLayout.Columns
+            .Select(x => new TaskBoardColumnVM(x.StatusId, statusesById[x.StatusId].Name, possibleNextStatusesByStatus[x.StatusId], x.TasksIds))
+            .ToList();
 
         return new TasksVM(tasks.Select(x => new TaskVM
         {
@@ -82,6 +93,11 @@ internal class GetTasksHandler(AppDbContext context)
             PossibleNextStatuses = possibleNextStatusesByStatus[x.Status].Select(xx => new TaskStatusVM(xx, statusesById[xx].Name)).ToList(),
             TotalTimeLogged = x.TotalTimeLogged,
             EstimatedTime = x.EstimatedTime
-        }).ToList(), allTaskStatuses);
+        }).ToList(), allTaskStatuses, boardColumns);
     }
 }
+
+// Board endpoint:
+// boards: [ { statusId: '', statusName: '', tasks: [ { id: } ] } ] 
+// FE: list of strings (ids)
+// on drop -> call update board

@@ -21,7 +21,7 @@ public static class Application
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));  
 
         services.AddScoped<IJobsService, JobsService>();
-
+        services.AddScoped<ITasksBoardLayoutService, TasksBoardLayoutService>();
         services.AddScoped<IDateTimeProvider, DateTimeProvider>();
 
         return services;

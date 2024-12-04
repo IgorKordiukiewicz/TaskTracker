@@ -3,6 +3,7 @@ import type { TaskPriority, TaskProperty } from "../enums";
 export interface TasksVM {
     tasks: TaskVM[];
     allTaskStatuses: TaskStatusDetailsVM[];
+    boardColumns: TaskBoardColumnVM[];
 }
 
 export interface TaskVM {
@@ -27,6 +28,13 @@ export interface TaskStatusDetailsVM {
     id: string;
     name: string;
     displayOrder: number;
+}
+
+export interface TaskBoardColumnVM {
+    statusId: string;
+    statusName: string;
+    possibleNextStatuses: string[];
+    tasksIds: string[];
 }
 
 export interface TaskCommentsVM {

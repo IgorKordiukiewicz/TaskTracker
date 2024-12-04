@@ -1,4 +1,5 @@
-﻿using Infrastructure.Extensions;
+﻿using Application.Common;
+using Infrastructure.Extensions;
 using Task = Domain.Tasks.Task;
 
 namespace Application.Features.Tasks;
@@ -13,12 +14,16 @@ internal class DeleteTaskCommandValidator : AbstractValidator<DeleteTaskCommand>
     }
 }
 
-internal class DeleteTaskHandler(AppDbContext dbContext) 
+internal class DeleteTaskHandler(AppDbContext dbContext, ITasksBoardLayoutService tasksBoardLayoutService) 
     : IRequestHandler<DeleteTaskCommand, Result>
 {
     public async Task<Result> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
     {
-        if(!await dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId, cancellationToken))
+        var projectId = await dbContext.Tasks
+            .Where(x => x.Id == request.TaskId)
+            .Select(x => x.ProjectId)
+            .FirstOrDefaultAsync(cancellationToken);
+        if(projectId == default)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
@@ -26,6 +31,8 @@ internal class DeleteTaskHandler(AppDbContext dbContext)
         return await dbContext.ExecuteTransaction(async () =>
         {
             await dbContext.Tasks.DeleteAll(x => x.Id == request.TaskId, cancellationToken);
+            await tasksBoardLayoutService.HandleChanges(projectId, 
+                layout => layout.DeleteTask(request.TaskId), cancellationToken);
         });
     }
 }

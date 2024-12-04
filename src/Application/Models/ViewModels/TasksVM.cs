@@ -1,6 +1,6 @@
 ﻿namespace Application.Models.ViewModels;
 
-public record TasksVM(IList<TaskVM> Tasks, IReadOnlyList<TaskStatusDetailedVM> AllTaskStatuses);
+public record TasksVM(IList<TaskVM> Tasks, IReadOnlyList<TaskStatusDetailedVM> AllTaskStatuses, IReadOnlyList<TaskBoardColumnVM> BoardColumns);
 
 public record TaskVM
 {
@@ -15,6 +15,8 @@ public record TaskVM
     public required int TotalTimeLogged { get; init; }
     public int? EstimatedTime { get; init; }
 }
+
+public record TaskBoardColumnVM(Guid StatusId, string StatusName, IReadOnlyList<Guid> PossibleNextStatuses, IReadOnlyList<Guid> TasksIds);
 
 public record TaskStatusVM(Guid Id, string Name);
 public record TaskStatusDetailedVM(Guid Id, string Name, int DisplayOrder) : TaskStatusVM(Id, Name);

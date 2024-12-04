@@ -34,6 +34,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Workflow> Workflows { get; set; }
 
     public DbSet<UserPresentationData> UsersPresentationData { get; set; }
+    public DbSet<TasksBoardLayout> TasksBoardLayouts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,4 +1,4 @@
-import type { AddTaskLoggedTimeDto, AddTaskCommentDto, CreateTaskDto, UpdateTaskEstimatedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto, UpdateTaskTitleDto } from "~/types/dtos/tasks";
+import type { AddTaskLoggedTimeDto, AddTaskCommentDto, CreateTaskDto, UpdateTaskEstimatedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto, UpdateTaskTitleDto, UpdateTaskBoardDto } from "~/types/dtos/tasks";
 import type { TaskActivitiesVM, TaskCommentsVM, TasksVM } from "~/types/viewModels/tasks";
 
 export const useTasksService = () => {
@@ -46,6 +46,9 @@ export const useTasksService = () => {
         },
         async deleteTask(id: string, projectId: string) {
             await api.sendPostRequest(`tasks/${id}/delete`, undefined, { 'ProjectId': projectId });
+        },
+        async updateBoard(projectId: string, model: UpdateTaskBoardDto) {
+            await api.sendPostRequest('tasks/update-board', model, { 'ProjectId': projectId });
         }
     }
 }
