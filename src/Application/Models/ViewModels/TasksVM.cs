@@ -14,6 +14,7 @@ public record TaskVM
     public required IReadOnlyList<TaskStatusVM> PossibleNextStatuses { get; init; }
     public required int TotalTimeLogged { get; init; }
     public int? EstimatedTime { get; init; }
+    public required int CommentsCount { get; init; }
 }
 
 public record TaskBoardColumnVM(Guid StatusId, string StatusName, IReadOnlyList<Guid> PossibleNextStatuses, IReadOnlyList<Guid> TasksIds);

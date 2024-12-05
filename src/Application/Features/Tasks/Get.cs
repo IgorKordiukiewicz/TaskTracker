@@ -36,6 +36,7 @@ internal class GetTasksHandler(AppDbContext context)
 
         IQueryable<Domain.Tasks.Task> query = context.Tasks
             .Include(x => x.TimeLogs)
+            .Include(x => x.Comments)
             .Where(x => x.ProjectId == request.ProjectId);
 
         query = request.Ids.Match(
@@ -56,6 +57,7 @@ internal class GetTasksHandler(AppDbContext context)
                 task.Priority,
                 task.TotalTimeLogged,
                 task.EstimatedTime,
+                CommentsCount = task.Comments.Count,
                 Status = status.Id,
             })
             .OrderByDescending(x => x.ShortId)
@@ -92,7 +94,8 @@ internal class GetTasksHandler(AppDbContext context)
             Status = new(x.Status, statusesById[x.Status].Name),
             PossibleNextStatuses = possibleNextStatusesByStatus[x.Status].Select(xx => new TaskStatusVM(xx, statusesById[xx].Name)).ToList(),
             TotalTimeLogged = x.TotalTimeLogged,
-            EstimatedTime = x.EstimatedTime
+            EstimatedTime = x.EstimatedTime,
+            CommentsCount = x.CommentsCount
         }).ToList(), allTaskStatuses, boardColumns);
     }
 }

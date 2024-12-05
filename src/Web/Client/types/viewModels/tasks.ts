@@ -17,6 +17,7 @@ export interface TaskVM {
     possibleNextStatuses: TaskStatusVM[];
     totalTimeLogged: number;
     estimatedTime?: number;
+    commentsCount: number;
 }
 
 export interface TaskStatusVM {

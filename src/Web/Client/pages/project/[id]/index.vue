@@ -32,20 +32,12 @@
                             <InputNumber v-model="filterModel.value" />
                         </template>
                     </Column>
-                    <Column header="Title" field="title" sortable style="width: 300px;">
+                    <Column header="Title" field="title" sortable>
                         <template #body="{ data }">
                             {{ data.title }}
                         </template>
                         <template #filter="{ filterModel }">
                             <InputText v-model="filterModel.value" type="text" placeholder="Search by title" />
-                        </template>
-                    </Column>
-                    <Column header="Description" field="description">
-                        <template #body="{ data }">
-                            {{ data.description }}
-                        </template>
-                        <template #filter="{ filterModel }">
-                            <InputText v-model="filterModel.value" type="text" placeholder="Search by description" />
                         </template>
                     </Column>
                     <Column header="Status" style="width: 200px;" sortable sortField="status.name" filter-field="status.name" :show-filter-match-modes="false">
@@ -81,14 +73,15 @@
                 </DataTable>
             </template>
             <template v-else>
-                <div class="mt-4 flex gap-2 overflow-y-auto" style="height: calc(100% - 3.6rem); width: calc(100vw - 309px);"> <!-- Doesnt work on really small viewport witdths -->
-                    <div v-for="column in tasks.boardColumns" class="p-3 shadow rounded-lg bg-white min-w-80 max-w-80 h-full border-4 border-white" 
-                    :style="{ 'border-color': getColumnDragColor(column) }">
-                        <p class="text-center text-xl font-semibold mb-3">{{ column.statusName }}</p>
-                        <draggable :list="column.tasksIds" class="flex flex-col gap-2" style="height: calc(100% - 2.5rem)" :group="{ name: 'statuses', put: isTransitionAllowed(column) }" v-bind="dragOptions" 
+                <div class="mt-4 flex gap-4 overflow-y-auto" style="height: calc(100% - 3.6rem); width: calc(100vw - 309px);"> <!-- Doesnt work on really small viewport witdths -->
+                    <div v-for="column in tasks.boardColumns" class="p-3 rounded-lg bg-surface-300 min-w-80 max-w-80 h-full border-0"  style="background: rgba(255, 255, 255, 0)"
+                    :style="{ 'border-color': getDragColor(column) }">
+                        <p class="text-lg mb-2 bg-white shadow-md rounded-md p-3 font-semibold text-center sticky top-0" style="z-index: 1;">{{ column.statusName }}</p>
+                        <div class="mb-2 rounded-sm sticky top-0" style="height: 3px; z-index: 1;" :style="{ 'background': getDragColor(column) }"></div>
+                        <draggable :list="column.tasksIds" class="flex flex-col gap-2" style="height: calc(100% - 4rem)" :group="{ name: 'statuses', put: isTransitionAllowed(column) }" v-bind="dragOptions" 
                         @start="() => onTaskDragStart(column.statusId)" @end="onTaskDragEnd" @change="(e) => onBoardChanged(column, e)">
                             <template #item="{element}">
-                                <div class="p-3 shadow rounded-md bg-surface-500 text-white cursor-pointer">{{ element }}</div>
+                                <TaskBoardCard :project-id="projectId":task="tasks.tasks.find(x => x.id === element)!" />
                             </template>
                         </draggable>
                     </div>
@@ -201,13 +194,9 @@ async function onBoardChanged(column: TaskBoardColumnVM, event: any) {
     await tasksService.updateBoard(projectId.value, updateModel);
 }
 
-function getColumnDragColor(column: TaskBoardColumnVM) {
-    if(!currentDragStatusId.value) {
-        return "#ffffff";
-    }
-
-    if(column.statusId === currentDragStatusId.value) {
-        return "var(--p-surface-400)";
+function getDragColor(column: TaskBoardColumnVM) {
+    if(!currentDragStatusId.value || column.statusId === currentDragStatusId.value) {
+        return "#cbd5e1";
     }
 
     if(column.possibleNextStatuses.includes(currentDragStatusId.value)) {
