@@ -151,7 +151,11 @@ function getStateSeverity(state: OrganizationInvitationState) {
 }
 
 function formatDate(date?: Date) {
-    return date ? new Date(date).toLocaleDateString() : '-';
+    return date ? new Date(date).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }) : '-';
 }
 
 function getExpirationTooltip(data: OrganizationInvitationVM) {
