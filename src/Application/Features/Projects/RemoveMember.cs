@@ -1,4 +1,6 @@
-﻿using Domain.Projects;
+﻿using Application.Common;
+using Domain.Notifications;
+using Domain.Projects;
 using Infrastructure.Extensions;
 
 namespace Application.Features.Projects;
@@ -14,7 +16,7 @@ internal class RemoveProjectMemberCommandValidator : AbstractValidator<RemovePro
     }
 }
 
-internal class RemoveProjectMemberHandler(IRepository<Project> projectRepository, AppDbContext dbContext) 
+internal class RemoveProjectMemberHandler(IRepository<Project> projectRepository, AppDbContext dbContext, IJobsService jobsService) 
     : IRequestHandler<RemoveProjectMemberCommand, Result>
 {
     public async Task<Result> Handle(RemoveProjectMemberCommand request, CancellationToken cancellationToken)
@@ -33,7 +35,7 @@ internal class RemoveProjectMemberHandler(IRepository<Project> projectRepository
             return Result.Fail(result.Errors);
         }
 
-        return await dbContext.ExecuteTransaction(async () =>
+        var transactionResult = await dbContext.ExecuteTransaction(async () =>
         {
             await projectRepository.Update(project, cancellationToken);
 
@@ -41,5 +43,9 @@ internal class RemoveProjectMemberHandler(IRepository<Project> projectRepository
                 .Where(x => x.ProjectId == project.Id && x.AssigneeId == userId!.Value)
                 .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.AssigneeId, (Guid?)null), cancellationToken);
         });
+
+        jobsService.EnqueueCreateNotification(NotificationFactory.RemovedFromProject(userId!.Value, project.Id));
+
+        return transactionResult;
     }
 }

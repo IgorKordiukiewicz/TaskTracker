@@ -1,4 +1,5 @@
 ﻿using Domain.Common;
+using Domain.Notifications;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Tasks;
@@ -32,6 +33,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Domain.Workflows.TaskStatus> TaskStatuses { get; set; }
     public DbSet<TaskStatusTransition> TaskStatusTransitions { get; set; }
     public DbSet<Workflow> Workflows { get; set; }
+
+    public DbSet<Notification> Notifications { get; set; }
 
     public DbSet<UserPresentationData> UsersPresentationData { get; set; }
     public DbSet<TasksBoardLayout> TasksBoardLayouts { get; set; }

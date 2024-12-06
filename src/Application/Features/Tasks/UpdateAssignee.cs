@@ -1,4 +1,6 @@
-﻿using Domain.Projects;
+﻿using Application.Common;
+using Domain.Notifications;
+using Domain.Projects;
 using Task = Domain.Tasks.Task;
 
 namespace Application.Features.Tasks;
@@ -14,7 +16,7 @@ internal class UpdateTaskAssigneeCommandValidator : AbstractValidator<UpdateTask
     }
 }
 
-internal class UpdateTaskAssigneeHandler(IRepository<Task> taskRepository, AppDbContext dbContext) 
+internal class UpdateTaskAssigneeHandler(IRepository<Task> taskRepository, AppDbContext dbContext, IJobsService jobsService) 
     : IRequestHandler<UpdateTaskAssigneeCommand, Result>
 {
     public async Task<Result> Handle(UpdateTaskAssigneeCommand request, CancellationToken cancellationToken)
@@ -37,7 +39,14 @@ internal class UpdateTaskAssigneeHandler(IRepository<Task> taskRepository, AppDb
                 return Result.Fail(new NotFoundError<ProjectMember>(request.Model.MemberId.Value));
             }
 
+            var oldAssigneeUserId = task.AssigneeId;
             task.UpdateAssignee(member.UserId);
+
+            jobsService.EnqueueCreateNotification(NotificationFactory.TaskAssigned(member.UserId, task.ProjectId, task.ShortId));
+            if(oldAssigneeUserId.HasValue)
+            {
+                jobsService.EnqueueCreateNotification(NotificationFactory.TaskUnassigned(oldAssigneeUserId.Value, task.ProjectId, task.ShortId));
+            }
         }
         else
         {

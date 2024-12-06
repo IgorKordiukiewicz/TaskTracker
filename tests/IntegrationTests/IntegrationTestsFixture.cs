@@ -84,6 +84,13 @@ public class IntegrationTestsFixture : IDisposable
         return await mediator.Send(request);
     }
 
+    public async Task SendRequest(IRequest request)
+    {
+        using var scope = _services.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        await mediator.Send(request);
+    }
+
     public async Task<List<TEntity>> GetAsync<TEntity>() 
         where TEntity : class
     {

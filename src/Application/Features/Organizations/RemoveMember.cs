@@ -1,6 +1,7 @@
 ﻿using Application.Common;
+using Application.Features.Projects;
+using Domain.Notifications;
 using Domain.Organizations;
-using Hangfire;
 
 namespace Application.Features.Organizations;
 
@@ -15,7 +16,8 @@ internal class RemoveOrganizationMemberCommandValidator : AbstractValidator<Remo
     }
 }
 
-internal class RemoveOrganizationMemberHandler(IRepository<Organization> organizationRepository, IBackgroundJobClient jobClient, IJobsService jobsService) 
+internal class RemoveOrganizationMemberHandler(IRepository<Organization> organizationRepository, AppDbContext dbContext, 
+    IMediator mediator, IJobsService jobsService) 
     : IRequestHandler<RemoveOrganizationMemberCommand, Result>
 {
     public async Task<Result> Handle(RemoveOrganizationMemberCommand request, CancellationToken cancellationToken)
@@ -34,9 +36,24 @@ internal class RemoveOrganizationMemberHandler(IRepository<Organization> organiz
             return Result.Fail(result.Errors);
         }
 
+        // TODO: use transaction (can't wrap in transaction when using the remove project member command - nested transaction)
         await organizationRepository.Update(organization, cancellationToken);
 
-        jobClient.Enqueue(() => jobsService.RemoveUserFromOrganizationProjects(userId!.Value, request.OrganizationId, cancellationToken));
+        var projectsMembers = await dbContext.Projects
+            .Where(x => x.OrganizationId == organization.Id && x.Members.Any(xx => xx.UserId == userId))
+            .Select(v => new { ProjectId = v.Id, MemberId = v.Members.First(x => x.UserId == userId).Id })
+            .ToListAsync(cancellationToken);
+
+        foreach (var projectMember in projectsMembers)
+        {
+            var projectHandlerResult = await mediator.Send(new RemoveProjectMemberCommand(projectMember.ProjectId, new(projectMember.MemberId)), cancellationToken);
+            if (projectHandlerResult.IsFailed)
+            {
+                return Result.Fail(projectHandlerResult.Errors);
+            }
+        }
+
+        jobsService.EnqueueCreateNotification(NotificationFactory.RemovedFromOrganization(userId!.Value, organization.Id));
 
         return Result.Ok();
     }

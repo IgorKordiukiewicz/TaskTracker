@@ -94,7 +94,7 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
         }
     }
 });
-app.UseJobs();
+app.AddCRONJobs();
 
 app.Run();
 

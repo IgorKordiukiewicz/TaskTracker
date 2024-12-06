@@ -172,6 +172,26 @@ public class OrganizationsTests
     }
 
     [Fact]
+    public async Task ExpireInvitations_ShouldExpireAllExpiredInvitations()
+    {
+        var users = await _factory.CreateUsers(2);
+        var org1 = Organization.Create("org1", users[0].Id);
+        var org2 = Organization.Create("org2", users[0].Id);
+        var invitationDate = new DateTime(2010, 1, 1);
+        var invitation1 = org1.CreateInvitation(users[1].Id, invitationDate, 10);
+        var invitation2 = org2.CreateInvitation(users[1].Id, invitationDate, 10);
+        
+        await _fixture.SeedDb(db =>
+        {
+            db.AddRange(org1, org2);
+        });
+        
+        await _fixture.SendRequest(new ExpireOrganizationsInvitationsCommand());
+        
+        (await _fixture.CountAsync<OrganizationInvitation>(x => x.State == OrganizationInvitationState.Expired)).Should().Be(2);
+    }
+
+    [Fact]
     public async Task Get_ShouldReturnOrganizationsUserIsAMemberOf()
     {
         var organizations = await _factory.CreateOrganizations(2);
@@ -279,7 +299,7 @@ public class OrganizationsTests
     }
 
     [Fact]
-    public async Task RemoveMember_ShouldRemoveMember_WhenOrganizationExists()
+    public async Task RemoveMember_ShouldRemoveMemberFromOrganizationAndItsProjects_WhenOrganizationExists()
     {
         var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
         var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
@@ -287,13 +307,18 @@ public class OrganizationsTests
         var invitation = organization.CreateInvitation(user2.Id, DateTime.Now).Value;
         organization.AcceptInvitation(invitation.Id, DateTime.Now);
 
+        var project = Project.Create("proj1", organization.Id, user1.Id);
+        project.AddMember(user2.Id);
+
         await _fixture.SeedDb(db =>
         {
             db.AddRange(user1, user2);
             db.Add(organization);
+            db.Add(project);
         });
 
         var membersBefore = await _fixture.CountAsync<OrganizationMember>();
+        var projectMembersBefore = await _fixture.CountAsync<ProjectMember>();
 
         var result = await _fixture.SendRequest(new RemoveOrganizationMemberCommand(organization.Id, 
             new(organization.Members.First(x => x.UserId == user2.Id).Id)));
@@ -302,6 +327,7 @@ public class OrganizationsTests
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<OrganizationMember>()).Should().Be(membersBefore - 1);
+            (await _fixture.CountAsync<ProjectMember>()).Should().Be(projectMembersBefore - 1);
         }
     }
 

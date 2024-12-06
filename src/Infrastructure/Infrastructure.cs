@@ -1,4 +1,5 @@
-﻿using Domain.Organizations;
+﻿using Domain.Notifications;
+using Domain.Organizations;
 using Domain.Projects;
 using Domain.Tasks;
 using Domain.Users;
@@ -21,6 +22,7 @@ public static class Infrastructure
         services.AddScoped<IRepository<Domain.Tasks.Task>, TaskRepository>();
         services.AddScoped<IRepository<Workflow>, WorkflowRepository>();
         services.AddScoped<IRepository<TaskRelationshipManager>, TaskRelationshipManagerRepository>();
+        services.AddScoped<IRepository<Notification>, NotificationRepository>();
 
         return services;
     }
