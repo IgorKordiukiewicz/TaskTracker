@@ -27,7 +27,9 @@ internal class UpdateTaskAssigneeHandler(IRepository<Task> taskRepository, AppDb
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
-        if(request.Model.MemberId is not null)
+        var oldAssigneeUserId = task.AssigneeId;
+
+        if (request.Model.MemberId is not null)
         {
             var member = (await dbContext.Projects
                 .AsNoTracking()
@@ -39,14 +41,9 @@ internal class UpdateTaskAssigneeHandler(IRepository<Task> taskRepository, AppDb
                 return Result.Fail(new NotFoundError<ProjectMember>(request.Model.MemberId.Value));
             }
 
-            var oldAssigneeUserId = task.AssigneeId;
             task.UpdateAssignee(member.UserId);
 
             jobsService.EnqueueCreateNotification(NotificationFactory.TaskAssigned(member.UserId, task.ProjectId, task.ShortId));
-            if(oldAssigneeUserId.HasValue)
-            {
-                jobsService.EnqueueCreateNotification(NotificationFactory.TaskUnassigned(oldAssigneeUserId.Value, task.ProjectId, task.ShortId));
-            }
         }
         else
         {
@@ -54,6 +51,11 @@ internal class UpdateTaskAssigneeHandler(IRepository<Task> taskRepository, AppDb
         }
 
         await taskRepository.Update(task, cancellationToken);
+
+        if(oldAssigneeUserId.HasValue)
+        {
+            jobsService.EnqueueCreateNotification(NotificationFactory.TaskUnassigned(oldAssigneeUserId!.Value, task.ProjectId, task.ShortId));
+        }
         
         return Result.Ok();
     }

@@ -7,7 +7,7 @@ public class NotificationTests
     [Fact]
     public void MarkAsRead_ShouldSetReadFlagToTrue()
     {
-        var notification = Notification.Create(Guid.NewGuid(), "abc", DateTime.Now, NotificationContext.Organization, Guid.NewGuid());
+        var notification = Notification.FromData(new(Guid.NewGuid(), "abc", DateTime.Now, NotificationContext.Organization, Guid.NewGuid()));
 
         notification.MarkAsRead();
 

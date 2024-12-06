@@ -2,12 +2,15 @@
 
 public abstract class Entity : IEquatable<Entity>
 {
-    public Guid Id { get; private init; }
+    public Guid Id { get; protected init; }
 
     protected Entity(Guid id)
     {
         Id = id;
     }
+
+    protected Entity()
+    { }
 
     public override bool Equals(object? obj)
         => obj is Entity entity && Id == entity.Id;

@@ -99,8 +99,3 @@ internal class GetTasksHandler(AppDbContext context)
         }).ToList(), allTaskStatuses, boardColumns);
     }
 }
-
-// Board endpoint:
-// boards: [ { statusId: '', statusName: '', tasks: [ { id: } ] } ] 
-// FE: list of strings (ids)
-// on drop -> call update board

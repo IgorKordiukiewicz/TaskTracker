@@ -9,7 +9,7 @@ namespace Application.Common;
 public interface IJobsService
 {
     void AddExpireOrganizationsInvitationsJob();
-    void EnqueueCreateNotification(Notification notification);
+    void EnqueueCreateNotification(NotificationData notification);
 }
 
 public class JobsService(IMediator mediator, IBackgroundJobClient backgroundJobClient, IRecurringJobManager recurringJobManager) 
@@ -24,7 +24,7 @@ public class JobsService(IMediator mediator, IBackgroundJobClient backgroundJobC
             "0 * * * *");
     }
 
-    public void EnqueueCreateNotification(Notification notification)
+    public void EnqueueCreateNotification(NotificationData notification)
     {
         backgroundJobClient.Enqueue(() => mediator.Send(new CreateNotificationCommand(notification), default));
     }

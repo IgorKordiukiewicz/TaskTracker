@@ -83,17 +83,25 @@ app.MapControllers();
 
 app.UseCors("Web.Client");
 
-app.UseHangfireDashboard("/hangfire", new DashboardOptions
+if(app.Environment.IsDevelopment())
 {
-    Authorization = new[]
+    app.UseHangfireDashboard("/hangfire");
+}
+else
+{
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions
     {
-        new HangfireCustomBasicAuthenticationFilter()
+        Authorization = new[]
         {
-            User = "admin",
-            Pass = builder.Configuration.GetSection("Authentication:HangfirePassword").Value
+            new HangfireCustomBasicAuthenticationFilter()
+            {
+                User = "admin",
+                Pass = builder.Configuration.GetSection("Authentication:HangfirePassword").Value
+            }
         }
-    }
-});
+    });
+}
+
 app.AddCRONJobs();
 
 app.Run();

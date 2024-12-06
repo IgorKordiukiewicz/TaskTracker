@@ -1,6 +1,6 @@
 ﻿namespace Domain.Organizations;
 
-public class Organization : Entity, IAggregateRoot
+public class Organization : Entity, IAggregateRoot, IHasName
 {
     public string Name { get; set; } = string.Empty;
 

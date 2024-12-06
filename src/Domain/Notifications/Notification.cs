@@ -1,11 +1,14 @@
-﻿namespace Domain.Notifications;
+﻿using System.Security.Principal;
+
+namespace Domain.Notifications;
 
 public enum NotificationContext
 {
     Organization,
-    Project,
-    Task
+    Project
 }
+
+public record NotificationData(Guid UserId, string Message, DateTime OccurredAt, NotificationContext Context, Guid ContextEntityId, int? TaskShortId = null);
 
 public class Notification : Entity, IAggregateRoot
 {
@@ -22,16 +25,16 @@ public class Notification : Entity, IAggregateRoot
         : base(id)
     { }
 
-    public static Notification Create(Guid userId, string message, DateTime now, NotificationContext context, Guid contextEntityId, int? taskShortId = null)
+    public static Notification FromData(NotificationData data)
     {
         return new(Guid.NewGuid())
         {
-            UserId = userId,
-            Message = message,
-            OccurredAt = now,
-            Context = context,
-            ContextEntityId = contextEntityId,
-            TaskShortId = taskShortId
+            UserId = data.UserId,
+            Message = data.Message,
+            OccurredAt = data.OccurredAt,
+            Context = data.Context,
+            ContextEntityId = data.ContextEntityId,
+            TaskShortId = data.TaskShortId
         };
     }
 

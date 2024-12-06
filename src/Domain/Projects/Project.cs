@@ -2,7 +2,7 @@
 
 namespace Domain.Projects;
 
-public class Project : Entity, IAggregateRoot
+public class Project : Entity, IAggregateRoot, IHasName
 {
     public string Name { get; set; } = string.Empty;
     public Guid OrganizationId { get; private set; }

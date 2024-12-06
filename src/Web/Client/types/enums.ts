@@ -58,3 +58,8 @@ export enum TaskStatusDeletionEligibility
     InUse,
     Initial
 }
+
+export enum NotificationContext {
+    Organization,
+    Project
+}
