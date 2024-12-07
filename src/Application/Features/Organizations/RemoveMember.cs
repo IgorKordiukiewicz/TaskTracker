@@ -17,7 +17,7 @@ internal class RemoveOrganizationMemberCommandValidator : AbstractValidator<Remo
 }
 
 internal class RemoveOrganizationMemberHandler(IRepository<Organization> organizationRepository, AppDbContext dbContext, 
-    IMediator mediator, IJobsService jobsService) 
+    IMediator mediator, IJobsService jobsService, IDateTimeProvider dateTimeProvider) 
     : IRequestHandler<RemoveOrganizationMemberCommand, Result>
 {
     public async Task<Result> Handle(RemoveOrganizationMemberCommand request, CancellationToken cancellationToken)
@@ -53,7 +53,7 @@ internal class RemoveOrganizationMemberHandler(IRepository<Organization> organiz
             }
         }
 
-        jobsService.EnqueueCreateNotification(NotificationFactory.RemovedFromOrganization(userId!.Value, organization.Id));
+        jobsService.EnqueueCreateNotification(NotificationFactory.RemovedFromOrganization(userId!.Value, dateTimeProvider.Now(), organization.Id));
 
         return Result.Ok();
     }

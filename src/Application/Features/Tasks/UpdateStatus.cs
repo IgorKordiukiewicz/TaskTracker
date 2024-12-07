@@ -16,7 +16,7 @@ internal class UpdateTaskStatusCommandValidator : AbstractValidator<UpdateTaskSt
 }
 
 internal class UpdateTaskStatusHandler(IRepository<Domain.Tasks.Task> taskRepository, IRepository<Workflow> workflowRepository, 
-    ITasksBoardLayoutService tasksBoardLayoutService, AppDbContext dbContext) 
+    ITasksBoardLayoutService tasksBoardLayoutService, AppDbContext dbContext, IDateTimeProvider dateTimeProvider) 
     : IRequestHandler<UpdateTaskStatusCommand, Result>
 {
     public async Task<Result> Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
@@ -33,7 +33,7 @@ internal class UpdateTaskStatusHandler(IRepository<Domain.Tasks.Task> taskReposi
             return Result.Fail(new NotFoundError<Domain.Workflows.TaskStatus>(request.Model.StatusId));
         }
 
-        var result = task.UpdateStatus(request.Model.StatusId, workflow);
+        var result = task.UpdateStatus(request.Model.StatusId, workflow, dateTimeProvider.Now());
         if(result.IsFailed)
         {
             return Result.Fail(result.Errors);

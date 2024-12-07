@@ -1,4 +1,5 @@
-﻿using Domain.Organizations;
+﻿using Application.Common;
+using Domain.Organizations;
 using Domain.Users;
 
 namespace Application.Features.Organizations;
@@ -15,7 +16,7 @@ internal class CreateOrganizationInvitationCommandValidator : AbstractValidator<
     }
 }
 
-internal class CreateOrganizationInvitationHandler(AppDbContext dbContext, IRepository<Organization> organizationRepository) 
+internal class CreateOrganizationInvitationHandler(AppDbContext dbContext, IRepository<Organization> organizationRepository, IDateTimeProvider dateTimeProvider) 
     : IRequestHandler<CreateOrganizationInvitationCommand, Result>
 {
     public async Task<Result> Handle(CreateOrganizationInvitationCommand request, CancellationToken cancellationToken)
@@ -31,7 +32,7 @@ internal class CreateOrganizationInvitationHandler(AppDbContext dbContext, IRepo
             return Result.Fail(new NotFoundError<User>(request.Model.UserId));
         }
 
-        var invitationResult = organization.CreateInvitation(request.Model.UserId, DateTime.Now, request.Model.ExpirationDays);
+        var invitationResult = organization.CreateInvitation(request.Model.UserId, dateTimeProvider.Now(), request.Model.ExpirationDays);
         if (invitationResult.IsFailed)
         {
             return Result.Fail(invitationResult.Errors);

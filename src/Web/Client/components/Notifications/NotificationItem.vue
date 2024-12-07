@@ -33,8 +33,7 @@ const props = defineProps({
 const timeParser = useTimeParser();
 
 const timeElapsed = computed(() => {
-    return "a minute ago"; // TODO: temp
-    //return timeParser.toReadableTimeDifference(new Date(props.notification.occurredAt));
+    return timeParser.toReadableTimeDifference(props.notification.occurredAt);
 })
 
 const gotoLink = computed(() => {

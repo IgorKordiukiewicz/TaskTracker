@@ -15,7 +15,8 @@ internal class AddProjectMemberCommandValidator : AbstractValidator<AddProjectMe
     }
 }
 
-internal class AddProjectMemberHandler(AppDbContext dbContext, IRepository<Project> projectRepository, IJobsService jobsService) 
+internal class AddProjectMemberHandler(AppDbContext dbContext, IRepository<Project> projectRepository, 
+    IJobsService jobsService, IDateTimeProvider dateTimeProvider) 
     : IRequestHandler<AddProjectMemberCommand, Result>
 {
     public async Task<Result> Handle(AddProjectMemberCommand request, CancellationToken cancellationToken)
@@ -42,7 +43,7 @@ internal class AddProjectMemberHandler(AppDbContext dbContext, IRepository<Proje
 
         await projectRepository.Update(project, cancellationToken);
 
-        jobsService.EnqueueCreateNotification(NotificationFactory.AddedToProject(request.Model.UserId, project.Id));
+        jobsService.EnqueueCreateNotification(NotificationFactory.AddedToProject(request.Model.UserId, dateTimeProvider.Now(), project.Id));
 
         return Result.Ok();
     }

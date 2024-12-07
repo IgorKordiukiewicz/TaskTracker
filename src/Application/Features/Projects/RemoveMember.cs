@@ -16,7 +16,8 @@ internal class RemoveProjectMemberCommandValidator : AbstractValidator<RemovePro
     }
 }
 
-internal class RemoveProjectMemberHandler(IRepository<Project> projectRepository, AppDbContext dbContext, IJobsService jobsService) 
+internal class RemoveProjectMemberHandler(IRepository<Project> projectRepository, AppDbContext dbContext, 
+    IJobsService jobsService, IDateTimeProvider dateTimeProvider) 
     : IRequestHandler<RemoveProjectMemberCommand, Result>
 {
     public async Task<Result> Handle(RemoveProjectMemberCommand request, CancellationToken cancellationToken)
@@ -44,7 +45,7 @@ internal class RemoveProjectMemberHandler(IRepository<Project> projectRepository
                 .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.AssigneeId, (Guid?)null), cancellationToken);
         });
 
-        jobsService.EnqueueCreateNotification(NotificationFactory.RemovedFromProject(userId!.Value, project.Id));
+        jobsService.EnqueueCreateNotification(NotificationFactory.RemovedFromProject(userId!.Value, dateTimeProvider.Now(), project.Id));
 
         return transactionResult;
     }

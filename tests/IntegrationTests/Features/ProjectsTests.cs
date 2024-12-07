@@ -203,7 +203,7 @@ public class ProjectsTests
         var task = (await _factory.CreateTasks())[0];
         var project = await _fixture.FirstAsync<Project>();
         var member = await _fixture.FirstAsync<ProjectMember>();
-        task.UpdateAssignee(member.UserId);
+        task.UpdateAssignee(member.UserId, DateTime.Now);
 
         await _fixture.SeedDb(db =>
         {

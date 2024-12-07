@@ -1,4 +1,5 @@
-﻿using Task = Domain.Tasks.Task;
+﻿using Application.Common;
+using Task = Domain.Tasks.Task;
 
 namespace Application.Features.Tasks;
 
@@ -13,7 +14,7 @@ internal class UpdateTaskTitleCommandValidator : AbstractValidator<UpdateTaskTit
     }
 }
 
-internal class UpdateTaskTitleHandler(IRepository<Task> repository) 
+internal class UpdateTaskTitleHandler(IRepository<Task> repository, IDateTimeProvider dateTimeProvider) 
     : IRequestHandler<UpdateTaskTitleCommand, Result>
 {
     public async Task<Result> Handle(UpdateTaskTitleCommand request, CancellationToken cancellationToken)
@@ -24,7 +25,7 @@ internal class UpdateTaskTitleHandler(IRepository<Task> repository)
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
-        task.UpdateTitle(request.Model.Title);
+        task.UpdateTitle(request.Model.Title, dateTimeProvider.Now());
         await repository.Update(task, cancellationToken);
 
         return Result.Ok();

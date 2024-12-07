@@ -388,9 +388,9 @@ public class TasksTests
         var oldStatus = workflow.Statuses.First(x => x.Id == task.StatusId);
         var newStatus = workflow.Statuses.First(x => x.Id == transition.ToStatusId);
 
-        task.UpdateAssignee(user.Id);
-        task.Unassign();
-        task.UpdateStatus(newStatus.Id, workflow);
+        task.UpdateAssignee(user.Id, DateTime.Now);
+        task.Unassign(DateTime.Now);
+        task.UpdateStatus(newStatus.Id, workflow, DateTime.Now);
 
         await _fixture.SeedDb(db =>
         {

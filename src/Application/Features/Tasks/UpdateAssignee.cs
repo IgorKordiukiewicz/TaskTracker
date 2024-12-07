@@ -16,7 +16,8 @@ internal class UpdateTaskAssigneeCommandValidator : AbstractValidator<UpdateTask
     }
 }
 
-internal class UpdateTaskAssigneeHandler(IRepository<Task> taskRepository, AppDbContext dbContext, IJobsService jobsService) 
+internal class UpdateTaskAssigneeHandler(IRepository<Task> taskRepository, AppDbContext dbContext, 
+    IJobsService jobsService, IDateTimeProvider dateTimeProvider) 
     : IRequestHandler<UpdateTaskAssigneeCommand, Result>
 {
     public async Task<Result> Handle(UpdateTaskAssigneeCommand request, CancellationToken cancellationToken)
@@ -41,20 +42,20 @@ internal class UpdateTaskAssigneeHandler(IRepository<Task> taskRepository, AppDb
                 return Result.Fail(new NotFoundError<ProjectMember>(request.Model.MemberId.Value));
             }
 
-            task.UpdateAssignee(member.UserId);
+            task.UpdateAssignee(member.UserId, dateTimeProvider.Now());
 
-            jobsService.EnqueueCreateNotification(NotificationFactory.TaskAssigned(member.UserId, task.ProjectId, task.ShortId));
+            jobsService.EnqueueCreateNotification(NotificationFactory.TaskAssigned(member.UserId, dateTimeProvider.Now(), task.ProjectId, task.ShortId));
         }
         else
         {
-            task.Unassign();
+            task.Unassign(dateTimeProvider.Now());
         }
 
         await taskRepository.Update(task, cancellationToken);
 
         if(oldAssigneeUserId.HasValue)
         {
-            jobsService.EnqueueCreateNotification(NotificationFactory.TaskUnassigned(oldAssigneeUserId!.Value, task.ProjectId, task.ShortId));
+            jobsService.EnqueueCreateNotification(NotificationFactory.TaskUnassigned(oldAssigneeUserId!.Value, dateTimeProvider.Now(), task.ProjectId, task.ShortId));
         }
         
         return Result.Ok();

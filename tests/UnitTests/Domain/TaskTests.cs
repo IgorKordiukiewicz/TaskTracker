@@ -37,7 +37,7 @@ public class TaskTests
 
         var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialStatus.Id);
 
-        var result = task.UpdateStatus(unavailableStatus.Id, workflow);
+        var result = task.UpdateStatus(unavailableStatus.Id, workflow, DateTime.Now);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -51,7 +51,7 @@ public class TaskTests
 
         var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialStatus.Id);
 
-        var result = task.UpdateStatus(availableStatusId, workflow);
+        var result = task.UpdateStatus(availableStatusId, workflow, DateTime.Now);
 
         using (new AssertionScope())
         {
@@ -67,7 +67,7 @@ public class TaskTests
         var task = CreateDefaultTask();
         var assigneeId = Guid.NewGuid();
 
-        task.UpdateAssignee(assigneeId);
+        task.UpdateAssignee(assigneeId, DateTime.Now);
 
         using(new AssertionScope())
         {
@@ -80,10 +80,10 @@ public class TaskTests
     public void Unassign_ShouldSetAssigneeIdToNull()
     {
         var task = CreateDefaultTask();
-        task.UpdateAssignee(Guid.NewGuid());
+        task.UpdateAssignee(Guid.NewGuid(), DateTime.Now);
         var assigneeIdBefore = task.AssigneeId;
 
-        task.Unassign();
+        task.Unassign(DateTime.Now);
 
         using(new AssertionScope())
         {
@@ -100,7 +100,7 @@ public class TaskTests
         var priority = task.Priority;
         var newPriority = Enum.GetValues<TaskPriority>().Where(x => x != priority).First();
 
-        task.UpdatePriority(newPriority);
+        task.UpdatePriority(newPriority, DateTime.Now);
 
         using(new AssertionScope())
         {
@@ -115,7 +115,7 @@ public class TaskTests
         var task = CreateDefaultTask();
         var newTitle = task.Title + "A";
 
-        task.UpdateTitle(newTitle);
+        task.UpdateTitle(newTitle, DateTime.Now);
 
         using(new AssertionScope())
         {
@@ -130,7 +130,7 @@ public class TaskTests
         var task = CreateDefaultTask();
         var newDescription = task.Description + "A";
 
-        task.UpdateDescription(newDescription);
+        task.UpdateDescription(newDescription, DateTime.Now);
 
         using (new AssertionScope())
         {

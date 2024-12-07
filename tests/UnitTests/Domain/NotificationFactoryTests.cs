@@ -11,7 +11,7 @@ public class NotificationFactoryTests
         var projectId = Guid.NewGuid();
         var taskShortId = 1;
 
-        var result = NotificationFactory.TaskAssigned(userId, projectId, taskShortId);
+        var result = NotificationFactory.TaskAssigned(userId, DateTime.Now, projectId, taskShortId);
 
         using(new AssertionScope())
         {
@@ -29,7 +29,7 @@ public class NotificationFactoryTests
         var projectId = Guid.NewGuid();
         var taskShortId = 1;
 
-        var result = NotificationFactory.TaskUnassigned(userId, projectId, taskShortId);
+        var result = NotificationFactory.TaskUnassigned(userId, DateTime.Now, projectId, taskShortId);
 
         using (new AssertionScope())
         {
@@ -46,7 +46,7 @@ public class NotificationFactoryTests
         var userId = Guid.NewGuid();
         var projectId = Guid.NewGuid();
 
-        var result = NotificationFactory.AddedToProject(userId, projectId);
+        var result = NotificationFactory.AddedToProject(userId, DateTime.Now, projectId);
 
         using (new AssertionScope())
         {
@@ -62,7 +62,7 @@ public class NotificationFactoryTests
         var userId = Guid.NewGuid();
         var projectId = Guid.NewGuid();
 
-        var result = NotificationFactory.RemovedFromProject(userId, projectId);
+        var result = NotificationFactory.RemovedFromProject(userId, DateTime.Now, projectId);
 
         using (new AssertionScope())
         {
@@ -78,7 +78,7 @@ public class NotificationFactoryTests
         var userId = Guid.NewGuid();
         var organizationId = Guid.NewGuid();
 
-        var result = NotificationFactory.RemovedFromOrganization(userId, organizationId);
+        var result = NotificationFactory.RemovedFromOrganization(userId, DateTime.Now, organizationId);
 
         using (new AssertionScope())
         {
