@@ -6,6 +6,9 @@ export const useNotificationsService = () => {
     return {
         async getNotifications() {
             return await api.sendGetRequest<NotificationsVM>('notifications');
+        },
+        async read(id: string) {
+            await api.sendPostRequest(`notifications/${id}/read`, undefined);
         }
     }
 }

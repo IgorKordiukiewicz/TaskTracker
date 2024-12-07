@@ -8,7 +8,7 @@
             <TabPanels>
                 <TabPanel value="0">
                     <div class="flex flex-col gap-3">
-                        <NotificationItem v-for="notification in notifications.notifications" :notification="notification" @on-link-clicked="visible = false"></NotificationItem>
+                        <NotificationItem v-for="notification in notifications.notifications" :notification="notification" @on-link-clicked="visible = false" @on-read="emit('onNotificationRead')"></NotificationItem>
                     </div>
                 </TabPanel>
                 <TabPanel value="1">
@@ -33,14 +33,13 @@ import type { NotificationsVM } from '~/types/viewModels/notifications';
 import type { UserOrganizationInvitationsVM } from '~/types/viewModels/organizations';
 
 defineExpose({ show });
-const emit = defineEmits([ 'onInvitationAction' ])
+const emit = defineEmits([ 'onInvitationAction', 'onNotificationRead' ])
 const props = defineProps({
     invitations: { type: Object as PropType<UserOrganizationInvitationsVM>, required: true },
     notifications: { type: Object as PropType<NotificationsVM>, required: true },
 })
 
 const organizationsService = useOrganizationsService();
-const notificationsService = useNotificationsService();
 
 const visible = ref(false);
 

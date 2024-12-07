@@ -62,4 +62,44 @@ public class NotificationsTests
             result.Notifications[1].ContextEntityName.Should().Be(organization.Name);
         }
     }
+
+    [Fact]
+    public async Task Read_ShouldFail_WhenNotificationDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new ReadNotificationCommand(Guid.NewGuid(), Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Read_ShouldFail_WhenItDoesNotBelongToCurrentUser()
+    {
+        var user = (await _factory.CreateUsers())[0];
+        var notification = Notification.FromData(new(user.Id, "abc", DateTime.Now, NotificationContext.Organization, Guid.NewGuid()));
+
+        await _fixture.SeedDb(db =>
+        {
+            db.Add(notification);
+        });
+
+        var result = await _fixture.SendRequest(new ReadNotificationCommand(notification.Id, Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Read_ShouldSucceed_WhenNotificationExistsAndBelongsToUser()
+    {
+        var user = (await _factory.CreateUsers())[0];
+        var notification = Notification.FromData(new(user.Id, "abc", DateTime.Now, NotificationContext.Organization, Guid.NewGuid()));
+
+        await _fixture.SeedDb(db =>
+        {
+            db.Add(notification);
+        });
+
+        var result = await _fixture.SendRequest(new ReadNotificationCommand(notification.Id, user.Id));
+
+        result.IsSuccess.Should().BeTrue();
+    }
 }

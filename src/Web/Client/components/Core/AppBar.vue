@@ -15,7 +15,7 @@
                     <i class="pi pi-bell text-xl" />
                 </template>
             </span>
-            <NotificationsPopup ref="notificationsPopup" :invitations="invitations" :notifications="notifications" @on-invitation-action="updateInvitations" />
+            <NotificationsPopup ref="notificationsPopup" :invitations="invitations" :notifications="notifications" @on-invitation-action="updateInvitations" @on-notification-read="updateNotifications" />
             <span @click="toggle" v-if="userId">
                 <UserAvatar :user-id="userId" aria-haspopup="true" aria-controls="user_menu" class="cursor-pointer" />
             </span>
