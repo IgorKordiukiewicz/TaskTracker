@@ -8,13 +8,13 @@ public class TaskActivity : ValueObject
     public string? NewValue { get; init; }
     public DateTime OccurredAt { get; init; }
 
-    public TaskActivity(Guid taskId, TaskProperty property, DateTime now, string? oldValue = null, string? newValue = null)
+    public TaskActivity(Guid taskId, TaskProperty property, DateTime occurredAt, string? oldValue = null, string? newValue = null)
     {
         TaskId = taskId;
         Property = property;
         OldValue = oldValue;
         NewValue = newValue;
-        OccurredAt = now;
+        OccurredAt = occurredAt;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
