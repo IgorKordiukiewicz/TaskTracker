@@ -29,7 +29,7 @@ public class OrganizationsController(IMediator mediator)
     /// <response code="404">User not found.</response>
     [HttpPost]
     [ProducesResponseType(typeof(Guid), 200)]
-    [ProducesResponseType(404)]
+    [ProducesResponseType(400)]
     public async Task<IActionResult> CreateOrganization([FromBody] CreateOrganizationDto model)
     {
         var result = await mediator.Send(new CreateOrganizationCommand(model, User.GetUserId()));
@@ -69,6 +69,8 @@ public class OrganizationsController(IMediator mediator)
     /// <response code="404">Organization or user not found.</response> 
     [HttpPost("{organizationId:guid}/invitations")]
     [Authorize(Policy.OrganizationEditMembers)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> CreateOrganizationInvitation(Guid organizationId, [FromBody] CreateOrganizationInvitationDto model)
     {
@@ -97,7 +99,6 @@ public class OrganizationsController(IMediator mediator)
     /// <response code="404">User not found.</response> 
     [HttpGet("invitations")]
     [ProducesResponseType(typeof(UserOrganizationInvitationsVM), 200)]
-    [ProducesResponseType(404)]
     public async Task<IActionResult> GetOrganizationInvitationsForUser()
     {
         var result = await mediator.Send(new GetOrganizationInvitationsForUserQuery(User.GetUserId()));
@@ -110,6 +111,8 @@ public class OrganizationsController(IMediator mediator)
     /// <param name="invitationId"></param>
     /// <response code="404">Organization with given invitation not found.</response> 
     [HttpPost("invitations/{invitationId:guid}/decline")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeclineOrganizationInvitation(Guid invitationId)
     {
@@ -123,6 +126,8 @@ public class OrganizationsController(IMediator mediator)
     /// <param name="invitationId"></param>
     /// <response code="404">Organization with given invitation not found.</response> 
     [HttpPost("invitations/{invitationId:guid}/accept")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> AcceptOrganizationInvitation(Guid invitationId)
     {
@@ -137,6 +142,8 @@ public class OrganizationsController(IMediator mediator)
     /// <response code="404">Organization with given invitation not found.</response> 
     [HttpPost("invitations/{invitationId:guid}/cancel")]
     [Authorize(Policy.OrganizationEditMembers)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> CancelOrganizationInvitation(Guid invitationId)
     {
@@ -167,6 +174,8 @@ public class OrganizationsController(IMediator mediator)
     /// <response code="404">Organization not found.</response> 
     [HttpPost("{organizationId:guid}/members/remove")]
     [Authorize(Policy.OrganizationEditMembers)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> RemoveOrganizationMember(Guid organizationId, [FromBody] RemoveOrganizationMemberDto model)
     {
@@ -182,6 +191,8 @@ public class OrganizationsController(IMediator mediator)
     /// <response code="404">Organization not found.</response> 
     [HttpPost("{organizationId:guid}/members/role")]
     [Authorize(Policy.OrganizationEditMembers)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateMemberRole(Guid organizationId, [FromBody] UpdateMemberRoleDto model)
     {
@@ -212,6 +223,8 @@ public class OrganizationsController(IMediator mediator)
     /// <response code="404">Organization not found.</response> 
     [HttpPost("{organizationId:guid}/roles")]
     [Authorize(Policy.OrganizationEditRoles)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> CreateOrganizationRole(Guid organizationId, [FromBody] CreateRoleDto<OrganizationPermissions> model)
     {
@@ -227,6 +240,8 @@ public class OrganizationsController(IMediator mediator)
     /// <response code="404">Organization not found.</response> 
     [HttpPost("{organizationId:guid}/roles/delete")]
     [Authorize(Policy.OrganizationEditRoles)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteOrganizationRole(Guid organizationId, DeleteRoleDto model)
     {
@@ -242,6 +257,8 @@ public class OrganizationsController(IMediator mediator)
     /// <response code="404">Organization not found.</response> 
     [HttpPost("{organizationId:guid}/roles/name")]
     [Authorize(Policy.OrganizationEditRoles)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateRoleName(Guid organizationId, [FromBody] UpdateRoleNameDto model)
     {
@@ -257,6 +274,8 @@ public class OrganizationsController(IMediator mediator)
     /// <response code="404">Organization not found.</response> 
     [HttpPost("{organizationId:guid}/roles/permissions")]
     [Authorize(Policy.OrganizationEditRoles)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateRolePermissions(Guid organizationId, [FromBody] UpdateRolePermissionsDto<OrganizationPermissions> model)
     {
@@ -287,6 +306,7 @@ public class OrganizationsController(IMediator mediator)
     /// <response code="404">Organization not found.</response>
     [HttpPost("{organizationId:guid}/name")]
     [Authorize(Policy.OrganizationEditOrganization)]
+    [ProducesResponseType(200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateOrganizationName(Guid organizationId, [FromBody] UpdateOrganizationNameDto model)
     {
@@ -301,6 +321,7 @@ public class OrganizationsController(IMediator mediator)
     /// <response code="404">Organization not found.</response>
     [HttpPost("{organizationId:guid}/delete")]
     [Authorize(Policy.OrganizationOwner)]
+    [ProducesResponseType(200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteOrganization(Guid organizationId)
     {

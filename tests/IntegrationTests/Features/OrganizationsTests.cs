@@ -23,16 +23,6 @@ public class OrganizationsTests
     }
 
     [Fact]
-    public async Task Create_ShouldFail_WhenOwnerDoesNotExist()
-    {
-        await _factory.CreateUsers();
-
-        var result = await _fixture.SendRequest(new CreateOrganizationCommand(new("org"), Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
     public async Task Create_ShouldFail_WhenOrganizationWithSameNameAlreadyExists()
     {
         var organization = (await _factory.CreateOrganizations())[0];

@@ -42,6 +42,8 @@ public class WorkflowsController(IMediator mediator)
     /// <response code="404">Workflow not found.</response>
     [HttpPost("{workflowId:guid}/statuses")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddStatus(Guid workflowId, AddWorkflowStatusDto model)
     {
@@ -53,9 +55,12 @@ public class WorkflowsController(IMediator mediator)
     /// Delete a workflow status.
     /// </summary>
     /// <param name="workflowId"></param>
+    /// <param name="model"></param>
     /// <response code="404">Workflow not found.</response>
     [HttpPost("{workflowId:guid}/statuses/delete")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteStatus(Guid workflowId, DeleteWorkflowStatusDto model)
     {
@@ -71,6 +76,8 @@ public class WorkflowsController(IMediator mediator)
     /// <response code="404">Workflow not found.</response>
     [HttpPost("{workflowId:guid}/transitions")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddTransition(Guid workflowId, AddWorkflowTransitionDto model)
     {
@@ -86,6 +93,8 @@ public class WorkflowsController(IMediator mediator)
     /// <response code="404">Workflow not found.</response>
     [HttpPost("{workflowId:guid}/transitions/delete")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteTransition(Guid workflowId, DeleteWorkflowTransitionDto model)
     {
@@ -101,6 +110,8 @@ public class WorkflowsController(IMediator mediator)
     /// <response code="404">Workflow not found.</response>
     [HttpPost("{workflowId:guid}/initial-status")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> ChangeInitialStatus(Guid workflowId, ChangeInitialWorkflowStatusDto model)
     {

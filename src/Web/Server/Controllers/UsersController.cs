@@ -33,7 +33,7 @@ public class UsersController(IMediator mediator)
     /// Get the user's data.
     /// </summary>
     /// <response code="404">User not found.</response> 
-    [HttpGet("me")] // without /data the endpoint is not called
+    [HttpGet("me")]
     [ProducesResponseType(typeof(UserVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetUser()
@@ -47,6 +47,7 @@ public class UsersController(IMediator mediator)
     /// </summary>
     [HttpPost("me/register")]
     [ProducesResponseType(201)]
+    [ProducesResponseType(400)]
     public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDto model) 
     {
         var result = await mediator.Send(new RegisterUserCommand(User.GetUserId(), model));
@@ -91,7 +92,7 @@ public class UsersController(IMediator mediator)
     /// <param name="model"></param>
     [HttpPost("me/update-name")]
     [Authorize]
-    [ProducesResponseType(404)]
+    [ProducesResponseType(200)]
     public async Task<IActionResult> UpdateUserName([FromBody] UpdateUserNameDto model)
     {
         var result = await mediator.Send(new UpdateUserNameCommand(User.GetUserId(), model));

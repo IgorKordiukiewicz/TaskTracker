@@ -29,6 +29,7 @@ public class NotificationsController(IMediator mediator)
     /// <param name="id"></param>
     [HttpPost("{id:guid}/read")]
     [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> ReadNotification(Guid id)
     {

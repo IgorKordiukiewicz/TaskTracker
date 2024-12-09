@@ -26,6 +26,8 @@ public class ProjectsController(IMediator mediator)
     /// <response code="404">Organization not found.</response>
     [HttpPost]
     [Authorize(Policy.OrganizationEditProjects)]
+    [ProducesResponseType(typeof(Guid), 200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> CreateProject([FromBody] CreateProjectDto model)
     {
@@ -70,6 +72,8 @@ public class ProjectsController(IMediator mediator)
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/members")]
     [Authorize(Policy.ProjectEditMembers)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberDto model)
     {
@@ -96,10 +100,12 @@ public class ProjectsController(IMediator mediator)
     /// Remove a member from a project.
     /// </summary>
     /// <param name="projectId"></param>
-    /// <param name="memberId"></param>
+    /// <param name="model"></param>
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/members/remove")]
     [Authorize(Policy.ProjectEditMembers)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> RemoveProjectMember(Guid projectId, [FromBody] RemoveProjectMemberDto model)
     {
@@ -116,6 +122,8 @@ public class ProjectsController(IMediator mediator)
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/members/role")]
     [Authorize(Policy.ProjectEditMembers)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateMemberRoleMember(Guid projectId, [FromBody] UpdateMemberRoleDto model)
     {
@@ -161,6 +169,8 @@ public class ProjectsController(IMediator mediator)
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/roles")]
     [Authorize(Policy.ProjectEditRoles)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> CreateProjectRole(Guid projectId, [FromBody] CreateRoleDto<ProjectPermissions> model)
     {
@@ -176,6 +186,8 @@ public class ProjectsController(IMediator mediator)
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/roles/delete")]
     [Authorize(Policy.ProjectEditRoles)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteProjectRole(Guid projectId, [FromBody] DeleteRoleDto model)
     {
@@ -191,6 +203,8 @@ public class ProjectsController(IMediator mediator)
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/roles/name")]
     [Authorize(Policy.ProjectEditRoles)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateRoleName(Guid projectId, [FromBody] UpdateRoleNameDto model)
     {
@@ -206,6 +220,8 @@ public class ProjectsController(IMediator mediator)
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/roles/permissions")]
     [Authorize(Policy.ProjectEditRoles)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateRolePermissions(Guid projectId, [FromBody] UpdateRolePermissionsDto<ProjectPermissions> model)
     {
@@ -236,6 +252,8 @@ public class ProjectsController(IMediator mediator)
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/name")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateProjectName(Guid projectId, [FromBody] UpdateProjectNameDto model)
     {
@@ -250,6 +268,7 @@ public class ProjectsController(IMediator mediator)
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/delete")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteProject(Guid projectId)
     {
