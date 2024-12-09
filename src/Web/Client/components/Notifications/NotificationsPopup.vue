@@ -8,18 +8,28 @@
             <TabPanels>
                 <TabPanel value="0">
                     <div class="flex flex-col gap-3">
-                        <NotificationItem v-for="notification in notifications.notifications" :notification="notification" @on-link-clicked="visible = false" @on-read="emit('onNotificationRead')"></NotificationItem>
+                        <template v-if="notifications.notifications.length > 0">
+                            <NotificationItem v-for="notification in notifications.notifications" :notification="notification" @on-link-clicked="visible = false" @on-read="emit('onNotificationRead')"></NotificationItem>
+                        </template>
+                        <template v-else>
+                            <p>You don't have any unread notifications.</p>
+                        </template>
                     </div>
                 </TabPanel>
                 <TabPanel value="1">
                     <div class="flex flex-col gap-3">
-                        <div v-for="invitation in invitations.invitations" class="flex justify-between items-center">
-                            <p>{{ invitation.organizationName }}</p>
-                            <div class="flex gap-1 items-center">
-                                <Button icon="pi pi-times" severity="danger" rounded text @click="declineInvitation(invitation.id)" />
-                                <Button icon="pi pi-check" severity="success"  rounded text @click="acceptInvitation(invitation.id)" />
+                        <template v-if="invitations.invitations.length > 0">
+                            <div v-for="invitation in invitations.invitations" class="flex justify-between items-center">
+                                <p>{{ invitation.organizationName }}</p>
+                                <div class="flex gap-1 items-center">
+                                    <Button icon="pi pi-times" severity="danger" rounded text @click="declineInvitation(invitation.id)" />
+                                    <Button icon="pi pi-check" severity="success"  rounded text @click="acceptInvitation(invitation.id)" />
+                                </div>
                             </div>
-                        </div>
+                        </template>
+                        <template v-else>
+                            <p>You don't have any invitations.</p>
+                        </template>
                     </div>
                 </TabPanel>
             </TabPanels>
