@@ -274,6 +274,53 @@ public class OrganizationTests
     }
 
     [Fact]
+    public void Leave_ShouldFail_WhenUserIsOwner()
+    {
+        var userId = Guid.NewGuid();
+        var organization = Organization.Create("Name", userId);
+
+        var result = organization.Leave(userId);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Leave_ShouldRemoveMember_WhenUserIsNotOwner()
+    {
+        var organization = Organization.Create("Name", Guid.NewGuid());
+        var userId = Guid.NewGuid();
+        var invitation = organization.CreateInvitation(userId, DateTime.Now).Value;
+        organization.AcceptInvitation(invitation.Id, DateTime.Now);
+
+        var result = organization.Leave(userId);
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            organization.Members.Count.Should().Be(1);
+        }    
+    }
+
+    [Fact]
+    public void GetMemberManagers_ShouldReturnAllMembersThatCanEditMembers()
+    {
+        var ownerId = Guid.NewGuid();
+        var organization = Organization.Create("Name", ownerId);
+        var userId1 = Guid.NewGuid();
+        var userId2 = Guid.NewGuid();
+        var invitation1 = organization.CreateInvitation(userId1, DateTime.Now).Value;
+        var invitation2 = organization.CreateInvitation(userId2, DateTime.Now).Value;
+        var member1 = organization.AcceptInvitation(invitation1.Id, DateTime.Now).Value;
+        var member2 = organization.AcceptInvitation(invitation2.Id, DateTime.Now).Value;
+        var adminRoleId = organization.Roles.First(x => x.Type == RoleType.Admin).Id;
+        _ = organization.RolesManager.UpdateMemberRole(member1.Id, adminRoleId, organization.Members);
+
+        var result = organization.GetMemberManagers();
+
+        result.Select(x => x.UserId).Should().BeEquivalentTo(new[] { ownerId, userId1 });
+    }
+
+    [Fact]
     public void Member_UpdateRole_ShouldUpdateRoleId()
     {
         var member = OrganizationMember.Create(Guid.NewGuid(), Guid.NewGuid());

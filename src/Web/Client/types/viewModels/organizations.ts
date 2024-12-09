@@ -62,4 +62,5 @@ export interface OrganizationSettingsVM {
 
 export interface UserOrganizationPermissionsVM {
     permissions: OrganizationPermissions;
+    isOwner: boolean;
 }

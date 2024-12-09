@@ -18,4 +18,7 @@ public static class NotificationFactory
 
     public static NotificationData RemovedFromOrganization(Guid userId, DateTime now, Guid organizationId)
         => new(userId, $"You have been removed from the organization.", now, NotificationContext.Organization, organizationId);
+
+    public static NotificationData UserLeftOrganization(Guid receivingUserId, string userName, DateTime now, Guid organizationId)
+        => new(receivingUserId, $"{userName} has left the organization.", now, NotificationContext.Organization, organizationId);
 }

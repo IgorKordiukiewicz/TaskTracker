@@ -120,6 +120,31 @@ public class Organization : Entity, IAggregateRoot, IHasName
         return Result.Ok();
     }
 
+    public Result Leave(Guid userId)
+    {
+        if(OwnerId == userId)
+        {
+            return Result.Fail(new DomainError("Owner can't leave the organization."));
+        }
+
+        var member = _members.First(x => x.UserId == userId);
+        _members.Remove(member);
+
+        return Result.Ok();
+    }
+
+    public IReadOnlyList<OrganizationMember> GetMemberManagers()
+    {
+        var editMembersRolesIds = _roles
+            .Where(x => x.HasPermission(OrganizationPermissions.EditMembers))
+            .Select(x => x.Id)
+            .ToHashSet();
+
+        return _members
+            .Where(x => editMembersRolesIds.Contains(x.RoleId))
+            .ToList();
+    }
+
     private Result<OrganizationInvitation> GetPendingInvitation(Guid invitationId)
     {
         var invitation = _invitations.FirstOrDefault(x => x.Id == invitationId);

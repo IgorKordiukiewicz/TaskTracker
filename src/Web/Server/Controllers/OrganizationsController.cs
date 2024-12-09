@@ -322,4 +322,19 @@ public class OrganizationsController(IMediator mediator)
         var result = await mediator.Send(new GetUserOrganizationPermissionsQuery(User.GetUserId(), organizationId));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Leave the given organization.
+    /// </summary>
+    /// <param name="organizationId"></param>
+    [HttpPost("{organizationId:guid}/leave")]
+    [Authorize(Policy.OrganizationMember)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> LeaveOrganization(Guid organizationId)
+    {
+        var result = await mediator.Send(new LeaveOrganizationCommand(organizationId, User.GetUserId()));
+        return result.ToHttpResult();
+    }
 }

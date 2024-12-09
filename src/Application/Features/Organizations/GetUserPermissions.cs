@@ -30,11 +30,11 @@ internal class GetUserOrganizationPermissionsHandler(AppDbContext dbContext)
             .Select(x => x.RoleId)
             .FirstAsync(cancellationToken);
 
-        var permissions = await dbContext.OrganizationRoles
+        var data = await dbContext.OrganizationRoles
             .Where(x => x.OrganizationId == request.OrganizationId && x.Id == userRoleId)
-            .Select(x => x.Permissions)
+            .Select(x => new { Permissions = x.Permissions, IsOwner = x.IsOwner() })
             .FirstAsync(cancellationToken);
 
-        return new UserOrganizationPermissionsVM(permissions);
+        return new UserOrganizationPermissionsVM(data.Permissions, data.IsOwner);
     }
 }

@@ -94,8 +94,7 @@ const organizationNodes = ref([
     {
         title: 'Settings',
         icon: 'pi pi-cog',
-        link: [ '/organization/', '/settings' ],
-        permission: OrganizationPermissions.EditOrganization as number
+        link: [ '/organization/', '/settings' ]
     }
 ]);
 
