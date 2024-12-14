@@ -1,5 +1,5 @@
-import type { AddTaskLoggedTimeDto, AddTaskCommentDto, CreateTaskDto, UpdateTaskEstimatedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto, UpdateTaskTitleDto, UpdateTaskBoardDto } from "~/types/dtos/tasks";
-import type { TaskRelationshipsVM, TaskActivitiesVM, TaskCommentsVM, TasksVM } from "~/types/viewModels/tasks";
+import type { AddTaskLoggedTimeDto, AddTaskCommentDto, CreateTaskDto, UpdateTaskEstimatedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto, UpdateTaskTitleDto, UpdateTaskBoardDto, AddTaskRelationshipDto } from "~/types/dtos/tasks";
+import type { TaskRelationshipsVM, TaskActivitiesVM, TaskCommentsVM, TasksVM, TaskAvailableChildrenVM } from "~/types/viewModels/tasks";
 
 export const useTasksService = () => {
     const api = useApi();
@@ -52,6 +52,12 @@ export const useTasksService = () => {
         },
         async getRelationships(id: string, projectId: string) {
             return await api.sendGetRequest<TaskRelationshipsVM>(`tasks/${id}/relationships`, { 'ProjectId': projectId });
+        },
+        async getAvailableChildren(id: string, projectId: string) {
+            return await api.sendGetRequest<TaskAvailableChildrenVM>(`tasks/${id}/available-children`, { 'ProjectId': projectId });
+        },
+        async addTaskRelationship(projectId: string, model: AddTaskRelationshipDto) {
+            await api.sendPostRequest('tasks/relationships/hierarchical', model, { 'ProjectId': projectId });
         }
     }
 }

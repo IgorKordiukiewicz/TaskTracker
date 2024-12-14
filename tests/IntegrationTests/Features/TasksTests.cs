@@ -501,8 +501,57 @@ public class TasksTests
         result.IsFailed.Should().BeTrue();
     }
 
+    // TODO: Doesnt work when query uses postgres syntax, change the test DB to postgres?
+    //[Fact]
+    //public async System.Threading.Tasks.Task GetTaskRelationships_ShouldReturnTaskRelationships_WhenTaskExists()
+    //{
+    //    var workflow = (await _factory.CreateWorkflows())[0];
+    //    var relationshipManager = new TaskRelationshipManager(workflow.ProjectId);
+    //    var initialStatus = workflow.Statuses.First(x => x.Initial);
+    //    var tasks = new Task[]
+    //    {
+    //        Task.Create(1, relationshipManager.ProjectId, "a", "desc", initialStatus.Id),
+    //        Task.Create(2, relationshipManager.ProjectId, "b", "desc", initialStatus.Id),
+    //        Task.Create(3, relationshipManager.ProjectId, "c", "desc", initialStatus.Id),
+    //    };
+    //    var tasksIds = tasks.Select(x => x.Id);
+    //    _ = relationshipManager.AddHierarchicalRelationship(tasks[0].Id, tasks[1].Id, tasksIds);
+    //    _ = relationshipManager.AddHierarchicalRelationship(tasks[1].Id, tasks[2].Id, tasksIds);
+    //    // a -> b -> c
+    //
+    //    await _fixture.SeedDb(db =>
+    //    {
+    //        db.Add(relationshipManager);
+    //        db.AddRange(tasks);
+    //    });
+    //
+    //    var result = await _fixture.SendRequest(new GetTaskRelationshipsQuery(tasks[1].Id));
+    //
+    //    using(new AssertionScope())
+    //    {
+    //        result.IsSuccess.Should().BeTrue();
+    //        result.Value.Parent.Should().NotBeNull();
+    //        result.Value.Parent!.Id.Should().Be(tasks[0].Id);
+    //
+    //        var childrenHierarchy = result.Value.ChildrenHierarchy;
+    //        childrenHierarchy.Should().NotBeNull();
+    //        childrenHierarchy!.TaskId.Should().Be(tasks[1].Id);
+    //        childrenHierarchy.Children.Should().HaveCount(1);
+    //        childrenHierarchy.Children[0].TaskId.Should().Be(tasks[2].Id);
+    //        childrenHierarchy.Children[0].Children.Should().BeEmpty();
+    //    }
+    //}
+
     [Fact]
-    public async System.Threading.Tasks.Task GetTaskRelationships_ShouldReturnTaskRelationships_WhenTaskExists()
+    public async System.Threading.Tasks.Task GetAvailableChildren_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetTaskAvailableChildrenQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GetAvailableChildren_ShouldReturnAvailableTasks_WhenTaskExists()
     {
         var workflow = (await _factory.CreateWorkflows())[0];
         var relationshipManager = new TaskRelationshipManager(workflow.ProjectId);
@@ -512,15 +561,12 @@ public class TasksTests
             Task.Create(1, relationshipManager.ProjectId, "a", "desc", initialStatus.Id),
             Task.Create(2, relationshipManager.ProjectId, "b", "desc", initialStatus.Id),
             Task.Create(3, relationshipManager.ProjectId, "c", "desc", initialStatus.Id),
+            Task.Create(4, relationshipManager.ProjectId, "d", "desc", initialStatus.Id),
         };
         var tasksIds = tasks.Select(x => x.Id);
-        var hierarchicalRelationships = new TaskHierarchicalRelationship[]
-        {
-            new(tasks[0].Id, tasks[1].Id),
-            new(tasks[1].Id, tasks[2].Id)
-        };
         _ = relationshipManager.AddHierarchicalRelationship(tasks[0].Id, tasks[1].Id, tasksIds);
-        _ = relationshipManager.AddHierarchicalRelationship(tasks[1].Id, tasks[2].Id, tasksIds);
+        _ = relationshipManager.AddHierarchicalRelationship(tasks[2].Id, tasks[3].Id, tasksIds);
+        // a -> b, c -> d
 
         await _fixture.SeedDb(db =>
         {
@@ -528,19 +574,12 @@ public class TasksTests
             db.AddRange(tasks);
         });
 
-        var result = await _fixture.SendRequest(new GetTaskRelationshipsQuery(tasks[1].Id));
+        var result = await _fixture.SendRequest(new GetTaskAvailableChildrenQuery(tasks[0].Id));
 
         using(new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            result.Value.ParentId.Should().Be(tasks[0].Id);
-
-            var childrenHierarchy = result.Value.ChildrenHierarchy;
-            childrenHierarchy.Should().NotBeNull();
-            childrenHierarchy!.TaskId.Should().Be(tasks[1].Id);
-            childrenHierarchy.Children.Should().HaveCount(1);
-            childrenHierarchy.Children[0].TaskId.Should().Be(tasks[2].Id);
-            childrenHierarchy.Children[0].Children.Should().BeEmpty();
+            result.Value.Tasks.Select(x => x.Id).Should().BeEquivalentTo([tasks[2].Id]);
         }
     }
 

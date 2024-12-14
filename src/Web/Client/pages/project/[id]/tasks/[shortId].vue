@@ -124,11 +124,17 @@
                     </div>
                 </div>
                 <div class="bg-white w-full shadow p-4 flex flex-col gap-3" v-if="relationships">
-                    <div class="flex items-center gap-3 font-semibold text-base">
-                        <i class="pi pi-sitemap" />
-                        <p class="font-semibold">
-                            Relationships
-                        </p>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3 font-semibold">
+                            <i class="pi pi-sitemap" />
+                            <p class="font-semibold">
+                                Relationships
+                            </p>
+                        </div>
+                        <div class="flex gap-3" v-if="canEditTasks">
+                            <Button severity="secondary" text icon="pi pi-plus" style="height: 24px; width: 24px;" @click="openAddChildDialog"  />
+                        </div>
+                        <AddChildDialog ref="addChildDialog" @on-submit="addChild" :task-id="details.id" :project-id="projectId" />
                     </div>
                     <div class="flex flex-col gap-1" v-if="relationships.parent">
                         <label class="text-sm">Parent</label>
@@ -154,7 +160,7 @@
 import { $dt } from '@primevue/themes';
 import type { TreeNode } from 'primevue/treenode';
 import UpdateEstimatedTimeDialog from '~/components/Task/UpdateEstimatedTimeDialog.vue';
-import { AddTaskCommentDto, AddTaskLoggedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
+import { AddTaskCommentDto, AddTaskLoggedTimeDto, AddTaskRelationshipDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
 import { allTaskPriorities, ProjectPermissions, TaskPriority } from '~/types/enums';
 import type { TaskHierarchyVM, TaskVM } from '~/types/viewModels/tasks';
 
@@ -172,7 +178,6 @@ const members = ref(await projectsService.getMembers(projectId.value)); // TODO:
 const comments = ref();
 const activities = ref();
 const relationships = ref();
-const childrenTree = ref();
 await updateDetails();
 await updateComments();
 await updateRelationships();
@@ -183,6 +188,7 @@ const logTimeDialog = ref();
 const estimatedTimeDialog = ref();
 const updateTitleDialog = ref();
 const actionsMenu = ref();
+const addChildDialog = ref();
 
 const statuses = ref(details.value?.possibleNextStatuses.map(x => ({
     id: x.id, name: x.name }))
@@ -313,6 +319,10 @@ function openEstimatedTimeDialog() {
     estimatedTimeDialog.value.show(details.value!.estimatedTime ? timeParser.fromMinutes(details.value!.estimatedTime) : null);
 }
 
+function openAddChildDialog() {
+    addChildDialog.value.show();
+}
+
 async function updateDescription() {
     const model = new UpdateTaskDescriptionDto();
     model.description = descriptionEditValue.value!;
@@ -379,6 +389,11 @@ async function addLoggedTime(model: AddTaskLoggedTimeDto) {
 async function deleteTask() {
     await tasksService.deleteTask(details.value!.id, projectId.value);
     navigateTo(`/project/${projectId.value}`);
+}
+
+async function addChild(model: AddTaskRelationshipDto) {
+    await tasksService.addTaskRelationship(projectId.value, model);
+    await updateRelationships();
 }
 </script>
 

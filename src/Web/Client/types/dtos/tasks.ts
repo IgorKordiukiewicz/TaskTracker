@@ -54,3 +54,8 @@ export class UpdateTaskBoardColumnDto {
         this.tasksIds = tasksIds;
     }
 }
+
+export class AddTaskRelationshipDto {
+    parentId: string = '';
+    childId: string = '';
+}

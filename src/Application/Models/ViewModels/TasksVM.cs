@@ -31,3 +31,6 @@ public record TaskActivityVM(TaskProperty Property, string? OldValue, string? Ne
 public record TaskRelationshipsVM(TaskRelationshipsParentVM? Parent, TaskHierarchyVM? ChildrenHierarchy);
 public record TaskRelationshipsParentVM(Guid Id, string Title, int ShortId);
 public record TaskHierarchyVM(Guid TaskId, string TaskTitle, int TaskShortId, IReadOnlyList<TaskHierarchyVM> Children);
+
+public record TaskAvailableChildrenVM(IReadOnlyList<TaskAvailableChildVM> Tasks);
+public record TaskAvailableChildVM(Guid Id, int ShortId, string Title);

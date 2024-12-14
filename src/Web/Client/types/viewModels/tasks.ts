@@ -77,3 +77,13 @@ export interface TaskHierarchyVM {
     taskShortId: number;
     children: TaskHierarchyVM[];
 }
+
+export interface TaskAvailableChildrenVM {
+    tasks: TaskAvailableChildVM[];
+}
+
+export interface TaskAvailableChildVM {
+    id: string;
+    shortId: number;
+    title: string;
+}

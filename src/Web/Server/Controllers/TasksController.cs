@@ -279,6 +279,21 @@ public class TasksController(IMediator mediator)
     }
 
     /// <summary>
+    /// Get tasks that can be assigned as the given task's children.
+    /// </summary>
+    /// <param name="taskId"></param>
+    /// <response code="404">Task not found.</response>
+    [HttpGet("{taskId:guid}/available-children")]
+    [Authorize(Policy.ProjectEditTasks)]
+    [ProducesResponseType(typeof(TaskAvailableChildrenVM), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetTaskAvailableChildren(Guid taskId)
+    {
+        var result = await mediator.Send(new GetTaskAvailableChildrenQuery(taskId));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
     /// Update the layout of the board.
     /// </summary>
     /// <param name="model"></param>
