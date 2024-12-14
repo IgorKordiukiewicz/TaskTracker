@@ -40,4 +40,17 @@ public class TaskRelationshipManager : Entity, IAggregateRoot
 
         return Result.Ok();
     }
+
+    public Result RemoveHierarchicalRelationship(Guid parentId, Guid childId)
+    {
+        var relationship = _hierarchicalRelationships.FirstOrDefault(x => x.ParentId == parentId && x.ChildId == childId);
+        if(relationship is null)
+        {
+            return Result.Fail(new DomainError("The relationship does not exist."));
+        }
+
+        _hierarchicalRelationships.Remove(relationship);
+
+        return Result.Ok();
+    }
 }

@@ -1,4 +1,4 @@
-import type { AddTaskLoggedTimeDto, AddTaskCommentDto, CreateTaskDto, UpdateTaskEstimatedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto, UpdateTaskTitleDto, UpdateTaskBoardDto, AddTaskRelationshipDto } from "~/types/dtos/tasks";
+import type { AddTaskLoggedTimeDto, AddTaskCommentDto, CreateTaskDto, UpdateTaskEstimatedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto, UpdateTaskTitleDto, UpdateTaskBoardDto, AddTaskRelationshipDto, RemoveTaskRelationshipDto } from "~/types/dtos/tasks";
 import type { TaskRelationshipsVM, TaskActivitiesVM, TaskCommentsVM, TasksVM, TaskAvailableChildrenVM } from "~/types/viewModels/tasks";
 
 export const useTasksService = () => {
@@ -58,6 +58,9 @@ export const useTasksService = () => {
         },
         async addTaskRelationship(projectId: string, model: AddTaskRelationshipDto) {
             await api.sendPostRequest('tasks/relationships/hierarchical', model, { 'ProjectId': projectId });
+        },
+        async removeTaskRelationship(projectId: string, model: RemoveTaskRelationshipDto) {
+            await api.sendPostRequest('tasks/relationships/hierarchical/remove', model, { 'ProjectId': projectId });
         }
     }
 }

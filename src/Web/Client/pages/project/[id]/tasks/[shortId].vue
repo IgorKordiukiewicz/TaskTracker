@@ -144,10 +144,11 @@
                             </p>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-1">
+                    <div class="flex flex-col gap-1"  v-if="relationships.childrenHierarchy">
                         <label class="text-sm">Children</label>
                         <ul class="rounded-md select-border text-sm">
-                            <ChildTask v-for="task in relationships.childrenHierarchy.children" :task="task" :project-id="projectId" />
+                            <ChildTask  v-for="task in relationships.childrenHierarchy.children" 
+                            :task="task" :project-id="projectId" :can-edit-tasks="canEditTasks" @on-remove="removeChild" />
                         </ul>
                     </div>
                 </div>
@@ -160,7 +161,7 @@
 import { $dt } from '@primevue/themes';
 import type { TreeNode } from 'primevue/treenode';
 import UpdateEstimatedTimeDialog from '~/components/Task/UpdateEstimatedTimeDialog.vue';
-import { AddTaskCommentDto, AddTaskLoggedTimeDto, AddTaskRelationshipDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
+import { AddTaskCommentDto, AddTaskLoggedTimeDto, AddTaskRelationshipDto, RemoveTaskRelationshipDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
 import { allTaskPriorities, ProjectPermissions, TaskPriority } from '~/types/enums';
 import type { TaskHierarchyVM, TaskVM } from '~/types/viewModels/tasks';
 
@@ -319,8 +320,8 @@ function openEstimatedTimeDialog() {
     estimatedTimeDialog.value.show(details.value!.estimatedTime ? timeParser.fromMinutes(details.value!.estimatedTime) : null);
 }
 
-function openAddChildDialog() {
-    addChildDialog.value.show();
+async function openAddChildDialog() {
+    await addChildDialog.value.show();
 }
 
 async function updateDescription() {
@@ -393,6 +394,14 @@ async function deleteTask() {
 
 async function addChild(model: AddTaskRelationshipDto) {
     await tasksService.addTaskRelationship(projectId.value, model);
+    await updateRelationships();
+}
+
+async function removeChild(childId: string) {
+    const model = new RemoveTaskRelationshipDto();
+    model.parentId = details.value!.id;
+    model.childId = childId;
+    await tasksService.removeTaskRelationship(projectId.value, model);
     await updateRelationships();
 }
 </script>

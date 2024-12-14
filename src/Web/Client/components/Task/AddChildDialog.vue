@@ -29,13 +29,12 @@ const dialog = ref();
 const availableChildren = ref();
 const selectedChild = ref();
 
-await updateAvailableChildren();
-
 const submitDisabled = computed(() => {
     return !selectedChild.value;
 })
 
-function show() {
+async function show() {
+    await updateAvailableChildren();
     dialog.value.show();
 }
 
@@ -46,7 +45,6 @@ async function submit() {
     emit('onSubmit', model);
 
     selectedChild.value = undefined;
-    await updateAvailableChildren();
 }
 
 async function updateAvailableChildren() {

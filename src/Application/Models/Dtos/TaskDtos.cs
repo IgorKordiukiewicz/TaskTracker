@@ -18,6 +18,7 @@ public record UpdateTaskEstimatedTimeDto(int Minutes);
 public record UpdateTaskTitleDto(string Title);
 
 public record AddHierarchicalTaskRelationshipDto(Guid ParentId, Guid ChildId);
+public record RemoveHierarchicalTaskRelationshipDto(Guid ParentId, Guid ChildId);
 
 public record UpdateTaskBoardDto(Guid ProjectId, IReadOnlyCollection<UpdateTaskBoardColumnDto> Columns);
 public record UpdateTaskBoardColumnDto(Guid StatusId, IReadOnlyCollection<Guid> TasksIds);

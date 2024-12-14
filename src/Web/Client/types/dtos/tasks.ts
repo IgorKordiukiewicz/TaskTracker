@@ -59,3 +59,8 @@ export class AddTaskRelationshipDto {
     parentId: string = '';
     childId: string = '';
 }
+
+export class RemoveTaskRelationshipDto {
+    parentId: string = '';
+    childId: string = '';
+}

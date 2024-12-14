@@ -92,4 +92,33 @@ public class TaskRelationshipManagerTests
 
         result.IsFailed.Should().BeTrue();
     }
+
+    [Fact]
+    public void RemoveHierarchicalRelationship_ShouldFail_WhenRelationshipDoesNotExist()
+    {
+        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
+
+        var result = relationshipManager.RemoveHierarchicalRelationship(Guid.NewGuid(), Guid.NewGuid());
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RemoveHierarchicalRelationship_ShouldRemoveRelationship_WhenRelationshipExists()
+    {
+        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
+
+        var parentId = Guid.NewGuid();
+        var childId = Guid.NewGuid();
+        var projectTasksIds = new[] { parentId, childId };
+        _ = relationshipManager.AddHierarchicalRelationship(parentId, childId, projectTasksIds);
+
+        var result = relationshipManager.RemoveHierarchicalRelationship(parentId, childId);
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            relationshipManager.HierarchicalRelationships.Should().BeEmpty();
+        }
+    }
 }
