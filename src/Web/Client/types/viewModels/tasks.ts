@@ -59,3 +59,21 @@ export interface TaskActivityVM {
     newValue: string;
     occurredAt: Date;
 }
+
+export interface TaskRelationshipsVM {
+    parent?: TaskRelationshipsParentVM;
+    childrenHierarchy: TaskHierarchyVM[];
+}
+
+export interface TaskRelationshipsParentVM {
+    id: string;
+    title: string;
+    shortId: number;
+}
+
+export interface TaskHierarchyVM {
+    taskId: string;
+    taskTitle: string;
+    taskShortId: number;
+    children: TaskHierarchyVM[];
+}

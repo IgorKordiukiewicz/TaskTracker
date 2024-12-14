@@ -14,7 +14,7 @@
             <UpdateTaskTitleDialog ref="updateTitleDialog" :id="details.id" :project-id="projectId" @on-update="updateDetails" />
             <ConfirmDialog></ConfirmDialog>
         </div>
-        <div class="flex gap-4 w-100 mt-4" v-if="details && members">
+        <div class="flex gap-4 w-full mt-4" v-if="details && members">
             <div class="flex flex-col gap-4 w-3/4">
                 <div class="bg-white w-full shadow p-4 flex flex-col gap-3">
                     <div class="flex justify-between items-center">
@@ -123,6 +123,28 @@
                         </div>
                     </div>
                 </div>
+                <div class="bg-white w-full shadow p-4 flex flex-col gap-3" v-if="relationships">
+                    <div class="flex items-center gap-3 font-semibold text-base">
+                        <i class="pi pi-sitemap" />
+                        <p class="font-semibold">
+                            Relationships
+                        </p>
+                    </div>
+                    <div class="flex flex-col gap-1" v-if="relationships.parent">
+                        <label class="text-sm">Parent</label>
+                        <div class="p-2 rounded-md select-border flex items-center">
+                            <p class="cursor-pointer hover:font-medium text-sm" @click="navigateTo(`/project/${projectId}/tasks/${relationships.parent.shortId}`)">
+                                [#{{ relationships.parent.shortId }}] {{ relationships.parent.title }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm">Children</label>
+                        <ul class="rounded-md select-border text-sm">
+                            <ChildTask v-for="task in relationships.childrenHierarchy.children" :task="task" :project-id="projectId" />
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -130,10 +152,11 @@
 
 <script setup lang="ts">
 import { $dt } from '@primevue/themes';
+import type { TreeNode } from 'primevue/treenode';
 import UpdateEstimatedTimeDialog from '~/components/Task/UpdateEstimatedTimeDialog.vue';
 import { AddTaskCommentDto, AddTaskLoggedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
 import { allTaskPriorities, ProjectPermissions, TaskPriority } from '~/types/enums';
-import type { TaskVM } from '~/types/viewModels/tasks';
+import type { TaskHierarchyVM, TaskVM } from '~/types/viewModels/tasks';
 
 const route = useRoute();
 const tasksService = useTasksService();
@@ -148,8 +171,11 @@ const details = ref<TaskVM | undefined>();
 const members = ref(await projectsService.getMembers(projectId.value)); // TODO: pass from tasks list page?
 const comments = ref();
 const activities = ref();
+const relationships = ref();
+const childrenTree = ref();
 await updateDetails();
 await updateComments();
+await updateRelationships();
 
 await permissions.checkProjectPermissions(projectId.value);
 
@@ -266,6 +292,12 @@ async function updateDetails() {
 async function updateComments() {
     comments.value = details.value
         ? await tasksService.getComments(details.value.id, projectId.value)
+        : null;
+}
+
+async function updateRelationships() {
+    relationships.value = details.value 
+        ? await tasksService.getRelationships(details.value.id, projectId.value)
         : null;
 }
 

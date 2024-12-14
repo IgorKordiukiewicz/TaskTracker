@@ -28,5 +28,6 @@ public record TaskCommentVM(string Content, Guid AuthorId, string AuthorName, Da
 public record TaskActivitiesVM(IReadOnlyList<TaskActivityVM> Activities);
 public record TaskActivityVM(TaskProperty Property, string? OldValue, string? NewValue, DateTime OccurredAt);
 
-public record TaskRelationshipsVM(Guid? ParentId, TaskHierarchyVM? ChildrenHierarchy);
-public record TaskHierarchyVM(Guid TaskId, IReadOnlyList<TaskHierarchyVM> Children);
+public record TaskRelationshipsVM(TaskRelationshipsParentVM? Parent, TaskHierarchyVM? ChildrenHierarchy);
+public record TaskRelationshipsParentVM(Guid Id, string Title, int ShortId);
+public record TaskHierarchyVM(Guid TaskId, string TaskTitle, int TaskShortId, IReadOnlyList<TaskHierarchyVM> Children);

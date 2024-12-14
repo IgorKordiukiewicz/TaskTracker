@@ -1,5 +1,5 @@
 import type { AddTaskLoggedTimeDto, AddTaskCommentDto, CreateTaskDto, UpdateTaskEstimatedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto, UpdateTaskTitleDto, UpdateTaskBoardDto } from "~/types/dtos/tasks";
-import type { TaskActivitiesVM, TaskCommentsVM, TasksVM } from "~/types/viewModels/tasks";
+import type { TaskRelationshipsVM, TaskActivitiesVM, TaskCommentsVM, TasksVM } from "~/types/viewModels/tasks";
 
 export const useTasksService = () => {
     const api = useApi();
@@ -49,6 +49,9 @@ export const useTasksService = () => {
         },
         async updateBoard(projectId: string, model: UpdateTaskBoardDto) {
             await api.sendPostRequest('tasks/update-board', model, { 'ProjectId': projectId });
+        },
+        async getRelationships(id: string, projectId: string) {
+            return await api.sendGetRequest<TaskRelationshipsVM>(`tasks/${id}/relationships`, { 'ProjectId': projectId });
         }
     }
 }
