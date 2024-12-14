@@ -6,6 +6,8 @@ public record ProjectVM
 {
     public required Guid Id { get; init; }
     public required string Name { get; init; }
+    public required int MembersCount { get; init; }
+    public required int TasksCount { get; init; }
 }
 
 public record ProjectOrganizationVM(Guid OrganizationId);

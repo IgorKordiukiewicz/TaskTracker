@@ -10,6 +10,8 @@ export interface OrganizationVM
 {
     id: string;
     name: string;
+    membersCount: number;
+    projectsCount: number;
 }
 
 export interface OrganizationNavDataVM {

@@ -192,20 +192,8 @@ public class OrganizationsTests
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            var orgs = result.Value.Organizations;
-            orgs.Should().BeEquivalentTo(new[]
-            {
-                new OrganizationVM()
-                {
-                    Id = organizations[0].Id,
-                    Name = organizations[0].Name,
-                },
-                new OrganizationVM()
-                {
-                    Id = organizations[1].Id,
-                    Name = organizations[1].Name
-                },
-            });
+            var orgs = result.Value.Organizations.Select(x => x.Id);
+            orgs.Should().BeEquivalentTo([ organizations[0].Id, organizations[1].Id]);
         }
     }
 

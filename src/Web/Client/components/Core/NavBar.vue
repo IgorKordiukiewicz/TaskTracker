@@ -102,7 +102,7 @@ const organizationNodes = ref([
 const projectNodes = ref([
     {
         title: 'Tasks',
-        icon: 'pi pi-list',
+        icon: 'pi pi-check-circle', // pi-file-check ?
         includeIndex: true,
         link: [ '/project/', '/' ]
     },

@@ -23,16 +23,24 @@ internal class GetProjectsForOrganizationHandler(AppDbContext dbContext)
         }
 
         var projects = await dbContext.Projects
+            .AsNoTracking()
             .Include(x => x.Members)
             .Where(x => x.OrganizationId == request.OrganizationId && x.Members.Any(xx => xx.UserId == request.UserId))
-            .Select(x => new ProjectVM
-            {
-                Id = x.Id,
-                Name = x.Name,
-            })
             .OrderBy(x => x.Name)
             .ToListAsync(cancellationToken);
 
-        return Result.Ok(new ProjectsVM(projects));
+        var projectsIds = projects.Select(x => x.Id).ToHashSet();
+        var tasksCountByProjectId = await dbContext.Tasks
+            .Where(x => projectsIds.Contains(x.ProjectId))
+            .GroupBy(x => x.ProjectId)
+            .ToDictionaryAsync(k => k.Key, v => v.Count(), cancellationToken);
+
+        return Result.Ok(new ProjectsVM(projects.Select(x => new ProjectVM()
+        {
+            Id = x.Id,
+            Name = x.Name,
+            MembersCount = x.Members.Count,
+            TasksCount = tasksCountByProjectId.TryGetValue(x.Id, out var tasksCount) ? tasksCount : 0
+        }).ToList()));
     }
 }

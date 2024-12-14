@@ -73,7 +73,7 @@
                 </DataTable>
             </template>
             <template v-else>
-                <div class="mt-4 flex gap-4 overflow-y-auto" style="height: calc(100% - 3.6rem); width: calc(100vw - 309px);"> <!-- Doesnt work on really small viewport witdths -->
+                <div class="mt-4 flex gap-4 overflow-y-auto" style="height: calc(100% - 3.6rem); width: calc(100vw - 309px);"> <!-- Doesn't work on really small viewport widths -->
                     <div v-for="column in tasks.boardColumns" class="p-3 rounded-lg bg-surface-300 min-w-80 max-w-80 h-full border-0"  style="background: rgba(255, 255, 255, 0)"
                     :style="{ 'border-color': getDragColor(column) }">
                         <p class="text-lg mb-2 bg-white shadow-md rounded-md p-3 font-semibold text-center sticky top-0" style="z-index: 1;">{{ column.statusName }}</p>

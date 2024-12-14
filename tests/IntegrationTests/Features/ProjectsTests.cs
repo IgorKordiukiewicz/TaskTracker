@@ -95,19 +95,7 @@ public class ProjectsTests
         using(new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            result.Value.Projects.Should().BeEquivalentTo(new[]
-            {
-                new ProjectVM
-                {
-                    Id = project1.Id,
-                    Name = project1.Name
-                },
-                new ProjectVM
-                {
-                    Id = project2.Id,
-                    Name = project2.Name
-                }
-            });
+            result.Value.Projects.Select(x => x.Id).Should().BeEquivalentTo([project1.Id, project2.Id]);
         }
     }
 

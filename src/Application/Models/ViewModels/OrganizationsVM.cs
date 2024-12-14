@@ -9,6 +9,8 @@ public record OrganizationVM
 {
     public required Guid Id { get; init; }
     public required string Name { get; init; }
+    public required int MembersCount { get; init; }
+    public required int ProjectsCount { get; init; }
 }
 
 public record UserOrganizationInvitationsVM(IReadOnlyList<UserOrganizationInvitationVM> Invitations);
