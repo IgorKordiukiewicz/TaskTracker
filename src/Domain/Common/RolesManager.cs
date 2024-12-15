@@ -128,5 +128,5 @@ public class RolesManager<TRole, TPermissions>
     }
 
     private bool IsNameTaken(string name)
-        => _roles.Any(x => x.Name.ToLower() == name.ToLower());
+        => _roles.Any(x => x.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase));
 }

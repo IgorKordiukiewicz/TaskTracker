@@ -10,6 +10,8 @@ export interface OrganizationVM
 {
     id: string;
     name: string;
+    membersCount: number;
+    projectsCount: number;
 }
 
 export interface OrganizationNavDataVM {
@@ -43,6 +45,7 @@ export interface OrganizationInvitationVM {
     state: OrganizationInvitationState;
     createdAt: Date;
     finalizedAt: Date;
+    expirationDate?: Date;
 }
 
 export interface UserOrganizationInvitationsVM {
@@ -61,4 +64,5 @@ export interface OrganizationSettingsVM {
 
 export interface UserOrganizationPermissionsVM {
     permissions: OrganizationPermissions;
+    isOwner: boolean;
 }

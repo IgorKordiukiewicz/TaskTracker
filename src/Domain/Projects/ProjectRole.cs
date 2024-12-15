@@ -17,10 +17,10 @@ public class ProjectRole : Role<ProjectPermissions>
 
     public static ProjectRole[] CreateDefaultRoles(Guid projectId)
     {
-        return new ProjectRole[]
-        {
+        return
+        [
             new("Administrator", projectId, EnumHelpers.GetAllFlags<ProjectPermissions>(), RoleType.Admin),
             new("Read-Only", projectId, ProjectPermissions.None, RoleType.ReadOnly),
-        };
+        ];
     }
 }

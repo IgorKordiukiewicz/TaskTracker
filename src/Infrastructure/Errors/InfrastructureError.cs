@@ -2,8 +2,7 @@
 
 namespace Infrastructure.Errors;
 
-public class InfrastructureError : Error
+public class InfrastructureError(string message) 
+    : Error(message)
 {
-    public InfrastructureError(string message)
-        : base(message) { }
 }

@@ -1,5 +1,5 @@
-import type { AddTaskLoggedTimeDto, AddTaskCommentDto, CreateTaskDto, UpdateTaskEstimatedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto, UpdateTaskTitleDto } from "~/types/dtos/tasks";
-import type { TaskActivitiesVM, TaskCommentsVM, TasksVM } from "~/types/viewModels/tasks";
+import type { AddTaskLoggedTimeDto, AddTaskCommentDto, CreateTaskDto, UpdateTaskEstimatedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto, UpdateTaskTitleDto, UpdateTaskBoardDto, AddTaskRelationshipDto, RemoveTaskRelationshipDto } from "~/types/dtos/tasks";
+import type { TaskRelationshipsVM, TaskActivitiesVM, TaskCommentsVM, TasksVM, TaskAvailableChildrenVM } from "~/types/viewModels/tasks";
 
 export const useTasksService = () => {
     const api = useApi();
@@ -46,6 +46,21 @@ export const useTasksService = () => {
         },
         async deleteTask(id: string, projectId: string) {
             await api.sendPostRequest(`tasks/${id}/delete`, undefined, { 'ProjectId': projectId });
+        },
+        async updateBoard(projectId: string, model: UpdateTaskBoardDto) {
+            await api.sendPostRequest('tasks/update-board', model, { 'ProjectId': projectId });
+        },
+        async getRelationships(id: string, projectId: string) {
+            return await api.sendGetRequest<TaskRelationshipsVM>(`tasks/${id}/relationships`, { 'ProjectId': projectId });
+        },
+        async getAvailableChildren(id: string, projectId: string) {
+            return await api.sendGetRequest<TaskAvailableChildrenVM>(`tasks/${id}/available-children`, { 'ProjectId': projectId });
+        },
+        async addTaskRelationship(projectId: string, model: AddTaskRelationshipDto) {
+            await api.sendPostRequest('tasks/relationships/hierarchical', model, { 'ProjectId': projectId });
+        },
+        async removeTaskRelationship(projectId: string, model: RemoveTaskRelationshipDto) {
+            await api.sendPostRequest('tasks/relationships/hierarchical/remove', model, { 'ProjectId': projectId });
         }
     }
 }

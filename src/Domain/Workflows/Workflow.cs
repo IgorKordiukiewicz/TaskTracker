@@ -4,10 +4,10 @@ public class Workflow : Entity, IAggregateRoot
 {
     public Guid ProjectId { get; set; }
 
-    private readonly List<TaskStatus> _statuses = new();
+    private readonly List<TaskStatus> _statuses = [];
     public IReadOnlyList<TaskStatus> Statuses => _statuses.AsReadOnly();
 
-    private readonly List<TaskStatusTransition> _transitions = new();
+    private readonly List<TaskStatusTransition> _transitions = [];
     public IReadOnlyList<TaskStatusTransition> Transitions => _transitions.AsReadOnly();
 
     private Workflow(Guid projectId)
@@ -43,7 +43,7 @@ public class Workflow : Entity, IAggregateRoot
 
     public Result AddStatus(string name)
     {
-        if (_statuses.Any(x => x.Name.ToLower() == name.ToLower()))
+        if (_statuses.Any(x => x.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase)))
         {
             return Result.Fail(new DomainError("Status with this name already exists."));
         }

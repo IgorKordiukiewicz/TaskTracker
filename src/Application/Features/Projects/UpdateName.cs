@@ -13,25 +13,19 @@ internal class UpdateProjectNameCommandValidator : AbstractValidator<UpdateProje
     }
 }
 
-internal class UpdateProjectNameHandler : IRequestHandler<UpdateProjectNameCommand, Result>
+internal class UpdateProjectNameHandler(IRepository<Project> projectRepository) 
+    : IRequestHandler<UpdateProjectNameCommand, Result>
 {
-    private readonly IRepository<Project> _projectRepository;
-
-    public UpdateProjectNameHandler(IRepository<Project> projectRepository)
-    {
-        _projectRepository = projectRepository;
-    }
-
     public async Task<Result> Handle(UpdateProjectNameCommand request, CancellationToken cancellationToken)
     {
-        var project = await _projectRepository.GetById(request.ProjectId);
+        var project = await projectRepository.GetById(request.ProjectId, cancellationToken);
         if(project is null)
         {
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
         project.Name = request.Model.Name;
-        await _projectRepository.Update(project);
+        await projectRepository.Update(project, cancellationToken);
 
         return Result.Ok();
     }

@@ -13,18 +13,12 @@ internal class ChangeInitialWorkflowStatusCommandValidator : AbstractValidator<C
     }
 }
 
-internal class ChangeInitialWorkflowStatusHandler : IRequestHandler<ChangeInitialWorkflowStatusCommand, Result>
+internal class ChangeInitialWorkflowStatusHandler(IRepository<Workflow> workflowRepository) 
+    : IRequestHandler<ChangeInitialWorkflowStatusCommand, Result>
 {
-    private readonly IRepository<Workflow> _workflowRepository;
-
-    public ChangeInitialWorkflowStatusHandler(IRepository<Workflow> workflowRepository)
-    {
-        _workflowRepository = workflowRepository;
-    }
-
     public async Task<Result> Handle(ChangeInitialWorkflowStatusCommand request, CancellationToken cancellationToken)
     {
-        var workflow = await _workflowRepository.GetById(request.WorkflowId);
+        var workflow = await workflowRepository.GetById(request.WorkflowId, cancellationToken);
         if (workflow is null)
         {
             return Result.Fail(new NotFoundError<Workflow>(request.WorkflowId));
@@ -36,7 +30,7 @@ internal class ChangeInitialWorkflowStatusHandler : IRequestHandler<ChangeInitia
             return Result.Fail(result.Errors);
         }
 
-        await _workflowRepository.Update(workflow);
+        await workflowRepository.Update(workflow, cancellationToken);
         return Result.Ok();
     }
 }

@@ -2,15 +2,15 @@
 
 namespace Domain.Projects;
 
-public class Project : Entity, IAggregateRoot
+public class Project : Entity, IAggregateRoot, IHasName
 {
     public string Name { get; set; } = string.Empty;
     public Guid OrganizationId { get; private set; }
 
-    private readonly List<ProjectMember> _members = new();
+    private readonly List<ProjectMember> _members = [];
     public IReadOnlyList<ProjectMember> Members => _members.AsReadOnly();
 
-    private readonly List<ProjectRole> _roles = new();
+    private readonly List<ProjectRole> _roles = [];
     public IReadOnlyList<ProjectRole> Roles => _roles.AsReadOnly();
 
     public RolesManager<ProjectRole, ProjectPermissions> RolesManager { get; private init; }

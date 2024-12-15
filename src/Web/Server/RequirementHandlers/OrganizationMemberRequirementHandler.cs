@@ -15,13 +15,9 @@ public class OrganizationMemberRequirement : MemberRequirement<OrganizationPermi
     }
 }
 
-public class OrganizationMemberRequirementHandler : MemberRequirementHandler<OrganizationMemberRequirement>
+public class OrganizationMemberRequirementHandler(AppDbContext dbContext, IHttpContextAccessor contextAccessor) 
+    : MemberRequirementHandler<OrganizationMemberRequirement>(dbContext, contextAccessor, "organizationId")
 {
-    public OrganizationMemberRequirementHandler(AppDbContext dbContext, IHttpContextAccessor contextAccessor)
-        : base(dbContext, contextAccessor, "organizationId")
-    {
-    }
-
     protected override async Task<bool> CheckRequirement(OrganizationMemberRequirement requirement, AppDbContext dbContext, Guid userId, Guid entityId)
     {
         var member = await dbContext.Organizations

@@ -39,3 +39,28 @@ export class UpdateTaskEstimatedTimeDto {
 export class UpdateTaskTitleDto {
     title: string = '';
 }
+
+export class UpdateTaskBoardDto {
+    projectId: string = '';
+    columns: UpdateTaskBoardColumnDto[] = [];
+}
+
+export class UpdateTaskBoardColumnDto {
+    statusId: string = '';
+    tasksIds: string[] = [];
+
+    constructor(statusId: string, tasksIds: string[]) {
+        this.statusId = statusId;
+        this.tasksIds = tasksIds;
+    }
+}
+
+export class AddTaskRelationshipDto {
+    parentId: string = '';
+    childId: string = '';
+}
+
+export class RemoveTaskRelationshipDto {
+    parentId: string = '';
+    childId: string = '';
+}

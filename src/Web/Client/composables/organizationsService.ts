@@ -67,6 +67,9 @@ export const useOrganizationsService = () => {
         async deleteOrganization(id: string) {
             await api.sendPostRequest(`organizations/${id}/delete`, undefined);
         },
+        async leaveOrganization(id: string) {
+            await api.sendPostRequest(`organizations/${id}/leave`, undefined);
+        },
         async getUserPermissions(id: string) {
             return await api.sendGetRequest<UserOrganizationPermissionsVM>(`organizations/${id}/permissions`);
         }

@@ -1,19 +1,19 @@
 ﻿namespace Domain.Organizations;
 
-public class Organization : Entity, IAggregateRoot
+public class Organization : Entity, IAggregateRoot, IHasName
 {
     public string Name { get; set; } = string.Empty;
 
     public Guid OwnerId { get; private init; } // User
 
 
-    private readonly List<OrganizationMember> _members = new();
+    private readonly List<OrganizationMember> _members = [];
     public IReadOnlyList<OrganizationMember> Members => _members.AsReadOnly();
 
-    private readonly List<OrganizationInvitation> _invitations = new();
+    private readonly List<OrganizationInvitation> _invitations = [];
     public IReadOnlyList<OrganizationInvitation> Invitations => _invitations.AsReadOnly();
 
-    private readonly List<OrganizationRole> _roles = new();
+    private readonly List<OrganizationRole> _roles = [];
     public IReadOnlyList<OrganizationRole> Roles => _roles.AsReadOnly();
 
     public RolesManager<OrganizationRole, OrganizationPermissions> RolesManager { get; init; }
@@ -39,7 +39,7 @@ public class Organization : Entity, IAggregateRoot
         return result;
     }
 
-    public Result<OrganizationInvitation> CreateInvitation(Guid userId)
+    public Result<OrganizationInvitation> CreateInvitation(Guid userId, DateTime now, int? expirationDays = null)
     {
         if(_members.Any(x => x.UserId == userId))
         {
@@ -50,14 +50,15 @@ public class Organization : Entity, IAggregateRoot
         {
             return Result.Fail<OrganizationInvitation>(new DomainError("There already exists a pending invitation for this user."));
         }
-        
-        var invitation = OrganizationInvitation.Create(userId, Id);
+
+        DateTime? expirationDate = expirationDays.HasValue ? now.AddDays(expirationDays.Value) : null;
+        var invitation = OrganizationInvitation.Create(userId, Id, now, expirationDate);
         _invitations.Add(invitation);
 
         return invitation;
     }
 
-    public Result<OrganizationMember> AcceptInvitation(Guid invitationId)
+    public Result<OrganizationMember> AcceptInvitation(Guid invitationId, DateTime now)
     {
         var invitationResult = GetPendingInvitation(invitationId);
         if (invitationResult.IsFailed)
@@ -66,11 +67,11 @@ public class Organization : Entity, IAggregateRoot
         }
 
         var invitation = invitationResult.Value;
-        invitation.Accept();
+        invitation.Accept(now);
         return AddMember(invitation.UserId, RolesManager.GetReadOnlyRoleId());
     }
 
-    public Result DeclineInvitation(Guid invitationId)
+    public Result DeclineInvitation(Guid invitationId, DateTime now)
     {
         var invitationResult = GetPendingInvitation(invitationId);
         if (invitationResult.IsFailed)
@@ -78,11 +79,11 @@ public class Organization : Entity, IAggregateRoot
             return Result.Fail(invitationResult.Errors);
         }
 
-        invitationResult.Value.Decline();
+        invitationResult.Value.Decline(now);
         return Result.Ok();
     }
 
-    public Result CancelInvitation(Guid invitationId)
+    public Result CancelInvitation(Guid invitationId, DateTime now)
     {
         var invitationResult = GetPendingInvitation(invitationId);
         if (invitationResult.IsFailed)
@@ -90,8 +91,16 @@ public class Organization : Entity, IAggregateRoot
             return Result.Fail(invitationResult.Errors);
         }
 
-        invitationResult.Value.Cancel();
+        invitationResult.Value.Cancel(now);
         return Result.Ok();
+    }
+
+    public void ExpireInvitations(DateTime now)
+    {
+        foreach(var invitation in _invitations)
+        {
+            invitation.Expire(now);
+        }
     }
 
     public Result RemoveMember(Guid memberId)
@@ -109,6 +118,31 @@ public class Organization : Entity, IAggregateRoot
 
         _members.Remove(member);
         return Result.Ok();
+    }
+
+    public Result Leave(Guid userId)
+    {
+        if(OwnerId == userId)
+        {
+            return Result.Fail(new DomainError("Owner can't leave the organization."));
+        }
+
+        var member = _members.First(x => x.UserId == userId);
+        _members.Remove(member);
+
+        return Result.Ok();
+    }
+
+    public IReadOnlyList<OrganizationMember> GetMemberManagers()
+    {
+        var editMembersRolesIds = _roles
+            .Where(x => x.HasPermission(OrganizationPermissions.EditMembers))
+            .Select(x => x.Id)
+            .ToHashSet();
+
+        return _members
+            .Where(x => editMembersRolesIds.Contains(x.RoleId))
+            .ToList();
     }
 
     private Result<OrganizationInvitation> GetPendingInvitation(Guid invitationId)

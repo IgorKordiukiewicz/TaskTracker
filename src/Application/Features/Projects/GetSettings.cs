@@ -12,25 +12,19 @@ internal class GetProjectSettingsQueryValidator : AbstractValidator<GetProjectSe
     }
 }
 
-internal class GetProjectSettingsHandler : IRequestHandler<GetProjectSettingsQuery, Result<ProjectSettingsVM>>
+internal class GetProjectSettingsHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetProjectSettingsQuery, Result<ProjectSettingsVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetProjectSettingsHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<ProjectSettingsVM>> Handle(GetProjectSettingsQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId)) 
+        if(!await dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken)) 
         {
             return Result.Fail<ProjectSettingsVM>(new NotFoundError<Project>(request.ProjectId));
         }
 
-        return await _dbContext.Projects
+        return await dbContext.Projects
             .Where(x => x.Id == request.ProjectId)
             .Select(x => new ProjectSettingsVM(x.Name))
-            .FirstAsync();
+            .FirstAsync(cancellationToken);
     }
 }

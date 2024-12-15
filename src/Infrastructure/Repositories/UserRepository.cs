@@ -2,33 +2,27 @@
 
 namespace Infrastructure.Repositories;
 
-public class UserRepository : IRepository<User>
+public class UserRepository(AppDbContext dbContext) 
+    : IRepository<User>
 {
-    private readonly AppDbContext _dbContext;
+    public async Task<User?> GetBy(Expression<Func<User, bool>> predicate, CancellationToken cancellationToken = default)
+        => await dbContext.Users
+        .FirstOrDefaultAsync(predicate, cancellationToken);
 
-    public UserRepository(AppDbContext dbContext)
+    public async Task<User?> GetById(Guid id, CancellationToken cancellationToken = default)
+        => await GetBy(x => x.Id == id, cancellationToken);
+
+    public async Task<bool> Exists(Expression<Func<User, bool>> predicate, CancellationToken cancellationToken = default)
+        => await dbContext.Users.AnyAsync(predicate, cancellationToken);
+
+    public async Task Add(User entity, CancellationToken cancellationToken = default)
     {
-        _dbContext = dbContext;
+        dbContext.Users.Add(entity);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<User?> GetBy(Expression<Func<User, bool>> predicate)
-        => await _dbContext.Users
-        .FirstOrDefaultAsync(predicate);
-
-    public async Task<User?> GetById(Guid id)
-        => await GetBy(x => x.Id == id);
-
-    public async Task<bool> Exists(Expression<Func<User, bool>> predicate)
-        => await _dbContext.Users.AnyAsync(predicate);
-
-    public async Task Add(User entity)
+    public async Task Update(User entity, CancellationToken cancellationToken = default)
     {
-        _dbContext.Users.Add(entity);
-        await _dbContext.SaveChangesAsync();
-    }
-
-    public async Task Update(User entity)
-    {
-        await _dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 }

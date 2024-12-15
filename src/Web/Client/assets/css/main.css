@@ -30,3 +30,11 @@ body {
 .settings-label-caption {
     color: rgb(100, 116, 139);
 }
+
+.select-border {
+    border: 1px solid var(--p-select-border-color);
+}
+
+.select-border:hover {
+    border: 1px solid var(--p-select-hover-border-color);
+}

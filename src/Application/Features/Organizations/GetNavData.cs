@@ -12,21 +12,15 @@ internal class GetOrganizationNavDataQueryValidator : AbstractValidator<GetOrgan
     }
 }
 
-internal class GetOrganizationNavDataHandler : IRequestHandler<GetOrganizationNavDataQuery, Result<OrganizationNavigationVM>>
+internal class GetOrganizationNavDataHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetOrganizationNavDataQuery, Result<OrganizationNavigationVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetOrganizationNavDataHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<OrganizationNavigationVM>> Handle(GetOrganizationNavDataQuery request, CancellationToken cancellationToken)
     {
-        var navData = await _dbContext.Organizations
+        var navData = await dbContext.Organizations
             .Where(x => x.Id == request.OrganizationId)
             .Select(x => new NavigationItemVM(x.Id, x.Name))
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(cancellationToken);
 
         if(navData is null)
         {

@@ -1,8 +1,6 @@
 <template>
     <div class="flex flex-col">
-        <p class="font-medium">
-            {{ description }}
-        </p>
+        <p v-html="description"></p>
         <p class="text-sm">
             {{ timeElapsed }}
         </p>
@@ -29,15 +27,24 @@ const description = computed(() => {
         case TaskProperty.Description:
             return "Updated description.";
         case TaskProperty.Status:
-            return `Changed status from ${props.activity.oldValue} to ${props.activity.newValue}.`;
+            return `Changed status from ${getValueDisplay(props.activity.oldValue)} to ${getValueDisplay(props.activity.newValue)}.`;
         case TaskProperty.Assignee:
             return !props.activity.newValue
-                ? `Unassigned ${props.activity.oldValue}.`
-                : (!props.activity.oldValue ? `Assigned ${props.activity.newValue}.` : `Changed assignee from ${props.activity.oldValue} to ${props.activity.newValue}.`);
+                ? `Unassigned ${getValueDisplay(props.activity.oldValue)}.`
+                : (!props.activity.oldValue ? `Assigned ${getValueDisplay(props.activity.newValue)}.` 
+                : `Changed assignee from ${getValueDisplay(props.activity.oldValue)} to ${getValueDisplay(props.activity.newValue)}.`);
         case TaskProperty.Priority:
-            return `Changed priority from ${props.activity.oldValue} to ${props.activity.newValue}.`
+            return `Changed priority from ${getValueDisplay(props.activity.oldValue)} to ${getValueDisplay(props.activity.newValue)}.`;
+        case TaskProperty.Title:
+            return `Changed title from ${getValueDisplay(props.activity.oldValue)} to ${getValueDisplay(props.activity.newValue)}`;
+        case TaskProperty.Creation:
+            return 'Created.';
         default:
             return "";
     }
 });
+
+function getValueDisplay(value: string) {
+    return `<span class="font-semibold">${value}</span>`;
+}
 </script>

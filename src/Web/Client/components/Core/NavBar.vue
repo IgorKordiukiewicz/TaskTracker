@@ -95,14 +95,14 @@ const organizationNodes = ref([
         title: 'Settings',
         icon: 'pi pi-cog',
         link: [ '/organization/', '/settings' ],
-        permission: OrganizationPermissions.EditOrganization as number
+        permission: undefined
     }
 ]);
 
 const projectNodes = ref([
     {
         title: 'Tasks',
-        icon: 'pi pi-list',
+        icon: 'pi pi-check-circle', // pi-file-check ?
         includeIndex: true,
         link: [ '/project/', '/' ]
     },

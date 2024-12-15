@@ -14,23 +14,18 @@ internal class GetTasksQueryValidator : AbstractValidator<GetTasksQuery>
     }
 }
 
-internal class GetTasksHandler : IRequestHandler<GetTasksQuery, Result<TasksVM>>
+internal class GetTasksHandler(AppDbContext context) 
+    : IRequestHandler<GetTasksQuery, Result<TasksVM>>
 {
-    private readonly AppDbContext _context;
-
-    public GetTasksHandler(AppDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<Result<TasksVM>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
     {
-        var workflow = await _context.Workflows
+        // TODO: refactor (extract methods)
+        var workflow = await context.Workflows
             .AsNoTracking()
             .Include(x => x.Statuses)
             .Include(x => x.Transitions)
             .Where(x => x.ProjectId == request.ProjectId)
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(cancellationToken);
 
         if(workflow is null)
         {
@@ -39,8 +34,9 @@ internal class GetTasksHandler : IRequestHandler<GetTasksQuery, Result<TasksVM>>
 
         var statusesById = workflow.Statuses.ToDictionary(x => x.Id, x => x);
 
-        IQueryable<Domain.Tasks.Task> query = _context.Tasks
+        IQueryable<Domain.Tasks.Task> query = context.Tasks
             .Include(x => x.TimeLogs)
+            .Include(x => x.Comments)
             .Where(x => x.ProjectId == request.ProjectId);
 
         query = request.Ids.Match(
@@ -48,7 +44,7 @@ internal class GetTasksHandler : IRequestHandler<GetTasksQuery, Result<TasksVM>>
             ids => query.Where(x => !ids.Any() || ids.Contains(x.Id)));
 
         var tasks = await query
-            .Join(_context.TaskStatuses, 
+            .Join(context.TaskStatuses, 
             x => x.StatusId,
             x => x.Id, 
             (task, status) => new
@@ -61,20 +57,31 @@ internal class GetTasksHandler : IRequestHandler<GetTasksQuery, Result<TasksVM>>
                 task.Priority,
                 task.TotalTimeLogged,
                 task.EstimatedTime,
+                CommentsCount = task.Comments.Count,
                 Status = status.Id,
             })
             .OrderByDescending(x => x.ShortId)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
-        var allTaskStatuses = workflow.Statuses
-            .Select(x => new TaskStatusDetailedVM(x.Id, x.Name, x.DisplayOrder))
-            .ToList();
+        var boardLayout = await context.TasksBoardLayouts
+            .AsNoTracking()
+            .Where(x => x.ProjectId == request.ProjectId)
+            .SingleAsync(cancellationToken);
 
         var possibleNextStatusesByStatus = workflow.Statuses.ToDictionary(k => k.Id, _ => new List<Guid>());
         foreach(var (statusId, possibleNextStatuses) in possibleNextStatusesByStatus)
         {
             possibleNextStatuses.AddRange(workflow.Transitions.Where(x => x.FromStatusId == statusId).Select(x => x.ToStatusId));
         }
+
+        var allTaskStatuses = workflow.Statuses
+            .Select(x => new TaskStatusDetailedVM(x.Id, x.Name, x.DisplayOrder))
+            .OrderBy(x => x.DisplayOrder)
+            .ToList();
+
+        var boardColumns = boardLayout.Columns
+            .Select(x => new TaskBoardColumnVM(x.StatusId, statusesById[x.StatusId].Name, possibleNextStatusesByStatus[x.StatusId], x.TasksIds))
+            .ToList();
 
         return new TasksVM(tasks.Select(x => new TaskVM
         {
@@ -87,7 +94,8 @@ internal class GetTasksHandler : IRequestHandler<GetTasksQuery, Result<TasksVM>>
             Status = new(x.Status, statusesById[x.Status].Name),
             PossibleNextStatuses = possibleNextStatusesByStatus[x.Status].Select(xx => new TaskStatusVM(xx, statusesById[xx].Name)).ToList(),
             TotalTimeLogged = x.TotalTimeLogged,
-            EstimatedTime = x.EstimatedTime
-        }).ToList(), allTaskStatuses);
+            EstimatedTime = x.EstimatedTime,
+            CommentsCount = x.CommentsCount
+        }).ToList(), allTaskStatuses, boardColumns);
     }
 }

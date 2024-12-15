@@ -12,27 +12,21 @@ internal class GetTaskActivitiesQueryValidator : AbstractValidator<GetTaskActivi
     }
 }
 
-internal class GetTaskActivitiesHandler : IRequestHandler<GetTaskActivitiesQuery, Result<TaskActivitiesVM>>
+internal class GetTaskActivitiesHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetTaskActivitiesQuery, Result<TaskActivitiesVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetTaskActivitiesHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<TaskActivitiesVM>> Handle(GetTaskActivitiesQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId))
+        if(!await dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId, cancellationToken))
         {
             return Result.Fail<TaskActivitiesVM>(new NotFoundError<Domain.Tasks.Task>(request.TaskId));
         }
 
-        var activities = await _dbContext.TaskActivities
+        var activities = await dbContext.TaskActivities
             .AsNoTracking()
             .Where(x => x.TaskId == request.TaskId)
             .OrderByDescending(x => x.OccurredAt)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         var userIds = new HashSet<Guid>();
         var statusIds = new HashSet<Guid>();
@@ -48,13 +42,13 @@ internal class GetTaskActivitiesHandler : IRequestHandler<GetTaskActivitiesQuery
             }
         }
 
-        var userNameById = await _dbContext.Users
+        var userNameById = await dbContext.Users
             .Where(x => userIds.Contains(x.Id))
-            .ToDictionaryAsync(k => k.Id, v => v.FullName);
+            .ToDictionaryAsync(k => k.Id, v => v.FullName, cancellationToken);
 
-        var statusNameById = await _dbContext.TaskStatuses
+        var statusNameById = await dbContext.TaskStatuses
             .Where(x => statusIds.Contains(x.Id))
-            .ToDictionaryAsync(k => k.Id, v => v.Name);
+            .ToDictionaryAsync(k => k.Id, v => v.Name, cancellationToken);
 
         var updatedActivities = new List<TaskActivityVM>();
         foreach(var activity in activities)

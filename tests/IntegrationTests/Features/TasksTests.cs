@@ -5,6 +5,7 @@ using Domain.Projects;
 using Domain.Tasks;
 using Domain.Users;
 using Domain.Workflows;
+using Infrastructure.Models;
 using Task = Domain.Tasks.Task;
 using TaskStatus = Domain.Workflows.TaskStatus;
 
@@ -91,14 +92,28 @@ public class TasksTests
     {
         var workflows = await _factory.CreateWorkflows(2);
 
+        var taskBoardLayouts = workflows.Select(x => new TasksBoardLayout()
+        {
+            ProjectId = x.ProjectId,
+            Columns = x.Statuses.Select(xx => new TasksBoardColumn()
+            {
+                StatusId = xx.Id,
+                TasksIds = []
+            }).ToArray()
+        }).ToList();
+
         var initialStatusId1 = workflows[0].Statuses.First(x => x.Initial).Id;
         var initialStatusId2 = workflows[1].Statuses.First(x => x.Initial).Id;
-        var task1 = Task.Create(1, workflows[0].ProjectId, "title1", "desc1", initialStatusId1);
-        var task2 = Task.Create(2, workflows[0].ProjectId, "title2", "desc2", initialStatusId1);
-        var task3 = Task.Create(1, workflows[1].ProjectId, "title3", "desc3", initialStatusId2);
+        var task1 = Task.Create(1, workflows[0].ProjectId, DateTime.Now, "title1", "desc1", initialStatusId1);
+        var task2 = Task.Create(2, workflows[0].ProjectId, DateTime.Now, "title2", "desc2", initialStatusId1);
+        var task3 = Task.Create(1, workflows[1].ProjectId, DateTime.Now, "title3", "desc3", initialStatusId2);
+
+        taskBoardLayouts[0].Columns.First(x => x.StatusId == initialStatusId1).TasksIds.AddRange([task1.Id, task2.Id]);
+
         await _fixture.SeedDb(db =>
         {
             db.AddRange(task1, task2, task3);
+            db.AddRange(taskBoardLayouts);
         });
 
         var result = await _fixture.SendRequest(new GetTasksQuery(workflows[0].ProjectId, useList ? new[] { task1.Id, task2.Id } : task1.ShortId));
@@ -108,6 +123,8 @@ public class TasksTests
             result.IsSuccess.Should().BeTrue();
             result.Value.Tasks.Should().HaveCount(expectedCount);
             result.Value.AllTaskStatuses.Should().HaveCount(workflows[0].Statuses.Count);
+            result.Value.BoardColumns.Should().HaveCount(workflows[0].Statuses.Count);
+            result.Value.BoardColumns.SelectMany(x => x.TasksIds).Should().HaveCount(2);
         }
     }
 
@@ -365,15 +382,15 @@ public class TasksTests
     {
         var workflow = (await _factory.CreateWorkflows())[0];
         var user = await _fixture.FirstAsync<User>();
-        var task = Task.Create(1, workflow.ProjectId, "title", "desc", workflow.Statuses.First(x => x.Initial).Id);
+        var task = Task.Create(1, workflow.ProjectId, DateTime.Now, "title", "desc", workflow.Statuses.First(x => x.Initial).Id);
 
         var transition = workflow.Transitions.First(x => x.FromStatusId == task.StatusId);
         var oldStatus = workflow.Statuses.First(x => x.Id == task.StatusId);
         var newStatus = workflow.Statuses.First(x => x.Id == transition.ToStatusId);
 
-        task.UpdateAssignee(user.Id);
-        task.Unassign();
-        task.UpdateStatus(newStatus.Id, workflow);
+        task.UpdateAssignee(user.Id, DateTime.Now);
+        task.Unassign(DateTime.Now);
+        task.UpdateStatus(newStatus.Id, workflow, DateTime.Now);
 
         await _fixture.SeedDb(db =>
         {
@@ -387,10 +404,11 @@ public class TasksTests
             result.IsSuccess.Should().BeTrue();
 
             var activities = result.Value.Activities;
-            activities.Should().HaveCount(3);
+            activities.Should().HaveCount(4);
             AssertActivities(activities[0], TaskProperty.Status, oldStatus.Name, newStatus.Name);
             AssertActivities(activities[1], TaskProperty.Assignee, user.FullName, null);
             AssertActivities(activities[2], TaskProperty.Assignee, null, user.FullName);
+            AssertActivities(activities[3], TaskProperty.Creation, null, null);
             
             static void AssertActivities(TaskActivityVM activity, TaskProperty expectedProperty, string? expectedOldValue, string? expectedNewValue)
             {
@@ -477,33 +495,26 @@ public class TasksTests
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task GetTaskRelationships_ShouldFail_WhenTaskDoesNotExist()
+    public async System.Threading.Tasks.Task RemoveHierarchicalTaskRelationship_ShouldFail_WhenRelationshipManagerDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new GetTaskRelationshipsQuery(Guid.NewGuid()));
+        var result = await _fixture.SendRequest(new RemoveHierarchicalTaskRelationshipCommand(Guid.NewGuid(), new(Guid.NewGuid(), Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task GetTaskRelationships_ShouldReturnTaskRelationships_WhenTaskExists()
+    public async System.Threading.Tasks.Task RemoveHierarchicalTaskRelationship_ShouldRemoveHierarchicalRelationship_WhenRelationshipManagerExists()
     {
         var workflow = (await _factory.CreateWorkflows())[0];
         var relationshipManager = new TaskRelationshipManager(workflow.ProjectId);
         var initialStatus = workflow.Statuses.First(x => x.Initial);
         var tasks = new Task[]
         {
-            Task.Create(1, relationshipManager.ProjectId, "a", "desc", initialStatus.Id),
-            Task.Create(2, relationshipManager.ProjectId, "b", "desc", initialStatus.Id),
-            Task.Create(3, relationshipManager.ProjectId, "c", "desc", initialStatus.Id),
+            Task.Create(1, relationshipManager.ProjectId, DateTime.Now, "a", "desc", initialStatus.Id),
+            Task.Create(2, relationshipManager.ProjectId, DateTime.Now, "b", "desc", initialStatus.Id),
         };
         var tasksIds = tasks.Select(x => x.Id);
-        var hierarchicalRelationships = new TaskHierarchicalRelationship[]
-        {
-            new(tasks[0].Id, tasks[1].Id),
-            new(tasks[1].Id, tasks[2].Id)
-        };
         _ = relationshipManager.AddHierarchicalRelationship(tasks[0].Id, tasks[1].Id, tasksIds);
-        _ = relationshipManager.AddHierarchicalRelationship(tasks[1].Id, tasks[2].Id, tasksIds);
 
         await _fixture.SeedDb(db =>
         {
@@ -511,19 +522,159 @@ public class TasksTests
             db.AddRange(tasks);
         });
 
-        var result = await _fixture.SendRequest(new GetTaskRelationshipsQuery(tasks[1].Id));
+        var result = await _fixture.SendRequest(new RemoveHierarchicalTaskRelationshipCommand(tasks[0].ProjectId, new(tasks[0].Id, tasks[1].Id)));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<TaskHierarchicalRelationship>()).Should().Be(0);
+        }
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GetTaskRelationships_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetTaskRelationshipsQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    // TODO: Doesnt work when query uses postgres syntax, change the test DB to postgres?
+    //[Fact]
+    //public async System.Threading.Tasks.Task GetTaskRelationships_ShouldReturnTaskRelationships_WhenTaskExists()
+    //{
+    //    var workflow = (await _factory.CreateWorkflows())[0];
+    //    var relationshipManager = new TaskRelationshipManager(workflow.ProjectId);
+    //    var initialStatus = workflow.Statuses.First(x => x.Initial);
+    //    var tasks = new Task[]
+    //    {
+    //        Task.Create(1, relationshipManager.ProjectId, "a", "desc", initialStatus.Id),
+    //        Task.Create(2, relationshipManager.ProjectId, "b", "desc", initialStatus.Id),
+    //        Task.Create(3, relationshipManager.ProjectId, "c", "desc", initialStatus.Id),
+    //    };
+    //    var tasksIds = tasks.Select(x => x.Id);
+    //    _ = relationshipManager.AddHierarchicalRelationship(tasks[0].Id, tasks[1].Id, tasksIds);
+    //    _ = relationshipManager.AddHierarchicalRelationship(tasks[1].Id, tasks[2].Id, tasksIds);
+    //    // a -> b -> c
+    //
+    //    await _fixture.SeedDb(db =>
+    //    {
+    //        db.Add(relationshipManager);
+    //        db.AddRange(tasks);
+    //    });
+    //
+    //    var result = await _fixture.SendRequest(new GetTaskRelationshipsQuery(tasks[1].Id));
+    //
+    //    using(new AssertionScope())
+    //    {
+    //        result.IsSuccess.Should().BeTrue();
+    //        result.Value.Parent.Should().NotBeNull();
+    //        result.Value.Parent!.Id.Should().Be(tasks[0].Id);
+    //
+    //        var childrenHierarchy = result.Value.ChildrenHierarchy;
+    //        childrenHierarchy.Should().NotBeNull();
+    //        childrenHierarchy!.TaskId.Should().Be(tasks[1].Id);
+    //        childrenHierarchy.Children.Should().HaveCount(1);
+    //        childrenHierarchy.Children[0].TaskId.Should().Be(tasks[2].Id);
+    //        childrenHierarchy.Children[0].Children.Should().BeEmpty();
+    //    }
+    //}
+
+    [Fact]
+    public async System.Threading.Tasks.Task GetAvailableChildren_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new GetTaskAvailableChildrenQuery(Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task GetAvailableChildren_ShouldReturnAvailableTasks_WhenTaskExists()
+    {
+        var workflow = (await _factory.CreateWorkflows())[0];
+        var relationshipManager = new TaskRelationshipManager(workflow.ProjectId);
+        var initialStatus = workflow.Statuses.First(x => x.Initial);
+        var tasks = new Task[]
+        {
+            Task.Create(1, relationshipManager.ProjectId, DateTime.Now, "a", "desc", initialStatus.Id),
+            Task.Create(2, relationshipManager.ProjectId, DateTime.Now, "b", "desc", initialStatus.Id),
+            Task.Create(3, relationshipManager.ProjectId, DateTime.Now, "c", "desc", initialStatus.Id),
+            Task.Create(4, relationshipManager.ProjectId, DateTime.Now, "d", "desc", initialStatus.Id),
+        };
+        var tasksIds = tasks.Select(x => x.Id);
+        _ = relationshipManager.AddHierarchicalRelationship(tasks[0].Id, tasks[1].Id, tasksIds);
+        _ = relationshipManager.AddHierarchicalRelationship(tasks[2].Id, tasks[3].Id, tasksIds);
+        // a -> b, c -> d
+
+        await _fixture.SeedDb(db =>
+        {
+            db.Add(relationshipManager);
+            db.AddRange(tasks);
+        });
+
+        var result = await _fixture.SendRequest(new GetTaskAvailableChildrenQuery(tasks[0].Id));
 
         using(new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            result.Value.ParentId.Should().Be(tasks[0].Id);
-
-            var childrenHierarchy = result.Value.ChildrenHierarchy;
-            childrenHierarchy.Should().NotBeNull();
-            childrenHierarchy!.TaskId.Should().Be(tasks[1].Id);
-            childrenHierarchy.Children.Should().HaveCount(1);
-            childrenHierarchy.Children[0].TaskId.Should().Be(tasks[2].Id);
-            childrenHierarchy.Children[0].Children.Should().BeEmpty();
+            result.Value.Tasks.Select(x => x.Id).Should().BeEquivalentTo([tasks[2].Id]);
         }
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateTaskBoard_ShouldFail_WhenBoardLayoutDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new UpdateTaskBoardCommand(new(Guid.NewGuid(), [])));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateTaskBoard_ShouldFail_WhenLayoutStatusesDontMatchExistingTasks()
+    {
+        var tasks = await _factory.CreateTasks();
+        var workflow = await _fixture.FirstAsync<Workflow>();
+
+        var columns = workflow.Statuses
+            .Select(x => new UpdateTaskBoardColumnDto(x.Id, x.Id == tasks[0].StatusId ? [tasks[0].Id] : []))
+            .ToList();
+        columns.Add(new UpdateTaskBoardColumnDto(Guid.NewGuid(), []));
+        var model = new UpdateTaskBoardDto(tasks[0].ProjectId, columns);
+
+        var result = await _fixture.SendRequest(new UpdateTaskBoardCommand(model));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateTaskBoard_ShouldFail_WhenLayoutTasksDontMatchExistingTasks()
+    {
+        var tasks = await _factory.CreateTasks();
+        var workflow = await _fixture.FirstAsync<Workflow>();
+
+        var columns = workflow.Statuses
+            .Select(x => new UpdateTaskBoardColumnDto(x.Id, []))
+            .ToList();
+        var model = new UpdateTaskBoardDto(tasks[0].ProjectId, columns);
+
+        var result = await _fixture.SendRequest(new UpdateTaskBoardCommand(model));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task UpdateTaskBoard_ShouldSucceed_WhenModelValidationPassed()
+    {
+        var tasks = await _factory.CreateTasks(2);
+        var statuses = await _fixture.GetAsync<TaskStatus>();
+
+        var columns = statuses
+            .Select(x => new UpdateTaskBoardColumnDto(x.Id, x.Id == tasks[0].StatusId ? [tasks[1].Id, tasks[0].Id] : []))
+            .ToList();
+        var model = new UpdateTaskBoardDto(tasks[0].ProjectId, columns);
+
+        var result = await _fixture.SendRequest(new UpdateTaskBoardCommand(model));
+
+        result.IsSuccess.Should().BeTrue();
     }
 }

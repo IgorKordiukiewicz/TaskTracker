@@ -14,18 +14,12 @@ internal class UpdateProjectMemberRoleCommandValidator : AbstractValidator<Updat
     }
 }
 
-internal class UpdateProjectMemberRoleHandler : IRequestHandler<UpdateProjectMemberRoleCommand, Result>
+internal class UpdateProjectMemberRoleHandler(IRepository<Project> projectRepository) 
+    : IRequestHandler<UpdateProjectMemberRoleCommand, Result>
 {
-    private readonly IRepository<Project> _projectRepository;
-
-    public UpdateProjectMemberRoleHandler(IRepository<Project> projectRepository)
-    {
-        _projectRepository = projectRepository;
-    }
-
     public async Task<Result> Handle(UpdateProjectMemberRoleCommand request, CancellationToken cancellationToken)
     {
-        var project = await _projectRepository.GetById(request.ProjectId);
+        var project = await projectRepository.GetById(request.ProjectId, cancellationToken);
         if(project is null)
         {
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
@@ -37,7 +31,7 @@ internal class UpdateProjectMemberRoleHandler : IRequestHandler<UpdateProjectMem
             return Result.Fail(result.Errors);
         }
 
-        await _projectRepository.Update(project);
+        await projectRepository.Update(project, cancellationToken);
         return Result.Ok();
     }
 }

@@ -8,9 +8,19 @@
         <div v-if="organizations" class="flex flex-wrap gap-3 mt-4">
             <div v-for="organization in organizations.organizations" class="block-list-item rounded-md bg-white shadow size-fit cursor-pointer h-40"
             @click="navigateTo(`/organization/${organization.id}/`)">
-                <span class="text-lg overflow-hidden  whitespace-nowrap text-ellipsis flex flex-col px-5 pb-3 pt-3 gap-1">
-                    {{  organization.name }}
-                </span>
+                <div class="text-lg overflow-hidden whitespace-nowrap text-ellipsis flex flex-col justify-between px-5 pb-3 pt-3 gap-1 font-medium h-full">
+                    {{ organization.name }}
+                    <div class="flex gap-3 self-end font-normal">
+                        <div class="flex items-center gap-1">
+                            <i class="pi pi pi-user" />
+                            <p class="text-sm">{{ organization.membersCount }}</p>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <i class="pi pi-objects-column" />
+                            <p class="text-sm">{{ organization.projectsCount }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

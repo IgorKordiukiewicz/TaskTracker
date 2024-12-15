@@ -11,25 +11,18 @@ public enum TestPermissions
     C = 1 << 2, // 4
 }
 
-public class TestRole : Role<TestPermissions>
+public class TestRole(string name, TestPermissions permissions, RoleType type = RoleType.Custom) 
+    : Role<TestPermissions>(name, permissions, type)
 {
-    public TestRole(string name, TestPermissions permissions, RoleType type = RoleType.Custom)
-        : base(name, permissions, type)
-    {
-    }
 }
 
-public class TestMember : IHasRole
+public class TestMember(Guid roleId)
+    : IHasRole
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid UserId { get; set; } = Guid.NewGuid();
 
-    public Guid RoleId { get; set; }
-
-    public TestMember(Guid roleId)
-    {
-        RoleId = roleId;
-    }
+    public Guid RoleId { get; set; } = roleId;
 
     public void UpdateRole(Guid roleId) { }
 }

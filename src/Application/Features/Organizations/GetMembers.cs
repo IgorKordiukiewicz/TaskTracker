@@ -12,34 +12,28 @@ internal class GetOrganizationMembersQueryValidator : AbstractValidator<GetOrgan
     }
 }
 
-internal class GetOrganizationMembersHandler : IRequestHandler<GetOrganizationMembersQuery, Result<OrganizationMembersVM>>
+internal class GetOrganizationMembersHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetOrganizationMembersQuery, Result<OrganizationMembersVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetOrganizationMembersHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<OrganizationMembersVM>> Handle(GetOrganizationMembersQuery request, CancellationToken cancellationToken)
     {
-        var organization = await _dbContext.Organizations
+        var organization = await dbContext.Organizations
             .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Id == request.OrganizationId);
+            .SingleOrDefaultAsync(x => x.Id == request.OrganizationId, cancellationToken);
         if (organization is null)
         {
             return Result.Fail<OrganizationMembersVM>(new NotFoundError<Organization>(request.OrganizationId));
         }
 
-        var roleNameById = await _dbContext.OrganizationRoles
+        var roleNameById = await dbContext.OrganizationRoles
             .Where(x => x.OrganizationId == request.OrganizationId)
-            .ToDictionaryAsync(k => k.Id, v => v.Name);
+            .ToDictionaryAsync(k => k.Id, v => v.Name, cancellationToken);
 
-        var members = (await _dbContext.Organizations
+        var members = (await dbContext.Organizations
             .Include(x => x.Members)
             .Where(x => x.Id == request.OrganizationId)
             .SelectMany(x => x.Members)
-            .Join(_dbContext.Users,
+            .Join(dbContext.Users,
             member => member.UserId,
             user => user.Id,
             (member, user) => new OrganizationMemberVM
@@ -52,7 +46,7 @@ internal class GetOrganizationMembersHandler : IRequestHandler<GetOrganizationMe
                 RoleName = roleNameById[member.RoleId],
                 Owner = user.Id == organization.OwnerId
             })
-            .ToListAsync())
+            .ToListAsync(cancellationToken))
             .OrderBy(x => x.Name)
             .ToList();
 

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="h-full">
         <MembersList v-if="members && roles" :members="members.members" :roles="roles.roles" :can-edit-members="canEditMembers"
         @on-update-member-role="updateMemberRole" @on-remove-member="removeMember">
             <Button icon="pi pi-plus" severity="primary" label="Add" @click="openAddProjectMemberDialog" v-if="canEditMembers" />

@@ -13,27 +13,19 @@ internal class CreateOrganizationCommandValidator : AbstractValidator<CreateOrga
     }
 }
 
-internal class CreateOrganizationHandler : IRequestHandler<CreateOrganizationCommand, Result<Guid>>
+internal class CreateOrganizationHandler(AppDbContext context, IRepository<Organization> organizationRepository) 
+    : IRequestHandler<CreateOrganizationCommand, Result<Guid>>
 {
-    private readonly AppDbContext _context;
-    private readonly IRepository<Organization> _organizationRepository;
-
-    public CreateOrganizationHandler(AppDbContext context, IRepository<Organization> organizationRepository)
-    {
-        _context = context;
-        _organizationRepository = organizationRepository;
-    }
-
     public async Task<Result<Guid>> Handle(CreateOrganizationCommand request, CancellationToken cancellationToken)
     {
-        if (!await _context.Users.AnyAsync(x => x.Id == request.OwnerId))
+        if(await organizationRepository.Exists(x => x.Name == request.Model.Name, cancellationToken))
         {
-            return Result.Fail(new NotFoundError<User>(request.OwnerId));
+            return Result.Fail<Guid>(new ApplicationError("Organization with the same name already exists."));
         }
 
         var organization = Organization.Create(request.Model.Name, request.OwnerId);
 
-        await _organizationRepository.Add(organization);
+        await organizationRepository.Add(organization, cancellationToken);
 
         return organization.Id;
     }

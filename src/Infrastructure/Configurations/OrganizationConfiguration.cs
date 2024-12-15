@@ -34,6 +34,9 @@ internal class OrganizationConfiguration : BaseEntityTypeConfiguration<Organizat
             .HasForeignKey(x => x.OrganizationId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasIndex(x => x.Name)
+            .IsUnique();
+
         base.Configure(builder);
     }
 }

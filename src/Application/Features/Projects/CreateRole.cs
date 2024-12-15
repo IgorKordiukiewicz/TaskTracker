@@ -14,18 +14,12 @@ internal class CreateProjectRoleCommandValidator : AbstractValidator<CreateProje
     }
 }
 
-internal class CreateProjectRoleHandler : IRequestHandler<CreateProjectRoleCommand, Result>
+internal class CreateProjectRoleHandler(IRepository<Project> projectRepository) 
+    : IRequestHandler<CreateProjectRoleCommand, Result>
 {
-    private readonly IRepository<Project> _projectRepository;
-
-    public CreateProjectRoleHandler(IRepository<Project> projectRepository)
-    {
-        _projectRepository = projectRepository;
-    }
-
     public async Task<Result> Handle(CreateProjectRoleCommand request, CancellationToken cancellationToken)
     {
-        var project = await _projectRepository.GetById(request.ProjectId);
+        var project = await projectRepository.GetById(request.ProjectId, cancellationToken);
         if(project is null)
         {
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
@@ -37,7 +31,7 @@ internal class CreateProjectRoleHandler : IRequestHandler<CreateProjectRoleComma
             return Result.Fail(result.Errors);
         }
 
-        await _projectRepository.Update(project);
+        await projectRepository.Update(project, cancellationToken);
         return Result.Ok();
     }
 }

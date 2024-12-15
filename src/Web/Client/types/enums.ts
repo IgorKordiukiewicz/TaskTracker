@@ -19,7 +19,8 @@ export enum OrganizationInvitationState
     Pending,
     Accepted,
     Declined,
-    Canceled
+    Canceled,
+    Expired
 }
 
 export const allInvitationStates = [
@@ -48,7 +49,9 @@ export enum TaskProperty
     Description,
     Status,
     Assignee,
-    Priority
+    Priority,
+    Title,
+    Creation
 }
 
 export enum TaskStatusDeletionEligibility 
@@ -56,4 +59,9 @@ export enum TaskStatusDeletionEligibility
     Eligible,
     InUse,
     Initial
+}
+
+export enum NotificationContext {
+    Organization,
+    Project
 }

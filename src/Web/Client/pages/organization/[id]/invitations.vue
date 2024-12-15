@@ -1,5 +1,5 @@
 <template>
-    <div v-if="permissions && canViewPage">
+    <div v-if="permissions && canViewPage" class="h-full">
         <div class="flex justify-between items-center">
             <p class="text-lg">Invitations</p>
             <div class="flex gap-2 items-center">
@@ -12,20 +12,20 @@
                 <SendInvitationDialog ref="sendInvitationDialog" :organizationId="organizationId" @onCreate="updateInvitations" />
             </div>
         </div>
-        <DataTable v-if="invitations" :value="invitations.invitations" class="mt-4 shadow" paginator :rows="10" :rows-per-page-options="[10, 25, 50]"
+        <DataTable v-if="invitations" :value="invitations.invitations" class="mt-4 shadow" paginator :rows="10" :rows-per-page-options="[10, 25, 50]" :always-show-paginator="false"
         removable-sort filter-display="menu" :global-filter-fields="['userEmail' ]" v-model:filters="filters">
             <Column header="Email" field="userEmail" sortable></Column>
-            <Column header="Finalized At" sortable sortField="finalizedAt">
-                <template #body="{ data }">
-                    {{ formatDate(data.finalizedAt) }}
-                </template>
-            </Column>
             <Column header="State" filter-field="state" :show-filter-match-modes="false">
                 <template #body="{ data }">
-                    <Tag class="w-24" :value="OrganizationInvitationState[data.state]" :severity="getStateSeverity(data.state)"></Tag>
+                    <Tag class="w-24" :value="OrganizationInvitationState[data.state]" :severity="getStateSeverity(data.state)" v-tooltip.bottom="getExpirationTooltip(data)"></Tag>
                 </template>
                 <template #filter="{ filterModel }">
                     <MultiSelect v-model="filterModel.value" :options="allInvitationStates" option-label="name" option-value="key"></MultiSelect>
+                </template>
+            </Column>
+            <Column header="Finalized At" sortable sortField="finalizedAt">
+                <template #body="{ data }">
+                    {{ formatDate(data.finalizedAt) }}
                 </template>
             </Column>
             <Column header="Created At" sortable sortField="createdAt">
@@ -49,6 +49,7 @@
 import { OrganizationInvitationState, OrganizationPermissions, allInvitationStates } from '~/types/enums';
 import { FilterMatchMode } from '@primevue/core/api';
 import { usePermissions } from '~/stores/permissions';
+import type { OrganizationInvitationVM } from '~/types/viewModels/organizations';
 
 const route = useRoute();
 const organizationsService = useOrganizationsService();
@@ -142,12 +143,24 @@ function getStateSeverity(state: OrganizationInvitationState) {
             return "warn";
         case OrganizationInvitationState.Declined:
             return "danger";
+        case OrganizationInvitationState.Expired:
+            return "warn";
         default: 
             return "primary";
     }
 }
 
 function formatDate(date?: Date) {
-    return date ? new Date(date).toLocaleDateString() : '-';
+    return date ? new Date(date).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }) : '-';
+}
+
+function getExpirationTooltip(data: OrganizationInvitationVM) {
+    return (data.state == OrganizationInvitationState.Pending && data.expirationDate) 
+    ? `Expiring at: ${formatDate(data.expirationDate)}`
+    : undefined;
 }
 </script>

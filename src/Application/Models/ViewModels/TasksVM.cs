@@ -1,6 +1,6 @@
 ﻿namespace Application.Models.ViewModels;
 
-public record TasksVM(IList<TaskVM> Tasks, IReadOnlyList<TaskStatusDetailedVM> AllTaskStatuses);
+public record TasksVM(IList<TaskVM> Tasks, IReadOnlyList<TaskStatusDetailedVM> AllTaskStatuses, IReadOnlyList<TaskBoardColumnVM> BoardColumns);
 
 public record TaskVM
 {
@@ -14,7 +14,10 @@ public record TaskVM
     public required IReadOnlyList<TaskStatusVM> PossibleNextStatuses { get; init; }
     public required int TotalTimeLogged { get; init; }
     public int? EstimatedTime { get; init; }
+    public required int CommentsCount { get; init; }
 }
+
+public record TaskBoardColumnVM(Guid StatusId, string StatusName, IReadOnlyList<Guid> PossibleNextStatuses, IReadOnlyList<Guid> TasksIds);
 
 public record TaskStatusVM(Guid Id, string Name);
 public record TaskStatusDetailedVM(Guid Id, string Name, int DisplayOrder) : TaskStatusVM(Id, Name);
@@ -25,5 +28,9 @@ public record TaskCommentVM(string Content, Guid AuthorId, string AuthorName, Da
 public record TaskActivitiesVM(IReadOnlyList<TaskActivityVM> Activities);
 public record TaskActivityVM(TaskProperty Property, string? OldValue, string? NewValue, DateTime OccurredAt);
 
-public record TaskRelationshipsVM(Guid? ParentId, TaskHierarchyVM? ChildrenHierarchy);
-public record TaskHierarchyVM(Guid TaskId, IReadOnlyList<TaskHierarchyVM> Children);
+public record TaskRelationshipsVM(TaskRelationshipsParentVM? Parent, TaskHierarchyVM? ChildrenHierarchy);
+public record TaskRelationshipsParentVM(Guid Id, string Title, int ShortId);
+public record TaskHierarchyVM(Guid TaskId, string TaskTitle, int TaskShortId, IReadOnlyList<TaskHierarchyVM> Children);
+
+public record TaskAvailableChildrenVM(IReadOnlyList<TaskAvailableChildVM> Tasks);
+public record TaskAvailableChildVM(Guid Id, int ShortId, string Title);

@@ -1,4 +1,6 @@
-﻿using Domain.Projects;
+﻿using Application.Common;
+using Domain.Notifications;
+using Domain.Projects;
 
 namespace Application.Features.Projects;
 
@@ -13,28 +15,21 @@ internal class AddProjectMemberCommandValidator : AbstractValidator<AddProjectMe
     }
 }
 
-internal class AddProjectMemberHandler : IRequestHandler<AddProjectMemberCommand, Result>
+internal class AddProjectMemberHandler(AppDbContext dbContext, IRepository<Project> projectRepository, 
+    IJobsService jobsService, IDateTimeProvider dateTimeProvider) 
+    : IRequestHandler<AddProjectMemberCommand, Result>
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IRepository<Project> _projectRepository;
-
-    public AddProjectMemberHandler(AppDbContext dbContext, IRepository<Project> projectRepository)
-    {
-        _dbContext = dbContext;
-        _projectRepository = projectRepository;
-    }
-
     public async Task<Result> Handle(AddProjectMemberCommand request, CancellationToken cancellationToken)
     {
-        var project = await _projectRepository.GetById(request.ProjectId);
+        var project = await projectRepository.GetById(request.ProjectId, cancellationToken);
         if(project is null)
         {
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
-        var isUserAMember = await _dbContext.Organizations
+        var isUserAMember = await dbContext.Organizations
             .Include(x => x.Members)
-            .AnyAsync(x => x.Id == project.OrganizationId && x.Members.Any(xx => xx.UserId == request.Model.UserId));
+            .AnyAsync(x => x.Id == project.OrganizationId && x.Members.Any(xx => xx.UserId == request.Model.UserId), cancellationToken);
         if (!isUserAMember)
         {
             return Result.Fail(new ApplicationError("User is not a member of the project's organization."));
@@ -46,7 +41,9 @@ internal class AddProjectMemberHandler : IRequestHandler<AddProjectMemberCommand
             return Result.Fail(result.Errors);
         }
 
-        await _projectRepository.Update(project);
+        await projectRepository.Update(project, cancellationToken);
+
+        jobsService.EnqueueCreateNotification(NotificationFactory.AddedToProject(request.Model.UserId, dateTimeProvider.Now(), project.Id));
 
         return Result.Ok();
     }

@@ -1,4 +1,5 @@
-﻿using Domain.Organizations;
+﻿using Application.Common;
+using Domain.Organizations;
 
 namespace Application.Features.Organizations;
 
@@ -12,30 +13,24 @@ internal class CancelOrganizationInvitationCommandValidator : AbstractValidator<
     }
 }
 
-internal class CancelOrganizationInvitationHandler : IRequestHandler<CancelOrganizationInvitationCommand, Result>
+internal class CancelOrganizationInvitationHandler(IRepository<Organization> organizationRepository, IDateTimeProvider dateTimeProvider) 
+    : IRequestHandler<CancelOrganizationInvitationCommand, Result>
 {
-    private readonly IRepository<Organization> _organizationRepository;
-
-    public CancelOrganizationInvitationHandler(IRepository<Organization> organizationRepository)
-    {
-        _organizationRepository = organizationRepository;
-    }
-
     public async Task<Result> Handle(CancelOrganizationInvitationCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _organizationRepository.GetBy(x => x.Invitations.Any(xx => xx.Id == request.InvitationId));
+        var organization = await organizationRepository.GetBy(x => x.Invitations.Any(xx => xx.Id == request.InvitationId), cancellationToken);
         if (organization is null)
         {
             return Result.Fail(new NotFoundError<Organization>($"invitation ID: {request.InvitationId}"));
         }
 
-        var result = organization.CancelInvitation(request.InvitationId);
+        var result = organization.CancelInvitation(request.InvitationId, dateTimeProvider.Now());
         if(result.IsFailed)
         {
             return Result.Fail(result.Errors);
         }
 
-        await _organizationRepository.Update(organization);
+        await organizationRepository.Update(organization, cancellationToken);
         return Result.Ok();
     }
 }

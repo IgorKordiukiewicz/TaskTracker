@@ -1,4 +1,5 @@
-﻿using Task = Domain.Tasks.Task;
+﻿using Application.Common;
+using Task = Domain.Tasks.Task;
 
 namespace Application.Features.Tasks;
 
@@ -13,25 +14,19 @@ internal class UpdateTaskPriorityCommandValidator : AbstractValidator<UpdateTask
     }
 }
 
-internal class UpdateTaskPriorityHandler : IRequestHandler<UpdateTaskPriorityCommand, Result>
+internal class UpdateTaskPriorityHandler(IRepository<Task> taskRepository, IDateTimeProvider dateTimeProvider) 
+    : IRequestHandler<UpdateTaskPriorityCommand, Result>
 {
-    private readonly IRepository<Task> _taskRepository;
-
-    public UpdateTaskPriorityHandler(IRepository<Task> taskRepository)
-    {
-        _taskRepository = taskRepository;
-    }
-
     public async Task<Result> Handle(UpdateTaskPriorityCommand request, CancellationToken cancellationToken)
     {
-        var task = await _taskRepository.GetById(request.TaskId);
+        var task = await taskRepository.GetById(request.TaskId, cancellationToken);
         if(task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
-        task.UpdatePriority(request.Model.Priority);
-        await _taskRepository.Update(task);
+        task.UpdatePriority(request.Model.Priority, dateTimeProvider.Now());
+        await taskRepository.Update(task, cancellationToken);
 
         return Result.Ok();
     }

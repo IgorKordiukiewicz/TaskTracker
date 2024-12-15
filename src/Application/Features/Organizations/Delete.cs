@@ -13,34 +13,28 @@ internal class DeleteOrganizationCommandValidator : AbstractValidator<DeleteOrga
     }
 }
 
-internal class DeleteOrganizationHandler : IRequestHandler<DeleteOrganizationCommand, Result>
+internal class DeleteOrganizationHandler(AppDbContext dbContext) 
+    : IRequestHandler<DeleteOrganizationCommand, Result>
 {
-    private readonly AppDbContext _dbContext;
-
-    public DeleteOrganizationHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result> Handle(DeleteOrganizationCommand request, CancellationToken cancellationToken)
     {
-        if (!await _dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId))
+        if (!await dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId, cancellationToken))
         {
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
         }
 
-        var projectsIds = await _dbContext.Projects.Where(x => x.OrganizationId == request.OrganizationId)
+        var projectsIds = await dbContext.Projects.Where(x => x.OrganizationId == request.OrganizationId)
             .Select(x => x.Id)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
-        return await _dbContext.ExecuteTransaction(async () =>
+        return await dbContext.ExecuteTransaction(async () =>
         {
-            await _dbContext.Organizations.DeleteAll(x => x.Id == request.OrganizationId);
-            await _dbContext.OrganizationInvitations.DeleteAll(x => x.OrganizationId == request.OrganizationId);
-            await _dbContext.Projects.DeleteAll(x => projectsIds.Contains(x.Id));
-            await _dbContext.Workflows.DeleteAll(x => projectsIds.Contains(x.ProjectId));
-            await _dbContext.Tasks.DeleteAll(x => projectsIds.Contains(x.ProjectId));
-            await _dbContext.TaskRelationshipManagers.DeleteAll(x => projectsIds.Contains(x.ProjectId));
+            await dbContext.Organizations.DeleteAll(x => x.Id == request.OrganizationId, cancellationToken);
+            await dbContext.OrganizationInvitations.DeleteAll(x => x.OrganizationId == request.OrganizationId, cancellationToken);
+            await dbContext.Projects.DeleteAll(x => projectsIds.Contains(x.Id), cancellationToken);
+            await dbContext.Workflows.DeleteAll(x => projectsIds.Contains(x.ProjectId), cancellationToken);
+            await dbContext.Tasks.DeleteAll(x => projectsIds.Contains(x.ProjectId), cancellationToken);
+            await dbContext.TaskRelationshipManagers.DeleteAll(x => projectsIds.Contains(x.ProjectId), cancellationToken);
         });
     }
 }

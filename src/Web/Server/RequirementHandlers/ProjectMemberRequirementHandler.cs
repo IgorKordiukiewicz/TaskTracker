@@ -11,13 +11,9 @@ public class ProjectMemberRequirement : MemberRequirement<ProjectPermissions>
     }
 }
 
-public class ProjectMemberRequirementHandler : MemberRequirementHandler<ProjectMemberRequirement>
+public class ProjectMemberRequirementHandler(AppDbContext dbContext, IHttpContextAccessor contextAccessor) 
+    : MemberRequirementHandler<ProjectMemberRequirement>(dbContext, contextAccessor, "projectId")
 {
-    public ProjectMemberRequirementHandler(AppDbContext dbContext, IHttpContextAccessor contextAccessor)
-        : base(dbContext, contextAccessor, "projectId")
-    {
-    }
-
     protected override async Task<bool> CheckRequirement(ProjectMemberRequirement requirement, AppDbContext dbContext, Guid userId, Guid entityId)
     {
         var member = await dbContext.Projects

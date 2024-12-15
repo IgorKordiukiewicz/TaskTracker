@@ -6,22 +6,16 @@ namespace Web.Server.Controllers;
 /// <summary>
 /// 
 /// </summary>
+/// <remarks>
+/// 
+/// </remarks>
+/// <param name="mediator"></param>
 [ApiController]
 [Route("projects")]
 [Authorize]
-public class ProjectsController : ControllerBase
+public class ProjectsController(IMediator mediator) 
+    : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="mediator"></param>
-    public ProjectsController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     /// <summary>
     /// Create a new project
     /// </summary>
@@ -32,10 +26,12 @@ public class ProjectsController : ControllerBase
     /// <response code="404">Organization not found.</response>
     [HttpPost]
     [Authorize(Policy.OrganizationEditProjects)]
+    [ProducesResponseType(typeof(Guid), 200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> CreateProject([FromBody] CreateProjectDto model)
     {
-        var result = await _mediator.Send(new CreateProjectCommand(User.GetUserId(), model));
+        var result = await mediator.Send(new CreateProjectCommand(User.GetUserId(), model));
         return result.ToHttpResult();
     }
 
@@ -50,7 +46,7 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetProjects([FromQuery] Guid organizationId)
     {
-        var result = await _mediator.Send(new GetProjectsForOrganizationQuery(organizationId, User.GetUserId()));
+        var result = await mediator.Send(new GetProjectsForOrganizationQuery(organizationId, User.GetUserId()));
         return result.ToHttpResult();
     }
 
@@ -64,7 +60,7 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetProjectNavData(Guid projectId)
     {
-        var result = await _mediator.Send(new GetProjectNavDataQuery(projectId));
+        var result = await mediator.Send(new GetProjectNavDataQuery(projectId));
         return result.ToHttpResult();
     }
 
@@ -76,10 +72,12 @@ public class ProjectsController : ControllerBase
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/members")]
     [Authorize(Policy.ProjectEditMembers)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberDto model)
     {
-        var result = await _mediator.Send(new AddProjectMemberCommand(projectId, model));
+        var result = await mediator.Send(new AddProjectMemberCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -94,7 +92,7 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetProjectMembers(Guid projectId)
     {
-        var result = await _mediator.Send(new GetProjectMembersQuery(projectId));
+        var result = await mediator.Send(new GetProjectMembersQuery(projectId));
         return result.ToHttpResult();
     }
 
@@ -102,14 +100,16 @@ public class ProjectsController : ControllerBase
     /// Remove a member from a project.
     /// </summary>
     /// <param name="projectId"></param>
-    /// <param name="memberId"></param>
+    /// <param name="model"></param>
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/members/remove")]
     [Authorize(Policy.ProjectEditMembers)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> RemoveProjectMember(Guid projectId, [FromBody] RemoveProjectMemberDto model)
     {
-        var result = await _mediator.Send(new RemoveProjectMemberCommand(projectId, model));
+        var result = await mediator.Send(new RemoveProjectMemberCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -122,10 +122,12 @@ public class ProjectsController : ControllerBase
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/members/role")]
     [Authorize(Policy.ProjectEditMembers)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateMemberRoleMember(Guid projectId, [FromBody] UpdateMemberRoleDto model)
     {
-        var result = await _mediator.Send(new UpdateProjectMemberRoleCommand(projectId, model));
+        var result = await mediator.Send(new UpdateProjectMemberRoleCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -140,7 +142,7 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetProjectOrganization(Guid projectId)
     {
-        var result = await _mediator.Send(new GetProjectOrganizationQuery(projectId));
+        var result = await mediator.Send(new GetProjectOrganizationQuery(projectId));
         return result.ToHttpResult();
     }
 
@@ -155,7 +157,7 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetProjectRoles(Guid projectId)
     {
-        var result = await _mediator.Send(new GetProjectRolesQuery(projectId));
+        var result = await mediator.Send(new GetProjectRolesQuery(projectId));
         return result.ToHttpResult();
     }
 
@@ -167,10 +169,12 @@ public class ProjectsController : ControllerBase
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/roles")]
     [Authorize(Policy.ProjectEditRoles)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> CreateProjectRole(Guid projectId, [FromBody] CreateRoleDto<ProjectPermissions> model)
     {
-        var result = await _mediator.Send(new CreateProjectRoleCommand(projectId, model));
+        var result = await mediator.Send(new CreateProjectRoleCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -182,10 +186,12 @@ public class ProjectsController : ControllerBase
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/roles/delete")]
     [Authorize(Policy.ProjectEditRoles)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteProjectRole(Guid projectId, [FromBody] DeleteRoleDto model)
     {
-        var result = await _mediator.Send(new DeleteProjectRoleCommand(projectId, model));
+        var result = await mediator.Send(new DeleteProjectRoleCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -197,10 +203,12 @@ public class ProjectsController : ControllerBase
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/roles/name")]
     [Authorize(Policy.ProjectEditRoles)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateRoleName(Guid projectId, [FromBody] UpdateRoleNameDto model)
     {
-        var result = await _mediator.Send(new UpdateProjectRoleNameCommand(projectId, model));
+        var result = await mediator.Send(new UpdateProjectRoleNameCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -212,10 +220,12 @@ public class ProjectsController : ControllerBase
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/roles/permissions")]
     [Authorize(Policy.ProjectEditRoles)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateRolePermissions(Guid projectId, [FromBody] UpdateRolePermissionsDto<ProjectPermissions> model)
     {
-        var result = await _mediator.Send(new UpdateProjectRolePermissionsCommand(projectId, model));
+        var result = await mediator.Send(new UpdateProjectRolePermissionsCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -230,7 +240,7 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetProjectSettings(Guid projectId)
     {
-        var result = await _mediator.Send(new GetProjectSettingsQuery(projectId));
+        var result = await mediator.Send(new GetProjectSettingsQuery(projectId));
         return result.ToHttpResult();
     }
 
@@ -242,10 +252,12 @@ public class ProjectsController : ControllerBase
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/name")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> UpdateProjectName(Guid projectId, [FromBody] UpdateProjectNameDto model)
     {
-        var result = await _mediator.Send(new UpdateProjectNameCommand(projectId, model));
+        var result = await mediator.Send(new UpdateProjectNameCommand(projectId, model));
         return result.ToHttpResult();
     }
 
@@ -256,10 +268,11 @@ public class ProjectsController : ControllerBase
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/delete")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteProject(Guid projectId)
     {
-        var result = await _mediator.Send(new DeleteProjectCommand(projectId));
+        var result = await mediator.Send(new DeleteProjectCommand(projectId));
         return result.ToHttpResult();
     }
 
@@ -274,7 +287,7 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetUserProjectPermissions(Guid projectId)
     {
-        var result = await _mediator.Send(new GetUserProjectPermissionsQuery(User.GetUserId(), projectId));
+        var result = await mediator.Send(new GetUserProjectPermissionsQuery(User.GetUserId(), projectId));
         return result.ToHttpResult();
     }
 }

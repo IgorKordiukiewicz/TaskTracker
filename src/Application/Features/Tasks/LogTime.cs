@@ -15,20 +15,12 @@ internal class LogTaskTimeCommandValidator : AbstractValidator<LogTaskTimeComman
     }
 }
 
-internal class LogTaskTimeHandler : IRequestHandler<LogTaskTimeCommand, Result>
+internal class LogTaskTimeHandler(IRepository<Task> taskRepository) 
+    : IRequestHandler<LogTaskTimeCommand, Result>
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IRepository<Task> _taskRepository;
-
-    public LogTaskTimeHandler(AppDbContext dbContext, IRepository<Task> taskRepository)
-    {
-        _dbContext = dbContext;
-        _taskRepository = taskRepository;
-    }
-
     public async Task<Result> Handle(LogTaskTimeCommand request, CancellationToken cancellationToken)
     {
-        var task = await _taskRepository.GetById(request.TaskId);
+        var task = await taskRepository.GetById(request.TaskId, cancellationToken);
         if (task is null)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
@@ -36,7 +28,7 @@ internal class LogTaskTimeHandler : IRequestHandler<LogTaskTimeCommand, Result>
         
         task.LogTime(request.Model.Minutes, DateOnly.FromDateTime(request.Model.Day), request.UserId);
         
-        await _taskRepository.Update(task);
+        await taskRepository.Update(task, cancellationToken);
         return Result.Ok();
     }
 }

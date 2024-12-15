@@ -3,6 +3,9 @@
         <LabeledInput label="User">
             <AutoComplete v-model="selectedUser" option-label="email" :suggestions="filteredUsers" @complete="searchUsers" :inputStyle="{ 'width': '100%' }" />
         </LabeledInput>
+        <LabeledInput label="Expiration days">
+            <InputNumber v-model="expirationDays" :min="0" />
+        </LabeledInput>
     </ActionDialog>
 </template>
 
@@ -23,6 +26,7 @@ const dialog = ref();
 
 const selectedUser = ref();
 const filteredUsers = ref();
+const expirationDays = ref();
 
 const submitDisabled = computed(() => {
     return !selectedUser.value;
@@ -35,9 +39,11 @@ function show() {
 async function sendInvitation() {
     const model = new CreateOrganizationInvitationDto();
     model.userId = selectedUser.value.id;
+    model.expirationDays = expirationDays.value;
     await organizationsService.createInvitation(props.organizationId, model);
 
     selectedUser.value = undefined;
+    expirationDays.value = undefined;
 
     emit('onCreate');
 }

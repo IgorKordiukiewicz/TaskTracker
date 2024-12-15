@@ -5,8 +5,8 @@
             <HierarchyNav></HierarchyNav>
         </div>
         <div class="flex gap-4 items-end">
-            <span class="cursor-pointer" style="color: rgb(100, 116, 139);" @click="toggleNotifications">
-                <template v-if="invitations && invitations.invitations.length > 0">
+            <span :class="{ 'cursor-pointer': anyNotifications }" style="color: rgb(100, 116, 139);" @click="openNotificationsPopup">
+                <template v-if="anyNotifications">
                     <OverlayBadge class="cursor-pointer">
                         <i class="pi pi-bell text-xl" />
                     </OverlayBadge>
@@ -15,18 +15,7 @@
                     <i class="pi pi-bell text-xl" />
                 </template>
             </span>
-            <Popover ref="notificationsPopover">
-                <div class="flex flex-col gap-3 w-72" v-if="invitations">
-                    <p class="font-semibold">Invitations</p>
-                    <div v-for="invitation in invitations.invitations" class="flex justify-between items-center">
-                        <p>{{ invitation.organizationName }}</p>
-                        <div class="flex gap-1 items-center">
-                            <Button icon="pi pi-times" severity="danger" rounded text @click="declineInvitation(invitation.id)" />
-                            <Button icon="pi pi-check" severity="success"  rounded text @click="acceptInvitation(invitation.id)" />
-                        </div>
-                    </div>
-                </div>
-            </Popover>
+            <NotificationsPopup ref="notificationsPopup" :invitations="invitations" :notifications="notifications" @on-invitation-action="updateInvitations" @on-notification-read="updateNotifications" />
             <span @click="toggle" v-if="userId">
                 <UserAvatar :user-id="userId" aria-haspopup="true" aria-controls="user_menu" class="cursor-pointer" />
             </span>
@@ -41,6 +30,7 @@ const emit = defineEmits([ 'toggleSidebar' ])
 
 const auth = useAuth();
 const organizationsService = useOrganizationsService();
+const notificationsService = useNotificationsService();
 
 const userId = ref(auth.getUserId());
 
@@ -63,37 +53,39 @@ const items = ref([
 ])
 
 const profileDialog = ref();
-const notificationsPopover = ref();
+const notificationsPopup = ref();
 
 const invitations = ref();
 await updateInvitations();
+
+const notifications = ref();
+await updateNotifications();
 
 const toggle = (event: Event) => {
     menu.value.toggle(event);
 }
 
-const toggleNotifications = (event: Event) => {
-    if(invitations.value && invitations.value?.invitations.length > 0) {
-        notificationsPopover.value.toggle(event);
-    }
-}
+const anyNotifications = computed(() => {
+    return invitations && notifications && (notifications.value.notifications.length > 0 || invitations.value.invitations.length > 0);
+})
 
 function toggleSidebar() {
     emit('toggleSidebar');
+}
+
+function openNotificationsPopup() {
+    if(!anyNotifications.value) {
+        return;
+    }
+
+    notificationsPopup.value.show();
 }
 
 async function updateInvitations() {
     invitations.value = await organizationsService.getUserInvitations();
 }
 
-async function declineInvitation(id: string) {
-    await organizationsService.declineInvitation(id);
-    await updateInvitations();
-}
-
-async function acceptInvitation(id: string) {
-    await organizationsService.acceptInvitation(id);
-    await updateInvitations();
-    // TODO: update organizations if on index page? (or always redirect to org page)
+async function updateNotifications() {
+    notifications.value = await notificationsService.getNotifications();
 }
 </script>

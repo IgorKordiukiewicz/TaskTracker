@@ -10,17 +10,11 @@ internal class IsUserRegisteredQueryValidator : AbstractValidator<IsUserRegister
     }
 }
 
-internal class IsUserRegisteredHandler : IRequestHandler<IsUserRegisteredQuery, Result<bool>>
+internal class IsUserRegisteredHandler(AppDbContext dbContext) 
+    : IRequestHandler<IsUserRegisteredQuery, Result<bool>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public IsUserRegisteredHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<bool>> Handle(IsUserRegisteredQuery request, CancellationToken cancellationToken)
     {
-        return await _dbContext.Users.AnyAsync(x => x.Id == request.Id);
+        return await dbContext.Users.AnyAsync(x => x.Id == request.Id, cancellationToken);
     }
 }

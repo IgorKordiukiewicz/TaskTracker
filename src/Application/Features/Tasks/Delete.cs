@@ -1,4 +1,5 @@
-﻿using Infrastructure.Extensions;
+﻿using Application.Common;
+using Infrastructure.Extensions;
 using Task = Domain.Tasks.Task;
 
 namespace Application.Features.Tasks;
@@ -13,25 +14,25 @@ internal class DeleteTaskCommandValidator : AbstractValidator<DeleteTaskCommand>
     }
 }
 
-internal class DeleteTaskHandler : IRequestHandler<DeleteTaskCommand, Result>
+internal class DeleteTaskHandler(AppDbContext dbContext, ITasksBoardLayoutService tasksBoardLayoutService) 
+    : IRequestHandler<DeleteTaskCommand, Result>
 {
-    private readonly AppDbContext _dbContext;
-
-    public DeleteTaskHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId))
+        var projectId = await dbContext.Tasks
+            .Where(x => x.Id == request.TaskId)
+            .Select(x => x.ProjectId)
+            .FirstOrDefaultAsync(cancellationToken);
+        if(projectId == default)
         {
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
-        return await _dbContext.ExecuteTransaction(async () =>
+        return await dbContext.ExecuteTransaction(async () =>
         {
-            await _dbContext.Tasks.DeleteAll(x => x.Id == request.TaskId);
+            await dbContext.Tasks.DeleteAll(x => x.Id == request.TaskId, cancellationToken);
+            await tasksBoardLayoutService.HandleChanges(projectId, 
+                layout => layout.DeleteTask(request.TaskId), cancellationToken);
         });
     }
 }

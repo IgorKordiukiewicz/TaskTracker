@@ -14,7 +14,7 @@
             <UpdateTaskTitleDialog ref="updateTitleDialog" :id="details.id" :project-id="projectId" @on-update="updateDetails" />
             <ConfirmDialog></ConfirmDialog>
         </div>
-        <div class="flex gap-4 w-100 mt-4" v-if="details && members">
+        <div class="flex gap-4 w-full mt-4" v-if="details && members">
             <div class="flex flex-col gap-4 w-3/4">
                 <div class="bg-white w-full shadow p-4 flex flex-col gap-3">
                     <div class="flex justify-between items-center">
@@ -102,8 +102,8 @@
                             <Button severity="secondary" text icon="pi pi-plus" style="height: 24px; width: 24px;" @click="openLogTimeDialog"  />
                             <Button severity="secondary" text icon="pi pi-pencil" style="height: 24px; width: 24px;" @click="openEstimatedTimeDialog" />
                         </div>
-                        <TimeInputDialog ref="estimatedTimeDialog" header="Edit estimated time" @on-submit="updateEstimatedTime" />
-                        <TimeInputDialog ref="logTimeDialog" header="Log time" @on-submit="addLoggedTime" />
+                        <UpdateEstimatedTimeDialog ref="estimatedTimeDialog" @on-submit="updateEstimatedTime" />
+                        <LogTimeDialog ref="logTimeDialog" @on-submit="addLoggedTime" />
                     </div>
                     <div class="flex gap-2 items-center w-full mt-4">
                         <div class="flex flex-col gap-1 items-center w-full">
@@ -123,6 +123,35 @@
                         </div>
                     </div>
                 </div>
+                <div class="bg-white w-full shadow p-4 flex flex-col gap-3" v-if="relationships">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3 font-semibold">
+                            <i class="pi pi-sitemap" />
+                            <p class="font-semibold">
+                                Relationships
+                            </p>
+                        </div>
+                        <div class="flex gap-3" v-if="canEditTasks">
+                            <Button severity="secondary" text icon="pi pi-plus" style="height: 24px; width: 24px;" @click="openAddChildDialog"  />
+                        </div>
+                        <AddChildDialog ref="addChildDialog" @on-submit="addChild" :task-id="details.id" :project-id="projectId" />
+                    </div>
+                    <div class="flex flex-col gap-1" v-if="relationships.parent">
+                        <label class="text-sm">Parent</label>
+                        <div class="p-2 rounded-md select-border flex items-center">
+                            <p class="cursor-pointer hover:font-medium text-sm" @click="navigateTo(`/project/${projectId}/tasks/${relationships.parent.shortId}`)">
+                                [#{{ relationships.parent.shortId }}] {{ relationships.parent.title }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1"  v-if="relationships.childrenHierarchy">
+                        <label class="text-sm">Children</label>
+                        <ul class="rounded-md select-border text-sm">
+                            <ChildTask  v-for="task in relationships.childrenHierarchy.children" 
+                            :task="task" :project-id="projectId" :can-edit-tasks="canEditTasks" @on-remove="removeChild" />
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -130,9 +159,11 @@
 
 <script setup lang="ts">
 import { $dt } from '@primevue/themes';
-import { AddTaskCommentDto, AddTaskLoggedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
+import type { TreeNode } from 'primevue/treenode';
+import UpdateEstimatedTimeDialog from '~/components/Task/UpdateEstimatedTimeDialog.vue';
+import { AddTaskCommentDto, AddTaskLoggedTimeDto, AddTaskRelationshipDto, RemoveTaskRelationshipDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
 import { allTaskPriorities, ProjectPermissions, TaskPriority } from '~/types/enums';
-import type { TaskVM } from '~/types/viewModels/tasks';
+import type { TaskHierarchyVM, TaskVM } from '~/types/viewModels/tasks';
 
 const route = useRoute();
 const tasksService = useTasksService();
@@ -147,8 +178,10 @@ const details = ref<TaskVM | undefined>();
 const members = ref(await projectsService.getMembers(projectId.value)); // TODO: pass from tasks list page?
 const comments = ref();
 const activities = ref();
+const relationships = ref();
 await updateDetails();
 await updateComments();
+await updateRelationships();
 
 await permissions.checkProjectPermissions(projectId.value);
 
@@ -156,6 +189,7 @@ const logTimeDialog = ref();
 const estimatedTimeDialog = ref();
 const updateTitleDialog = ref();
 const actionsMenu = ref();
+const addChildDialog = ref();
 
 const statuses = ref(details.value?.possibleNextStatuses.map(x => ({
     id: x.id, name: x.name }))
@@ -268,6 +302,12 @@ async function updateComments() {
         : null;
 }
 
+async function updateRelationships() {
+    relationships.value = details.value 
+        ? await tasksService.getRelationships(details.value.id, projectId.value)
+        : null;
+}
+
 function cancelDescriptionEdit() {
     descriptionEditValue.value = details.value!.description;
 }
@@ -278,6 +318,10 @@ function openLogTimeDialog() {
 
 function openEstimatedTimeDialog() {
     estimatedTimeDialog.value.show(details.value!.estimatedTime ? timeParser.fromMinutes(details.value!.estimatedTime) : null);
+}
+
+async function openAddChildDialog() {
+    await addChildDialog.value.show();
 }
 
 async function updateDescription() {
@@ -338,9 +382,7 @@ async function updateEstimatedTime(minutes: number) {
     await updateDetails();
 }
 
-async function addLoggedTime(minutes: number) {
-    const model = new AddTaskLoggedTimeDto();
-    model.minutes = minutes;
+async function addLoggedTime(model: AddTaskLoggedTimeDto) {
     await tasksService.addLoggedTime(details.value!.id, projectId.value, model);
     await updateDetails();
 }
@@ -348,6 +390,19 @@ async function addLoggedTime(minutes: number) {
 async function deleteTask() {
     await tasksService.deleteTask(details.value!.id, projectId.value);
     navigateTo(`/project/${projectId.value}`);
+}
+
+async function addChild(model: AddTaskRelationshipDto) {
+    await tasksService.addTaskRelationship(projectId.value, model);
+    await updateRelationships();
+}
+
+async function removeChild(childId: string) {
+    const model = new RemoveTaskRelationshipDto();
+    model.parentId = details.value!.id;
+    model.childId = childId;
+    await tasksService.removeTaskRelationship(projectId.value, model);
+    await updateRelationships();
 }
 </script>
 

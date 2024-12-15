@@ -12,7 +12,7 @@ public class TaskRelationshipManagerTests
         var parentId = Guid.NewGuid();
         var childId = Guid.NewGuid();
 
-        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, new[] { parentId, childId });
+        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, [parentId, childId]);
 
         using(new AssertionScope())
         {
@@ -29,7 +29,7 @@ public class TaskRelationshipManagerTests
         var parentId = Guid.NewGuid();
         var childId = Guid.NewGuid();
 
-        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, new[] { childId });
+        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, [childId]);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -42,7 +42,7 @@ public class TaskRelationshipManagerTests
         var parentId = Guid.NewGuid();
         var childId = Guid.NewGuid();
 
-        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, new[] { parentId });
+        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, [parentId]);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -91,5 +91,34 @@ public class TaskRelationshipManagerTests
         var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, projectTasksIds);
 
         result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RemoveHierarchicalRelationship_ShouldFail_WhenRelationshipDoesNotExist()
+    {
+        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
+
+        var result = relationshipManager.RemoveHierarchicalRelationship(Guid.NewGuid(), Guid.NewGuid());
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RemoveHierarchicalRelationship_ShouldRemoveRelationship_WhenRelationshipExists()
+    {
+        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
+
+        var parentId = Guid.NewGuid();
+        var childId = Guid.NewGuid();
+        var projectTasksIds = new[] { parentId, childId };
+        _ = relationshipManager.AddHierarchicalRelationship(parentId, childId, projectTasksIds);
+
+        var result = relationshipManager.RemoveHierarchicalRelationship(parentId, childId);
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            relationshipManager.HierarchicalRelationships.Should().BeEmpty();
+        }
     }
 }

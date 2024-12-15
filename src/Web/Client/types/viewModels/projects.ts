@@ -8,6 +8,8 @@ export interface ProjectsVM {
 export interface ProjectVM {
     id: string;
     name: string;
+    membersCount: number;
+    tasksCount: number;
 }
 
 export interface ProjectNavDataVM {

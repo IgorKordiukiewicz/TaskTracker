@@ -4,6 +4,7 @@ export class CreateOrganizationDto {
 
 export class CreateOrganizationInvitationDto {
     userId: string = '';
+    expirationDays?: number;
 }
 
 export class UpdateOrganizationNameDto {

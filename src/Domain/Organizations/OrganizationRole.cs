@@ -17,11 +17,11 @@ public class OrganizationRole : Role<OrganizationPermissions>
 
     public static OrganizationRole[] CreateDefaultRoles(Guid organizationId)
     {
-        return new OrganizationRole[]
-        {
+        return
+        [
             new("Owner", organizationId, EnumHelpers.GetAllFlags<OrganizationPermissions>(), RoleType.Owner),
             new("Administrator", organizationId, EnumHelpers.GetAllFlags<OrganizationPermissions>(), RoleType.Admin),
             new("Read-Only", organizationId, OrganizationPermissions.None, RoleType.ReadOnly),
-        };
+        ];
     }
 }

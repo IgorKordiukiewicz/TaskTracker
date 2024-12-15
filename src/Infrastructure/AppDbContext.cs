@@ -1,4 +1,5 @@
 ﻿using Domain.Common;
+using Domain.Notifications;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Tasks;
@@ -8,7 +9,8 @@ using Infrastructure.Models;
 
 namespace Infrastructure;
 
-public class AppDbContext : DbContext
+public class AppDbContext(DbContextOptions<AppDbContext> options) 
+    : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
 
@@ -32,11 +34,10 @@ public class AppDbContext : DbContext
     public DbSet<TaskStatusTransition> TaskStatusTransitions { get; set; }
     public DbSet<Workflow> Workflows { get; set; }
 
-    public DbSet<UserPresentationData> UsersPresentationData { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
-    public AppDbContext(DbContextOptions<AppDbContext> options) 
-        : base(options)
-    { }
+    public DbSet<UserPresentationData> UsersPresentationData { get; set; }
+    public DbSet<TasksBoardLayout> TasksBoardLayouts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

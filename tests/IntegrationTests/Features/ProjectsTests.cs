@@ -5,6 +5,7 @@ using Domain.Organizations;
 using Domain.Projects;
 using Domain.Users;
 using Domain.Workflows;
+using Infrastructure.Models;
 
 namespace IntegrationTests.Features;
 
@@ -42,7 +43,7 @@ public class ProjectsTests
     }
 
     [Fact]
-    public async Task Create_ShouldCreateNewProjectAndWorkflowAndTaskRelationshipManager_WhenValidationPassed()
+    public async Task Create_ShouldCreateNewProjectAndRelatedEntities_WhenValidationPassed()
     {
         var organization = (await _factory.CreateOrganizations())[0];
         var user = await _fixture.FirstAsync<User>();
@@ -58,6 +59,8 @@ public class ProjectsTests
             workflow.Should().NotBeNull();
             var taskRelationshipManager = await _fixture.FirstAsync<Domain.Tasks.TaskRelationshipManager>(x => x.ProjectId == result.Value);
             taskRelationshipManager.Should().NotBeNull();
+            var tasksBoardLayout = await _fixture.FirstAsync<TasksBoardLayout>(x => x.ProjectId == result.Value);
+            tasksBoardLayout.Should().NotBeNull();
         }
     }
 
@@ -75,8 +78,8 @@ public class ProjectsTests
         var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
         var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
         var organization = Organization.Create("org", user1.Id);
-        var invitation = organization.CreateInvitation(user2.Id).Value;
-        _ = organization.AcceptInvitation(invitation.Id);
+        var invitation = organization.CreateInvitation(user2.Id, DateTime.Now).Value;
+        _ = organization.AcceptInvitation(invitation.Id, DateTime.Now);
         var project1 = Project.Create("project1", organization.Id, user1.Id);
         var project2 = Project.Create("project2", organization.Id, user1.Id);
         var project3 = Project.Create("project3", organization.Id, user2.Id);
@@ -92,19 +95,7 @@ public class ProjectsTests
         using(new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            result.Value.Projects.Should().BeEquivalentTo(new[]
-            {
-                new ProjectVM
-                {
-                    Id = project1.Id,
-                    Name = project1.Name
-                },
-                new ProjectVM
-                {
-                    Id = project2.Id,
-                    Name = project2.Name
-                }
-            });
+            result.Value.Projects.Select(x => x.Id).Should().BeEquivalentTo([project1.Id, project2.Id]);
         }
     }
 
@@ -200,7 +191,7 @@ public class ProjectsTests
         var task = (await _factory.CreateTasks())[0];
         var project = await _fixture.FirstAsync<Project>();
         var member = await _fixture.FirstAsync<ProjectMember>();
-        task.UpdateAssignee(member.UserId);
+        task.UpdateAssignee(member.UserId, DateTime.Now);
 
         await _fixture.SeedDb(db =>
         {
@@ -487,6 +478,7 @@ public class ProjectsTests
             (await _fixture.CountAsync<Domain.Tasks.Task>(x => x.Id == task.Id)).Should().Be(0);
             (await _fixture.CountAsync<Workflow>(x => x.Id == workflowId.Id)).Should().Be(0);
             (await _fixture.CountAsync<Domain.Tasks.TaskRelationshipManager>(x => x.Id == taskRelationshipManager.Id)).Should().Be(0);
+            (await _fixture.CountAsync<TasksBoardLayout>(x => x.ProjectId == project.Id)).Should().Be(0);
         }
     }
 

@@ -1,4 +1,6 @@
-﻿using Domain.Workflows;
+﻿using Application.Common;
+using Domain.Workflows;
+using Infrastructure.Extensions;
 
 namespace Application.Features.Workflows;
 
@@ -13,18 +15,12 @@ internal class AddWorkflowTaskStatusCommandValidator : AbstractValidator<AddWork
     }
 }
 
-internal class AddWorkflowTaskStatusHandler : IRequestHandler<AddWorkflowTaskStatusCommand, Result>
+internal class AddWorkflowTaskStatusHandler(IRepository<Workflow> workflowRepository, ITasksBoardLayoutService tasksBoardLayoutService, AppDbContext dbContext) 
+    : IRequestHandler<AddWorkflowTaskStatusCommand, Result>
 {
-    private readonly IRepository<Workflow> _workflowRepository;
-
-    public AddWorkflowTaskStatusHandler(IRepository<Workflow> workflowRepository)
-    {
-        _workflowRepository = workflowRepository;
-    }
-
     public async Task<Result> Handle(AddWorkflowTaskStatusCommand request, CancellationToken cancellationToken)
     {
-        var workflow = await _workflowRepository.GetById(request.WorkflowId);
+        var workflow = await workflowRepository.GetById(request.WorkflowId, cancellationToken);
         if (workflow is null)
         {
             return Result.Fail(new NotFoundError<Workflow>(request.WorkflowId));
@@ -36,7 +32,19 @@ internal class AddWorkflowTaskStatusHandler : IRequestHandler<AddWorkflowTaskSta
             return Result.Fail(result.Errors);
         }
 
-        await _workflowRepository.Update(workflow);
+        var transactionResult = await dbContext.ExecuteTransaction(async () =>
+        {
+            await workflowRepository.Update(workflow, cancellationToken);
+            await tasksBoardLayoutService.HandleChanges(workflow.ProjectId,
+                layout => layout.AddStatus(workflow.Statuses.First(x => x.Name == request.Model.Name).Id), cancellationToken);
+        });
+
+        if(transactionResult.IsFailed)
+        {
+            return Result.Fail(transactionResult.Errors);
+        }
+        
+
         return Result.Ok();
     }
 }

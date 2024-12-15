@@ -6,7 +6,7 @@ namespace UnitTests.Domain;
 public class TaskTests
 {
     [Fact]
-    public void Create_ShouldCreateTask_WithGivenParameters()
+    public void Create_ShouldCreateTask_WithGivenParametersAndCreatedActivity()
     {
         var shortId = 1;
         var projectId = Guid.NewGuid();
@@ -14,7 +14,7 @@ public class TaskTests
         var description = "Description";
         var statusId = Guid.NewGuid();
 
-        var result = Task.Create(shortId, projectId, title, description, statusId);
+        var result = Task.Create(shortId, projectId, DateTime.Now, title, description, statusId);
 
         using(new AssertionScope())
         {
@@ -24,6 +24,7 @@ public class TaskTests
             result.Title.Should().Be(title);
             result.Description.Should().Be(description);
             result.StatusId.Should().Be(statusId);
+            result.Activities.Count().Should().Be(1);
         }
     }
 
@@ -35,9 +36,9 @@ public class TaskTests
         var availableStatuses = workflow.Transitions.Where(x => x.FromStatusId == initialStatus.Id).Select(x => x.ToStatusId);
         var unavailableStatus = workflow.Statuses.First(x => !availableStatuses.Contains(x.Id));
 
-        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialStatus.Id);
+        var task = Task.Create(1, Guid.NewGuid(), DateTime.Now, "title", "desc", initialStatus.Id);
 
-        var result = task.UpdateStatus(unavailableStatus.Id, workflow);
+        var result = task.UpdateStatus(unavailableStatus.Id, workflow, DateTime.Now);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -49,9 +50,9 @@ public class TaskTests
         var initialStatus = workflow.Statuses.First(x => x.Initial);
         var availableStatusId = workflow.Transitions.First(x => x.FromStatusId == initialStatus.Id).ToStatusId;
 
-        var task = Task.Create(1, Guid.NewGuid(), "title", "desc", initialStatus.Id);
+        var task = Task.Create(1, Guid.NewGuid(), DateTime.Now, "title", "desc", initialStatus.Id);
 
-        var result = task.UpdateStatus(availableStatusId, workflow);
+        var result = task.UpdateStatus(availableStatusId, workflow, DateTime.Now);
 
         using (new AssertionScope())
         {
@@ -67,7 +68,7 @@ public class TaskTests
         var task = CreateDefaultTask();
         var assigneeId = Guid.NewGuid();
 
-        task.UpdateAssignee(assigneeId);
+        task.UpdateAssignee(assigneeId, DateTime.Now);
 
         using(new AssertionScope())
         {
@@ -80,10 +81,10 @@ public class TaskTests
     public void Unassign_ShouldSetAssigneeIdToNull()
     {
         var task = CreateDefaultTask();
-        task.UpdateAssignee(Guid.NewGuid());
+        task.UpdateAssignee(Guid.NewGuid(), DateTime.Now);
         var assigneeIdBefore = task.AssigneeId;
 
-        task.Unassign();
+        task.Unassign(DateTime.Now);
 
         using(new AssertionScope())
         {
@@ -100,7 +101,7 @@ public class TaskTests
         var priority = task.Priority;
         var newPriority = Enum.GetValues<TaskPriority>().Where(x => x != priority).First();
 
-        task.UpdatePriority(newPriority);
+        task.UpdatePriority(newPriority, DateTime.Now);
 
         using(new AssertionScope())
         {
@@ -115,7 +116,7 @@ public class TaskTests
         var task = CreateDefaultTask();
         var newTitle = task.Title + "A";
 
-        task.UpdateTitle(newTitle);
+        task.UpdateTitle(newTitle, DateTime.Now);
 
         using(new AssertionScope())
         {
@@ -130,7 +131,7 @@ public class TaskTests
         var task = CreateDefaultTask();
         var newDescription = task.Description + "A";
 
-        task.UpdateDescription(newDescription);
+        task.UpdateDescription(newDescription, DateTime.Now);
 
         using (new AssertionScope())
         {
@@ -209,5 +210,5 @@ public class TaskTests
     }
     
     private static Task CreateDefaultTask()
-        => Task.Create(1, Guid.NewGuid(), "title", "desc", Guid.NewGuid());
+        => Task.Create(1, Guid.NewGuid(), DateTime.Now, "title", "desc", Guid.NewGuid());
 }

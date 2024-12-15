@@ -14,25 +14,19 @@ internal class UpdateOrganizationNameCommandValidator : AbstractValidator<Update
     }
 }
 
-internal class UpdateOrganizationNameHandler : IRequestHandler<UpdateOrganizationNameCommand, Result>
+internal class UpdateOrganizationNameHandler(IRepository<Organization> organizationRepository) 
+    : IRequestHandler<UpdateOrganizationNameCommand, Result>
 {
-    private readonly IRepository<Organization> _organizationRepository;
-
-    public UpdateOrganizationNameHandler(IRepository<Organization> organizationRepository)
-    {
-        _organizationRepository = organizationRepository;
-    }
-
     public async Task<Result> Handle(UpdateOrganizationNameCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _organizationRepository.GetById(request.OrganizationId);
+        var organization = await organizationRepository.GetById(request.OrganizationId, cancellationToken);
         if(organization is null)
         {
             return Result.Fail(new NotFoundError<Organization>(request.OrganizationId));
         }
 
         organization.Name = request.Model.Name;
-        await _organizationRepository.Update(organization);
+        await organizationRepository.Update(organization, cancellationToken);
 
         return Result.Ok();
     }

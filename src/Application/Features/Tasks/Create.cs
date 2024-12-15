@@ -1,4 +1,6 @@
-﻿using Domain.Projects;
+﻿using Application.Common;
+using Domain.Projects;
+using Infrastructure.Extensions;
 using Task = Domain.Tasks.Task;
 
 namespace Application.Features.Tasks;
@@ -15,21 +17,12 @@ internal class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
     }
 }
 
-internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Guid>>
+internal class CreateTaskHandler(AppDbContext dbContext, IRepository<Task> taskRepository, ITasksBoardLayoutService tasksBoardLayoutService, IDateTimeProvider dateTimeProvider) 
+    : IRequestHandler<CreateTaskCommand, Result<Guid>>
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IRepository<Task> _taskRepository;
-
-    public CreateTaskHandler(AppDbContext dbContext, IRepository<Task> taskRepository)
-    {
-        _dbContext = dbContext;
-        _taskRepository = taskRepository;
-    }
-
-
     public async Task<Result<Guid>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId))
+        if(!await dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
         {
             return Result.Fail<Guid>(new NotFoundError<Project>(request.ProjectId));
         }
@@ -37,10 +30,10 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
         Guid? assigneeId = null;
         if(request.Model.AssigneeMemberId is not null)
         {
-            var member = (await _dbContext.Projects
+            var member = (await dbContext.Projects
                 .AsNoTracking()
                 .Include(x => x.Members)
-                .SingleAsync(x => x.Id == request.ProjectId))
+                .SingleAsync(x => x.Id == request.ProjectId, cancellationToken))
                 .Members.SingleOrDefault(x => x.Id == request.Model.AssigneeMemberId);
             if (member is null)
             {
@@ -50,20 +43,30 @@ internal class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Result<Gui
             assigneeId = member.UserId;
         }
 
-        var shortId = (await _dbContext.Tasks
+        var shortId = (await dbContext.Tasks
             .Where(x => x.ProjectId == request.ProjectId)
-            .CountAsync()) + 1;
+            .CountAsync(cancellationToken)) + 1;
 
-        var initialTaskStatus = await _dbContext.Workflows
+        var initialTaskStatus = await dbContext.Workflows
             .Include(x => x.Statuses)
             .Where(x => x.ProjectId == request.ProjectId)
             .SelectMany(x => x.Statuses)
-            .FirstAsync(x => x.Initial);
+            .FirstAsync(x => x.Initial, cancellationToken);
 
-        var task = Task.Create(shortId, request.ProjectId, request.Model.Title, request.Model.Description, 
+        var task = Task.Create(shortId, request.ProjectId, dateTimeProvider.Now(), request.Model.Title, request.Model.Description, 
             initialTaskStatus.Id, assigneeId, request.Model.Priority);
 
-        await _taskRepository.Add(task);
+        var result = await dbContext.ExecuteTransaction(async () =>
+        {
+            await taskRepository.Add(task, cancellationToken);
+            await tasksBoardLayoutService.HandleChanges(task.ProjectId, layout =>
+                layout.CreateTask(task.Id, task.StatusId), cancellationToken);
+        });
+        
+        if(result.IsFailed)
+        {
+            return Result.Fail<Guid>(result.Errors);
+        }
 
         return task.Id;
     }

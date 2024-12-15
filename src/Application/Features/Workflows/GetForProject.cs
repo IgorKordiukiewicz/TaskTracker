@@ -12,28 +12,22 @@ internal class GetWorkflowForProjectQueryValidator : AbstractValidator<GetWorkfl
     }
 }
 
-internal class GetWorkflowForProjectHandler : IRequestHandler<GetWorkflowForProjectQuery, Result<WorkflowVM>>
+internal class GetWorkflowForProjectHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetWorkflowForProjectQuery, Result<WorkflowVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetWorkflowForProjectHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<WorkflowVM>> Handle(GetWorkflowForProjectQuery request, CancellationToken cancellationToken)
     {
-        var workflow = await _dbContext.Workflows
+        var workflow = await dbContext.Workflows
             .AsNoTracking()
             .Include(x => x.Statuses)
             .Include(x => x.Transitions)
-            .SingleOrDefaultAsync(x => x.ProjectId == request.ProjectId);
+            .SingleOrDefaultAsync(x => x.ProjectId == request.ProjectId, cancellationToken);
         if(workflow is null)
         {
             return Result.Fail<WorkflowVM>(new NotFoundError<Workflow>($"project ID: {request.ProjectId}"));
         }
 
-        var usedStatusesIds = _dbContext.Tasks.Select(x => x.StatusId)
+        var usedStatusesIds = dbContext.Tasks.Select(x => x.StatusId)
             .Distinct()
             .ToHashSet();
 

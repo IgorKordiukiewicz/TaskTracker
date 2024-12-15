@@ -1,43 +1,31 @@
-﻿using Application.Features.Projects;
-using Microsoft.Extensions.Logging;
+﻿
+using Application.Features.Organizations;
+using Application.Features.Notifications;
+using Domain.Notifications;
+using Hangfire;
 
 namespace Application.Common;
 
 public interface IJobsService
 {
-    Task RemoveUserFromOrganizationProjects(Guid userId, Guid organizationId);
+    void AddExpireOrganizationsInvitationsJob();
+    void EnqueueCreateNotification(NotificationData notification);
 }
 
-public class JobsService : IJobsService
+public class JobsService(IMediator mediator, IBackgroundJobClient backgroundJobClient, IRecurringJobManager recurringJobManager) 
+    : IJobsService
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IMediator _mediator;
-    private readonly ILogger<JobsService> _logger;
 
-    public JobsService(AppDbContext dbContext, IMediator mediator, ILogger<JobsService> logger)
+    public void AddExpireOrganizationsInvitationsJob()
     {
-        _dbContext = dbContext;
-        _mediator = mediator;
-        _logger = logger;
+        recurringJobManager.AddOrUpdate(
+            "Expire organizations invitations",
+            () => mediator.Send(new ExpireOrganizationsInvitationsCommand(), default),
+            "0 * * * *");
     }
 
-    public async Task RemoveUserFromOrganizationProjects(Guid userId, Guid organizationId)
+    public void EnqueueCreateNotification(NotificationData notification)
     {
-        var projectsAndMembers = await _dbContext.Projects
-            .Where(x => x.OrganizationId == organizationId && x.Members.Any(xx => xx.UserId == userId))
-            .Select(v => new { ProjectId = v.Id, MemberId = v.Members.First(x => x.UserId == userId).Id })
-            .ToListAsync();
-
-        foreach (var projectAndMember in projectsAndMembers)
-        {
-            var result = await _mediator.Send(new RemoveProjectMemberCommand(projectAndMember.ProjectId, new(projectAndMember.MemberId)));
-            if(result.IsFailed)
-            {
-                _logger.LogCritical("Removing user (ID: {@userId}) from organization (ID: {@organizationId}) failed!", userId, organizationId);
-                // TODO: throw?
-            }
-
-            var count = await _dbContext.ProjectMembers.CountAsync();
-        }
+        backgroundJobClient.Enqueue(() => mediator.Send(new CreateNotificationCommand(notification), default));
     }
 }

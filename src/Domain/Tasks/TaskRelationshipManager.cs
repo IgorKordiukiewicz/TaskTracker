@@ -4,7 +4,7 @@ public class TaskRelationshipManager : Entity, IAggregateRoot
 {
     public Guid ProjectId { get; init; }
 
-    private readonly List<TaskHierarchicalRelationship> _hierarchicalRelationships = new();
+    private readonly List<TaskHierarchicalRelationship> _hierarchicalRelationships = [];
     public IReadOnlyList<TaskHierarchicalRelationship> HierarchicalRelationships => _hierarchicalRelationships.AsReadOnly();
 
     public TaskRelationshipManager(Guid projectId) 
@@ -37,6 +37,19 @@ public class TaskRelationshipManager : Entity, IAggregateRoot
         }
 
         _hierarchicalRelationships.Add(new TaskHierarchicalRelationship(parentId, childId));
+
+        return Result.Ok();
+    }
+
+    public Result RemoveHierarchicalRelationship(Guid parentId, Guid childId)
+    {
+        var relationship = _hierarchicalRelationships.FirstOrDefault(x => x.ParentId == parentId && x.ChildId == childId);
+        if(relationship is null)
+        {
+            return Result.Fail(new DomainError("The relationship does not exist."));
+        }
+
+        _hierarchicalRelationships.Remove(relationship);
 
         return Result.Ok();
     }

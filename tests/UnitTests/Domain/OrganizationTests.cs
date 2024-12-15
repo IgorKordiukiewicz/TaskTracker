@@ -31,13 +31,14 @@ public class OrganizationTests
     }
 
     [Fact]
-    public void CreateInvitation_ShouldCreateInvitation()
+    public void CreateInvitation_ShouldCreateInvitationWithCorrectExpirationDate()
     {
         var ownerId = Guid.NewGuid();
         var organization = Organization.Create("Name", ownerId);
 
         var userId = Guid.NewGuid();
-        var result = organization.CreateInvitation(userId);
+        var now = new DateTime(2024, 12, 1);
+        var result = organization.CreateInvitation(userId, now, 10);
 
         using(new AssertionScope())
         {
@@ -46,6 +47,7 @@ public class OrganizationTests
             result.Value.Id.Should().NotBeEmpty();
             result.Value.OrganizationId.Should().Be(organization.Id);
             result.Value.UserId.Should().Be(userId);
+            result.Value.ExpirationDate.Should().Be(new DateTime(2024, 12, 11));
         }
     }
 
@@ -55,10 +57,10 @@ public class OrganizationTests
         var organization = Organization.Create("Name", Guid.NewGuid());
 
         var userId = Guid.NewGuid();
-        var invitation = organization.CreateInvitation(userId).Value;
-        organization.DeclineInvitation(invitation.Id);
+        var invitation = organization.CreateInvitation(userId, DateTime.Now).Value;
+        organization.DeclineInvitation(invitation.Id, DateTime.Now);
 
-        var result = organization.CreateInvitation(userId);
+        var result = organization.CreateInvitation(userId, DateTime.Now);
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -68,10 +70,10 @@ public class OrganizationTests
     {
         var organization = Organization.Create("Name", Guid.NewGuid());
 
-        var invitation = organization.CreateInvitation(Guid.NewGuid()).Value;
-        organization.DeclineInvitation(invitation.Id);
+        var invitation = organization.CreateInvitation(Guid.NewGuid(), DateTime.Now).Value;
+        organization.DeclineInvitation(invitation.Id, DateTime.Now);
 
-        var result = organization.CreateInvitation(Guid.NewGuid());
+        var result = organization.CreateInvitation(Guid.NewGuid(), DateTime.Now);
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -82,7 +84,7 @@ public class OrganizationTests
         var ownerId = Guid.NewGuid();
         var organization = Organization.Create("Name", ownerId);
 
-        var result = organization.CreateInvitation(ownerId);
+        var result = organization.CreateInvitation(ownerId, DateTime.Now);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -94,8 +96,8 @@ public class OrganizationTests
         var organization = Organization.Create("Name", ownerId);
 
         var userId = Guid.NewGuid();
-        _ = organization.CreateInvitation(userId);
-        var result = organization.CreateInvitation(userId);
+        _ = organization.CreateInvitation(userId, DateTime.Now);
+        var result = organization.CreateInvitation(userId, DateTime.Now);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -105,9 +107,9 @@ public class OrganizationTests
     {
         var organization = Organization.Create("Name", Guid.NewGuid());
         var expectedRoleId = organization.Roles.First(x => x.Type == RoleType.ReadOnly).Id;
-        var invitation = organization.CreateInvitation(Guid.NewGuid()).Value;
+        var invitation = organization.CreateInvitation(Guid.NewGuid(), DateTime.Now).Value;
 
-        var result = organization.AcceptInvitation(invitation.Id);
+        var result = organization.AcceptInvitation(invitation.Id, DateTime.Now);
 
         using(new AssertionScope())
         {
@@ -124,7 +126,7 @@ public class OrganizationTests
     {
         var organization = Organization.Create("Name", Guid.NewGuid());
 
-        var result = organization.AcceptInvitation(Guid.NewGuid());
+        var result = organization.AcceptInvitation(Guid.NewGuid(), DateTime.Now);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -133,10 +135,10 @@ public class OrganizationTests
     public void AcceptInvitation_ShouldFail_WhenInvitationisNotPending()
     {
         var organization = Organization.Create("Name", Guid.NewGuid());
-        var invitation = organization.CreateInvitation(Guid.NewGuid()).Value;
-        organization.AcceptInvitation(invitation.Id);
+        var invitation = organization.CreateInvitation(Guid.NewGuid(), DateTime.Now).Value;
+        organization.AcceptInvitation(invitation.Id, DateTime.Now);
 
-        var result = organization.AcceptInvitation(invitation.Id);
+        var result = organization.AcceptInvitation(invitation.Id, DateTime.Now);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -145,9 +147,9 @@ public class OrganizationTests
     public void DeclineInvitation_ShouldDeclineInvitation()
     {
         var organization = Organization.Create("Name", Guid.NewGuid());
-        var invitation = organization.CreateInvitation(Guid.NewGuid()).Value;
+        var invitation = organization.CreateInvitation(Guid.NewGuid(), DateTime.Now).Value;
 
-        var result = organization.DeclineInvitation(invitation.Id);
+        var result = organization.DeclineInvitation(invitation.Id, DateTime.Now);
 
         using (new AssertionScope())
         {
@@ -161,7 +163,7 @@ public class OrganizationTests
     {
         var organization = Organization.Create("Name", Guid.NewGuid());
 
-        var result = organization.DeclineInvitation(Guid.NewGuid());
+        var result = organization.DeclineInvitation(Guid.NewGuid(), DateTime.Now);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -170,10 +172,10 @@ public class OrganizationTests
     public void DeclineInvitation_ShouldFail_WhenInvitationisNotPending()
     {
         var organization = Organization.Create("Name", Guid.NewGuid());
-        var invitation = organization.CreateInvitation(Guid.NewGuid()).Value;
-        organization.DeclineInvitation(invitation.Id);
+        var invitation = organization.CreateInvitation(Guid.NewGuid(), DateTime.Now).Value;
+        organization.DeclineInvitation(invitation.Id, DateTime.Now);
 
-        var result = organization.DeclineInvitation(invitation.Id);
+        var result = organization.DeclineInvitation(invitation.Id, DateTime.Now);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -182,9 +184,9 @@ public class OrganizationTests
     public void CancelInvitation_ShouldCancelInvitation()
     {
         var organization = Organization.Create("Name", Guid.NewGuid());
-        var invitation = organization.CreateInvitation(Guid.NewGuid()).Value;
+        var invitation = organization.CreateInvitation(Guid.NewGuid(), DateTime.Now).Value;
 
-        var result = organization.CancelInvitation(invitation.Id);
+        var result = organization.CancelInvitation(invitation.Id, DateTime.Now);
 
         using (new AssertionScope())
         {
@@ -198,7 +200,7 @@ public class OrganizationTests
     {
         var organization = Organization.Create("Name", Guid.NewGuid());
 
-        var result = organization.CancelInvitation(Guid.NewGuid());
+        var result = organization.CancelInvitation(Guid.NewGuid(), DateTime.Now);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -207,12 +209,29 @@ public class OrganizationTests
     public void CancelInvitation_ShouldFail_WhenInvitationisNotPending()
     {
         var organization = Organization.Create("Name", Guid.NewGuid());
-        var invitation = organization.CreateInvitation(Guid.NewGuid()).Value;
-        organization.CancelInvitation(invitation.Id);
+        var invitation = organization.CreateInvitation(Guid.NewGuid(), DateTime.Now).Value;
+        organization.CancelInvitation(invitation.Id, DateTime.Now);
 
-        var result = organization.CancelInvitation(invitation.Id);
+        var result = organization.CancelInvitation(invitation.Id, DateTime.Now);
 
         result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ExpireInvitations_ShouldExpireInvitations_WithExpirationDatePastCurrentAndPendingState()
+    {
+        var organization = Organization.Create("Name", Guid.NewGuid());
+        var now = new DateTime(2024, 12, 2);
+        var invitation1 = organization.CreateInvitation(Guid.NewGuid(), now).Value; // No expiration date
+        var invitation2 = organization.CreateInvitation(Guid.NewGuid(), now, 10).Value; // Not in pending state
+        invitation2.Cancel(now);
+        var invitation3 = organization.CreateInvitation(Guid.NewGuid(), now, 20).Value; // Not yet expired
+        var invitation4 = organization.CreateInvitation(Guid.NewGuid(), now, 10).Value; // Expired
+
+        organization.ExpireInvitations(now.AddDays(15));
+
+        var expiredInvitations = organization.Invitations.Where(x => x.State == OrganizationInvitationState.Expired);
+        expiredInvitations.Should().BeEquivalentTo([invitation4]);
     }
 
     [Fact]
@@ -241,8 +260,8 @@ public class OrganizationTests
     {
         var organization = Organization.Create("Name", Guid.NewGuid());
         var userId = Guid.NewGuid();
-        var invitation = organization.CreateInvitation(userId).Value;
-        organization.AcceptInvitation(invitation.Id);
+        var invitation = organization.CreateInvitation(userId, DateTime.Now).Value;
+        organization.AcceptInvitation(invitation.Id, DateTime.Now);
         var memberId = organization.Members.First(x => x.UserId == userId).Id;
 
         var result = organization.RemoveMember(memberId);
@@ -252,6 +271,53 @@ public class OrganizationTests
             result.IsSuccess.Should().BeTrue();
             organization.Members.Count.Should().Be(1);
         }
+    }
+
+    [Fact]
+    public void Leave_ShouldFail_WhenUserIsOwner()
+    {
+        var userId = Guid.NewGuid();
+        var organization = Organization.Create("Name", userId);
+
+        var result = organization.Leave(userId);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Leave_ShouldRemoveMember_WhenUserIsNotOwner()
+    {
+        var organization = Organization.Create("Name", Guid.NewGuid());
+        var userId = Guid.NewGuid();
+        var invitation = organization.CreateInvitation(userId, DateTime.Now).Value;
+        organization.AcceptInvitation(invitation.Id, DateTime.Now);
+
+        var result = organization.Leave(userId);
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            organization.Members.Count.Should().Be(1);
+        }    
+    }
+
+    [Fact]
+    public void GetMemberManagers_ShouldReturnAllMembersThatCanEditMembers()
+    {
+        var ownerId = Guid.NewGuid();
+        var organization = Organization.Create("Name", ownerId);
+        var userId1 = Guid.NewGuid();
+        var userId2 = Guid.NewGuid();
+        var invitation1 = organization.CreateInvitation(userId1, DateTime.Now).Value;
+        var invitation2 = organization.CreateInvitation(userId2, DateTime.Now).Value;
+        var member1 = organization.AcceptInvitation(invitation1.Id, DateTime.Now).Value;
+        var member2 = organization.AcceptInvitation(invitation2.Id, DateTime.Now).Value;
+        var adminRoleId = organization.Roles.First(x => x.Type == RoleType.Admin).Id;
+        _ = organization.RolesManager.UpdateMemberRole(member1.Id, adminRoleId, organization.Members);
+
+        var result = organization.GetMemberManagers();
+
+        result.Select(x => x.UserId).Should().BeEquivalentTo(new[] { ownerId, userId1 });
     }
 
     [Fact]

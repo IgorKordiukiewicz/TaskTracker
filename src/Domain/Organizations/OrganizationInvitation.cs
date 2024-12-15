@@ -7,6 +7,7 @@ public class OrganizationInvitation : Entity
     public OrganizationInvitationState State { get; private set; } = OrganizationInvitationState.Pending;
     public DateTime CreatedAt { get; private set; }
     public DateTime? FinalizedAt { get; private set; }
+    public DateTime? ExpirationDate { get; private set; }
 
     private OrganizationInvitation(Guid id)
         : base(id)
@@ -14,31 +15,43 @@ public class OrganizationInvitation : Entity
 
     }
 
-    public static OrganizationInvitation Create(Guid userId, Guid organizationId)
+    public static OrganizationInvitation Create(Guid userId, Guid organizationId, DateTime now, DateTime? expirationDate)
     {
         return new(Guid.NewGuid())
         {
             UserId = userId,
             OrganizationId = organizationId,
-            CreatedAt = DateTime.Now
+            CreatedAt = now,
+            ExpirationDate = expirationDate
         };
     }
 
-    public void Accept()
+    public void Accept(DateTime now)
     {
         State = OrganizationInvitationState.Accepted;
-        FinalizedAt = DateTime.Now;
+        FinalizedAt = now;
     }
 
-    public void Decline()
+    public void Decline(DateTime now)
     {
         State = OrganizationInvitationState.Declined;
-        FinalizedAt = DateTime.Now;
+        FinalizedAt = now;
     }
 
-    public void Cancel()
+    public void Cancel(DateTime now)
     {
         State = OrganizationInvitationState.Canceled;
-        FinalizedAt = DateTime.Now;
+        FinalizedAt = now;
+    }
+
+    public void Expire(DateTime now)
+    {
+        if(!ExpirationDate.HasValue || ExpirationDate.Value > now || State != OrganizationInvitationState.Pending)
+        {
+            return;
+        }
+
+        State = OrganizationInvitationState.Expired;
+        FinalizedAt = now;
     }
 }

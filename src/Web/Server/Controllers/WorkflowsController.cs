@@ -5,6 +5,10 @@ namespace Web.Server.Controllers;
 /// <summary>
 /// 
 /// </summary>
+/// <remarks>
+/// 
+/// </remarks>
+/// <param name="mediator"></param>
 [ApiController]
 [Route("workflows")]
 [Authorize]
@@ -12,19 +16,9 @@ namespace Web.Server.Controllers;
 [ProducesResponseType(400)]
 [ProducesResponseType(500)]
 [Produces("application/json")]
-public class WorkflowsController : ControllerBase
+public class WorkflowsController(IMediator mediator) 
+    : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="mediator"></param>
-    public WorkflowsController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     /// <summary>
     /// Get project's workflow.
     /// </summary>
@@ -36,7 +30,7 @@ public class WorkflowsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetWorkflow([FromQuery] Guid projectId)
     {
-        var result = await _mediator.Send(new GetWorkflowForProjectQuery(projectId));
+        var result = await mediator.Send(new GetWorkflowForProjectQuery(projectId));
         return result.ToHttpResult();
     }
 
@@ -48,10 +42,12 @@ public class WorkflowsController : ControllerBase
     /// <response code="404">Workflow not found.</response>
     [HttpPost("{workflowId:guid}/statuses")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddStatus(Guid workflowId, AddWorkflowStatusDto model)
     {
-        var result = await _mediator.Send(new AddWorkflowTaskStatusCommand(workflowId, model));
+        var result = await mediator.Send(new AddWorkflowTaskStatusCommand(workflowId, model));
         return result.ToHttpResult();
     }
 
@@ -59,13 +55,16 @@ public class WorkflowsController : ControllerBase
     /// Delete a workflow status.
     /// </summary>
     /// <param name="workflowId"></param>
+    /// <param name="model"></param>
     /// <response code="404">Workflow not found.</response>
     [HttpPost("{workflowId:guid}/statuses/delete")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteStatus(Guid workflowId, DeleteWorkflowStatusDto model)
     {
-        var result = await _mediator.Send(new DeleteWorkflowStatusCommand(workflowId, model));
+        var result = await mediator.Send(new DeleteWorkflowStatusCommand(workflowId, model));
         return result.ToHttpResult();
     }
 
@@ -77,10 +76,12 @@ public class WorkflowsController : ControllerBase
     /// <response code="404">Workflow not found.</response>
     [HttpPost("{workflowId:guid}/transitions")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddTransition(Guid workflowId, AddWorkflowTransitionDto model)
     {
-        var result = await _mediator.Send(new AddWorkflowTransitionCommand(workflowId, model));
+        var result = await mediator.Send(new AddWorkflowTransitionCommand(workflowId, model));
         return result.ToHttpResult();
     }
 
@@ -92,10 +93,12 @@ public class WorkflowsController : ControllerBase
     /// <response code="404">Workflow not found.</response>
     [HttpPost("{workflowId:guid}/transitions/delete")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteTransition(Guid workflowId, DeleteWorkflowTransitionDto model)
     {
-        var result = await _mediator.Send(new DeleteWorkflowTransitionCommand(workflowId, model));
+        var result = await mediator.Send(new DeleteWorkflowTransitionCommand(workflowId, model));
         return result.ToHttpResult();
     }
 
@@ -107,10 +110,12 @@ public class WorkflowsController : ControllerBase
     /// <response code="404">Workflow not found.</response>
     [HttpPost("{workflowId:guid}/initial-status")]
     [Authorize(Policy.ProjectEditProject)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> ChangeInitialStatus(Guid workflowId, ChangeInitialWorkflowStatusDto model)
     {
-        var result = await _mediator.Send(new ChangeInitialWorkflowStatusCommand(workflowId, model));
+        var result = await mediator.Send(new ChangeInitialWorkflowStatusCommand(workflowId, model));
         return result.ToHttpResult();
     }
 }

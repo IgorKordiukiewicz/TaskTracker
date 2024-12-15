@@ -14,18 +14,12 @@ internal class DeleteWorkflowTransitionCommandValidator : AbstractValidator<Dele
     }
 }
 
-internal class DeleteWorkflowTransitionHandler : IRequestHandler<DeleteWorkflowTransitionCommand, Result>
+internal class DeleteWorkflowTransitionHandler(IRepository<Workflow> workflowRepository)
+    : IRequestHandler<DeleteWorkflowTransitionCommand, Result>
 {
-    private readonly IRepository<Workflow> _workflowRepository;
-
-    public DeleteWorkflowTransitionHandler(IRepository<Workflow> workflowRepository)
-    {
-        _workflowRepository = workflowRepository;
-    }
-
     public async Task<Result> Handle(DeleteWorkflowTransitionCommand request, CancellationToken cancellationToken)
     {
-        var workflow = await _workflowRepository.GetById(request.WorkflowId);
+        var workflow = await workflowRepository.GetById(request.WorkflowId, cancellationToken);
         if (workflow is null)
         {
             return Result.Fail(new NotFoundError<Workflow>(request.WorkflowId));
@@ -37,7 +31,7 @@ internal class DeleteWorkflowTransitionHandler : IRequestHandler<DeleteWorkflowT
             return result;
         }
 
-        await _workflowRepository.Update(workflow);
+        await workflowRepository.Update(workflow, cancellationToken);
         return Result.Ok();
     }
 }

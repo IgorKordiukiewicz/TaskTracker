@@ -14,18 +14,12 @@ internal class AddWorkflowTransitionCommandValidator : AbstractValidator<AddWork
     }
 }
 
-internal class AddWorkflowTransitionHandler : IRequestHandler<AddWorkflowTransitionCommand, Result>
+internal class AddWorkflowTransitionHandler(IRepository<Workflow> workflowRepository) 
+    : IRequestHandler<AddWorkflowTransitionCommand, Result>
 {
-    private readonly IRepository<Workflow> _workflowRepository;
-
-    public AddWorkflowTransitionHandler(IRepository<Workflow> workflowRepository)
-    {
-        _workflowRepository = workflowRepository;
-    }
-
     public async Task<Result> Handle(AddWorkflowTransitionCommand request, CancellationToken cancellationToken)
     {
-        var workflow = await _workflowRepository.GetById(request.WorkflowId);
+        var workflow = await workflowRepository.GetById(request.WorkflowId, cancellationToken);
         if (workflow is null)
         {
             return Result.Fail(new NotFoundError<Workflow>(request.WorkflowId));
@@ -37,7 +31,7 @@ internal class AddWorkflowTransitionHandler : IRequestHandler<AddWorkflowTransit
             return Result.Fail(result.Errors);
         }
 
-        await _workflowRepository.Update(workflow);
+        await workflowRepository.Update(workflow, cancellationToken);
         return Result.Ok();
     }
 }

@@ -10,30 +10,24 @@ internal class GetTaskCommentsQueryValidator : AbstractValidator<GetTaskComments
     }
 }
 
-internal class GetTaskCommentsHandler : IRequestHandler<GetTaskCommentsQuery, Result<TaskCommentsVM>>
+internal class GetTaskCommentsHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetTaskCommentsQuery, Result<TaskCommentsVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetTaskCommentsHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<TaskCommentsVM>> Handle(GetTaskCommentsQuery request, CancellationToken cancellationToken)
     {
-        if(!await _dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId)) 
+        if(!await dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId, cancellationToken)) 
         {
             return Result.Fail<TaskCommentsVM>(new NotFoundError<Domain.Tasks.Task>(request.TaskId));
         }
 
-        var comments = await _dbContext.TaskComments
+        var comments = await dbContext.TaskComments
             .Where(x => x.TaskId == request.TaskId)
             .OrderBy(x => x.CreatedAt)
-            .Join(_dbContext.Users,
+            .Join(dbContext.Users,
             comment => comment.AuthorId,
             user => user.Id,
             (comment, user) => new TaskCommentVM(comment.Content, user.Id, user.FullName, comment.CreatedAt))
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return Result.Ok(new TaskCommentsVM(comments));
     }

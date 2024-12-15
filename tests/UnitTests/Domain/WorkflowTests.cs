@@ -34,7 +34,7 @@ public class WorkflowTests
 
             // Display orders
             result.Statuses.OrderBy(x => x.DisplayOrder).Select(x => x.Name.ToLower())
-                .Should().BeEquivalentTo(new[] { "todo", "in progress", "done" }, options => options.WithStrictOrdering());
+                .Should().BeEquivalentTo(["todo", "in progress", "done"], options => options.WithStrictOrdering());
         }
     }
 

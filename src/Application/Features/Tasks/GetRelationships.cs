@@ -14,64 +14,72 @@ internal class GetTaskRelationshipsQueryValidator : AbstractValidator<GetTaskRel
     }
 }
 
-internal class GetTaskRelationshipsHandler : IRequestHandler<GetTaskRelationshipsQuery, Result<TaskRelationshipsVM>>
+internal class GetTaskRelationshipsHandler(AppDbContext dbContext) 
+    : IRequestHandler<GetTaskRelationshipsQuery, Result<TaskRelationshipsVM>>
 {
-    private readonly AppDbContext _dbContext;
-
-    public GetTaskRelationshipsHandler(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<Result<TaskRelationshipsVM>> Handle(GetTaskRelationshipsQuery request, CancellationToken cancellationToken)
     {
-        var task = await _dbContext.Tasks
+        var task = await dbContext.Tasks
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == request.TaskId);
+            .FirstOrDefaultAsync(x => x.Id == request.TaskId, cancellationToken);
         if(task is null)
         {
             return Result.Fail<TaskRelationshipsVM>(new NotFoundError<Task>(request.TaskId));
         }
 
-        var parentId = (await _dbContext.TaskHierarchicalRelationships
+        var parentId = (await dbContext.TaskHierarchicalRelationships
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.ChildId == request.TaskId))?.ParentId ?? null;
+            .FirstOrDefaultAsync(x => x.ChildId == request.TaskId, cancellationToken))?.ParentId ?? null;
 
-        var childrenRelationships = await _dbContext.TaskHierarchicalRelationships.FromSqlRaw(
+        var childrenRelationships = await dbContext.TaskHierarchicalRelationships.FromSqlRaw(
             @"
-            WITH RecursiveTaskHierarchy AS (
+            WITH RECURSIVE RecursiveTaskHierarchy AS (
                 SELECT 
-                    ParentId, ChildId, IsDeleted, TaskRelationshipManagerId
+                    thr.""ParentId"", thr.""ChildId"", thr.""IsDeleted"", thr.""TaskRelationshipManagerId""
                 FROM 
-                    TaskHierarchicalRelationships thr
+                    public.""TaskHierarchicalRelationships"" thr
                 WHERE 
-                    ParentId = {0}
+                    thr.""ParentId"" = {0}
 
                 UNION ALL
 
                 SELECT 
-                    thr1.ParentId, thr1.ChildId, thr1.IsDeleted, thr1.TaskRelationshipManagerId
+                    thr1.""ParentId"", thr1.""ChildId"", thr1.""IsDeleted"", thr1.""TaskRelationshipManagerId""
                 FROM 
-                    TaskHierarchicalRelationships thr1
+                    public.""TaskHierarchicalRelationships"" thr1
                 INNER JOIN 
-                    RecursiveTaskHierarchy rth ON thr1.ParentId = rth.ChildId
+                    RecursiveTaskHierarchy rth ON thr1.""ParentId"" = rth.""ChildId""
             )
             SELECT * FROM RecursiveTaskHierarchy", request.TaskId)
             .IgnoreQueryFilters()
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         var childrenByParent = childrenRelationships
             .GroupBy(x => x.ParentId)
             .ToDictionary(k => k.Key, v => v.ToList());
 
-        var childrenHierarchy = childrenRelationships.Any() 
-            ? BuildHierarchy(request.TaskId, childrenByParent) 
+        var allTasksIds = childrenRelationships
+            .Select(x => x.ParentId)
+            .Concat(childrenRelationships.Select(x => x.ChildId))
+            .Concat(parentId is not null ? [ parentId.Value ] : [])
+            .Distinct()
+            .ToHashSet();
+        var taskDataById = await dbContext.Tasks
+            .Where(x => x.ProjectId == task.ProjectId && allTasksIds.Contains(x.Id))
+            .ToDictionaryAsync(k => k.Id, v => (v.Title, v.ShortId), cancellationToken);
+
+        var childrenHierarchy = childrenRelationships.Count != 0
+            ? BuildHierarchy(request.TaskId, childrenByParent, taskDataById) 
             : null;
 
-        return new TaskRelationshipsVM(parentId, childrenHierarchy);
+        var parent = parentId is not null 
+            ? new TaskRelationshipsParentVM(parentId.Value, taskDataById[parentId.Value].Title, taskDataById[parentId.Value].ShortId) 
+            : null;
+
+        return new TaskRelationshipsVM(parent, childrenHierarchy);
     }
 
-    private TaskHierarchyVM BuildHierarchy(Guid parentId, IReadOnlyDictionary<Guid, List<TaskHierarchicalRelationship>> childrenByParent)
+    private static TaskHierarchyVM BuildHierarchy(Guid parentId, IReadOnlyDictionary<Guid, List<TaskHierarchicalRelationship>> childrenByParent, IReadOnlyDictionary<Guid, (string Title, int ShortId)> dataById)
     {
         var childrenHierarchies = new List<TaskHierarchyVM>();
 
@@ -79,11 +87,12 @@ internal class GetTaskRelationshipsHandler : IRequestHandler<GetTaskRelationship
         {
             foreach (var relationship in childrenRelationships)
             {
-                var childrenHierarchy = BuildHierarchy(relationship.ChildId, childrenByParent);
+                var childrenHierarchy = BuildHierarchy(relationship.ChildId, childrenByParent, dataById);
                 childrenHierarchies.Add(childrenHierarchy);
             }
         }
 
-        return new TaskHierarchyVM(parentId, childrenHierarchies);
+        var data = dataById[parentId];
+        return new TaskHierarchyVM(parentId, data.Title, data.ShortId, childrenHierarchies);
     }
 }
