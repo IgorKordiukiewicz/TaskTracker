@@ -3,7 +3,7 @@ name: Build and deploy API
 env:
   AZURE_WEBAPP_NAME: tasktracker-api   
   AZURE_WEBAPP_PACKAGE_PATH: '.'  
-  DOTNET_VERSION: '7'                
+  DOTNET_VERSION: '8'                
 
 on:
   push:
