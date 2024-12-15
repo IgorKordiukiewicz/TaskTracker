@@ -115,7 +115,7 @@ public class WorkflowsTests
     {
         var workflow = (await _factory.CreateWorkflows())[0];
         var notInitialStatus = workflow.Statuses.First(x => !x.Initial);
-        var task = Task.Create(1, workflow.ProjectId, "title", "desc", notInitialStatus.Id);
+        var task = Task.Create(1, workflow.ProjectId, DateTime.Now, "title", "desc", notInitialStatus.Id);
         await _fixture.SeedDb(db =>
         {
             db.Add(task);

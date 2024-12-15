@@ -104,9 +104,9 @@ public class TasksTests
 
         var initialStatusId1 = workflows[0].Statuses.First(x => x.Initial).Id;
         var initialStatusId2 = workflows[1].Statuses.First(x => x.Initial).Id;
-        var task1 = Task.Create(1, workflows[0].ProjectId, "title1", "desc1", initialStatusId1);
-        var task2 = Task.Create(2, workflows[0].ProjectId, "title2", "desc2", initialStatusId1);
-        var task3 = Task.Create(1, workflows[1].ProjectId, "title3", "desc3", initialStatusId2);
+        var task1 = Task.Create(1, workflows[0].ProjectId, DateTime.Now, "title1", "desc1", initialStatusId1);
+        var task2 = Task.Create(2, workflows[0].ProjectId, DateTime.Now, "title2", "desc2", initialStatusId1);
+        var task3 = Task.Create(1, workflows[1].ProjectId, DateTime.Now, "title3", "desc3", initialStatusId2);
 
         taskBoardLayouts[0].Columns.First(x => x.StatusId == initialStatusId1).TasksIds.AddRange([task1.Id, task2.Id]);
 
@@ -382,7 +382,7 @@ public class TasksTests
     {
         var workflow = (await _factory.CreateWorkflows())[0];
         var user = await _fixture.FirstAsync<User>();
-        var task = Task.Create(1, workflow.ProjectId, "title", "desc", workflow.Statuses.First(x => x.Initial).Id);
+        var task = Task.Create(1, workflow.ProjectId, DateTime.Now, "title", "desc", workflow.Statuses.First(x => x.Initial).Id);
 
         var transition = workflow.Transitions.First(x => x.FromStatusId == task.StatusId);
         var oldStatus = workflow.Statuses.First(x => x.Id == task.StatusId);
@@ -404,10 +404,11 @@ public class TasksTests
             result.IsSuccess.Should().BeTrue();
 
             var activities = result.Value.Activities;
-            activities.Should().HaveCount(3);
+            activities.Should().HaveCount(4);
             AssertActivities(activities[0], TaskProperty.Status, oldStatus.Name, newStatus.Name);
             AssertActivities(activities[1], TaskProperty.Assignee, user.FullName, null);
             AssertActivities(activities[2], TaskProperty.Assignee, null, user.FullName);
+            AssertActivities(activities[3], TaskProperty.Creation, null, null);
             
             static void AssertActivities(TaskActivityVM activity, TaskProperty expectedProperty, string? expectedOldValue, string? expectedNewValue)
             {
@@ -509,8 +510,8 @@ public class TasksTests
         var initialStatus = workflow.Statuses.First(x => x.Initial);
         var tasks = new Task[]
         {
-            Task.Create(1, relationshipManager.ProjectId, "a", "desc", initialStatus.Id),
-            Task.Create(2, relationshipManager.ProjectId, "b", "desc", initialStatus.Id),
+            Task.Create(1, relationshipManager.ProjectId, DateTime.Now, "a", "desc", initialStatus.Id),
+            Task.Create(2, relationshipManager.ProjectId, DateTime.Now, "b", "desc", initialStatus.Id),
         };
         var tasksIds = tasks.Select(x => x.Id);
         _ = relationshipManager.AddHierarchicalRelationship(tasks[0].Id, tasks[1].Id, tasksIds);
@@ -595,10 +596,10 @@ public class TasksTests
         var initialStatus = workflow.Statuses.First(x => x.Initial);
         var tasks = new Task[]
         {
-            Task.Create(1, relationshipManager.ProjectId, "a", "desc", initialStatus.Id),
-            Task.Create(2, relationshipManager.ProjectId, "b", "desc", initialStatus.Id),
-            Task.Create(3, relationshipManager.ProjectId, "c", "desc", initialStatus.Id),
-            Task.Create(4, relationshipManager.ProjectId, "d", "desc", initialStatus.Id),
+            Task.Create(1, relationshipManager.ProjectId, DateTime.Now, "a", "desc", initialStatus.Id),
+            Task.Create(2, relationshipManager.ProjectId, DateTime.Now, "b", "desc", initialStatus.Id),
+            Task.Create(3, relationshipManager.ProjectId, DateTime.Now, "c", "desc", initialStatus.Id),
+            Task.Create(4, relationshipManager.ProjectId, DateTime.Now, "d", "desc", initialStatus.Id),
         };
         var tasksIds = tasks.Select(x => x.Id);
         _ = relationshipManager.AddHierarchicalRelationship(tasks[0].Id, tasks[1].Id, tasksIds);

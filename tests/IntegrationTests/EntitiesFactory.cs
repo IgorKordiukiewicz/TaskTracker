@@ -93,7 +93,7 @@ public class EntitiesFactory(IntegrationTestsFixture fixture)
         var statuses = await fixture.GetAsync<Domain.Workflows.TaskStatus>();
 
         var initialStatus = await fixture.FirstAsync<Domain.Workflows.TaskStatus>(x => x.Initial);
-        var tasks = CreateEntities(count, i => Task.Create(1, relationshipManager.ProjectId, $"title{i}", $"desc{i}", initialStatus.Id));
+        var tasks = CreateEntities(count, i => Task.Create(1, relationshipManager.ProjectId, DateTime.Now, $"title{i}", $"desc{i}", initialStatus.Id));
 
         var tasksBoardLayout = new TasksBoardLayout()
         {

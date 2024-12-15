@@ -34,7 +34,11 @@ const description = computed(() => {
                 : (!props.activity.oldValue ? `Assigned ${getValueDisplay(props.activity.newValue)}.` 
                 : `Changed assignee from ${getValueDisplay(props.activity.oldValue)} to ${getValueDisplay(props.activity.newValue)}.`);
         case TaskProperty.Priority:
-            return `Changed priority from ${getValueDisplay(props.activity.oldValue)} to ${getValueDisplay(props.activity.newValue)}.`
+            return `Changed priority from ${getValueDisplay(props.activity.oldValue)} to ${getValueDisplay(props.activity.newValue)}.`;
+        case TaskProperty.Title:
+            return `Changed title from ${getValueDisplay(props.activity.oldValue)} to ${getValueDisplay(props.activity.newValue)}`;
+        case TaskProperty.Creation:
+            return 'Created.';
         default:
             return "";
     }

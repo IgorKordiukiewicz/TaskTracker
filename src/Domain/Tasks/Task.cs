@@ -30,9 +30,9 @@ public class Task : Entity, IAggregateRoot
 
     }
 
-    public static Task Create(int shortId, Guid projectId, string title, string description, Guid statusId, Guid? assigneeId = null, TaskPriority priority = TaskPriority.Normal)
+    public static Task Create(int shortId, Guid projectId, DateTime now, string title, string description, Guid statusId, Guid? assigneeId = null, TaskPriority priority = TaskPriority.Normal)
     {
-        return new(Guid.NewGuid())
+        var result = new Task(Guid.NewGuid())
         {
             ShortId = shortId,
             ProjectId = projectId,
@@ -42,6 +42,10 @@ public class Task : Entity, IAggregateRoot
             AssigneeId = assigneeId,
             Priority = priority
         };
+
+        result._activities.Add(new(result.Id, TaskProperty.Creation, now));
+
+        return result;
     }
 
     public void UpdateTitle(string title, DateTime now)

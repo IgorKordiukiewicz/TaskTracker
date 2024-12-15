@@ -17,7 +17,7 @@ internal class CreateTaskCommandValidator : AbstractValidator<CreateTaskCommand>
     }
 }
 
-internal class CreateTaskHandler(AppDbContext dbContext, IRepository<Task> taskRepository, ITasksBoardLayoutService tasksBoardLayoutService) 
+internal class CreateTaskHandler(AppDbContext dbContext, IRepository<Task> taskRepository, ITasksBoardLayoutService tasksBoardLayoutService, IDateTimeProvider dateTimeProvider) 
     : IRequestHandler<CreateTaskCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
@@ -53,7 +53,7 @@ internal class CreateTaskHandler(AppDbContext dbContext, IRepository<Task> taskR
             .SelectMany(x => x.Statuses)
             .FirstAsync(x => x.Initial, cancellationToken);
 
-        var task = Task.Create(shortId, request.ProjectId, request.Model.Title, request.Model.Description, 
+        var task = Task.Create(shortId, request.ProjectId, dateTimeProvider.Now(), request.Model.Title, request.Model.Description, 
             initialTaskStatus.Id, assigneeId, request.Model.Priority);
 
         var result = await dbContext.ExecuteTransaction(async () =>

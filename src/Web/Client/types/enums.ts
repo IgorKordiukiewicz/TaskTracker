@@ -49,7 +49,9 @@ export enum TaskProperty
     Description,
     Status,
     Assignee,
-    Priority
+    Priority,
+    Title,
+    Creation
 }
 
 export enum TaskStatusDeletionEligibility 
