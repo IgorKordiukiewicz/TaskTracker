@@ -7,6 +7,9 @@ export const useNotificationsService = () => {
         async getNotifications() {
             return await api.sendGetRequest<NotificationsVM>('notifications');
         },
+        async getUnreadCount() {
+            return await api.sendGetRequest<number>('notifications/unread-count');
+        },
         async read(id: string) {
             await api.sendPostRequest(`notifications/${id}/read`, undefined);
         }

@@ -39,8 +39,8 @@ const items = ref([
     { 
         label: 'Profile', 
         icon: 'pi pi-user' ,
-        command: () => {
-            profileDialog.value.show();
+        command: async () => {
+            await profileDialog.value.show();
         }
     },
     { 
@@ -56,27 +56,28 @@ const profileDialog = ref();
 const notificationsPopup = ref();
 
 const invitations = ref();
-await updateInvitations();
-
 const notifications = ref();
-await updateNotifications();
+const unreadCount = ref(await notificationsService.getUnreadCount());
 
 const toggle = (event: Event) => {
     menu.value.toggle(event);
 }
 
 const anyNotifications = computed(() => {
-    return invitations && notifications && (notifications.value.notifications.length > 0 || invitations.value.invitations.length > 0);
+    return unreadCount.value ? unreadCount.value > 0 : false;
 })
 
 function toggleSidebar() {
     emit('toggleSidebar');
 }
 
-function openNotificationsPopup() {
+async function openNotificationsPopup() {
     if(!anyNotifications.value) {
         return;
     }
+
+    await updateInvitations();
+    await updateNotifications();
 
     notificationsPopup.value.show();
 }

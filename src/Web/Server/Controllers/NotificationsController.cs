@@ -24,6 +24,18 @@ public class NotificationsController(IMediator mediator)
     }
 
     /// <summary>
+    /// Get the count of user's unread notifications and organizations invitations.
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("unread-count")]
+    [ProducesResponseType(typeof(int), 200)]
+    public async Task<IActionResult> GetUnreadNotificationsCount()
+    {
+        var result = await mediator.Send(new GetUnreadNotificationsCountQuery(User.GetUserId()));
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Mark a given notification as read.
     /// </summary>
     /// <param name="id"></param>

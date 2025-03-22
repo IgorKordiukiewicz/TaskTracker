@@ -28,7 +28,6 @@ const usersService = useUsersService();
 
 const model = ref();
 const userDetails = ref();
-await updateUserDetails();
 
 const dialog = ref();
 
@@ -37,7 +36,8 @@ const submitDisabled = computed(() => {
         || (model.value.firstName === userDetails.value.firstName && model.value.lastName === userDetails.value.lastName);
 })
 
-function show() {
+async function show() {
+    await updateUserDetails();
     dialog.value.show();
 }
 
