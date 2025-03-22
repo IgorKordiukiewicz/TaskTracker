@@ -7,6 +7,7 @@ on:
     paths:
       - 'src/Web/Client/**'
       - '.github/workflows/azure-static-web-apps-thankful-plant-046fce203.yml'
+  workflow_dispatch:
 
 jobs:
   build_and_deploy_job:
