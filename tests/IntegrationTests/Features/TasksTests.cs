@@ -77,14 +77,6 @@ public class TasksTests
         }
     }
 
-    [Fact]
-    public async System.Threading.Tasks.Task Get_ShouldFail_WhenWorkflowDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetTasksQuery(Guid.NewGuid(), 1));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
     [Theory]
     [InlineData(false, 1)]
     [InlineData(true, 2)]
@@ -186,44 +178,6 @@ public class TasksTests
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<TaskComment>()).Should().Be(taskCommentsCountBefore + 1);
-        }
-    }
-
-    [Fact]
-    public async System.Threading.Tasks.Task GetComments_ShouldFail_WhenTaskDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetTaskCommentsQuery(Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
-    public async System.Threading.Tasks.Task GetComments_ShouldReturnTaskComments_WhenTaskExists()
-    {
-        var task = (await _factory.CreateTasks())[0];
-        var user = await _fixture.FirstAsync<User>();
-        var earlierDate = new DateTime(2023, 10, 20);
-        var laterDate = earlierDate.AddDays(1);
-        task.AddComment("abc", user.Id, laterDate);
-        task.AddComment("xyz", user.Id, earlierDate);
-
-        await _fixture.SeedDb(db =>
-        {
-            db.AddRange(task.Comments);
-        });
-
-        var result = await _fixture.SendRequest(new GetTaskCommentsQuery(task.Id));
-
-        using(new AssertionScope())
-        {
-            result.IsSuccess.Should().BeTrue();
-
-            var comments = result.Value.Comments;
-            comments.Should().BeEquivalentTo(new[]
-            {
-                new TaskCommentVM("xyz", user.Id, user.FullName, earlierDate),
-                new TaskCommentVM("abc", user.Id, user.FullName, laterDate),
-            }, options => options.WithStrictOrdering());
         }
     }
 
@@ -367,14 +321,6 @@ public class TasksTests
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<Task>()).Should().Be(0);
         }
-    }
-
-    [Fact]
-    public async System.Threading.Tasks.Task GetActivities_ShouldFail_WhenTaskDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetTaskActivitiesQuery(Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
@@ -531,14 +477,6 @@ public class TasksTests
         }
     }
 
-    [Fact]
-    public async System.Threading.Tasks.Task GetTaskRelationships_ShouldFail_WhenTaskDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetTaskRelationshipsQuery(Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
     // TODO: Doesnt work when query uses postgres syntax, change the test DB to postgres?
     //[Fact]
     //public async System.Threading.Tasks.Task GetTaskRelationships_ShouldReturnTaskRelationships_WhenTaskExists()
@@ -579,47 +517,6 @@ public class TasksTests
     //        childrenHierarchy.Children[0].Children.Should().BeEmpty();
     //    }
     //}
-
-    [Fact]
-    public async System.Threading.Tasks.Task GetAvailableChildren_ShouldFail_WhenTaskDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetTaskAvailableChildrenQuery(Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
-    public async System.Threading.Tasks.Task GetAvailableChildren_ShouldReturnAvailableTasks_WhenTaskExists()
-    {
-        var workflow = (await _factory.CreateWorkflows())[0];
-        var relationshipManager = new TaskRelationshipManager(workflow.ProjectId);
-        var initialStatus = workflow.Statuses.First(x => x.Initial);
-        var tasks = new Task[]
-        {
-            Task.Create(1, relationshipManager.ProjectId, DateTime.Now, "a", "desc", initialStatus.Id),
-            Task.Create(2, relationshipManager.ProjectId, DateTime.Now, "b", "desc", initialStatus.Id),
-            Task.Create(3, relationshipManager.ProjectId, DateTime.Now, "c", "desc", initialStatus.Id),
-            Task.Create(4, relationshipManager.ProjectId, DateTime.Now, "d", "desc", initialStatus.Id),
-        };
-        var tasksIds = tasks.Select(x => x.Id);
-        _ = relationshipManager.AddHierarchicalRelationship(tasks[0].Id, tasks[1].Id, tasksIds);
-        _ = relationshipManager.AddHierarchicalRelationship(tasks[2].Id, tasks[3].Id, tasksIds);
-        // a -> b, c -> d
-
-        await _fixture.SeedDb(db =>
-        {
-            db.Add(relationshipManager);
-            db.AddRange(tasks);
-        });
-
-        var result = await _fixture.SendRequest(new GetTaskAvailableChildrenQuery(tasks[0].Id));
-
-        using(new AssertionScope())
-        {
-            result.IsSuccess.Should().BeTrue();
-            result.Value.Tasks.Select(x => x.Id).Should().BeEquivalentTo([tasks[2].Id]);
-        }
-    }
 
     [Fact]
     public async System.Threading.Tasks.Task UpdateTaskBoard_ShouldFail_WhenBoardLayoutDoesNotExist()

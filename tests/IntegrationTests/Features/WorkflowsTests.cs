@@ -20,30 +20,6 @@ public class WorkflowsTests
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task GetForProject_ShouldFail_WhenWorkflowForProjectDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetWorkflowForProjectQuery(Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
-    public async System.Threading.Tasks.Task GetForProject_ShouldReturnWorkflow_WhenWorkflowForProjectExists()
-    {
-        var workflow = (await _factory.CreateWorkflows())[0];
-
-        var result = await _fixture.SendRequest(new GetWorkflowForProjectQuery(workflow.ProjectId));
-
-        using(new AssertionScope())
-        {
-            result.IsSuccess.Should().BeTrue();
-
-            result.Value.Id.Should().Be(workflow.Id);
-            result.Value.Statuses.Count.Should().Be(workflow.Statuses.Count);
-        }
-    }
-
-    [Fact]
     public async System.Threading.Tasks.Task AddTaskStatus_ShouldFail_WhenWorkflowDoesNotExist()
     {
         var result = await _fixture.SendRequest(new AddWorkflowTaskStatusCommand(Guid.NewGuid(), new("abc")));

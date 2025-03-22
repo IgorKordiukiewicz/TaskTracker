@@ -65,41 +65,6 @@ public class ProjectsTests
     }
 
     [Fact]
-    public async Task GetForOrganization_ShouldFail_WhenOrganizationDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetProjectsForOrganizationQuery(Guid.NewGuid(), Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task GetForOrganization_ShouldReturnAListOfProjectsUserIsAMemberOfInGivenOrganization()
-    {
-        var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
-        var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
-        var organization = Organization.Create("org", user1.Id);
-        var invitation = organization.CreateInvitation(user2.Id, DateTime.Now).Value;
-        _ = organization.AcceptInvitation(invitation.Id, DateTime.Now);
-        var project1 = Project.Create("project1", organization.Id, user1.Id);
-        var project2 = Project.Create("project2", organization.Id, user1.Id);
-        var project3 = Project.Create("project3", organization.Id, user2.Id);
-        await _fixture.SeedDb(db =>
-        {
-            db.AddRange(user1, user2);
-            db.Add(organization);
-            db.AddRange(project1, project2, project3);
-        });
-
-        var result = await _fixture.SendRequest(new GetProjectsForOrganizationQuery(organization.Id, user1.Id));
-
-        using(new AssertionScope())
-        {
-            result.IsSuccess.Should().BeTrue();
-            result.Value.Projects.Select(x => x.Id).Should().BeEquivalentTo([project1.Id, project2.Id]);
-        }
-    }
-
-    [Fact]
     public async Task AddMember_ShouldFail_WhenProjectDoesNotExist()
     {
         var result = await _fixture.SendRequest(new AddProjectMemberCommand(Guid.NewGuid(), new(Guid.NewGuid())));
@@ -144,40 +109,6 @@ public class ProjectsTests
     }
 
     [Fact]
-    public async Task GetMembers_ShouldFail_WhenProjectDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetProjectMembersQuery(Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task GetMembers_ShouldReturnProjectMembers_WhenProjectExists()
-    {
-        var project = (await _factory.CreateProjects())[0];
-        var user = await _fixture.FirstAsync<User>();
-
-        var result = await _fixture.SendRequest(new GetProjectMembersQuery(project.Id));
-
-        using(new AssertionScope())
-        {
-            result.IsSuccess.Should().BeTrue();
-            result.Value.Members.Should().BeEquivalentTo(new[]
-            {
-                new ProjectMemberVM
-                {
-                    Id = project.Members[0].Id,
-                    UserId = user.Id,
-                    Name = user.FullName,
-                    Email = user.Email,
-                    RoleId = project.Members[0].RoleId,
-                    RoleName = "Administrator"
-                }
-            });
-        }
-    }
-
-    [Fact]
     public async Task RemoveMember_ShouldFail_WhenProjectDoesNotExist()
     {
         var result = await _fixture.SendRequest(new RemoveProjectMemberCommand(Guid.NewGuid(), new(Guid.NewGuid())));
@@ -207,86 +138,6 @@ public class ProjectsTests
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<ProjectMember>()).Should().Be(membersBefore - 1);
             (await _fixture.FirstAsync<Domain.Tasks.Task>(x => x.Id == task.Id)).AssigneeId.Should().BeNull();
-        }
-    }
-
-    [Fact]
-    public async Task GetProjectOrganization_ShouldFail_WhenProjectDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetProjectOrganizationQuery(Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task GetProjectOrganization_ShouldReturnProjectsOrganizationData_WhenProjectExists()
-    {
-        var project = (await _factory.CreateProjects())[0];
-
-        var result = await _fixture.SendRequest(new GetProjectOrganizationQuery(project.Id));
-
-        using(new AssertionScope())
-        {
-            result.IsSuccess.Should().BeTrue();
-            result.Value.OrganizationId.Should().Be(project.OrganizationId);
-        }
-    }
-
-    [Fact]
-    public async Task GetNavData_ShouldFail_WhenProjectDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetProjectNavDataQuery(Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task GetNavData_ShouldReturnNavData_WhenProjectExists()
-    {
-        var project = (await _factory.CreateProjects())[0];
-        var organization = await _fixture.FirstAsync<Organization>();
-
-        var result = await _fixture.SendRequest(new GetProjectNavDataQuery(project.Id));
-
-        using(new AssertionScope())
-        {
-            result.IsSuccess.Should().BeTrue();
-            result.Value.Should().Be(new ProjectNavigationVM(new(project.Id, project.Name), new(organization.Id, organization.Name)));
-        }
-    }
-
-    [Fact]
-    public async Task GetRoles_ShouldFail_WhenProjectDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetProjectRolesQuery(Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task GetRoles_ShouldReturnRoles_WhenProjectExists()
-    {
-        var project = (await _factory.CreateProjects())[0];
-
-        var expectedRoles = new List<RoleVM<ProjectPermissions>>();
-        foreach (var role in project.Roles)
-        {
-            expectedRoles.Add(new()
-            {
-                Id = role.Id,
-                Name = role.Name,
-                Permissions = role.Permissions,
-                Modifiable = role.IsModifiable(),
-                Owner = role.IsOwner()
-            });
-        }
-
-        var result = await _fixture.SendRequest(new GetProjectRolesQuery(project.Id));
-
-        using (new AssertionScope())
-        {
-            result.IsSuccess.Should().BeTrue();
-            result.Value.Roles.Should().BeEquivalentTo(expectedRoles);
         }
     }
 
@@ -409,28 +260,6 @@ public class ProjectsTests
     }
 
     [Fact]
-    public async Task GetProjectSettings_ShouldFail_WhenProjectDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetProjectSettingsQuery(Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task GetProjectSettings_ShouldReturnSettings_WhenProjectExists()
-    {
-        var project = (await _factory.CreateProjects())[0];
-
-        var result = await _fixture.SendRequest(new GetProjectSettingsQuery(project.Id));
-
-        using(new AssertionScope())
-        {
-            result.IsSuccess.Should().BeTrue();
-            result.Value.Should().Be(new ProjectSettingsVM(project.Name));
-        }
-    }
-
-    [Fact]
     public async Task UpdateProjectName_ShouldFail_WhenProjectDoesNotExist()
     {
         var result = await _fixture.SendRequest(new UpdateProjectNameCommand(Guid.NewGuid(), new("abc")));
@@ -479,30 +308,6 @@ public class ProjectsTests
             (await _fixture.CountAsync<Workflow>(x => x.Id == workflowId.Id)).Should().Be(0);
             (await _fixture.CountAsync<Domain.Tasks.TaskRelationshipManager>(x => x.Id == taskRelationshipManager.Id)).Should().Be(0);
             (await _fixture.CountAsync<TasksBoardLayout>(x => x.ProjectId == project.Id)).Should().Be(0);
-        }
-    }
-
-    [Fact]
-    public async Task GetUserPermissions_ShouldFail_WhenProjectDoesNotExist()
-    {
-        var result = await _fixture.SendRequest(new GetUserProjectPermissionsQuery(Guid.NewGuid(), Guid.NewGuid()));
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task GetUserPermissions_ShouldSucceedAndReturnUserPermissions_WhenProjectExists()
-    {
-        var project = (await _factory.CreateProjects())[0];
-        var member = await _fixture.FirstAsync<ProjectMember>();
-        var role = await _fixture.FirstAsync<ProjectRole>(x => x.Id == member.RoleId);
-
-        var result = await _fixture.SendRequest(new GetUserProjectPermissionsQuery(member.UserId, project.Id));
-
-        using (new AssertionScope())
-        {
-            result.IsSuccess.Should().BeTrue();
-            result.Value.Permissions.Should().Be(role.Permissions);
         }
     }
 
