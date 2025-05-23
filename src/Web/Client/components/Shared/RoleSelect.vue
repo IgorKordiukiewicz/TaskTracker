@@ -11,7 +11,6 @@
 <script setup lang="ts">
 import type { SelectChangeEvent } from 'primevue/select';
 import type { PropType } from 'vue';
-import Members from '~/pages/organization/[id]/members.vue';
 import { UpdateMemberRoleDto } from '~/types/dtos/shared';
 import type { MemberVM, RoleVM } from '~/types/viewModels/shared';
 

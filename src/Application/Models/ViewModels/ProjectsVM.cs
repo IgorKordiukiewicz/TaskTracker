@@ -10,8 +10,6 @@ public record ProjectVM
     public required int TasksCount { get; init; }
 }
 
-public record ProjectOrganizationVM(Guid OrganizationId);
-
 public record ProjectSettingsVM(string Name);
 
 public record UserProjectPermissionsVM(ProjectPermissions Permissions);

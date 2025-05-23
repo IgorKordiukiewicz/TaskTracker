@@ -24,11 +24,9 @@ internal class GetProjectNavDataHandler(AppDbContext dbContext)
 
         var navData = await dbContext.Projects
             .Where(x => x.Id == request.ProjectId)
-            .Join(dbContext.Organizations,
-            project => project.OrganizationId,
-            organization => organization.Id,
-            (project, organization) => new ProjectNavigationVM(new(project.Id, project.Name), new(organization.Id, organization.Name)))
+            .Select(x => new ProjectNavigationVM(new(x.Id, x.Name), new(Guid.NewGuid(), string.Empty))) // TODO
             .SingleAsync(cancellationToken);
+
 
         return navData;
     }

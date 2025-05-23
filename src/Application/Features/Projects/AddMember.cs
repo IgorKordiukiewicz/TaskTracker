@@ -27,13 +27,7 @@ internal class AddProjectMemberHandler(AppDbContext dbContext, IRepository<Proje
             return Result.Fail(new NotFoundError<Project>(request.ProjectId));
         }
 
-        var isUserAMember = await dbContext.Organizations
-            .Include(x => x.Members)
-            .AnyAsync(x => x.Id == project.OrganizationId && x.Members.Any(xx => xx.UserId == request.Model.UserId), cancellationToken);
-        if (!isUserAMember)
-        {
-            return Result.Fail(new ApplicationError("User is not a member of the project's organization."));
-        }
+        // TODO
 
         var result = project.AddMember(request.Model.UserId);
         if(result.IsFailed)

@@ -55,22 +55,6 @@ public class UsersController(IMediator mediator)
     }
 
     /// <summary>
-    /// Get users that are available for organization invitation.
-    /// </summary>
-    /// <param name="searchValue"></param>
-    /// <param name="organizationId"></param>
-    /// <response code="404">Organization not found.</response> 
-    [HttpGet("available-for-invitation")]
-    [Authorize(Policy.OrganizationEditMembers)]
-    [ProducesResponseType(typeof(UsersSearchVM), 200)]
-    [ProducesResponseType(404)]
-    public async Task<IActionResult> GetUsersNotInOrganization([FromQuery] string searchValue, [FromQuery] Guid organizationId)
-    {
-        var result = await mediator.Send(new GetUsersAvailableForOrganizationInvitationQuery(organizationId, searchValue));
-        return result.ToHttpResult();
-    }
-
-    /// <summary>
     /// Get organization members that are available to be added to the given project.
     /// </summary>
     /// <param name="projectId"></param>

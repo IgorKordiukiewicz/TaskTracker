@@ -20,21 +20,17 @@
 </template>
 
 <script setup lang="ts">
-import { OrganizationPermissions, ProjectPermissions } from '~/types/enums';
+import { ProjectPermissions } from '~/types/enums';
 
 const route = useRoute();
 const permissions = usePermissions();
-
-const organizationView = computed(() => {
-    return route.path.startsWith('/organization');
-})
 
 const projectView = computed(() => {
     return route.path.startsWith('/project');
 })
 
 const id = computed(() => {
-    if(organizationView || projectView) {
+    if(projectView) {
         return route.params.id as string;
     }
     else {
@@ -42,62 +38,18 @@ const id = computed(() => {
     }
 })
 
-if(organizationView.value) {
-    await permissions.checkOrganizationPermissions(id.value);
-}
-else if(projectView.value) {
+if(projectView.value) {
     await permissions.checkProjectPermissions(id.value);
 }
 
 const nodes = computed(() => {
-    if(organizationView.value) {
-        return organizationNodes.value;
-    }
-    else if(projectView.value) {
+    if(projectView.value) {
         return projectNodes.value;
     }
     else {
         return indexNodes.value;
     }
 })
-
-const organizationNodes = ref([
-    {
-        title: 'Projects',
-        icon: 'pi pi-objects-column', // pi-th-large
-        includeIndex: true,
-        link: [ '/organization/', '/' ]
-    },
-    {
-        title: 'Team',
-        icon: 'pi pi-users',
-        children: [
-            {
-                title: 'Members',
-                icon: 'pi pi-user',
-                link: [ '/organization/', '/members' ],
-            },
-            {
-                title: 'Invitations',
-                icon: 'pi pi-user-plus',
-                link: [ '/organization/', '/invitations' ],
-                permission: OrganizationPermissions.EditMembers as number
-            },
-            {
-                title: 'Roles',
-                icon: 'pi pi-user-edit',
-                link: [ '/organization/', '/roles' ],
-                permission: OrganizationPermissions.EditRoles as number
-            },
-        ]
-    },
-    {
-        title: 'Settings',
-        icon: 'pi pi-cog',
-        link: [ '/organization/', '/settings' ],
-        permission: undefined
-    }
-]);
 
 const projectNodes = ref([
     {

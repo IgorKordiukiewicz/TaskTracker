@@ -6,14 +6,14 @@ export const useProjectsService = () => {
     const api = useApi();
 
     return {
-        async getProjects(organizationId: string) {
-            return await api.sendGetRequest<ProjectsVM>(`projects?organizationId=${organizationId}`);
+        async getProjects() {
+            return await api.sendGetRequest<ProjectsVM>(`projects`);
         },
         async getNavData(id: string) {
             return await api.sendGetRequest<ProjectNavDataVM>(`projects/${id}/nav-data`);
         },
         async createProject(model: CreateProjectDto) {
-            await api.sendPostRequest('projects', model, { 'OrganizationId': model.organizationId });
+            await api.sendPostRequest('projects', model);
         },
         async getMembers(id: string) {
             return await api.sendGetRequest<ProjectMembersVM>(`projects/${id}/members`);

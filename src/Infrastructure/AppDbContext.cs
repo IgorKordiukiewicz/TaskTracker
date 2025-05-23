@@ -1,6 +1,5 @@
 ﻿using Domain.Common;
 using Domain.Notifications;
-using Domain.Organizations;
 using Domain.Projects;
 using Domain.Tasks;
 using Domain.Users;
@@ -13,11 +12,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
-
-    public DbSet<Organization> Organizations { get; set; }
-    public DbSet<OrganizationInvitation> OrganizationInvitations { get; set; }
-    public DbSet<OrganizationMember> OrganizationMembers { get; set; }
-    public DbSet<OrganizationRole> OrganizationRoles { get; set; }
 
     public DbSet<Project> Projects { get; set; }
     public DbSet<ProjectMember> ProjectMembers { get; set; }

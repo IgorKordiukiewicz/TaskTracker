@@ -11,9 +11,6 @@ import { CreateProjectDto } from '~/types/dtos/projects';
 
 defineExpose({ show });
 const emit = defineEmits([ 'onCreate' ]);
-const props = defineProps({
-    organizationId: { type: String, required: true }
-});
 
 const projectsService = useProjectsService();
 
@@ -29,7 +26,6 @@ function show() {
 }
 
 async function createProject() {
-    model.value.organizationId = props.organizationId;
     await projectsService.createProject(model.value);
 
     model.value = new CreateProjectDto();

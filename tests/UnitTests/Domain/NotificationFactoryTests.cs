@@ -16,7 +16,6 @@ public class NotificationFactoryTests
         using(new AssertionScope())
         {
             result.UserId.Should().Be(userId);
-            result.Context.Should().Be(NotificationContext.Project);
             result.ContextEntityId.Should().Be(projectId);
             result.TaskShortId.Should().Be(taskShortId);
         }
@@ -34,7 +33,6 @@ public class NotificationFactoryTests
         using (new AssertionScope())
         {
             result.UserId.Should().Be(userId);
-            result.Context.Should().Be(NotificationContext.Project);
             result.ContextEntityId.Should().Be(projectId);
             result.TaskShortId.Should().Be(taskShortId);
         }
@@ -51,7 +49,6 @@ public class NotificationFactoryTests
         using (new AssertionScope())
         {
             result.UserId.Should().Be(userId);
-            result.Context.Should().Be(NotificationContext.Project);
             result.ContextEntityId.Should().Be(projectId);
         }
     }
@@ -67,24 +64,7 @@ public class NotificationFactoryTests
         using (new AssertionScope())
         {
             result.UserId.Should().Be(userId);
-            result.Context.Should().Be(NotificationContext.Project);
             result.ContextEntityId.Should().Be(projectId);
-        }
-    }
-
-    [Fact]
-    public void RemovedFromOrganization_ShouldCreateWithCorrectValues()
-    {
-        var userId = Guid.NewGuid();
-        var organizationId = Guid.NewGuid();
-
-        var result = NotificationFactory.RemovedFromOrganization(userId, DateTime.Now, organizationId);
-
-        using (new AssertionScope())
-        {
-            result.UserId.Should().Be(userId);
-            result.Context.Should().Be(NotificationContext.Organization);
-            result.ContextEntityId.Should().Be(organizationId);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Application.Common;
-using Domain.Organizations;
 using Domain.Projects;
 using Domain.Tasks;
 using Domain.Workflows;
@@ -14,7 +13,6 @@ internal class CreateProjectCommandValidator : AbstractValidator<CreateProjectCo
     public CreateProjectCommandValidator()
     {
         RuleFor(x => x.UserId).NotEmpty();
-        RuleFor(x => x.Model.OrganizationId).NotEmpty();
         RuleFor(x => x.Model.Name).NotEmpty().MaximumLength(100);
     }
 }
@@ -25,17 +23,13 @@ internal class CreateProjectHandler(AppDbContext dbContext, IRepository<Project>
 {
     public async Task<Result<Guid>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
     {
-        if(!await dbContext.Organizations.AnyAsync(x => x.Id == request.Model.OrganizationId, cancellationToken))
-        {
-            return Result.Fail<Guid>(new NotFoundError<Organization>(request.Model.OrganizationId));
-        }
+        // TODO: Make name unique or not?
+        //if(await projectRepository.Exists(x => x.Name == request.Model.Name, cancellationToken))
+        //{
+        //    return Result.Fail<Guid>(new ApplicationError("Project with the same name already exists."));
+        //}
 
-        if(await projectRepository.Exists(x => x.OrganizationId == request.Model.OrganizationId && x.Name == request.Model.Name, cancellationToken))
-        {
-            return Result.Fail<Guid>(new ApplicationError("Project with the same name already exists in this organization."));
-        }
-
-        var project = Project.Create(request.Model.Name, request.Model.OrganizationId, request.UserId);
+        var project = Project.Create(request.Model.Name, request.UserId);
         var workflow = Workflow.Create(project.Id);
         var taskRelationshipManager = new TaskRelationshipManager(project.Id);
 

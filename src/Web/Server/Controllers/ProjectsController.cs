@@ -1,5 +1,4 @@
-﻿using Application.Features.Organizations;
-using Application.Features.Projects;
+﻿using Application.Features.Projects;
 
 namespace Web.Server.Controllers;
 
@@ -23,9 +22,8 @@ public class ProjectsController(IMediator mediator)
     /// Returns ID of the created project.
     /// </remarks>
     /// <param name="model"></param>
-    /// <response code="404">Organization not found.</response>
     [HttpPost]
-    [Authorize(Policy.OrganizationEditProjects)]
+    [Authorize]
     [ProducesResponseType(typeof(Guid), 200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
@@ -36,17 +34,15 @@ public class ProjectsController(IMediator mediator)
     }
 
     /// <summary>
-    /// Get the organization's projects that user belongs to.
+    /// Get projects the user belongs to.
     /// </summary>
-    /// <param name="organizationId"></param>
-    /// <response code="404">Organization not found.</response>
     [HttpGet("")]
-    [Authorize(Policy.OrganizationMember)]
+    [Authorize]
     [ProducesResponseType(typeof(ProjectsVM), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetProjects([FromQuery] Guid organizationId)
+    public async Task<IActionResult> GetProjects()
     {
-        var result = await mediator.Send(new GetProjectsForOrganizationQuery(organizationId, User.GetUserId()));
+        var result = await mediator.Send(new GetProjectsQuery(User.GetUserId()));
         return result.ToHttpResult();
     }
 
@@ -128,21 +124,6 @@ public class ProjectsController(IMediator mediator)
     public async Task<IActionResult> UpdateMemberRoleMember(Guid projectId, [FromBody] UpdateMemberRoleDto model)
     {
         var result = await mediator.Send(new UpdateProjectMemberRoleCommand(projectId, model));
-        return result.ToHttpResult();
-    }
-
-    /// <summary>
-    /// Get info about a project's organization.
-    /// </summary>
-    /// <param name="projectId"></param>
-    /// <response code="404">Project not found.</response>
-    [HttpGet("{projectId:guid}/organization")]
-    [Authorize(Policy.ProjectMember)]
-    [ProducesResponseType(typeof(ProjectOrganizationVM), 200)]
-    [ProducesResponseType(404)]
-    public async Task<IActionResult> GetProjectOrganization(Guid projectId)
-    {
-        var result = await mediator.Send(new GetProjectOrganizationQuery(projectId));
         return result.ToHttpResult();
     }
 

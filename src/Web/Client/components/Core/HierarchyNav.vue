@@ -5,7 +5,6 @@
 </template>
 
 <script setup lang="ts">
-const organizationsService = useOrganizationsService();
 const projectsService = useProjectsService();
 const route = useRoute();
 
@@ -23,19 +22,7 @@ async function getBreadcrumbs() {
             return;
         }
         items.value = [
-            { label: navData.organization.name, url: `/organization/${navData.organization.id}/` },
             { label: navData.project.name, url: `/project/${navData.project.id}/` }
-        ];
-    }
-    else if(route.fullPath.startsWith('/organization')) {
-        const id = route.params.id as string;
-        const navData = await organizationsService.getNavData(id);
-        if(!navData) {
-            items.value = [];
-            return;
-        }
-        items.value = [
-            { label: navData.organization.name, url: `/organization/${navData.organization.id}/` }
         ];
     }
 }

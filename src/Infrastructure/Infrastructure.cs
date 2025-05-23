@@ -1,5 +1,4 @@
 ﻿using Domain.Notifications;
-using Domain.Organizations;
 using Domain.Projects;
 using Domain.Tasks;
 using Domain.Users;
@@ -17,7 +16,6 @@ public static class Infrastructure
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IRepository<User>, UserRepository>();
-        services.AddScoped<IRepository<Organization>, OrganizationRepository>();
         services.AddScoped<IRepository<Project>, ProjectRepository>();
         services.AddScoped<IRepository<Domain.Tasks.Task>, TaskRepository>();
         services.AddScoped<IRepository<Workflow>, WorkflowRepository>();

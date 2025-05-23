@@ -1,5 +1,4 @@
-﻿using Domain.Organizations;
-using Domain.Projects;
+﻿using Domain.Projects;
 
 namespace Application.Features.Users;
 
@@ -33,11 +32,7 @@ internal class GetUsersAvailableForProjectHandler(AppDbContext dbContext)
             .Select(x => x.OrganizationId)
             .FirstAsync(cancellationToken);
 
-        var organizationMembersUserIds = await dbContext.Organizations
-            .Include(x => x.Members)
-            .Where(x => x.Id == organizationId)
-            .Select(x => x.Members.Select(xx => xx.UserId))
-            .FirstAsync(cancellationToken);
+        var organizationMembersUserIds = new List<Guid>(); // TODO
 
         var usersIds = organizationMembersUserIds.Except(projectMembersUserIds)
             .ToHashSet();

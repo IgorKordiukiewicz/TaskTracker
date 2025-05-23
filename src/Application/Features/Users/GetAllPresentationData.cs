@@ -1,17 +1,14 @@
-﻿using Domain.Users;
-
-namespace Application.Features.Users;
+﻿namespace Application.Features.Users;
 
 public record GetAllUsersPresentationDataQuery(Guid UserId) : IRequest<Result<UsersPresentationDataVM>>;
-
 
 internal class GetAllUsersPresentationDataHandler(AppDbContext dbContext) 
     : IRequestHandler<GetAllUsersPresentationDataQuery, Result<UsersPresentationDataVM>>
 {
     public async Task<Result<UsersPresentationDataVM>> Handle(GetAllUsersPresentationDataQuery request, CancellationToken cancellationToken)
     {
-        // Only return users that belong to the organizations that the given user also belongs to, to optimize it
-        var possibleUsersIds = await dbContext.Organizations
+        // Only return users that belong to the projects that the given user also belongs to, to optimize it
+        var possibleUsersIds = await dbContext.Projects
             .Include(x => x.Members)
             .Where(x => x.Members.Any(xx => xx.UserId == request.UserId))
             .SelectMany(x => x.Members.Select(xx => xx.UserId))

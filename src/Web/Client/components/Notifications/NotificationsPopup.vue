@@ -18,18 +18,6 @@
                 </TabPanel>
                 <TabPanel value="1">
                     <div class="flex flex-col gap-3">
-                        <template v-if="invitations.invitations.length > 0">
-                            <div v-for="invitation in invitations.invitations" class="flex justify-between items-center">
-                                <p>{{ invitation.organizationName }}</p>
-                                <div class="flex gap-1 items-center">
-                                    <Button icon="pi pi-times" severity="danger" rounded text @click="declineInvitation(invitation.id)" />
-                                    <Button icon="pi pi-check" severity="success"  rounded text @click="acceptInvitation(invitation.id)" />
-                                </div>
-                            </div>
-                        </template>
-                        <template v-else>
-                            <p>You don't have any invitations.</p>
-                        </template>
                     </div>
                 </TabPanel>
             </TabPanels>
@@ -40,16 +28,13 @@
 <script setup lang="ts">
 import type { PropType } from 'vue';
 import type { NotificationsVM } from '~/types/viewModels/notifications';
-import type { UserOrganizationInvitationsVM } from '~/types/viewModels/organizations';
 
 defineExpose({ show });
 const emit = defineEmits([ 'onInvitationAction', 'onNotificationRead' ])
 const props = defineProps({
-    invitations: { type: Object as PropType<UserOrganizationInvitationsVM>, required: true },
     notifications: { type: Object as PropType<NotificationsVM>, required: true },
 })
 
-const organizationsService = useOrganizationsService();
 
 const visible = ref(false);
 
@@ -58,12 +43,10 @@ function show() {
 }
 
 async function declineInvitation(id: string) {
-    await organizationsService.declineInvitation(id);
     emit('onInvitationAction');
 }
 
 async function acceptInvitation(id: string) {
-    await organizationsService.acceptInvitation(id);
     emit('onInvitationAction');
     // TODO: update organizations if on index page? (or always redirect to org page)
 }

@@ -33,7 +33,6 @@ const canEditMembers = computed(() => {
 
 async function updateMembers() {
     members.value = await projectsService.getMembers(projectId.value);
-    availableUsers.value = await usersService.getAvailableForProject(projectId.value);
 }
 
 async function updateMemberRole(model: UpdateMemberRoleDto) {

@@ -10,9 +10,7 @@ internal class GetUnreadNotificationsCountHandler(AppDbContext dbContext)
         var notificationsCount = await dbContext.Notifications
             .AsNoTracking()
             .CountAsync(x => x.UserId == request.UserId && !x.Read, cancellationToken);
-        var pendingInvitationsCount = await dbContext.OrganizationInvitations
-            .AsNoTracking()
-            .CountAsync(x => x.UserId == request.UserId && x.State == OrganizationInvitationState.Pending, cancellationToken);
+        var pendingInvitationsCount = 0;
         return notificationsCount + pendingInvitationsCount;
     }
 }

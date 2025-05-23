@@ -21,12 +21,12 @@ public class Project : Entity, IAggregateRoot, IHasName
         RolesManager = new(_roles, (name, permissions) => new ProjectRole(name, Id, permissions));
     }
 
-    public static Project Create(string name, Guid organizationId, Guid createdByUserId)
+    public static Project Create(string name, Guid createdByUserId)
     {
         var result = new Project(Guid.NewGuid())
         {
             Name = name,
-            OrganizationId = organizationId,
+            OrganizationId = Guid.NewGuid(), // TODO
         };
 
         result._roles.AddRange(ProjectRole.CreateDefaultRoles(result.Id));

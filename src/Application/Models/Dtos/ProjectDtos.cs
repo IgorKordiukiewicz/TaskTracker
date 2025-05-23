@@ -1,6 +1,6 @@
 ﻿namespace Application.Models.Dtos;
 
-public record CreateProjectDto(Guid OrganizationId, string Name);
+public record CreateProjectDto(string Name);
 
 public record AddProjectMemberDto(Guid UserId);
 public record RemoveProjectMemberDto(Guid MemberId);

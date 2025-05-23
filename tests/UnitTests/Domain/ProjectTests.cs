@@ -9,15 +9,13 @@ public class ProjectTests
     public void Create_ShouldCreateProjectWithOwnerMemberAndDefaultRoles()
     {
         var name = "project";
-        var orgId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        var result = Project.Create(name, orgId, userId);
+        var result = Project.Create(name, userId);
 
         using(new AssertionScope())
         {
             result.Id.Should().NotBeEmpty();
             result.Name.Should().Be(name);
-            result.OrganizationId.Should().Be(orgId);
 
             // Ensure default roles are created
             result.Roles.Count.Should().Be(2);
@@ -33,7 +31,7 @@ public class ProjectTests
     [Fact]
     public void AddMember_ShouldAddNewMember()
     {
-        var project = Project.Create("name", Guid.NewGuid(), Guid.NewGuid());
+        var project = Project.Create("name", Guid.NewGuid());
         var expectedRoleId = project.Roles.First(x => x.Type == RoleType.ReadOnly).Id;
         var userId = Guid.NewGuid();
 
@@ -52,7 +50,7 @@ public class ProjectTests
     [Fact]
     public void AddMember_ShouldFail_WhenUserIsAlreadyAMember()
     {
-        var project = Project.Create("name", Guid.NewGuid(), Guid.NewGuid());
+        var project = Project.Create("name", Guid.NewGuid());
         var userId = Guid.NewGuid();
         _ = project.AddMember(userId);
 
@@ -64,7 +62,7 @@ public class ProjectTests
     [Fact]
     public void RemoveMember_ShouldFail_WhenMemberDoesNotExist()
     {
-        var project = Project.Create("name", Guid.NewGuid(), Guid.NewGuid());
+        var project = Project.Create("name", Guid.NewGuid());
 
         var result = project.RemoveMember(Guid.NewGuid());
 
@@ -74,7 +72,7 @@ public class ProjectTests
     [Fact]
     public void RemoveMember_ShouldRemoveMember_WhenMemberExists()
     {
-        var project = Project.Create("name", Guid.NewGuid(), Guid.NewGuid());
+        var project = Project.Create("name", Guid.NewGuid());
 
         var result = project.RemoveMember(project.Members[0].Id);
 

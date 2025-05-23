@@ -16,31 +16,15 @@ internal class GetNotificationsHandler(AppDbContext dbContext)
             .OrderByDescending(x => x.OccurredAt)
             .ToListAsync(cancellationToken);
 
-        var entityNamesByIdByContext = new Dictionary<NotificationContext, IReadOnlyDictionary<Guid, string>>()
-        {
-            { NotificationContext.Organization, await GetEntityNameById(notifications, NotificationContext.Organization, dbContext.Organizations) },
-            { NotificationContext.Project, await GetEntityNameById(notifications, NotificationContext.Project, dbContext.Projects) },
-        };
+        var projectIds = notifications
+            .Select(r => r.ContextEntityId);
 
-        return new(notifications.Select(x => new NotificationVM(x.Id, x.Message, x.OccurredAt, x.Context, x.ContextEntityId, 
-            ResolveEntitiesNames(entityNamesByIdByContext, x.Context, x.ContextEntityId), x.TaskShortId)).ToList());
-    }
+        var projectNameById = await dbContext.Projects
+            .Where(x => projectIds.Contains(x.Id))
+            .ToDictionaryAsync(k => k.Id, v => v.Name, cancellationToken);
 
-    private static async Task<IReadOnlyDictionary<Guid, string>> GetEntityNameById<TEntity>(List<Notification> notifications, NotificationContext context, DbSet<TEntity> entities)
-        where TEntity : Entity, IHasName
-    {
-        var ids = notifications
-            .Where(x => x.Context == context)
-            .Select(x => x.ContextEntityId);
-
-        return await entities
-            .Where(x => ids.Contains(x.Id))
-            .ToDictionaryAsync(k => k.Id, v => v.Name);
-    }
-
-    private static string ResolveEntitiesNames(Dictionary<NotificationContext, IReadOnlyDictionary<Guid, string>> entityNamesByIdByContext, NotificationContext context, Guid id)
-    {
-        var entityNamesById = entityNamesByIdByContext[context];
-        return entityNamesById.TryGetValue(id, out var name) ? name : string.Empty;
+        return new(notifications
+            .Select(x => new NotificationVM(x.Id, x.Message, x.OccurredAt, x.ContextEntityId, projectNameById.GetValueOrDefault(x.ContextEntityId) ?? string.Empty, x.TaskShortId))
+            .ToList());
     }
 }

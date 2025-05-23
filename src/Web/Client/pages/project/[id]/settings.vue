@@ -93,14 +93,8 @@ async function deleteProject() {
             severity: 'danger'
         },
         accept: async () => {
-            const navData = await projectsService.getNavData(projectId.value);
             await projectsService.deleteProject(projectId.value);
-            if(navData) {
-                navigateTo(`/organization/${navData?.organization.id}`);
-            }
-            else {
-                navigateTo('/');
-            }
+            navigateTo('/');
         }
     })
 }

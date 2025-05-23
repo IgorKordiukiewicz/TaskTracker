@@ -1,31 +1,23 @@
-﻿using Domain.Organizations;
+﻿namespace Application.Features.Projects;
 
-namespace Application.Features.Projects;
+public record GetProjectsQuery(Guid UserId) : IRequest<Result<ProjectsVM>>;
 
-public record GetProjectsForOrganizationQuery(Guid OrganizationId, Guid UserId) : IRequest<Result<ProjectsVM>>;
-
-internal class GetProjectsForOrganizationQueryValidator : AbstractValidator<GetProjectsForOrganizationQuery>
+internal class GetProjectsForOrganizationQueryValidator : AbstractValidator<GetProjectsQuery> // TODO: Delete?
 {
     public GetProjectsForOrganizationQueryValidator()
     {
-        RuleFor(x => x.OrganizationId).NotEmpty();
     }
 }
 
 internal class GetProjectsForOrganizationHandler(AppDbContext dbContext) 
-    : IRequestHandler<GetProjectsForOrganizationQuery, Result<ProjectsVM>>
+    : IRequestHandler<GetProjectsQuery, Result<ProjectsVM>>
 {
-    public async Task<Result<ProjectsVM>> Handle(GetProjectsForOrganizationQuery request, CancellationToken cancellationToken)
+    public async Task<Result<ProjectsVM>> Handle(GetProjectsQuery request, CancellationToken cancellationToken)
     {
-        if(!await dbContext.Organizations.AnyAsync(x => x.Id == request.OrganizationId, cancellationToken))
-        {
-            return Result.Fail<ProjectsVM>(new NotFoundError<Organization>(request.OrganizationId));
-        }
-
         var projects = await dbContext.Projects
             .AsNoTracking()
             .Include(x => x.Members)
-            .Where(x => x.OrganizationId == request.OrganizationId && x.Members.Any(xx => xx.UserId == request.UserId))
+            .Where(x => x.Members.Any(xx => xx.UserId == request.UserId))
             .OrderBy(x => x.Name)
             .ToListAsync(cancellationToken);
 

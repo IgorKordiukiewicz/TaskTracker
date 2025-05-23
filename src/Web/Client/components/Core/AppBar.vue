@@ -15,7 +15,7 @@
                     <i class="pi pi-bell text-xl" />
                 </template>
             </span>
-            <NotificationsPopup ref="notificationsPopup" :invitations="invitations" :notifications="notifications" @on-invitation-action="updateInvitations" @on-notification-read="updateNotifications" />
+            <NotificationsPopup ref="notificationsPopup" :invitations="invitations" :notifications="notifications" @on-notification-read="updateNotifications" />
             <span @click="toggle" v-if="userId">
                 <UserAvatar :user-id="userId" aria-haspopup="true" aria-controls="user_menu" class="cursor-pointer" />
             </span>
@@ -29,7 +29,6 @@
 const emit = defineEmits([ 'toggleSidebar' ])
 
 const auth = useAuth();
-const organizationsService = useOrganizationsService();
 const notificationsService = useNotificationsService();
 
 const userId = ref(auth.getUserId());
@@ -76,14 +75,9 @@ async function openNotificationsPopup() {
         return;
     }
 
-    await updateInvitations();
     await updateNotifications();
 
     notificationsPopup.value.show();
-}
-
-async function updateInvitations() {
-    invitations.value = await organizationsService.getUserInvitations();
 }
 
 async function updateNotifications() {

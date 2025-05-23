@@ -1,11 +1,9 @@
-﻿using Infrastructure.Models;
-using Domain.Organizations;
-using Domain.Projects;
+﻿using Domain.Projects;
+using Domain.Tasks;
 using Domain.Users;
 using Domain.Workflows;
+using Infrastructure.Models;
 using Task = Domain.Tasks.Task;
-using Domain.Tasks;
-using Application.Models.ViewModels;
 
 namespace IntegrationTests;
 
@@ -30,25 +28,11 @@ public class EntitiesFactory(IntegrationTestsFixture fixture)
         return users;
     }
 
-    public async Task<List<Organization>> CreateOrganizations(int count = 1)
+    public async Task<List<Project>> CreateProjects(int count = 1)
     {
         var user = (await CreateUsers())[0];
 
-        var organizations = CreateEntities(count, i => Organization.Create($"org{i}", user.Id));
-
-        await fixture.SeedDb(db =>
-        {
-            db.AddRange(organizations);
-        });
-
-        return organizations;
-    }
-
-    public async Task<List<Project>> CreateProjects(int count = 1)
-    {
-        var organization = (await CreateOrganizations())[0];
-
-        var projects = CreateEntities(count, i => Project.Create($"project{i}", organization.Id, organization.OwnerId));
+        var projects = CreateEntities(count, i => Project.Create($"project{i}", user.Id));
 
         await fixture.SeedDb(db =>
         {
