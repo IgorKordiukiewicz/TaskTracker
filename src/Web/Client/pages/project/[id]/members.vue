@@ -2,8 +2,6 @@
     <div class="h-full">
         <MembersList v-if="members && roles" :members="members.members" :roles="roles.roles" :can-edit-members="canEditMembers"
         @on-update-member-role="updateMemberRole" @on-remove-member="removeMember">
-            <Button icon="pi pi-plus" severity="primary" label="Add" @click="openAddProjectMemberDialog" v-if="canEditMembers" />
-            <AddProjectMemberDialog v-if="availableUsers" ref="addProjectMemberDialog" :projectId="projectId" :available-users="availableUsers.users" @on-add="updateMembers" />
         </MembersList>
     </div>
 </template>
@@ -43,10 +41,6 @@ async function updateMemberRole(model: UpdateMemberRoleDto) {
 async function removeMember(model: RemoveMemberDto) {
     await projectsService.removeMember(projectId.value, model);
     await updateMembers();
-}
-
-function openAddProjectMemberDialog() {
-    addProjectMemberDialog.value.show();
 }
 
 </script>

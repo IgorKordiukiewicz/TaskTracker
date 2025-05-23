@@ -18,6 +18,18 @@
                 </TabPanel>
                 <TabPanel value="1">
                     <div class="flex flex-col gap-3">
+                        <template v-if="invitations.invitations.length > 0">
+                            <div v-for="invitation in invitations.invitations" class="flex justify-between items-center">
+                                <p>{{ invitation.projectName }}</p>
+                                <div class="flex gap-1 items-center">
+                                    <Button icon="pi pi-times" severity="danger" rounded text @click="declineInvitation(invitation.id)" />
+                                    <Button icon="pi pi-check" severity="success"  rounded text @click="acceptInvitation(invitation.id)" />
+                                </div>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <p>You don't have any invitations.</p>
+                        </template>
                     </div>
                 </TabPanel>
             </TabPanels>
@@ -28,13 +40,16 @@
 <script setup lang="ts">
 import type { PropType } from 'vue';
 import type { NotificationsVM } from '~/types/viewModels/notifications';
+import type { UserProjectInvitationsVM } from '~/types/viewModels/projects';
 
 defineExpose({ show });
 const emit = defineEmits([ 'onInvitationAction', 'onNotificationRead' ])
 const props = defineProps({
+    invitations: { type: Object as PropType<UserProjectInvitationsVM>, required: true },
     notifications: { type: Object as PropType<NotificationsVM>, required: true },
 })
 
+const projectsService = useProjectsService();
 
 const visible = ref(false);
 
@@ -43,10 +58,12 @@ function show() {
 }
 
 async function declineInvitation(id: string) {
+    await projectsService.declineInvitation(id);
     emit('onInvitationAction');
 }
 
 async function acceptInvitation(id: string) {
+    await projectsService.acceptInvitation(id);
     emit('onInvitationAction');
     // TODO: update organizations if on index page? (or always redirect to org page)
 }

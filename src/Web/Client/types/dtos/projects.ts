@@ -2,8 +2,9 @@ export class CreateProjectDto {
     name: string = '';
 }
 
-export class AddProjectMemberDto {
+export class CreateProjectInvitationDto {
     userId: string = '';
+    expirationDays?: number;
 }
 
 export class UpdateProjectNameDto {

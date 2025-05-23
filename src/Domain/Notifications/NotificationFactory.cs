@@ -10,8 +10,7 @@ public static class NotificationFactory
 
     // TODO: Assigned task updated?
 
-    public static NotificationData AddedToProject(Guid userId, DateTime now, Guid projectId)
-        => new(userId, $"You have been added to the project.", now, projectId);
+    // TODO: user joined project
 
     public static NotificationData RemovedFromProject(Guid userId, DateTime now, Guid projectId)
         => new(userId, $"You have been removed from the project.", now, projectId);

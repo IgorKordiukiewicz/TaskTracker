@@ -6,6 +6,22 @@ export enum ProjectPermissions {
     EditProject = 1 << 3 // 8
 }
 
+export enum ProjectInvitationState
+{
+    Pending,
+    Accepted,
+    Declined,
+    Canceled,
+    Expired
+}
+
+export const allInvitationStates = [
+    { key: ProjectInvitationState.Pending, name: ProjectInvitationState[ProjectInvitationState.Pending] },
+    { key: ProjectInvitationState.Accepted, name: ProjectInvitationState[ProjectInvitationState.Accepted] },
+    { key: ProjectInvitationState.Declined, name: ProjectInvitationState[ProjectInvitationState.Declined] },
+    { key: ProjectInvitationState.Canceled, name: ProjectInvitationState[ProjectInvitationState.Canceled] },
+]
+
 export enum TaskPriority {
     Low,
     Normal,

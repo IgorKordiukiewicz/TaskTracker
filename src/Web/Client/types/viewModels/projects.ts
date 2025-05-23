@@ -1,4 +1,4 @@
-import type { ProjectPermissions } from "../enums";
+import type { ProjectInvitationState, ProjectPermissions } from "../enums";
 import type { MemberVM, NavDataVM, RoleVM } from "./shared";
 
 export interface ProjectsVM {
@@ -14,7 +14,7 @@ export interface ProjectVM {
 
 export interface ProjectNavDataVM {
     project: NavDataVM;
-    organization: NavDataVM;
+    Project: NavDataVM;
 }
 
 export interface ProjectMembersVM {
@@ -39,4 +39,27 @@ export interface ProjectSettingsVM {
 export interface UserProjectPermissionsVM {
     permissions: ProjectPermissions;
     isOwner: boolean;
+}
+
+export interface ProjectInvitationsVM {
+    invitations: ProjectInvitationVM[];
+    totalPagesCount: number;
+}
+
+export interface ProjectInvitationVM {
+    id: string;
+    userEmail: string;
+    state: ProjectInvitationState;
+    createdAt: Date;
+    finalizedAt: Date;
+    expirationDate?: Date;
+}
+
+export interface UserProjectInvitationsVM {
+    invitations: UserProjectInvitationVM[];
+}
+
+export interface UserProjectInvitationVM {
+    id: string;
+    projectName: string;
 }

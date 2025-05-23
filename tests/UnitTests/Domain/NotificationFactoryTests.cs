@@ -39,21 +39,6 @@ public class NotificationFactoryTests
     }
 
     [Fact]
-    public void AddedToProject_ShouldCreateWithCorrectValues()
-    {
-        var userId = Guid.NewGuid();
-        var projectId = Guid.NewGuid();
-
-        var result = NotificationFactory.AddedToProject(userId, DateTime.Now, projectId);
-
-        using (new AssertionScope())
-        {
-            result.UserId.Should().Be(userId);
-            result.ContextEntityId.Should().Be(projectId);
-        }
-    }
-
-    [Fact]
     public void RemovedFromProject_ShouldCreateWithCorrectValues()
     {
         var userId = Guid.NewGuid();

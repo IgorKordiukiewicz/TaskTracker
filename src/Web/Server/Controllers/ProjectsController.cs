@@ -61,23 +61,6 @@ public class ProjectsController(IMediator mediator)
     }
 
     /// <summary>
-    /// Add a new project member.
-    /// </summary>
-    /// <param name="projectId"></param>
-    /// <param name="model"></param>
-    /// <response code="404">Project not found.</response>
-    [HttpPost("{projectId:guid}/members")]
-    [Authorize(Policy.ProjectEditMembers)]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(404)]
-    public async Task<IActionResult> AddProjectMember(Guid projectId, [FromBody] AddProjectMemberDto model)
-    {
-        var result = await mediator.Send(new AddProjectMemberCommand(projectId, model));
-        return result.ToHttpResult();
-    }
-
-    /// <summary>
     /// Get members of a project.
     /// </summary>
     /// <param name="projectId"></param>
@@ -89,6 +72,96 @@ public class ProjectsController(IMediator mediator)
     public async Task<IActionResult> GetProjectMembers(Guid projectId)
     {
         var result = await mediator.Send(new GetProjectMembersQuery(projectId));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
+    /// Create a invitation to project for a given user.
+    /// </summary>
+    /// <param name="projectId"></param>
+    /// <param name="model"></param>
+    /// <response code="404">Project or user not found.</response> 
+    [HttpPost("{projectId:guid}/invitations")]
+    [Authorize(Policy.ProjectEditMembers)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> CreateProjectInvitation(Guid projectId, [FromBody] CreateProjectInvitationDto model)
+    {
+        var result = await mediator.Send(new CreateProjectInvitationCommand(projectId, model));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
+    /// Get all invitations of a project.
+    /// </summary>
+    /// <param name="projectId"></param>
+    /// <response code="404">Project not found.</response> 
+    [HttpGet("{projectId:guid}/invitations")]
+    [Authorize(Policy.ProjectEditMembers)]
+    [ProducesResponseType(typeof(ProjectInvitationsVM), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetProjectInvitationsForProject(Guid projectId)
+    {
+        var result = await mediator.Send(new GetProjectInvitationsQuery(projectId));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
+    /// Get pending invitations for the user.
+    /// </summary>
+    /// <response code="404">User not found.</response> 
+    [HttpGet("invitations")]
+    [ProducesResponseType(typeof(UserProjectInvitationsVM), 200)]
+    public async Task<IActionResult> GetProjectInvitationsForUser()
+    {
+        var result = await mediator.Send(new GetProjectInvitationsForUserQuery(User.GetUserId()));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
+    /// Decline project invitation (by user).
+    /// </summary>
+    /// <param name="invitationId"></param>
+    /// <response code="404">Project with given invitation not found.</response> 
+    [HttpPost("invitations/{invitationId:guid}/decline")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> DeclineProjectInvitation(Guid invitationId)
+    {
+        var result = await mediator.Send(new DeclineProjectInvitationCommand(invitationId));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
+    /// Accept project invitation (by user).
+    /// </summary>
+    /// <param name="invitationId"></param>
+    /// <response code="404">Project with given invitation not found.</response> 
+    [HttpPost("invitations/{invitationId:guid}/accept")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> AcceptProjectInvitation(Guid invitationId)
+    {
+        var result = await mediator.Send(new AcceptProjectInvitationCommand(invitationId));
+        return result.ToHttpResult();
+    }
+
+    /// <summary>
+    /// Cancel project invitation (by project member).
+    /// </summary>
+    /// <param name="invitationId"></param>
+    /// <response code="404">Project with given invitation not found.</response> 
+    [HttpPost("invitations/{invitationId:guid}/cancel")]
+    [Authorize(Policy.ProjectEditMembers)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> CancelProjectInvitation(Guid invitationId)
+    {
+        var result = await mediator.Send(new CancelProjectInvitationCommand(invitationId));
         return result.ToHttpResult();
     }
 

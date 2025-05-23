@@ -1,6 +1,6 @@
-import type { AddProjectMemberDto, CreateProjectDto, UpdateProjectNameDto } from "~/types/dtos/projects";
+import type { CreateProjectDto, CreateProjectInvitationDto, UpdateProjectNameDto } from "~/types/dtos/projects";
 import type { CreateRoleDto, DeleteRoleDto, RemoveMemberDto, UpdateMemberRoleDto, UpdateRoleNameDto, UpdateRolePermissionsDto } from "~/types/dtos/shared";
-import type { ProjectRolesVM, ProjectMembersVM, ProjectNavDataVM, ProjectsVM, ProjectSettingsVM, UserProjectPermissionsVM } from "~/types/viewModels/projects";
+import type { ProjectRolesVM, ProjectMembersVM, ProjectNavDataVM, ProjectsVM, ProjectSettingsVM, UserProjectPermissionsVM, ProjectInvitationsVM, UserProjectInvitationsVM } from "~/types/viewModels/projects";
 
 export const useProjectsService = () => {
     const api = useApi();
@@ -14,6 +14,24 @@ export const useProjectsService = () => {
         },
         async createProject(model: CreateProjectDto) {
             await api.sendPostRequest('projects', model);
+        },
+        async createInvitation(id: string, model: CreateProjectInvitationDto) {
+            await api.sendPostRequest(`projects/${id}/invitations`, model);
+        },
+        async getInvitations(id: string) {
+            return await api.sendGetRequest<ProjectInvitationsVM>(`projects/${id}/invitations`);
+        },
+        async getUserInvitations() {
+            return await api.sendGetRequest<UserProjectInvitationsVM>('projects/invitations');
+        },
+        async acceptInvitation(invitationId: string) {
+            await api.sendPostRequest(`projects/invitations/${invitationId}/accept`, undefined);
+        },
+        async declineInvitation(invitationId: string) {
+            await api.sendPostRequest(`projects/invitations/${invitationId}/decline`, undefined);
+        },
+        async cancelInvitation(id: string, invitationId: string) {
+            await api.sendPostRequest(`projects/invitations/${invitationId}/cancel`, undefined,  { 'ProjectId': id });
         },
         async getMembers(id: string) {
             return await api.sendGetRequest<ProjectMembersVM>(`projects/${id}/members`);
@@ -35,9 +53,6 @@ export const useProjectsService = () => {
         },
         async deleteRole(id: string, model: DeleteRoleDto) {
             await api.sendPostRequest(`projects/${id}/roles/delete`, model);
-        },
-        async addMember(id: string, model: AddProjectMemberDto) {
-            await api.sendPostRequest(`projects/${id}/members`, model);
         },
         async removeMember(id: string, model: RemoveMemberDto) {
             await api.sendPostRequest(`projects/${id}/members/remove`, model);

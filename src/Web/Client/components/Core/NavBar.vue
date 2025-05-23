@@ -68,6 +68,12 @@ const projectNodes = ref([
                 link: [ '/project/', '/members' ]
             },
             {
+                title: 'Invitations',
+                icon: 'pi pi-user-plus',
+                link: [ '/project/', '/invitations' ],
+                permission: ProjectPermissions.EditMembers as number
+            },
+            {
                 title: 'Roles',
                 icon: 'pi pi-user-edit',
                 link: [ '/project/', '/roles' ],

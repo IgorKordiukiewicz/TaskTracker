@@ -2,6 +2,8 @@
 
 public record CreateProjectDto(string Name);
 
+public record CreateProjectInvitationDto(Guid UserId, int? ExpirationDays = null);
+
 public record AddProjectMemberDto(Guid UserId);
 public record RemoveProjectMemberDto(Guid MemberId);
 

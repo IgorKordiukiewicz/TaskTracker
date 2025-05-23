@@ -15,6 +15,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<Project> Projects { get; set; }
     public DbSet<ProjectMember> ProjectMembers { get; set; }
+    public DbSet<ProjectInvitation> ProjectInvitations { get; set; }
     public DbSet<ProjectRole> ProjectRoles { get; set; }
 
     public DbSet<Domain.Tasks.Task> Tasks { get; set; }

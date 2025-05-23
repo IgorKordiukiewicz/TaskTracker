@@ -8,6 +8,7 @@ public class ProjectRepository(AppDbContext dbContext)
     public async Task<Project?> GetBy(Expression<Func<Project, bool>> predicate, CancellationToken cancellationToken = default)
         => await dbContext.Projects
         .Include(x => x.Members)
+        .Include(x => x.Invitations)
         .Include(x => x.Roles)
         .FirstOrDefaultAsync(predicate, cancellationToken);
 
@@ -17,6 +18,7 @@ public class ProjectRepository(AppDbContext dbContext)
     public async Task<bool> Exists(Expression<Func<Project, bool>> predicate, CancellationToken cancellationToken = default)
         => await dbContext.Projects
         .Include(x => x.Members)
+        .Include(x => x.Invitations)
         .Include(x => x.Roles)
         .AnyAsync(predicate, cancellationToken);
 
@@ -31,10 +33,12 @@ public class ProjectRepository(AppDbContext dbContext)
         var oldEntity = await dbContext.Projects
             .AsNoTracking()
             .Include(x => x.Members)
+            .Include(x => x.Invitations)
             .Include(x => x.Roles)
             .SingleAsync(x => x.Id == entity.Id, cancellationToken);
         
         dbContext.AddRemoveChildEntities(entity.Members, oldEntity.Members.Select(x => x.Id));
+        dbContext.AddRemoveChildEntities(entity.Invitations, oldEntity.Invitations.Select(x => x.Id));
         dbContext.AddRemoveChildEntities(entity.Roles,oldEntity.Roles.Select(x => x.Id));
         await dbContext.SaveChangesAsync(cancellationToken);
     }
