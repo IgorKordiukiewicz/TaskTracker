@@ -1,4 +1,5 @@
 ﻿using Application.Features.Notifications;
+using Application.Features.Projects;
 using Domain.Notifications;
 using Hangfire;
 
@@ -6,7 +7,7 @@ namespace Application.Common;
 
 public interface IJobsService
 {
-    void AddExpireOrganizationsInvitationsJob();
+    void AddExpireProjectsInvitationsJob();
     void EnqueueCreateNotification(NotificationData notification);
 }
 
@@ -14,8 +15,12 @@ public class JobsService(IMediator mediator, IBackgroundJobClient backgroundJobC
     : IJobsService
 {
 
-    public void AddExpireOrganizationsInvitationsJob()
+    public void AddExpireProjectsInvitationsJob()
     {
+        recurringJobManager.AddOrUpdate(
+            "Expire organizations invitations",
+            () => mediator.Send(new ExpireProjectsInvitationsCommand(), default),
+            "0 * * * *");
     }
 
     public void EnqueueCreateNotification(NotificationData notification)

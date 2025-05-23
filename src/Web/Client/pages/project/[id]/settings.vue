@@ -2,36 +2,47 @@
     <div v-if="canViewPage">
         <p class="text-lg">Settings</p>
         <div class="bg-white w-full shadow mt-4 p-4 flex flex-col gap-1" v-if="settings">
-            <div class="flex justify-between items-center">
-                <div>
-                    <p class="font-semibold mb-1">Name</p>
-                    <p class="text-sm settings-label-caption">The name of the project.</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <InputText v-model="projectName" :disabled="!nameEditActive" class="w-80" />
-                    <template v-if="nameEditActive">
-                        <Button severity="secondary" text icon="pi pi-times" @click="cancelNameEdit" />
-                        <Button severity="primary" text icon="pi pi-check" @click="updateName" :disabled="updateNameSaveDisabled" />
-                    </template>
-                    <template v-else>
-                        <Button severity="secondary" text icon="pi pi-pencil" @click="activateNameEdit" />
-                    </template>
-                </div>
-            </div>
-            <template v-if="isOwner">
-                <Divider />
+            <template v-if="canEditSettings && settings">
                 <div class="flex justify-between items-center">
                     <div>
-                        <p class="font-semibold mb-1">Delete Project</p>
-                        <p class="text-sm settings-label-caption">This will permanently delete the project.</p>
+                        <p class="font-semibold mb-1">Name</p>
+                        <p class="text-sm settings-label-caption">The name of the project.</p>
                     </div>
-                    <div >
-                        <Button severity="danger" label="Delete" @click="deleteProject" />
+                    <div class="flex items-center gap-2">
+                        <InputText v-model="projectName" :disabled="!nameEditActive" class="w-80" />
+                        <template v-if="nameEditActive">
+                            <Button severity="secondary" text icon="pi pi-times" @click="cancelNameEdit" />
+                            <Button severity="primary" text icon="pi pi-check" @click="updateName" :disabled="updateNameSaveDisabled" />
+                        </template>
+                        <template v-else>
+                            <Button severity="secondary" text icon="pi pi-pencil" @click="activateNameEdit" />
+                        </template>
                     </div>
                 </div>
+                <template v-if="isOwner">
+                    <Divider />
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-semibold mb-1">Delete Project</p>
+                            <p class="text-sm settings-label-caption">This will permanently delete the project.</p>
+                        </div>
+                        <div >
+                            <Button severity="danger" label="Delete" @click="deleteProject" />
+                        </div>
+                    </div>
+                </template>
             </template>
-            <template v-else>
-                <!-- TODO: Leave project -->
+            <template v-if="!isOwner">
+                <Divider v-if="canEditSettings" />
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="font-semibold mb-1">Leave Project</p>
+                        <p class="text-sm settings-label-caption">Leave this project.</p>
+                    </div>
+                    <div >
+                        <Button severity="danger" label="Leave" @click="leaveProject" />
+                    </div>
+                </div>
             </template>
         </div>
         <ConfirmDialog></ConfirmDialog>
@@ -66,6 +77,10 @@ const updateNameSaveDisabled = computed(() => {
 
 const isOwner = computed(() => {
     return permissions.isOwner();
+})
+
+const canEditSettings = computed(() => {
+    return permissions.hasPermission(ProjectPermissions.EditProject);
 })
 
 async function updateSettings() {
@@ -103,6 +118,25 @@ async function deleteProject() {
         },
         accept: async () => {
             await projectsService.deleteProject(projectId.value);
+            navigateTo('/');
+        }
+    })
+}
+
+async function leaveProject() {
+    confirm.require({
+        message: `Are you sure you want to leave the project?`,
+        header: 'Confirm action',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary'
+        },
+        acceptProps: {
+            label: 'Confirm',
+            severity: 'danger'
+        },
+        accept: async () => {
+            await projectsService.leaveProject(projectId.value);
             navigateTo('/');
         }
     })

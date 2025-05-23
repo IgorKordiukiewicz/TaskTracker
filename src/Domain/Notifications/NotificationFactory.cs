@@ -14,4 +14,7 @@ public static class NotificationFactory
 
     public static NotificationData RemovedFromProject(Guid userId, DateTime now, Guid projectId)
         => new(userId, $"You have been removed from the project.", now, projectId);
+
+    public static NotificationData UserLeftProject(Guid receivingUserId, string userName, DateTime now, Guid projectId)
+        => new(receivingUserId, $"{userName} has left the project.", now, projectId);
 }

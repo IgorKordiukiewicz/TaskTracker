@@ -272,6 +272,53 @@ public class ProjectTests
     }
 
     [Fact]
+    public void Leave_ShouldFail_WhenUserIsOwner()
+    {
+        var userId = Guid.NewGuid();
+        var project = Project.Create("Name", userId);
+
+        var result = project.Leave(userId);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Leave_ShouldRemoveMember_WhenUserIsNotOwner()
+    {
+        var project = Project.Create("Name", Guid.NewGuid());
+        var userId = Guid.NewGuid();
+        var invitation = project.CreateInvitation(userId, DateTime.Now).Value;
+        project.AcceptInvitation(invitation.Id, DateTime.Now);
+
+        var result = project.Leave(userId);
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            project.Members.Count.Should().Be(1);
+        }
+    }
+
+    [Fact]
+    public void GetMembersWithEditMembersPermission_ShouldReturnAllMembersWithEditMembersPermission()
+    {
+        var ownerId = Guid.NewGuid();
+        var project = Project.Create("Name", ownerId);
+        var userId1 = Guid.NewGuid();
+        var userId2 = Guid.NewGuid();
+        var invitation1 = project.CreateInvitation(userId1, DateTime.Now).Value;
+        var invitation2 = project.CreateInvitation(userId2, DateTime.Now).Value;
+        var member1 = project.AcceptInvitation(invitation1.Id, DateTime.Now).Value;
+        var member2 = project.AcceptInvitation(invitation2.Id, DateTime.Now).Value;
+        var adminRoleId = project.Roles.First(x => x.Type == RoleType.Admin).Id;
+        _ = project.RolesManager.UpdateMemberRole(member1.Id, adminRoleId, project.Members);
+
+        var result = project.GetMembersWithEditMembersPermission();
+
+        result.Select(x => x.UserId).Should().BeEquivalentTo([ownerId, userId1]);
+    }
+
+    [Fact]
     public void Member_UpdateRole_ShouldUpdateRoleId()
     {
         var member = ProjectMember.Create(Guid.NewGuid(), Guid.NewGuid());

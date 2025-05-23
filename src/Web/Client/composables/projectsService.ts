@@ -68,6 +68,9 @@ export const useProjectsService = () => {
         },
         async getUserPermissions(id: string) {
             return await api.sendGetRequest<UserProjectPermissionsVM>(`projects/${id}/permissions`);
-        }
+        },
+        async leaveProject(id: string) {
+            await api.sendPostRequest(`projects/${id}/leave`, undefined);
+        },
     }
 }

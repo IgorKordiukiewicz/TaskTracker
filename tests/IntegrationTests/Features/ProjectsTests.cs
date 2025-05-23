@@ -389,6 +389,40 @@ public class ProjectsTests
         }
     }
 
+    [Fact]
+    public async Task Leave_ShouldFail_WhenProjectDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new LeaveProjectCommand(Guid.NewGuid(), Guid.NewGuid()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Leave_ShouldRemoveUserFromProject_WhenProjectExists()
+    {
+        var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");
+        var user2 = User.Create(Guid.NewGuid(), "user2", "firstName", "lastName");
+        var project = Project.Create("org", user1.Id);
+        var invitation = project.CreateInvitation(user2.Id, DateTime.Now).Value;
+        project.AcceptInvitation(invitation.Id, DateTime.Now);
+
+        await _fixture.SeedDb(db =>
+        {
+            db.AddRange(user1, user2);
+            db.Add(project);
+        });
+
+        var membersBefore = await _fixture.CountAsync<ProjectMember>();
+
+        var result = await _fixture.SendRequest(new LeaveProjectCommand(project.Id, user2.Id));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<ProjectMember>()).Should().Be(membersBefore - 1);
+        }
+    }
+
     private async Task<Guid> CreateProjectWithInvitation()
     {
         var user1 = User.Create(Guid.NewGuid(), "user1", "firstName", "lastName");

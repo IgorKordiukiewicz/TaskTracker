@@ -122,6 +122,31 @@ public class Project : Entity, IAggregateRoot, IHasName
         return Result.Ok();
     }
 
+    public Result Leave(Guid userId)
+    {
+        if (OwnerId == userId)
+        {
+            return Result.Fail(new DomainError("Owner can't leave the organization."));
+        }
+
+        var member = _members.First(x => x.UserId == userId);
+        _members.Remove(member);
+
+        return Result.Ok();
+    }
+
+    public IReadOnlyList<ProjectMember> GetMembersWithEditMembersPermission()
+    {
+        var rolesIds = _roles
+            .Where(x => x.HasPermission(ProjectPermissions.EditMembers))
+            .Select(x => x.Id)
+            .ToHashSet();
+
+        return _members
+            .Where(x => rolesIds.Contains(x.RoleId))
+            .ToList();
+    }
+
     private Result<ProjectInvitation> GetPendingInvitation(Guid invitationId)
     {
         var invitation = _invitations.FirstOrDefault(x => x.Id == invitationId);

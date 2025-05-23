@@ -343,4 +343,19 @@ public class ProjectsController(IMediator mediator)
         var result = await mediator.Send(new GetUserProjectPermissionsQuery(User.GetUserId(), projectId));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Leave the given project.
+    /// </summary>
+    /// <param name="projectId"></param>
+    [HttpPost("{projectId:guid}/leave")]
+    [Authorize(Policy.ProjectMember)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> LeaveProject(Guid projectId)
+    {
+        var result = await mediator.Send(new LeaveProjectCommand(projectId, User.GetUserId()));
+        return result.ToHttpResult();
+    }
 }
