@@ -30,11 +30,11 @@ internal class GetUserProjectPermissionsHandler(AppDbContext dbContext)
             .Select(x => x.RoleId)
             .FirstAsync(cancellationToken);
 
-        var permissions = await dbContext.ProjectRoles
+        var data = await dbContext.ProjectRoles
             .Where(x => x.ProjectId == request.ProjectId && x.Id == userRoleId)
-            .Select(x => x.Permissions)
+            .Select(x => new { x.Permissions, IsOwner = x.IsOwner() })
             .FirstAsync(cancellationToken);
 
-        return new UserProjectPermissionsVM(permissions);
+        return new UserProjectPermissionsVM(data.Permissions, data.IsOwner);
     }
 }

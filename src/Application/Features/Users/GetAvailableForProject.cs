@@ -27,10 +27,7 @@ internal class GetUsersAvailableForProjectHandler(AppDbContext dbContext)
             return Result.Fail<UsersSearchVM>(new NotFoundError<Project>(request.ProjectId));
         }
 
-        var organizationId = await dbContext.Projects
-            .Where(x => x.Id == request.ProjectId)
-            .Select(x => x.OrganizationId)
-            .FirstAsync(cancellationToken);
+        var organizationId = Guid.NewGuid(); // TODO
 
         var organizationMembersUserIds = new List<Guid>(); // TODO
 

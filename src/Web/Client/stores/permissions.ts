@@ -17,7 +17,9 @@ export const usePermissions = defineStore('permissions', {
         async checkProjectPermissions(id: string) {
             if(!this.permissions) {
                 const projectsService = useProjectsService();
-                this.permissions = (await projectsService.getUserPermissions(id))?.permissions ?? null;
+                const data = await projectsService.getUserPermissions(id);
+                this.permissions = data?.permissions ?? null;
+                this.owner = data?.isOwner ?? null;
             }
         }
     }

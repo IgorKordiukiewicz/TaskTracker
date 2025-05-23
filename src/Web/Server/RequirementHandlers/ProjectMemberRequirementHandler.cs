@@ -5,9 +5,12 @@ namespace Web.Server.RequirementHandlers;
 
 public class ProjectMemberRequirement : MemberRequirement<ProjectPermissions>
 {
-    public ProjectMemberRequirement(ProjectPermissions? permissions = null)
+    public bool Owner { get; init; }
+
+    public ProjectMemberRequirement(ProjectPermissions? permissions = null, bool owner = false)
     {
         Permissions = permissions;
+        Owner = owner;
     }
 }
 
@@ -25,6 +28,12 @@ public class ProjectMemberRequirementHandler(AppDbContext dbContext, IHttpContex
         if (member is null)
         {
             return false;
+        }
+
+        if (requirement.Owner)
+        {
+            return await dbContext.Projects
+                .AnyAsync(x => x.Id == entityId && x.OwnerId == userId);
         }
 
         if (requirement.Permissions is null)

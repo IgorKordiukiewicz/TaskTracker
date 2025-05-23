@@ -10,6 +10,6 @@ public record ProjectVM
     public required int TasksCount { get; init; }
 }
 
-public record ProjectSettingsVM(string Name);
+public record ProjectSettingsVM(string Name, Guid OwnerId);
 
-public record UserProjectPermissionsVM(ProjectPermissions Permissions);
+public record UserProjectPermissionsVM(ProjectPermissions Permissions, bool IsOwner);

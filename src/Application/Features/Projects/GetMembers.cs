@@ -17,7 +17,10 @@ internal class GetProjectMembersHandler(AppDbContext dbContext)
 {
     public async Task<Result<ProjectMembersVM>> Handle(GetProjectMembersQuery request, CancellationToken cancellationToken)
     {
-        if(!await dbContext.Projects.AnyAsync(x => x.Id == request.ProjectId, cancellationToken))
+        var project = await dbContext.Projects
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == request.ProjectId, cancellationToken);
+        if (project is null)
         {
             return Result.Fail<ProjectMembersVM>(new NotFoundError<Project>(request.ProjectId));
         }
@@ -41,6 +44,7 @@ internal class GetProjectMembersHandler(AppDbContext dbContext)
                 Email = user.Email,
                 RoleId = member.RoleId,
                 RoleName = roleNameById[member.RoleId],
+                Owner = user.Id == project.OwnerId
             })
             .ToListAsync(cancellationToken))
             .OrderBy(x => x.Name)

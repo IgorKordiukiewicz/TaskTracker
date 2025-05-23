@@ -1,4 +1,5 @@
 ﻿using Domain.Projects;
+using Domain.Users;
 
 namespace Infrastructure.Configurations;
 
@@ -13,6 +14,11 @@ internal class ProjectConfiguration : BaseEntityTypeConfiguration<Project>
             .HasMaxLength(100);
 
         builder.Ignore(x => x.RolesManager);
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(x => x.OwnerId)
+            .IsRequired();
 
         builder.HasMany(x => x.Members)
             .WithOne()

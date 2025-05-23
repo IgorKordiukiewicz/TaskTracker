@@ -5,7 +5,7 @@ namespace Domain.Projects;
 public class Project : Entity, IAggregateRoot, IHasName
 {
     public string Name { get; set; } = string.Empty;
-    public Guid OrganizationId { get; private set; }
+    public Guid OwnerId { get; private init; }
 
     private readonly List<ProjectMember> _members = [];
     public IReadOnlyList<ProjectMember> Members => _members.AsReadOnly();
@@ -21,17 +21,17 @@ public class Project : Entity, IAggregateRoot, IHasName
         RolesManager = new(_roles, (name, permissions) => new ProjectRole(name, Id, permissions));
     }
 
-    public static Project Create(string name, Guid createdByUserId)
+    public static Project Create(string name, Guid ownerId)
     {
         var result = new Project(Guid.NewGuid())
         {
             Name = name,
-            OrganizationId = Guid.NewGuid(), // TODO
+            OwnerId = ownerId,
         };
 
         result._roles.AddRange(ProjectRole.CreateDefaultRoles(result.Id));
 
-        var member = ProjectMember.Create(createdByUserId, result.RolesManager.GetAdminRoleId());
+        var member = ProjectMember.Create(ownerId, result.RolesManager.GetOwnerRoleId()!.Value);
         result._members.Add(member);
 
         return result;

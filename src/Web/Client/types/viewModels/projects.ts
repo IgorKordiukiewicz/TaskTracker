@@ -38,4 +38,5 @@ export interface ProjectSettingsVM {
 
 export interface UserProjectPermissionsVM {
     permissions: ProjectPermissions;
+    isOwner: boolean;
 }

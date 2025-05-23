@@ -18,13 +18,13 @@ public class ProjectTests
             result.Name.Should().Be(name);
 
             // Ensure default roles are created
-            result.Roles.Count.Should().Be(2);
-            result.Roles.Select(x => x.Type).Should().BeEquivalentTo(new RoleType[] { RoleType.Admin, RoleType.ReadOnly });
-            var adminRoleId = result.Roles.First(x => x.Type == RoleType.Admin).Id;
+            result.Roles.Count.Should().Be(3);
+            result.Roles.Select(x => x.Type).Should().BeEquivalentTo([RoleType.Owner, RoleType.Admin, RoleType.ReadOnly]);
+            var ownerRoleId = result.Roles.First(x => x.Type == RoleType.Owner).Id;
 
             result.Members.Count.Should().Be(1);
             result.Members[0].UserId.Should().Be(userId);
-            result.Members[0].RoleId.Should().Be(adminRoleId);
+            result.Members[0].RoleId.Should().Be(ownerRoleId);
         }
     }
 

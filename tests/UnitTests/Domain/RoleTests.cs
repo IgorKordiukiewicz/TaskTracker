@@ -27,11 +27,13 @@ public class RoleTests
 
         using(new AssertionScope())
         {
-            result.Length.Should().Be(2);
+            result.Length.Should().Be(3);
             result[0].Permissions.Should().Be(EnumHelpers.GetAllFlags<ProjectPermissions>());
-            result[0].Type.Should().Be(RoleType.Admin);
-            result[1].Permissions.Should().Be(ProjectPermissions.None);
-            result[1].Type.Should().Be(RoleType.ReadOnly);
+            result[0].Type.Should().Be(RoleType.Owner);
+            result[1].Permissions.Should().Be(EnumHelpers.GetAllFlags<ProjectPermissions>());
+            result[1].Type.Should().Be(RoleType.Admin);
+            result[2].Permissions.Should().Be(ProjectPermissions.None);
+            result[2].Type.Should().Be(RoleType.ReadOnly);
             result.All(x => x.ProjectId == projectId).Should().BeTrue();
         }
     }

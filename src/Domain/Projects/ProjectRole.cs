@@ -19,6 +19,7 @@ public class ProjectRole : Role<ProjectPermissions>
     {
         return
         [
+            new("Owner", projectId, EnumHelpers.GetAllFlags<ProjectPermissions>(), RoleType.Owner),
             new("Administrator", projectId, EnumHelpers.GetAllFlags<ProjectPermissions>(), RoleType.Admin),
             new("Read-Only", projectId, ProjectPermissions.None, RoleType.ReadOnly),
         ];

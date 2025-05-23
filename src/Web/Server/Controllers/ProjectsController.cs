@@ -113,7 +113,6 @@ public class ProjectsController(IMediator mediator)
     /// Update role of a project member.
     /// </summary>
     /// <param name="projectId"></param>
-    /// <param name="memberId"></param>
     /// <param name="model"></param>
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/members/role")]
@@ -248,7 +247,7 @@ public class ProjectsController(IMediator mediator)
     /// <param name="projectId"></param>
     /// <response code="404">Project not found.</response>
     [HttpPost("{projectId:guid}/delete")]
-    [Authorize(Policy.ProjectEditProject)]
+    [Authorize(Policy.ProjectOwner)]
     [ProducesResponseType(200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> DeleteProject(Guid projectId)

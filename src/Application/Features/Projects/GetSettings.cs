@@ -24,7 +24,7 @@ internal class GetProjectSettingsHandler(AppDbContext dbContext)
 
         return await dbContext.Projects
             .Where(x => x.Id == request.ProjectId)
-            .Select(x => new ProjectSettingsVM(x.Name))
+            .Select(x => new ProjectSettingsVM(x.Name, x.OwnerId))
             .FirstAsync(cancellationToken);
     }
 }

@@ -31,4 +31,5 @@ public record ProjectMemberVM : IMemberVM
     public required string Email { get; init; }
     public required Guid RoleId { get; init; }
     public required string RoleName { get; init; }
+    public required bool Owner { get; init; }
 }

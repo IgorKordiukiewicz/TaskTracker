@@ -34,6 +34,7 @@ public static class AuthExtensions
         options.AddPolicy(Policy.ProjectEditMembers, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.EditMembers)));
         options.AddPolicy(Policy.ProjectEditRoles, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.EditRoles)));
         options.AddPolicy(Policy.ProjectEditProject, policy => policy.Requirements.Add(new ProjectMemberRequirement(ProjectPermissions.EditProject)));
+        options.AddPolicy(Policy.ProjectOwner, policy => policy.Requirements.Add(new ProjectMemberRequirement(owner: true)));
     }
 }
 
@@ -44,4 +45,5 @@ public static class Policy
     public const string ProjectEditMembers = nameof(ProjectEditMembers);
     public const string ProjectEditRoles = nameof(ProjectEditRoles);
     public const string ProjectEditProject = nameof(ProjectEditProject);
+    public const string ProjectOwner = nameof(ProjectOwner);
 }

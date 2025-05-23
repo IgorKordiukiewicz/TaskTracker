@@ -18,16 +18,21 @@
                     </template>
                 </div>
             </div>
-            <Divider />
-            <div class="flex justify-between items-center">
-                <div>
-                    <p class="font-semibold mb-1">Delete Project</p>
-                    <p class="text-sm settings-label-caption">This will permanently delete the project.</p>
+            <template v-if="isOwner">
+                <Divider />
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="font-semibold mb-1">Delete Project</p>
+                        <p class="text-sm settings-label-caption">This will permanently delete the project.</p>
+                    </div>
+                    <div >
+                        <Button severity="danger" label="Delete" @click="deleteProject" />
+                    </div>
                 </div>
-                <div >
-                    <Button severity="danger" label="Delete" @click="deleteProject" />
-                </div>
-            </div>
+            </template>
+            <template v-else>
+                <!-- TODO: Leave project -->
+            </template>
         </div>
         <ConfirmDialog></ConfirmDialog>
     </div>
@@ -57,6 +62,10 @@ const canViewPage = computed(() => {
 
 const updateNameSaveDisabled = computed(() => {
     return !projectName.value || projectName.value === settings.value?.name;
+})
+
+const isOwner = computed(() => {
+    return permissions.isOwner();
 })
 
 async function updateSettings() {
