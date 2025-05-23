@@ -1,6 +1,6 @@
 ﻿namespace Domain.Projects;
 
-public class ProjectMember : Entity, IHasRole
+public class ProjectMember : Entity
 {
     public Guid UserId { get; private init; }
     public Guid RoleId { get; private set; }

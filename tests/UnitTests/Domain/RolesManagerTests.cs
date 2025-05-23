@@ -1,4 +1,4 @@
-﻿using Domain.Common;
+﻿using Domain.Projects;
 
 namespace UnitTests.Domain;
 
@@ -33,7 +33,7 @@ public class RolesManagerTests
     {
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
-        var result = rolesManager.AddRole(roles[0].Name, TestPermissions.A);
+        var result = rolesManager.AddRole(roles[0].Name, ProjectPermissions.EditMembers);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -44,7 +44,7 @@ public class RolesManagerTests
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
         var rolesCountBefore = roles.Count;
-        var result = rolesManager.AddRole("abc", TestPermissions.A);
+        var result = rolesManager.AddRole("abc", ProjectPermissions.EditMembers);
 
         using (new AssertionScope())
         {
@@ -82,9 +82,9 @@ public class RolesManagerTests
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
         var roleName = "abc";
-        _ = rolesManager.AddRole(roleName, TestPermissions.A);
+        _ = rolesManager.AddRole(roleName, ProjectPermissions.EditMembers);
         var roleToDelete = roles.First(x => x.Name == roleName);
-        var members = new List<TestMember>() { new(roleToDelete.Id) };
+        List<ProjectMember> members = [ ProjectMember.Create(Guid.NewGuid(), roleToDelete.Id) ];
 
         var result = rolesManager.DeleteRole(roleToDelete.Id, members);
 
@@ -97,7 +97,7 @@ public class RolesManagerTests
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
         var roleName = "abc";
-        _ = rolesManager.AddRole(roleName, TestPermissions.A);
+        _ = rolesManager.AddRole(roleName, ProjectPermissions.EditMembers);
         var rolesCountBefore = roles.Count;
         var roleToDelete = roles.First(x => x.Name == roleName);
 
@@ -179,7 +179,7 @@ public class RolesManagerTests
     {
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
-        var members = new List<TestMember>() { new(roles.First(x => x.Type == RoleType.Owner).Id) };
+        List<ProjectMember> members = [ ProjectMember.Create(Guid.NewGuid(), roles.First(x => x.Type == RoleType.Owner).Id) ];
 
         var result = rolesManager.UpdateMemberRole(members[0].Id, roles[1].Id, members);
 
@@ -191,7 +191,7 @@ public class RolesManagerTests
     {
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
-        var members = new List<TestMember>() { new(Guid.NewGuid()) };
+        List<ProjectMember> members = [ ProjectMember.Create(Guid.NewGuid(), Guid.NewGuid()) ];
 
         var result = rolesManager.UpdateMemberRole(members[0].Id, Guid.NewGuid(), members);
 
@@ -203,7 +203,7 @@ public class RolesManagerTests
     {
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
-        var members = new List<TestMember>() { new(roles[0].Id) };
+        List<ProjectMember> members = [ ProjectMember.Create(Guid.NewGuid(), roles[0].Id) ];
 
         var result = rolesManager.UpdateMemberRole(members[0].Id, roles.First(x => x.Type == RoleType.Owner).Id, members);
 
@@ -215,9 +215,9 @@ public class RolesManagerTests
     {
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
-        var members = new List<TestMember>() { new(roles[0].Id) };
+        List<ProjectMember> members = [ProjectMember.Create(Guid.NewGuid(), roles[1].Id)];
 
-        var result = rolesManager.UpdateMemberRole(members[0].Id, roles[1].Id, members);
+        var result = rolesManager.UpdateMemberRole(members[0].Id, roles[2].Id, members);
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -228,7 +228,7 @@ public class RolesManagerTests
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
 
-        var result = rolesManager.UpdateRolePermissions(Guid.NewGuid(), TestPermissions.A);
+        var result = rolesManager.UpdateRolePermissions(Guid.NewGuid(), ProjectPermissions.EditMembers);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -240,7 +240,7 @@ public class RolesManagerTests
         var rolesManager = CreateRolesManager(roles);
         var roleId = roles.First(x => !x.IsModifiable()).Id;
 
-        var result = rolesManager.UpdateRolePermissions(roleId, TestPermissions.A);
+        var result = rolesManager.UpdateRolePermissions(roleId, ProjectPermissions.EditMembers);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -251,7 +251,7 @@ public class RolesManagerTests
         var roles = CreateTestRoles();
         var rolesManager = CreateRolesManager(roles);
         var roleId = roles.First(x => x.IsModifiable()).Id;
-        var newPermissions = TestPermissions.A | TestPermissions.C;
+        var newPermissions = ProjectPermissions.EditMembers | ProjectPermissions.EditProject;
 
         var result = rolesManager.UpdateRolePermissions(roleId, newPermissions);
 
@@ -262,16 +262,13 @@ public class RolesManagerTests
         }
     }
 
-    private static List<TestRole> CreateTestRoles()
+    private static List<MemberRole> CreateTestRoles()
         =>
         [
-            new("a", default, RoleType.Admin),
-            new("b", default, RoleType.Custom),
-            new("c", default, RoleType.Custom),
-            new("d", default, RoleType.ReadOnly),
-            new("e", default, RoleType.Owner)
+            .. MemberRole.CreateDefaultRoles(Guid.NewGuid()),
+            new("custom", Guid.NewGuid(), ProjectPermissions.None)
         ];
 
-    private static RolesManager<TestRole, TestPermissions> CreateRolesManager(List<TestRole> roles)
-        => new(roles, (name, permissions) => new TestRole(name, permissions));
+    private static RolesManager CreateRolesManager(List<MemberRole> roles)
+        => new(roles, Guid.NewGuid());
 }

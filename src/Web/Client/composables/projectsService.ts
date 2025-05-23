@@ -1,6 +1,6 @@
 import type { CreateProjectDto, CreateProjectInvitationDto, UpdateProjectNameDto } from "~/types/dtos/projects";
-import type { CreateRoleDto, DeleteRoleDto, RemoveMemberDto, UpdateMemberRoleDto, UpdateRoleNameDto, UpdateRolePermissionsDto } from "~/types/dtos/shared";
-import type { ProjectRolesVM, ProjectMembersVM, ProjectNavDataVM, ProjectsVM, ProjectSettingsVM, UserProjectPermissionsVM, ProjectInvitationsVM, UserProjectInvitationsVM } from "~/types/viewModels/projects";
+import type { CreateRoleDto, DeleteRoleDto, RemoveMemberDto, UpdateMemberRoleDto, UpdateRoleNameDto, UpdateRolePermissionsDto } from "~/types/dtos/projects";
+import type { RolesVM, ProjectMembersVM, ProjectNavDataVM, ProjectsVM, ProjectSettingsVM, UserProjectPermissionsVM, ProjectInvitationsVM, UserProjectInvitationsVM } from "~/types/viewModels/projects";
 
 export const useProjectsService = () => {
     const api = useApi();
@@ -37,7 +37,7 @@ export const useProjectsService = () => {
             return await api.sendGetRequest<ProjectMembersVM>(`projects/${id}/members`);
         },
         async getRoles(id: string) {
-            return await api.sendGetRequest<ProjectRolesVM>(`projects/${id}/roles`);
+            return await api.sendGetRequest<RolesVM>(`projects/${id}/roles`);
         },
         async updateMemberRole(id: string, model: UpdateMemberRoleDto) {
             await api.sendPostRequest(`projects/${id}/members/role`, model);

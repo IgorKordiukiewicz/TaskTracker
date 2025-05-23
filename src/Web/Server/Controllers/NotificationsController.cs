@@ -24,7 +24,7 @@ public class NotificationsController(IMediator mediator)
     }
 
     /// <summary>
-    /// Get the count of user's unread notifications and organizations invitations.
+    /// Get the count of user's unread notifications and project invitations.
     /// </summary>
     /// <returns></returns>
     [HttpGet("unread-count")]

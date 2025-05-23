@@ -18,7 +18,7 @@ public class JobsService(IMediator mediator, IBackgroundJobClient backgroundJobC
     public void AddExpireProjectsInvitationsJob()
     {
         recurringJobManager.AddOrUpdate(
-            "Expire organizations invitations",
+            "Expire projects invitations",
             () => mediator.Send(new ExpireProjectsInvitationsCommand(), default),
             "0 * * * *");
     }

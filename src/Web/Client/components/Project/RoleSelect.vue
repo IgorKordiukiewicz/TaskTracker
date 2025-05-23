@@ -11,12 +11,12 @@
 <script setup lang="ts">
 import type { SelectChangeEvent } from 'primevue/select';
 import type { PropType } from 'vue';
-import { UpdateMemberRoleDto } from '~/types/dtos/shared';
-import type { MemberVM, RoleVM } from '~/types/viewModels/shared';
+import { UpdateMemberRoleDto } from '~/types/dtos/projects';
+import type { ProjectMemberVM, RoleVM } from '~/types/viewModels/projects';
 
 const props = defineProps({
     roles: { type: Object as PropType<RoleVM[]>, required: true },
-    member: { type: Object as PropType<MemberVM>, required: true }
+    member: { type: Object as PropType<ProjectMemberVM>, required: true }
 });
 
 const emit = defineEmits([ 'onUpdate' ]);
@@ -32,14 +32,14 @@ const isCurrentOwner = computed(() => {
     return props.roles.find(x => x.id === props.member.roleId)!.owner;
 })
 
-function getRoleValue(member: MemberVM) {
+function getRoleValue(member: ProjectMemberVM) {
     return {
         id: member.roleId,
         name: member.roleName
     };
 }
 
-async function updateMemberRole(event: SelectChangeEvent, member: MemberVM) {
+async function updateMemberRole(event: SelectChangeEvent, member: ProjectMemberVM) {
     const model = new UpdateMemberRoleDto();
     model.memberId = member.id;
     model.roleId = event.value.id;

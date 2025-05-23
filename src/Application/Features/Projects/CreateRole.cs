@@ -2,7 +2,7 @@
 
 namespace Application.Features.Projects;
 
-public record CreateProjectRoleCommand(Guid ProjectId, CreateRoleDto<ProjectPermissions> Model) : IRequest<Result>;
+public record CreateProjectRoleCommand(Guid ProjectId, CreateRoleDto Model) : IRequest<Result>;
 
 internal class CreateProjectRoleCommandValidator : AbstractValidator<CreateProjectRoleCommand>
 {

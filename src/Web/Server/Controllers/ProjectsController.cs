@@ -206,7 +206,7 @@ public class ProjectsController(IMediator mediator)
     /// <response code="404">Project not found.</response>
     [HttpGet("{projectId:guid}/roles")]
     [Authorize(Policy.ProjectMember)]
-    [ProducesResponseType(typeof(RolesVM<ProjectPermissions>), 200)]
+    [ProducesResponseType(typeof(RolesVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetProjectRoles(Guid projectId)
     {
@@ -225,7 +225,7 @@ public class ProjectsController(IMediator mediator)
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> CreateProjectRole(Guid projectId, [FromBody] CreateRoleDto<ProjectPermissions> model)
+    public async Task<IActionResult> CreateProjectRole(Guid projectId, [FromBody] CreateRoleDto model)
     {
         var result = await mediator.Send(new CreateProjectRoleCommand(projectId, model));
         return result.ToHttpResult();
@@ -276,7 +276,7 @@ public class ProjectsController(IMediator mediator)
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> UpdateRolePermissions(Guid projectId, [FromBody] UpdateRolePermissionsDto<ProjectPermissions> model)
+    public async Task<IActionResult> UpdateRolePermissions(Guid projectId, [FromBody] UpdateRolePermissionsDto model)
     {
         var result = await mediator.Send(new UpdateProjectRolePermissionsCommand(projectId, model));
         return result.ToHttpResult();

@@ -1,5 +1,5 @@
 import type { ProjectInvitationState, ProjectPermissions } from "../enums";
-import type { MemberVM, NavDataVM, RoleVM } from "./shared";
+import type { NavDataVM } from "./shared";
 
 export interface ProjectsVM {
     projects: ProjectVM[];
@@ -21,15 +21,25 @@ export interface ProjectMembersVM {
     members: ProjectMemberVM[];
 }
 
-export interface ProjectMemberVM extends MemberVM {
+export interface ProjectMemberVM {
+    id: string;
+    userId: string;
+    name: string;
+    email: string;
+    roleId: string;
+    roleName: string;
 }
 
-export interface ProjectRolesVM {
-    roles: ProjectRoleVM[];
+export interface RolesVM {
+    roles: RoleVM[];
 }
 
-export interface ProjectRoleVM extends RoleVM {
+export interface RoleVM {
     permissions: ProjectPermissions;
+    id: string;
+    name: string;
+    modifiable: boolean;
+    owner: boolean;
 }
 
 export interface ProjectSettingsVM {

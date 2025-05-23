@@ -23,8 +23,8 @@ internal class GetProjectInvitationsForUserHandler(AppDbContext dbContext)
             .Where(x => x.UserId == user.Id && x.State == ProjectInvitationState.Pending)
             .Join(dbContext.Projects,
             invitation => invitation.ProjectId,
-            organization => organization.Id,
-            (invitation, organization) => new UserProjectInvitationVM(invitation.Id, organization.Name))
+            project => project.Id,
+            (invitation, project) => new UserProjectInvitationVM(invitation.Id, project.Name))
             .ToListAsync(cancellationToken);
 
         return Result.Ok(new UserProjectInvitationsVM(invitations));

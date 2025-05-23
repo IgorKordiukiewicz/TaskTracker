@@ -2,7 +2,7 @@
 
 namespace Domain.Projects;
 
-public class Project : Entity, IAggregateRoot, IHasName
+public class Project : Entity, IAggregateRoot
 {
     public string Name { get; set; } = string.Empty;
     public Guid OwnerId { get; private init; }
@@ -13,15 +13,15 @@ public class Project : Entity, IAggregateRoot, IHasName
     private readonly List<ProjectInvitation> _invitations = [];
     public IReadOnlyList<ProjectInvitation> Invitations => _invitations.AsReadOnly();
 
-    private readonly List<ProjectRole> _roles = [];
-    public IReadOnlyList<ProjectRole> Roles => _roles.AsReadOnly();
+    private readonly List<MemberRole> _roles = [];
+    public IReadOnlyList<MemberRole> Roles => _roles.AsReadOnly();
 
-    public RolesManager<ProjectRole, ProjectPermissions> RolesManager { get; private init; }
+    public RolesManager RolesManager { get; private init; }
 
     private Project(Guid id)
         : base(id)
     {
-        RolesManager = new(_roles, (name, permissions) => new ProjectRole(name, Id, permissions));
+        RolesManager = new(_roles, id);
     }
 
     public static Project Create(string name, Guid ownerId)
@@ -32,7 +32,7 @@ public class Project : Entity, IAggregateRoot, IHasName
             OwnerId = ownerId,
         };
 
-        result._roles.AddRange(ProjectRole.CreateDefaultRoles(result.Id));
+        result._roles.AddRange(MemberRole.CreateDefaultRoles(result.Id));
 
         var member = ProjectMember.Create(ownerId, result.RolesManager.GetOwnerRoleId()!.Value);
         result._members.Add(member);
@@ -126,7 +126,7 @@ public class Project : Entity, IAggregateRoot, IHasName
     {
         if (OwnerId == userId)
         {
-            return Result.Fail(new DomainError("Owner can't leave the organization."));
+            return Result.Fail(new DomainError("Owner can't leave the project."));
         }
 
         var member = _members.First(x => x.UserId == userId);

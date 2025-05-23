@@ -2,14 +2,7 @@
 
 public record GetProjectsQuery(Guid UserId) : IRequest<Result<ProjectsVM>>;
 
-internal class GetProjectsForOrganizationQueryValidator : AbstractValidator<GetProjectsQuery> // TODO: Delete?
-{
-    public GetProjectsForOrganizationQueryValidator()
-    {
-    }
-}
-
-internal class GetProjectsForOrganizationHandler(AppDbContext dbContext) 
+internal class GetProjectsHandler(AppDbContext dbContext) 
     : IRequestHandler<GetProjectsQuery, Result<ProjectsVM>>
 {
     public async Task<Result<ProjectsVM>> Handle(GetProjectsQuery request, CancellationToken cancellationToken)

@@ -2,7 +2,7 @@
 
 namespace Application.Features.Projects;
 
-public record UpdateProjectRolePermissionsCommand(Guid ProjectId, UpdateRolePermissionsDto<ProjectPermissions> Model) : IRequest<Result>;
+public record UpdateProjectRolePermissionsCommand(Guid ProjectId, UpdateRolePermissionsDto Model) : IRequest<Result>;
 
 internal class UpdateProjectRolePermissionsCommandValidator : AbstractValidator<UpdateProjectRolePermissionsCommand>
 {

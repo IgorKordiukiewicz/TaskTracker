@@ -56,7 +56,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Projects.Project", b =>
@@ -82,7 +82,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Projects.ProjectInvitation", b =>
@@ -120,7 +120,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ProjectInvitations");
+                    b.ToTable("ProjectInvitations", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Projects.ProjectMember", b =>
@@ -149,7 +149,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ProjectMembers");
+                    b.ToTable("ProjectMembers", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Projects.ProjectRole", b =>
@@ -180,7 +180,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("ProjectRoles");
+                    b.ToTable("ProjectRoles", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Tasks.Task", b =>
@@ -230,7 +230,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Tasks", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Tasks.TaskActivity", b =>
@@ -265,7 +265,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TaskId");
 
-                    b.ToTable("TaskActivities");
+                    b.ToTable("TaskActivities", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Tasks.TaskComment", b =>
@@ -298,7 +298,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TaskId");
 
-                    b.ToTable("TaskComments");
+                    b.ToTable("TaskComments", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Tasks.TaskHierarchicalRelationship", b =>
@@ -323,7 +323,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TaskRelationshipManagerId");
 
-                    b.ToTable("TaskHierarchicalRelationships");
+                    b.ToTable("TaskHierarchicalRelationships", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Tasks.TaskRelationshipManager", b =>
@@ -342,7 +342,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TaskRelationshipManagers");
+                    b.ToTable("TaskRelationshipManagers", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Tasks.TaskTimeLog", b =>
@@ -376,7 +376,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TaskId");
 
-                    b.ToTable("TaskTimeLogs");
+                    b.ToTable("TaskTimeLogs", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Users.User", b =>
@@ -407,7 +407,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Workflows.TaskStatus", b =>
@@ -438,7 +438,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("WorkflowId");
 
-                    b.ToTable("TaskStatuses");
+                    b.ToTable("TaskStatuses", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Workflows.TaskStatusTransition", b =>
@@ -461,7 +461,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("WorkflowId");
 
-                    b.ToTable("TaskStatusTransitions");
+                    b.ToTable("TaskStatusTransitions", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Workflows.Workflow", b =>
@@ -483,7 +483,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ProjectId")
                         .IsUnique();
 
-                    b.ToTable("Workflows");
+                    b.ToTable("Workflows", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.Models.TasksBoardLayout", b =>
@@ -503,7 +503,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("ProjectId");
 
-                    b.ToTable("TasksBoardLayouts");
+                    b.ToTable("TasksBoardLayouts", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.Models.UserPresentationData", b =>
@@ -523,7 +523,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("UsersPresentationData");
+                    b.ToTable("UsersPresentationData", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Notifications.Notification", b =>

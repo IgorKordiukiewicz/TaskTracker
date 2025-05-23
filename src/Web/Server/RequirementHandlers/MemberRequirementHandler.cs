@@ -3,44 +3,76 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Web.Server.RequirementHandlers;
 
-public abstract class MemberRequirement<TPermissions> : IAuthorizationRequirement
-    where TPermissions : struct, Enum
+public class ProjectMemberRequirement : IAuthorizationRequirement
 {
-    public TPermissions? Permissions { get; init; }
+    public ProjectPermissions? Permissions { get; init; }
+    public bool Owner { get; init; }
+
+    public ProjectMemberRequirement(ProjectPermissions? permissions = null, bool owner = false)
+    {
+        Permissions = permissions;
+        Owner = owner;
+    }
 }
 
-public abstract class MemberRequirementHandler<TAuthorizationRequirement>(AppDbContext dbContext, IHttpContextAccessor contextAccessor, string idKey) 
-    : AuthorizationHandler<TAuthorizationRequirement>
-    where TAuthorizationRequirement : IAuthorizationRequirement
+public class ProjectMemberRequirementHandler(AppDbContext dbContext, IHttpContextAccessor contextAccessor) 
+    : AuthorizationHandler<ProjectMemberRequirement>
 {
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, TAuthorizationRequirement requirement)
+    private readonly string _idKey = "projectId";
+
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, ProjectMemberRequirement requirement)
     {
-        var entityId = GetEntityId(contextAccessor.HttpContext);
-        if (entityId == default)
-        {
-            context.Fail();
-            return;
-        }
-
-        var userId = context.User.GetUserId();
-        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
-        if (user is null)
-        {
-            context.Fail();
-            return;
-        }
-
-        if(!await CheckRequirement(requirement, dbContext, user.Id, entityId))
+        if(!await CheckRequirement(context, requirement))
         {
             context.Fail();
             return;
         }
 
         context.Succeed(requirement);
-        return;
     }
 
-    protected abstract Task<bool> CheckRequirement(TAuthorizationRequirement requirement, AppDbContext dbContext, Guid userId, Guid entityId);
+    private async Task<bool> CheckRequirement(AuthorizationHandlerContext context, ProjectMemberRequirement requirement)
+    {
+        var entityId = GetEntityId(contextAccessor.HttpContext);
+        if (entityId == default)
+        {
+            return false;
+        }
+
+        var userId = context.User.GetUserId();
+        if (userId == default)
+        {
+            return false;
+        }
+
+        var member = await dbContext.Projects
+            .AsNoTracking()
+            .Include(x => x.Members)
+            .Where(x => x.Id == entityId)
+            .SelectMany(x => x.Members)
+            .FirstOrDefaultAsync(x => x.UserId == userId);
+
+        if (member is null)
+        {
+            return false;
+        }
+
+        if (requirement.Owner)
+        {
+            return await dbContext.Projects.AnyAsync(x => x.Id == entityId && x.OwnerId == userId);
+        }
+
+        if (requirement.Permissions is null)
+        {
+            return true;
+        }
+
+        var role = await dbContext.ProjectRoles
+            .AsNoTracking()
+            .Where(x => x.Id == member.RoleId)
+            .FirstAsync();
+        return role.HasPermission(requirement.Permissions.Value);
+    }
 
     private Guid GetEntityId(HttpContext? httpContext)
     {
@@ -49,19 +81,19 @@ public abstract class MemberRequirementHandler<TAuthorizationRequirement>(AppDbC
             return default;
         }
 
-        var routeValue = httpContext.Request.RouteValues[idKey]?.ToString() ?? string.Empty;
+        var routeValue = httpContext.Request.RouteValues[_idKey]?.ToString() ?? string.Empty;
         if (Guid.TryParse(routeValue, out var routeId))
         {
             return routeId;
         }
 
-        var headerValue = httpContext.Request.Headers[idKey].ToString() ?? string.Empty;
+        var headerValue = httpContext.Request.Headers[_idKey].ToString() ?? string.Empty;
         if (Guid.TryParse(headerValue, out var headerId))
         {
             return headerId;
         }
 
-        var paramValue = httpContext.Request.Query[idKey].FirstOrDefault() ?? string.Empty;
+        var paramValue = httpContext.Request.Query[_idKey].FirstOrDefault() ?? string.Empty;
         if (Guid.TryParse(paramValue, out var paramId))
         {
             return paramId;

@@ -1,24 +1,14 @@
-﻿namespace Domain.Common;
+﻿namespace Domain.Projects;
 
-public interface IHasRole
+public class RolesManager
 {
-    Guid Id { get; }
-    Guid UserId { get; }
-    Guid RoleId { get; }
-    void UpdateRole(Guid roleId);
-}
+    private readonly List<MemberRole> _roles;
+    private readonly Guid _projectId;
 
-public class RolesManager<TRole, TPermissions>
-    where TRole : Role<TPermissions>
-    where TPermissions : struct, Enum
-{
-    private readonly List<TRole> _roles;
-    private readonly Func<string, TPermissions, TRole> _createNewRoleFunc;
-
-    public RolesManager(List<TRole> roles, Func<string, TPermissions, TRole> createNewRoleFunc)
+    public RolesManager(List<MemberRole> roles, Guid projectId)
     {
         _roles = roles;
-        _createNewRoleFunc = createNewRoleFunc;
+        _projectId = projectId;
     }
 
     public Guid? GetOwnerRoleId()
@@ -30,15 +20,15 @@ public class RolesManager<TRole, TPermissions>
     public Guid GetReadOnlyRoleId()
         => _roles.Single(x => x.Type == RoleType.ReadOnly).Id;
 
-    public Result AddRole(string name, TPermissions permissions)
+    public Result AddRole(string name, ProjectPermissions permissions)
     {
         if (IsNameTaken(name))
         {
             return Result.Fail(new DomainError("Role with this name already exists."));
         }
 
-        var newRole = _createNewRoleFunc(name, permissions);
-        _roles.Add(newRole);
+        _roles.Add(new MemberRole(name, _projectId, permissions));
+
         return Result.Ok();
     }
 
@@ -50,7 +40,7 @@ public class RolesManager<TRole, TPermissions>
             return Result.Fail(new DomainError("Role wih this ID does not exist."));
         }
 
-        if(!role.IsModifiable())
+        if (!role.IsModifiable())
         {
             return Result.Fail(new DomainError("This role can not be modified."));
         }
@@ -64,15 +54,15 @@ public class RolesManager<TRole, TPermissions>
         return Result.Ok();
     }
 
-    public Result DeleteRole(Guid roleId, IReadOnlyCollection<IHasRole> members)
+    public Result DeleteRole(Guid roleId, IReadOnlyCollection<ProjectMember> members)
     {
         var role = _roles.FirstOrDefault(x => x.Id == roleId);
-        if(role is null)
+        if (role is null)
         {
             return Result.Fail(new DomainError("Role wih this ID does not exist."));
         }
 
-        if(!role.IsModifiable() || members.Any(x => x.RoleId == roleId))
+        if (!role.IsModifiable() || members.Any(x => x.RoleId == roleId))
         {
             return Result.Fail(new DomainError("This role can not be deleted."));
         }
@@ -81,16 +71,16 @@ public class RolesManager<TRole, TPermissions>
         return Result.Ok();
     }
 
-    public Result UpdateMemberRole(Guid memberId, Guid roleId, IReadOnlyCollection<IHasRole> members)
+    public Result UpdateMemberRole(Guid memberId, Guid roleId, IReadOnlyCollection<ProjectMember> members)
     {
         var member = members.FirstOrDefault(x => x.Id == memberId);
-        if(member is null)
+        if (member is null)
         {
             return Result.Fail(new DomainError("Member with this ID does not exist."));
         }
 
         var role = _roles.FirstOrDefault(x => x.Id == roleId);
-        if(role is null)
+        if (role is null)
         {
             return Result.Fail(new DomainError("Role wih this ID does not exist."));
         }
@@ -110,15 +100,15 @@ public class RolesManager<TRole, TPermissions>
         return Result.Ok();
     }
 
-    public Result UpdateRolePermissions(Guid roleId, TPermissions permissions)
+    public Result UpdateRolePermissions(Guid roleId, ProjectPermissions permissions)
     {
         var role = _roles.FirstOrDefault(x => x.Id == roleId);
-        if(role is null)
+        if (role is null)
         {
             return Result.Fail(new DomainError("Role wih this ID does not exist."));
         }
 
-        if(!role.IsModifiable())
+        if (!role.IsModifiable())
         {
             return Result.Fail(new DomainError("This role can not be modified."));
         }

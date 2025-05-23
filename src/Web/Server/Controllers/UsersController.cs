@@ -59,7 +59,7 @@ public class UsersController(IMediator mediator)
     /// </summary>
     /// <param name="searchValue"></param>
     /// <param name="projectId"></param>
-    /// <response code="404">Organization not found.</response> 
+    /// <response code="404">Project not found.</response> 
     [HttpGet("available-for-invitation")]
     [Authorize(Policy.ProjectEditMembers)]
     [ProducesResponseType(typeof(UsersSearchVM), 200)]

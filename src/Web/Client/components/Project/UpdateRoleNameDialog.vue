@@ -7,8 +7,8 @@
 </template>
 
 <script setup lang="ts">
-import { UpdateRoleNameDto } from '~/types/dtos/shared';
-import type { RoleVM } from '~/types/viewModels/shared';
+import { UpdateRoleNameDto } from '~/types/dtos/projects';
+import type { RoleVM } from '~/types/viewModels/projects';
 
 defineExpose({ show });
 const emit = defineEmits([ 'onUpdate' ]);

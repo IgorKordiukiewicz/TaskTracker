@@ -7,16 +7,14 @@
 </template>
 
 <script setup lang="ts">
-import { RemoveMemberDto, UpdateMemberRoleDto } from '~/types/dtos/shared';
+import { RemoveMemberDto, UpdateMemberRoleDto } from '~/types/dtos/projects';
 import { ProjectPermissions } from '~/types/enums';
 
 const route = useRoute();
 const projectsService = useProjectsService();
-const usersService = useUsersService();
 const permissions = usePermissions();
 
 const projectId = ref(route.params.id as string);
-const addProjectMemberDialog = ref();
 
 await permissions.checkProjectPermissions(projectId.value);
 

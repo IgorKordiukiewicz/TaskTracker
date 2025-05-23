@@ -2,5 +2,5 @@
 
 public record NavigationItemVM(Guid Id, string Name);
 
-public record OrganizationNavigationVM(NavigationItemVM Organization);
+public record OrganizationNavigationVM(NavigationItemVM Organization); // TODO: Delete
 public record ProjectNavigationVM(NavigationItemVM Project, NavigationItemVM Organization);

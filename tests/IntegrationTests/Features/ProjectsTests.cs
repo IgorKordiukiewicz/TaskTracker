@@ -1,6 +1,5 @@
 ﻿using Application.Features.Projects;
 using Application.Models.ViewModels;
-using Domain.Common;
 using Domain.Projects;
 using Domain.Users;
 using Domain.Workflows;
@@ -221,14 +220,14 @@ public class ProjectsTests
     public async Task CreateRole_ShouldAddNewRole_WhenProjectExists()
     {
         var project = (await _factory.CreateProjects())[0];
-        var rolesCountBefore = await _fixture.CountAsync<ProjectRole>();
+        var rolesCountBefore = await _fixture.CountAsync<MemberRole>();
 
         var result = await _fixture.SendRequest(new CreateProjectRoleCommand(project.Id, new("abc", ProjectPermissions.EditTasks)));
 
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            (await _fixture.CountAsync<ProjectRole>()).Should().Be(rolesCountBefore + 1);
+            (await _fixture.CountAsync<MemberRole>()).Should().Be(rolesCountBefore + 1);
         }
     }
 
@@ -244,14 +243,14 @@ public class ProjectsTests
     public async Task DeleteRole_ShouldDeleteRole_WhenPprojectExists()
     {
         var (project, roleName) = await CreateProjectWithCustomRole();
-        var rolesCountBefore = await _fixture.CountAsync<ProjectRole>();
+        var rolesCountBefore = await _fixture.CountAsync<MemberRole>();
 
         var result = await _fixture.SendRequest(new DeleteProjectRoleCommand(project.Id, new(project.Roles.First(x => x.Name == roleName).Id)));
 
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            (await _fixture.CountAsync<ProjectRole>()).Should().Be(rolesCountBefore - 1);
+            (await _fixture.CountAsync<MemberRole>()).Should().Be(rolesCountBefore - 1);
         }
     }
 
@@ -275,7 +274,7 @@ public class ProjectsTests
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            (await _fixture.FirstAsync<ProjectRole>(x => x.Id == roleId)).Name.Should().Be(newName);
+            (await _fixture.FirstAsync<MemberRole>(x => x.Id == roleId)).Name.Should().Be(newName);
         }
     }
 
@@ -333,7 +332,7 @@ public class ProjectsTests
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            (await _fixture.FirstAsync<ProjectRole>(x => x.Id == roleId)).Permissions.Should().Be(newPermissions);
+            (await _fixture.FirstAsync<MemberRole>(x => x.Id == roleId)).Permissions.Should().Be(newPermissions);
         }
     }
 

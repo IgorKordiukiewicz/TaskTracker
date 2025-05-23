@@ -48,12 +48,12 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue';
-import { RemoveMemberDto, type UpdateMemberRoleDto } from '~/types/dtos/shared';
-import type { MemberVM, RoleVM } from '~/types/viewModels/shared';
+import { RemoveMemberDto, type UpdateMemberRoleDto } from '~/types/dtos/projects';
+import type { ProjectMemberVM, RoleVM } from '~/types/viewModels/projects';
 import { FilterMatchMode } from '@primevue/core/api';
 
 const props = defineProps({
-    members: { type: Object as PropType<MemberVM[]>, required: true },
+    members: { type: Object as PropType<ProjectMemberVM[]>, required: true },
     roles: { type: Object as PropType<RoleVM[]>, required: true },
     canEditMembers: { type: Boolean, required: true }
 })

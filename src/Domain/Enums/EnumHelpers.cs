@@ -10,5 +10,4 @@ public static class EnumHelpers
 
         return (TEnum)(object)flagsValue;
     }
-        
 }

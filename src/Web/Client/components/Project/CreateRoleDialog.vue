@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { CreateRoleDto } from '~/types/dtos/shared';
+import { CreateRoleDto } from '~/types/dtos/projects';
 
 defineExpose({ show });
 const emit = defineEmits([ 'onCreate' ]);

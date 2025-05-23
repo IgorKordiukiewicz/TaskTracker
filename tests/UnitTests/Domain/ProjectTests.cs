@@ -1,5 +1,4 @@
-﻿using Domain.Common;
-using Domain.Projects;
+﻿using Domain.Projects;
 
 namespace UnitTests.Domain;
 
@@ -245,10 +244,10 @@ public class ProjectTests
     [Fact]
     public void RemoveMember_ShouldFail_WhenMemberIsOwner()
     {
-        var organization = Project.Create("Name", Guid.NewGuid());
-        var member = organization.Members[0];
+        var project = Project.Create("Name", Guid.NewGuid());
+        var member = project.Members[0];
 
-        var result = organization.RemoveMember(member.Id);
+        var result = project.RemoveMember(member.Id);
 
         result.IsFailed.Should().BeTrue();
     }
