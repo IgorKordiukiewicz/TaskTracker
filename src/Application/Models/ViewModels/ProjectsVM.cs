@@ -42,3 +42,5 @@ public record RoleVM
     public required bool Modifiable { get; init; }
     public required bool Owner { get; init; }
 }
+
+public record ProjectInfoVM(Guid Id, string Name);

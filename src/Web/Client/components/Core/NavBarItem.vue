@@ -1,10 +1,10 @@
 <template>
-    <a class="flex items-center cursor-pointer p-3 hover:bg-surface-100 rounded gap-3" :href="props.link" :class="{ 'bg-surface-100': selected }">
+    <NuxtLink class="flex items-center cursor-pointer p-3 hover:bg-surface-100 rounded gap-3" :to="props.link" :class="{ 'bg-surface-100': selected }">
         <i :class="props.icon" class="navbar-item-icon"></i>
         <span>
             {{ props.title }}
         </span>
-    </a>
+    </NuxtLink>
 </template>
 
 <script setup lang="ts">

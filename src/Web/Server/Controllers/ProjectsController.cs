@@ -47,16 +47,16 @@ public class ProjectsController(IMediator mediator)
     }
 
     /// <summary>
-    /// Get navigation data for a project.
+    /// Get project information.
     /// </summary>
     /// <param name="projectId"></param>
     /// <response code="404">Project not found.</response>
-    [HttpGet("{projectId:guid}/nav-data")]
-    [ProducesResponseType(typeof(ProjectNavigationVM), 200)]
+    [HttpGet("{projectId:guid}")]
+    [ProducesResponseType(typeof(ProjectInfoVM), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetProjectNavData(Guid projectId)
+    public async Task<IActionResult> GetProjectInformation(Guid projectId)
     {
-        var result = await mediator.Send(new GetProjectNavDataQuery(projectId));
+        var result = await mediator.Send(new GetProjectInfoQuery(projectId));
         return result.ToHttpResult();
     }
 

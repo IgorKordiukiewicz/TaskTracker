@@ -2,7 +2,7 @@
     <div class="flex justify-between border-b h-14 p-3 items-center">
         <div class="flex gap-2 items-center">
             <i class="pi pi-bars p-2 hover:bg-surface-100 cursor-pointer rounded" @click="toggleSidebar"></i>
-            <HierarchyNav></HierarchyNav>
+            <label v-if="project">{{ project.name }}</label>
         </div>
         <div class="flex gap-4 items-end">
             <span :class="{ 'cursor-pointer': anyNotifications }" style="color: rgb(100, 116, 139);" @click="openNotificationsPopup">
@@ -31,6 +31,21 @@ const emit = defineEmits([ 'toggleSidebar' ])
 const auth = useAuth();
 const projectsService = useProjectsService();
 const notificationsService = useNotificationsService();
+const route = useRoute();
+
+const project = ref();
+
+watch(() => route.path, checkProjectInfo, { immediate: true });
+
+async function checkProjectInfo() {
+    if(route.fullPath.startsWith('/project')) {
+        const id = route.params.id as string;
+        if(project.value && project.value.id === id) {
+            return;
+        }
+        project.value = await projectsService.getInfo(id);
+    }
+}
 
 const userId = ref(auth.getUserId());
 
