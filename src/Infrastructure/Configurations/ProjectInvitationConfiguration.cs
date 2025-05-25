@@ -3,7 +3,7 @@ using Domain.Users;
 
 namespace Infrastructure.Configurations;
 
-internal class ProjectInvitationConfiguration : BaseEntityTypeConfiguration<ProjectInvitation>
+internal class ProjectInvitationConfiguration : DomainEntityTypeConfiguration<ProjectInvitation>
 {
     public override void Configure(EntityTypeBuilder<ProjectInvitation> builder)
     {

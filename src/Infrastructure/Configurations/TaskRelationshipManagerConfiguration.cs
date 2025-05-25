@@ -2,7 +2,7 @@
 
 namespace Infrastructure.Configurations;
 
-internal class TaskRelationshipManagerConfiguration : BaseEntityTypeConfiguration<TaskRelationshipManager>
+internal class TaskRelationshipManagerConfiguration : DomainEntityTypeConfiguration<TaskRelationshipManager>
 {
     public override void Configure(EntityTypeBuilder<TaskRelationshipManager> builder)
     {

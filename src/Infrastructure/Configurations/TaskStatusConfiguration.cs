@@ -1,6 +1,6 @@
 ﻿namespace Infrastructure.Configurations;
 
-internal class TaskStatusConfiguration : BaseEntityTypeConfiguration<Domain.Workflows.TaskStatus>
+internal class TaskStatusConfiguration : DomainEntityTypeConfiguration<Domain.Workflows.TaskStatus>
 {
     public override void Configure(EntityTypeBuilder<Domain.Workflows.TaskStatus> builder)
     {

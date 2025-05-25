@@ -36,6 +36,7 @@ public class Project : Entity, IAggregateRoot
 
         var member = ProjectMember.Create(ownerId, result.RolesManager.GetOwnerRoleId()!.Value);
         result._members.Add(member);
+        result.AddEvent(new ProjectCreated(result.Id, ownerId));
 
         return result;
     }
@@ -55,6 +56,7 @@ public class Project : Entity, IAggregateRoot
         DateTime? expirationDate = expirationDays.HasValue ? now.AddDays(expirationDays.Value) : null;
         var invitation = ProjectInvitation.Create(userId, Id, now, expirationDate);
         _invitations.Add(invitation);
+        AddEvent(new ProjectInvitationCreated(Id, userId));
 
         return invitation;
     }
@@ -69,6 +71,8 @@ public class Project : Entity, IAggregateRoot
 
         var invitation = invitationResult.Value;
         invitation.Accept(now);
+        AddEvent(new ProjectInvitationAccepted(Id, invitation.UserId));
+
         return AddMember(invitation.UserId, RolesManager.GetReadOnlyRoleId());
     }
 
@@ -81,6 +85,8 @@ public class Project : Entity, IAggregateRoot
         }
 
         invitationResult.Value.Decline(now);
+        AddEvent(new ProjectInvitationDeclined(Id, invitationResult.Value.UserId));
+
         return Result.Ok();
     }
 
@@ -93,6 +99,8 @@ public class Project : Entity, IAggregateRoot
         }
 
         invitationResult.Value.Cancel(now);
+        AddEvent(new ProjectInvitationCanceled(Id, invitationResult.Value.UserId));
+
         return Result.Ok();
     }
 
@@ -100,7 +108,12 @@ public class Project : Entity, IAggregateRoot
     {
         foreach (var invitation in _invitations)
         {
-            invitation.Expire(now);
+            var expired = invitation.Expire(now);
+
+            if(expired)
+            {
+                AddEvent(new ProjectInvitationExpired(Id, invitation.UserId));
+            }
         }
     }
 
@@ -117,8 +130,9 @@ public class Project : Entity, IAggregateRoot
             return Result.Fail(new DomainError("Can't remove owner."));
         }
 
-
         _members.Remove(member);
+        AddEvent(new ProjectMemberRemoved(Id, member.UserId));
+
         return Result.Ok();
     }
 
@@ -131,6 +145,7 @@ public class Project : Entity, IAggregateRoot
 
         var member = _members.First(x => x.UserId == userId);
         _members.Remove(member);
+        AddEvent(new ProjectMemberLeft(Id, userId));
 
         return Result.Ok();
     }

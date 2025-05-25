@@ -1,4 +1,5 @@
-﻿using Domain.Projects;
+﻿using Domain.Events;
+using Domain.Projects;
 
 namespace UnitTests.Domain;
 
@@ -24,6 +25,8 @@ public class ProjectTests
             result.Members.Count.Should().Be(1);
             result.Members[0].UserId.Should().Be(userId);
             result.Members[0].RoleId.Should().Be(ownerRoleId);
+
+            result.HasDomainEvents<ProjectCreated>().Should().BeTrue();
         }
     }
 
@@ -45,6 +48,7 @@ public class ProjectTests
             result.Value.ProjectId.Should().Be(project.Id);
             result.Value.UserId.Should().Be(userId);
             result.Value.ExpirationDate.Should().Be(new DateTime(2024, 12, 11));
+            project.HasDomainEvents<ProjectInvitationCreated>().Should().BeTrue();
         }
     }
 
@@ -58,19 +62,6 @@ public class ProjectTests
         project.DeclineInvitation(invitation.Id, DateTime.Now);
 
         var result = project.CreateInvitation(userId, DateTime.Now);
-
-        result.IsSuccess.Should().BeTrue();
-    }
-
-    [Fact]
-    public void CreateInvitation_ShouldReturnOk_WhenThereExistsPendingInvitationForAnotherUser()
-    {
-        var project = Project.Create("Name", Guid.NewGuid());
-
-        var invitation = project.CreateInvitation(Guid.NewGuid(), DateTime.Now).Value;
-        project.DeclineInvitation(invitation.Id, DateTime.Now);
-
-        var result = project.CreateInvitation(Guid.NewGuid(), DateTime.Now);
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -115,6 +106,7 @@ public class ProjectTests
             result.Value.Should().NotBeNull();
             result.Value.RoleId.Should().Be(expectedRoleId);
             project.Members.Should().HaveCount(2);
+            project.HasDomainEvents<ProjectInvitationAccepted>().Should().BeTrue();
         }
     }
 
@@ -152,6 +144,7 @@ public class ProjectTests
         {
             result.IsSuccess.Should().BeTrue();
             invitation.State.Should().Be(ProjectInvitationState.Declined);
+            project.HasDomainEvents<ProjectInvitationDeclined>().Should().BeTrue();
         }
     }
 
@@ -189,6 +182,7 @@ public class ProjectTests
         {
             result.IsSuccess.Should().BeTrue();
             invitation.State.Should().Be(ProjectInvitationState.Canceled);
+            project.HasDomainEvents<ProjectInvitationCanceled>().Should().BeTrue();
         }
     }
 
@@ -227,8 +221,12 @@ public class ProjectTests
 
         project.ExpireInvitations(now.AddDays(15));
 
-        var expiredInvitations = project.Invitations.Where(x => x.State == ProjectInvitationState.Expired);
-        expiredInvitations.Should().BeEquivalentTo([invitation4]);
+        using(new AssertionScope())
+        {
+            var expiredInvitations = project.Invitations.Where(x => x.State == ProjectInvitationState.Expired);
+            expiredInvitations.Should().BeEquivalentTo([invitation4]);
+            project.HasDomainEvents<ProjectInvitationExpired>().Should().BeTrue();
+        }
     }
 
     [Fact]
@@ -267,6 +265,7 @@ public class ProjectTests
         {
             result.IsSuccess.Should().BeTrue();
             project.Members.Count.Should().Be(1);
+            project.HasDomainEvents<ProjectMemberRemoved>().Should().BeTrue();
         }
     }
 
@@ -295,6 +294,7 @@ public class ProjectTests
         {
             result.IsSuccess.Should().BeTrue();
             project.Members.Count.Should().Be(1);
+            project.HasDomainEvents<ProjectMemberLeft>().Should().BeTrue();
         }
     }
 

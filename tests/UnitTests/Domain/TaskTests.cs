@@ -1,4 +1,5 @@
-﻿using Domain.Workflows;
+﻿using Domain.Events;
+using Domain.Workflows;
 using Task = Domain.Tasks.Task;
 
 namespace UnitTests.Domain;
@@ -25,6 +26,7 @@ public class TaskTests
             result.Description.Should().Be(description);
             result.StatusId.Should().Be(statusId);
             result.Activities.Count().Should().Be(1);
+            result.HasDomainEvents<TaskCreated>().Should().BeTrue();
         }
     }
 
@@ -59,6 +61,7 @@ public class TaskTests
             result.IsSuccess.Should().BeTrue();
             task.StatusId.Should().Be(availableStatusId);
             task.Activities.Any(x => x.Property == TaskProperty.Status).Should().BeTrue();
+            task.HasDomainEvents<TaskStatusUpdated>().Should().BeTrue();
         }
     }
 
@@ -74,6 +77,7 @@ public class TaskTests
         {
             task.AssigneeId.Should().Be(assigneeId);
             task.Activities.Any(x => x.Property == TaskProperty.Assignee).Should().BeTrue();
+            task.HasDomainEvents<TaskAssigneeUpdated>().Should().BeTrue();
         }
     }
 
@@ -91,6 +95,7 @@ public class TaskTests
             task.AssigneeId.Should().BeNull();
             task.AssigneeId.Should().NotBe(assigneeIdBefore.ToString());
             task.Activities.Count(x => x.Property == TaskProperty.Assignee).Should().Be(2);
+            task.HasDomainEvents<TaskAssigneeUpdated>(2).Should().BeTrue();
         }
     }
 
@@ -107,6 +112,7 @@ public class TaskTests
         {
             task.Priority.Should().Be(newPriority);
             task.Activities.Any(x => x.Property == TaskProperty.Priority).Should().BeTrue();
+            task.HasDomainEvents<TaskPriorityUpdated>().Should().BeTrue();
         }
     }
 
@@ -147,7 +153,11 @@ public class TaskTests
 
         task.AddComment("abc", Guid.NewGuid(), DateTime.Now);
 
-        task.Comments.Count.Should().Be(1);
+        using(new AssertionScope())
+        {
+            task.Comments.Count.Should().Be(1);
+            task.HasDomainEvents<TaskCommentAdded>().Should().BeTrue();
+        }
     }
 
     [Fact]
@@ -167,6 +177,7 @@ public class TaskTests
             task.TimeLogs[0].Minutes.Should().Be(minutes);
             task.TimeLogs[0].Day.Should().Be(day);
             task.TimeLogs[0].LoggedBy.Should().Be(userId);
+            task.HasDomainEvents<TaskTimeLogged>().Should().BeTrue();
         }
     }
 
@@ -194,7 +205,11 @@ public class TaskTests
         
         task.UpdateEstimatedTime(expected);
 
-        task.EstimatedTime.Should().Be(expected);
+        using(new AssertionScope())
+        {
+            task.EstimatedTime.Should().Be(expected);
+            task.HasDomainEvents<TaskEstimatedTimeUpdated>().Should().BeTrue();
+        }
     }
 
     [Theory]
@@ -206,7 +221,11 @@ public class TaskTests
         
         task.UpdateEstimatedTime(minutes);
 
-        task.EstimatedTime.Should().BeNull();
+        using(new AssertionScope())
+        {
+            task.EstimatedTime.Should().BeNull();
+            task.HasDomainEvents<TaskEstimatedTimeUpdated>().Should().BeTrue();
+        }
     }
     
     private static Task CreateDefaultTask()

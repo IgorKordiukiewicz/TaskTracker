@@ -5,9 +5,9 @@ public record DomainEvent
     public Guid ProjectId { get; private init; }
     public DateTime OccurredAt { get; private init; }
 
-    protected DomainEvent(Guid projectId, DateTime now)
+    protected DomainEvent(Guid projectId)
     {
         ProjectId = projectId;
-        OccurredAt = now;
+        OccurredAt = DateTime.UtcNow;
     }
 }

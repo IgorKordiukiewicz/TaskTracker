@@ -87,7 +87,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IDomainEventDi
         // TODO: Later move to outbox pattern
         var entities = ChangeTracker
             .Entries<Entity>()
-            .Where(e => (e.State == EntityState.Added || e.State == EntityState.Modified) && e.Entity.Events.Any())
+            .Where(e => e.Entity.Events.Any())
             .Select(e => e.Entity)
             .ToList();
 

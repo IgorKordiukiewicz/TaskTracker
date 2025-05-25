@@ -3,7 +3,7 @@ using Domain.Workflows;
 
 namespace Infrastructure.Configurations;
 
-internal class WorkflowConfiguration : BaseEntityTypeConfiguration<Workflow>
+internal class WorkflowConfiguration : DomainEntityTypeConfiguration<Workflow>
 {
     public override void Configure(EntityTypeBuilder<Workflow> builder)
     {

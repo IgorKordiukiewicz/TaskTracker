@@ -3,7 +3,7 @@ using Domain.Users;
 
 namespace Infrastructure.Configurations;
 
-internal class TaskCommentConfiguration : BaseEntityTypeConfiguration<TaskComment>
+internal class TaskCommentConfiguration : DomainEntityTypeConfiguration<TaskComment>
 {
     public override void Configure(EntityTypeBuilder<TaskComment> builder)
     {

@@ -3,7 +3,7 @@ using Domain.Users;
 
 namespace Infrastructure.Configurations;
 
-internal class NotificationConfiguration : BaseEntityTypeConfiguration<Notification>
+internal class NotificationConfiguration : DomainEntityTypeConfiguration<Notification>
 {
     public override void Configure(EntityTypeBuilder<Notification> builder)
     {

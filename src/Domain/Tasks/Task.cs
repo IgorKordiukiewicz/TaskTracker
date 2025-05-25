@@ -16,6 +16,7 @@ public class Task : Entity, IAggregateRoot
     private readonly List<TaskComment> _comments = [];
     public IReadOnlyList<TaskComment> Comments => _comments.AsReadOnly();
 
+    // TODO: Remove and use events from analytics instead?
     private readonly List<TaskActivity> _activities = [];
     public IReadOnlyList<TaskActivity> Activities => _activities.AsReadOnly();
 
@@ -45,8 +46,7 @@ public class Task : Entity, IAggregateRoot
         };
 
         result._activities.Add(new(result.Id, TaskProperty.Creation, now));
-
-        result.AddEvent(new TaskCreated(result.Id, projectId, now));
+        result.AddEvent(new TaskCreated(result.Id, result.StatusId, result.AssigneeId, result.Priority, projectId));
 
         return result;
     }
@@ -71,6 +71,7 @@ public class Task : Entity, IAggregateRoot
         }
 
         _activities.Add(new(Id, TaskProperty.Status, now, StatusId.ToString(), newStatusId.ToString()));
+        AddEvent(new TaskStatusUpdated(Id, StatusId, newStatusId, ProjectId));
         StatusId = newStatusId;
         return Result.Ok();
     }
@@ -78,34 +79,40 @@ public class Task : Entity, IAggregateRoot
     public void UpdateAssignee(Guid newAssigneeId, DateTime now)
     {
         _activities.Add(new(Id, TaskProperty.Assignee, now, AssigneeId?.ToString(), newAssigneeId.ToString()));
+        AddEvent(new TaskAssigneeUpdated(Id, AssigneeId, newAssigneeId, ProjectId));
         AssigneeId = newAssigneeId;
     }
 
     public void Unassign(DateTime now)
     {
         _activities.Add(new(Id, TaskProperty.Assignee, now, AssigneeId.ToString()));
+        AddEvent(new TaskAssigneeUpdated(Id, AssigneeId, null, ProjectId));
         AssigneeId = null;
     }
 
     public void UpdatePriority(TaskPriority newPriority, DateTime now)
     {
         _activities.Add(new(Id, TaskProperty.Priority, now, Priority.ToString(), newPriority.ToString()));
+        AddEvent(new TaskPriorityUpdated(Id, Priority, newPriority, ProjectId));
         Priority = newPriority;
     }
 
     public void AddComment(string content, Guid authorId, DateTime now)
     {
         _comments.Add(new(Id, content, authorId, now));
+        AddEvent(new TaskCommentAdded(Id, authorId, ProjectId));
     }
 
     public void LogTime(int minutes, DateOnly day, Guid userId)
     {
-        // TODO: Save as activity ?
         _timeLogs.Add(new (Id, minutes, day, userId));
+        AddEvent(new TaskTimeLogged(Id, minutes, day, ProjectId));
     }
 
     public void UpdateEstimatedTime(int minutes)
     {
+        var oldValue = EstimatedTime;
         EstimatedTime = minutes <= 0 ? null : minutes;
+        AddEvent(new TaskEstimatedTimeUpdated(Id, oldValue, EstimatedTime, ProjectId));
     }
 }

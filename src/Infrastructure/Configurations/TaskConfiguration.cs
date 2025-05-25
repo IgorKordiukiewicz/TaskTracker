@@ -3,7 +3,7 @@ using Domain.Users;
 
 namespace Infrastructure.Configurations;
 
-internal class TaskConfiguration : BaseEntityTypeConfiguration<Domain.Tasks.Task>
+internal class TaskConfiguration : DomainEntityTypeConfiguration<Domain.Tasks.Task>
 {
     public override void Configure(EntityTypeBuilder<Domain.Tasks.Task> builder)
     {

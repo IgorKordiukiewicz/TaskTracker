@@ -44,14 +44,15 @@ public class ProjectInvitation : Entity
         FinalizedAt = now;
     }
 
-    public void Expire(DateTime now)
+    public bool Expire(DateTime now)
     {
         if (!ExpirationDate.HasValue || ExpirationDate.Value > now || State != ProjectInvitationState.Pending)
         {
-            return;
+            return false;
         }
 
         State = ProjectInvitationState.Expired;
         FinalizedAt = now;
+        return true;
     }
 }

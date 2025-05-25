@@ -2,7 +2,7 @@
 
 namespace Infrastructure.Configurations;
 
-internal class UserConfiguration : BaseEntityTypeConfiguration<User>
+internal class UserConfiguration : DomainEntityTypeConfiguration<User>
 {
     public override void Configure(EntityTypeBuilder<User> builder)
     {

@@ -2,7 +2,7 @@
 
 namespace Infrastructure.Configurations;
 
-internal class ProjectRoleConfiguration : BaseEntityTypeConfiguration<MemberRole>
+internal class ProjectRoleConfiguration : DomainEntityTypeConfiguration<MemberRole>
 {
     public override void Configure(EntityTypeBuilder<MemberRole> builder)
     {
