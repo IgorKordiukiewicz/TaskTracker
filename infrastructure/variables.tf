@@ -30,5 +30,5 @@ variable "supabase_token" {
 
 variable "supabase_organization" {
   type = string
-  description = "Name of the Supabase organization (slug)."
+  description = "Id of the Supabase organization (slug)."
 }

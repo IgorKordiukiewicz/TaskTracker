@@ -4,6 +4,9 @@ public abstract class Entity : IEquatable<Entity>
 {
     public Guid Id { get; protected init; }
 
+    private readonly List<DomainEvent> _events = [];
+    public IReadOnlyList<DomainEvent> Events => _events.AsReadOnly();
+
     protected Entity(Guid id)
     {
         Id = id;
@@ -11,6 +14,16 @@ public abstract class Entity : IEquatable<Entity>
 
     protected Entity()
     { }
+
+    protected void AddEvent(DomainEvent domainEvent)
+    {
+        _events.Add(domainEvent);
+    }
+
+    public void ClearEvents()
+    {
+        _events.Clear();
+    }
 
     public override bool Equals(object? obj)
         => obj is Entity entity && Id == entity.Id;

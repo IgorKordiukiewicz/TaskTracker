@@ -52,6 +52,7 @@ public class ProjectsController(IMediator mediator)
     /// <param name="projectId"></param>
     /// <response code="404">Project not found.</response>
     [HttpGet("{projectId:guid}")]
+    [Authorize(Policy.ProjectMember)]
     [ProducesResponseType(typeof(ProjectInfoVM), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetProjectInformation(Guid projectId)

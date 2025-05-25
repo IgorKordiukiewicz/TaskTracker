@@ -2,3 +2,4 @@
 global using Domain.Errors;
 global using FluentResults;
 global using Domain.Enums;
+global using Domain.Events;

@@ -1,4 +1,5 @@
-﻿using Domain.Common;
+﻿using Analytics.Services;
+using Domain.Common;
 using Domain.Notifications;
 using Domain.Projects;
 using Domain.Tasks;
@@ -8,7 +9,7 @@ using Infrastructure.Models;
 
 namespace Infrastructure;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) 
+public class AppDbContext(DbContextOptions<AppDbContext> options, IDomainEventDispatcher domainEventDispatcher) 
     : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
@@ -37,6 +38,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await base.SaveChangesAsync(cancellationToken);
+
+        await DispatchDomainEvents(cancellationToken);
+
+        return result;
     }
 
     public void AddRemoveChildEntities<TDependent>(IEnumerable<TDependent> actualEntities, IEnumerable<Guid> dbEntities)
@@ -69,6 +79,27 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
             Set<TDependent>().Attach(removedEntity);
             Set<TDependent>().Remove(removedEntity);
+        }
+    }
+
+    private async System.Threading.Tasks.Task DispatchDomainEvents(CancellationToken cancellationToken)
+    {
+        // TODO: Later move to outbox pattern
+        var entities = ChangeTracker
+            .Entries<Entity>()
+            .Where(e => (e.State == EntityState.Added || e.State == EntityState.Modified) && e.Entity.Events.Any())
+            .Select(e => e.Entity)
+            .ToList();
+
+        var events = entities
+            .SelectMany(e => e.Events)
+            .ToList();
+
+        entities.ForEach(e => e.ClearEvents());
+
+        foreach (var @event in events)
+        {
+            await domainEventDispatcher.Dispatch(@event);
         }
     }
 }

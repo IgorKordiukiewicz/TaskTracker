@@ -1,4 +1,5 @@
-﻿using Domain.Workflows;
+﻿using Domain.Events;
+using Domain.Workflows;
 
 namespace Domain.Tasks;
 
@@ -44,6 +45,8 @@ public class Task : Entity, IAggregateRoot
         };
 
         result._activities.Add(new(result.Id, TaskProperty.Creation, now));
+
+        result.AddEvent(new TaskCreated(result.Id, projectId, now));
 
         return result;
     }

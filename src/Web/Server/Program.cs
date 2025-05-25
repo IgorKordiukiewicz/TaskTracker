@@ -7,6 +7,7 @@ using System.Reflection;
 using Web.Server.Configuration;
 using Microsoft.Extensions.Logging.ApplicationInsights;
 using HangfireBasicAuthenticationFilter;
+using Analytics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,7 @@ builder.Services.AddHangfireServer();
 
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddAnalyticsServices(builder.Configuration);
 builder.Services.AddAuth(builder.Configuration);
 
 builder.Services.AddControllersWithViews();
