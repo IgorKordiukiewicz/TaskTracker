@@ -7,6 +7,8 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options)
 {
     public DbSet<Event> Events { get; set; }
 
+    public DbSet<DailyTotalTaskStatus> DailyTotalTaskStatuses { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

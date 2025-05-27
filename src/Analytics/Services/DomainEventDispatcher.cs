@@ -15,7 +15,10 @@ public class DomainEventDispatcher(AnalyticsDbContext dbContext)
     : IDomainEventDispatcher
 {
     // TODO: add all projection handlers using reflection
-    private readonly List<IProjectionHandler> _projectionHandlers = [];
+    private readonly List<IProjectionHandler> _projectionHandlers = 
+    [
+        new DailyTotalTaskStatusHandler(dbContext),
+    ];
 
     public async Task Dispatch(DomainEvent domainEvent)
     {
