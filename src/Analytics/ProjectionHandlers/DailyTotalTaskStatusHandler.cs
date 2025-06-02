@@ -1,69 +1,82 @@
-﻿using Analytics.Infrastructure;
-using Analytics.Infrastructure.Models;
+﻿using Analytics.Infrastructure.Models;
+using Analytics.Services;
 using Domain.Common;
 using Domain.Events;
 
 namespace Analytics.ProjectionHandlers;
 
-public class DailyTotalTaskStatusHandler(AnalyticsDbContext dbContext)
-    : IProjectionHandler
+public class DailyTotalTaskStatusHandler(IRepository repository)
+    : ProjectionHandler<DailyTotalTaskStatus>(repository)
 {
-    public async Task ApplyEvent(DomainEvent domainEvent)
+    public override void ApplyEvent(DomainEvent domainEvent)
     {
-        if(domainEvent is TaskCreated taskCreated)
+        if (domainEvent is TaskCreated taskCreated)
         {
-            await IncrementStatusCount(taskCreated.ProjectId, taskCreated.StatusId, taskCreated.OccurredAt.Date);
+            IncrementStatusCount(taskCreated.ProjectId, taskCreated.StatusId, taskCreated.OccurredAt.Date);
         }
         else if(domainEvent is TaskStatusUpdated taskStatusUpdated)
         {
-            await IncrementStatusCount(taskStatusUpdated.ProjectId, taskStatusUpdated.NewStatusId, taskStatusUpdated.OccurredAt.Date);
-            await DecrementStatusCount(taskStatusUpdated.ProjectId, taskStatusUpdated.OldStatusId, taskStatusUpdated.OccurredAt.Date);
+            IncrementStatusCount(taskStatusUpdated.ProjectId, taskStatusUpdated.NewStatusId, taskStatusUpdated.OccurredAt.Date);
+            DecrementStatusCount(taskStatusUpdated.ProjectId, taskStatusUpdated.OldStatusId, taskStatusUpdated.OccurredAt.Date);
         }
-
-        await dbContext.SaveChangesAsync();
     }
 
-    private async Task IncrementStatusCount(Guid projectId, Guid statusId, DateTime date)
+    private void IncrementStatusCount(Guid projectId, Guid statusId, DateTime date)
     {
-        var projection = await GetProjection(projectId, statusId, date);
+        var currentDayProjection = Find(x => x.ProjectId == projectId && x.StatusId == statusId && x.Date.Date == date);
 
-        if (projection is null)
+        if (currentDayProjection is null)
         {
-            dbContext.DailyTotalTaskStatuses.Add(new DailyTotalTaskStatus
+            var previousDayProjection = GetPreviousDayProjection(projectId, statusId, date);
+            var updatedCount = previousDayProjection is not null ? previousDayProjection.Count + 1 : 1;
+            Add(new DailyTotalTaskStatus
             {
                 ProjectId = projectId,
                 StatusId = statusId,
                 Date = date,
-                Count = 1
+                Count = updatedCount
             });
         }
         else
         {
-            ++projection.Count;
-            dbContext.DailyTotalTaskStatuses.Update(projection);
+            ++currentDayProjection.Count;
         }
     }
 
-    private async Task DecrementStatusCount(Guid projectId, Guid statusId, DateTime date)
+    private void DecrementStatusCount(Guid projectId, Guid statusId, DateTime date)
     {
-        var projection = await GetProjection(projectId, statusId, date);
+        var currentDayProjection = Find(x => x.ProjectId == projectId && x.StatusId == statusId && x.Date == date);
 
-        if (projection is null)
+        if (currentDayProjection is null)
         {
-            return; // TODO: throw exception?
-        }
+            var previousDayProjection = GetPreviousDayProjection(projectId, statusId, date);
+            var updatedCount = previousDayProjection is not null ? previousDayProjection.Count - 1 : 0;
+            if(updatedCount <= 0)
+            {
+                return; // No need to add a projection with zero count
+            }
 
-        --projection.Count;
-        if (projection.Count <= 0)
-        {
-            dbContext.DailyTotalTaskStatuses.Remove(projection);
+            Add(new DailyTotalTaskStatus
+            {
+                ProjectId = projectId,
+                StatusId = statusId,
+                Date = date,
+                Count = updatedCount
+            });
         }
         else
         {
-            dbContext.DailyTotalTaskStatuses.Update(projection);
+            --currentDayProjection.Count;
+            if (currentDayProjection.Count <= 0)
+            {
+                Remove(currentDayProjection);
+            }
         }
     }
 
-    private async Task<DailyTotalTaskStatus?> GetProjection(Guid projectId, Guid statusId, DateTime date)
-        => await dbContext.DailyTotalTaskStatuses.FirstOrDefaultAsync(x => x.ProjectId == projectId && x.StatusId == statusId && x.Date == date);
+    private DailyTotalTaskStatus? GetPreviousDayProjection(Guid projectId, Guid statusId, DateTime currentDate)
+    {
+        var previousDay = currentDate.AddDays(-1);
+        return Find(x => x.ProjectId == projectId && x.StatusId == statusId && x.Date.Date == previousDay);
+    }
 }

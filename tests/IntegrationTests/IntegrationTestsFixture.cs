@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using System.Linq.Expressions;
+using Analytics.Infrastructure;
+using Microsoft.AspNetCore.TestHost;
 
 namespace IntegrationTests;
 
@@ -19,7 +21,8 @@ public class TestDateTimeProvider : IDateTimeProvider
 public class IntegrationTestsFixture : IDisposable
 {
     private readonly IServiceProvider _services;
-    private readonly string _connectionString = "Server=(localdb)\\mssqllocaldb;Database=TaskTrackerDbTests;Trusted_Connection=True"; // TODO: Store it somewhere else?
+    //private readonly string _connectionString = "Server=(localdb)\\mssqllocaldb;Database=TaskTrackerDbTests;Trusted_Connection=True"; // TODO: Store it somewhere else?
+    private readonly string _connectionString = "Host=localhost;Port=5432;Database=TaskTrackerDbTests;Username=postgres;Password=qwerty123"; // TODO: Store it somewhere else?
 
     public IBackgroundJobClient BackgroundJobClientMock { get; } = Substitute.For<IBackgroundJobClient>();
 
@@ -31,12 +34,16 @@ public class IntegrationTestsFixture : IDisposable
             {
                 var dbContextDescriptor = services.SingleOrDefault(x => x.ServiceType == typeof(DbContextOptions<AppDbContext>))
                     ?? throw new Exception("DbContext service not found.");
+                var analyticsContextDescriptor = services.SingleOrDefault(x => x.ServiceType == typeof(DbContextOptions<AnalyticsDbContext>))
+                    ?? throw new Exception("AnalyticsDbContext service not found.");
 
                 services.Remove(dbContextDescriptor);
-                services.AddDbContext<AppDbContext>(options => options.UseSqlServer(_connectionString));
+                services.Remove(analyticsContextDescriptor);
+                services.AddDbContext<AppDbContext>(options => options.UseNpgsql(_connectionString));
+                services.AddDbContext<AnalyticsDbContext>(options => options.UseNpgsql(_connectionString));
 
                 services.AddScoped<IDateTimeProvider, TestDateTimeProvider>();
-                services.AddScoped<IBackgroundJobClient>(serviceProvider => BackgroundJobClientMock);
+                services.AddScoped(serviceProvider => BackgroundJobClientMock);
             });
 
             builder.UseEnvironment("Development");
@@ -57,9 +64,10 @@ public class IntegrationTestsFixture : IDisposable
     {
         using var scope = _services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
+        var db2 = scope.ServiceProvider.GetRequiredService<AnalyticsDbContext>();
         db.Database.EnsureDeleted();
-        db.Database.EnsureCreated();
+        db.Database.Migrate();
+        db2.Database.Migrate();
     }
 
     public async Task SeedDb(Action<AppDbContext> action)

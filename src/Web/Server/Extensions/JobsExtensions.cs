@@ -8,7 +8,6 @@ public static class JobsExtensions
     {
         using var scope = app.ApplicationServices.CreateScope();
         var jobsService = scope.ServiceProvider.GetRequiredService<IJobsService>();
-
-        jobsService.AddExpireProjectsInvitationsJob();
+        jobsService.AddCRONJobs();
     }
 }

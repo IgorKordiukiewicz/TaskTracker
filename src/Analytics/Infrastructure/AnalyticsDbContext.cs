@@ -26,6 +26,8 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options)
         {
             modelBuilder.Entity(entityType.ClrType, entity =>
             {
+                entity.HasKey(nameof(IProjection.Id));
+
                 entity.HasIndex(nameof(IProjection.ProjectId));
             });
         }

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Enums;
 
 namespace Analytics.Infrastructure.Models;
 
@@ -8,7 +8,7 @@ public class Event
 
     public required Guid ProjectId { get; init; }
 
-    // TODO: Event type enum?
+    public EventType Type { get; init; }
 
     public required string Details { get; init; }
 

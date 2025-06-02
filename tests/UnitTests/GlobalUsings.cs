@@ -3,3 +3,4 @@ global using FluentAssertions;
 global using FluentAssertions.Execution;
 global using Xunit;
 global using Domain.Enums;
+global using NSubstitute;

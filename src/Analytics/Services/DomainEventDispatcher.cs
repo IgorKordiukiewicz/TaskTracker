@@ -1,8 +1,4 @@
-﻿using Analytics.Infrastructure;
-using Analytics.Infrastructure.Models;
-using Analytics.ProjectionHandlers;
-using Domain.Common;
-using System.Text.Json;
+﻿using Domain.Common;
 
 namespace Analytics.Services;
 
@@ -11,35 +7,19 @@ public interface IDomainEventDispatcher
     Task Dispatch(DomainEvent domainEvent);
 }
 
-public class DomainEventDispatcher(AnalyticsDbContext dbContext) 
+public class DomainEventDispatcher(IRepository repository, IEnumerable<IProjectionHandler> projectionHandlers) 
     : IDomainEventDispatcher
 {
-    // TODO: add all projection handlers using reflection
-    private readonly List<IProjectionHandler> _projectionHandlers = 
-    [
-        new DailyTotalTaskStatusHandler(dbContext),
-    ];
-
     public async Task Dispatch(DomainEvent domainEvent)
     {
-        foreach (var projectionHandler in _projectionHandlers)
+        foreach (var projectionHandler in projectionHandlers)
         {
-            await projectionHandler.ApplyEvent(domainEvent);
+            await projectionHandler.InitializeState(domainEvent.ProjectId);
+            projectionHandler.ApplyEvent(domainEvent);
         }
 
-        await SaveEvent(domainEvent);
-    }
-
-    private async Task SaveEvent(DomainEvent domainEvent)
-    {
-        var @event = new Event()
-        {
-            ProjectId = domainEvent.ProjectId,
-            Details = JsonSerializer.Serialize(domainEvent),
-            OccurredAt = domainEvent.OccurredAt
-        };
-
-        dbContext.Events.Add(@event);
-        await dbContext.SaveChangesAsync();
+        // Event is saved with updated projections in a transaction
+        repository.AddEvent(domainEvent.ToEvent());
+        await repository.Commit();
     }
 }
