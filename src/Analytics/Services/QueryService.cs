@@ -10,7 +10,7 @@ public interface IQueryService
 
 public class QueryService(AnalyticsDbContext dbContext) : IQueryService
 {
-    public async Task<TotalTaskStatusesVM> GetTotalTaskStatuses(Guid projectId)
+    public async Task<TotalTaskStatusesVM> GetTotalTaskStatuses(Guid projectId) // TODO: rename to current statuses or sth?
     {
         var today = DateTime.UtcNow.Date; // TODO: DateTimeProvider?
         var countByStatusId = await dbContext.DailyTotalTaskStatuses

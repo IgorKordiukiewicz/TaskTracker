@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     'primeicons/primeicons.css', 
     './assets/css/main.css' 
   ],
-  modules: ['@primevue/nuxt-module', '@nuxtjs/tailwindcss', '@nuxtjs/supabase', '@pinia/nuxt'],
+  modules: ['@primevue/nuxt-module', '@nuxtjs/tailwindcss', '@nuxtjs/supabase', '@pinia/nuxt', 'nuxt-echarts'],
   components: [
     { 
       path: '~/components',
