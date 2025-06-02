@@ -15,6 +15,7 @@ public static class Analytics
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IProjectionRebuilder, ProjectionRebuilder>();
         services.AddScoped<IRepository, Repository>();
+        services.AddScoped<IQueryService, QueryService>();
 
         services.AddScoped<IProjectionHandler, DailyTotalTaskStatusHandler>();
 

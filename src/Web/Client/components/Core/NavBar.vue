@@ -59,6 +59,11 @@ const projectNodes = ref([
         link: [ '/project/', '/' ]
     },
     {
+        title: 'Analytics',
+        icon: 'pi pi-chart-bar',
+        link: [ '/project/', '/analytics' ]
+    },
+    {
         title: 'Team',
         icon: 'pi pi-users',
         children: [
