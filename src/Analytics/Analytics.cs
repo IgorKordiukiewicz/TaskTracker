@@ -18,6 +18,7 @@ public static class Analytics
         services.AddScoped<IQueryService, QueryService>();
 
         services.AddScoped<IProjectionHandler, DailyTotalTaskStatusHandler>();
+        services.AddScoped<IProjectionHandler, DailyTotalTaskPriorityHandler>();
 
         return services;
     }

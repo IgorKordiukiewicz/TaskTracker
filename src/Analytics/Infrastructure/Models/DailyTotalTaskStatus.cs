@@ -1,6 +1,6 @@
 ﻿namespace Analytics.Infrastructure.Models;
 
-public class DailyTotalTaskStatus : IProjection
+public class DailyTotalTaskStatus : IDailyCountProjection
 {
     public int Id { get; set; }
     public Guid ProjectId { get; set; }
