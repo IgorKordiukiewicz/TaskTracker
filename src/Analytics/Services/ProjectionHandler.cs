@@ -7,7 +7,7 @@ namespace Analytics.Services;
 
 public interface IProjectionHandler
 {
-    Task InitializeState(Guid projectId);
+    Task InitializeState(Guid projectId, bool rebuild = false);
     void ApplyEvent(DomainEvent domainEvent);
 }
 
@@ -17,9 +17,17 @@ public abstract class ProjectionHandler<TProjection>(IRepository repository)
 {
     private List<TProjection> Projections { get; set; } = [];
 
-    public async Task InitializeState(Guid projectId)
+    public async Task InitializeState(Guid projectId, bool rebuild = false)
     {
-        Projections = (await repository.GetProjections<TProjection>(projectId)).ToList();
+        if(rebuild)
+        {
+            await repository.ClearProjections<TProjection>(projectId);
+            Projections.Clear();
+        }
+        else
+        {
+            Projections = (await repository.GetProjections<TProjection>(projectId)).ToList();
+        }
     }
 
     public abstract void ApplyEvent(DomainEvent domainEvent);

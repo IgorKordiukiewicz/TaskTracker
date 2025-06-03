@@ -15,6 +15,8 @@ public interface IRepository
     Task<IReadOnlyList<Guid>> GetProjectsIds();
     void RemoveProjection<TProjection>(TProjection projection) 
         where TProjection : class, IProjection;
+    Task ClearProjections<TProjection>(Guid projectId)
+        where TProjection : class, IProjection;
 }
 
 public class Repository(AnalyticsDbContext dbContext) : IRepository
@@ -64,5 +66,13 @@ public class Repository(AnalyticsDbContext dbContext) : IRepository
     public async Task Commit()
     {
         await dbContext.SaveChangesAsync();
+    }
+
+    public async Task ClearProjections<TProjection>(Guid projectId)
+        where TProjection : class, IProjection
+    {
+        dbContext.Set<TProjection>()
+            .RemoveRange(dbContext.Set<TProjection>().Where(x => x.ProjectId == projectId));
+        await Commit();
     }
 }

@@ -29,7 +29,7 @@ public class ProjectionRebuilder(IRepository repository, IEnumerable<IProjection
 
         foreach (var projectionHandler in projectionHandlers)
         {
-            await projectionHandler.InitializeState(projectId);
+            await projectionHandler.InitializeState(projectId, true);
             foreach (var domainEvent in domainEvents)
             {
                 projectionHandler.ApplyEvent(domainEvent!);

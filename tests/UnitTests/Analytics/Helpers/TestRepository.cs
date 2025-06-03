@@ -40,6 +40,12 @@ public class TestRepository : IRepository
         Projections.Add(projection);
     }
 
+    Task IRepository.ClearProjections<TProjection>(Guid projectId)
+    {
+        Projections.Clear();
+        return Task.CompletedTask;
+    }
+
     Task<IReadOnlyList<TProjection>> IRepository.GetProjections<TProjection>(Guid projectId)
     {
         return Task.FromResult<IReadOnlyList<TProjection>>(
