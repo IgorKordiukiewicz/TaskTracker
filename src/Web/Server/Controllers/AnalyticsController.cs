@@ -18,9 +18,22 @@ public class AnalyticsController(IQueryService queryService)
     /// </summary>
     /// <param name="projectId"></param>
     [HttpGet("{projectId:guid}/tasks/statuses")]
+    [Authorize(Policy.ProjectMember)]
     [ProducesResponseType(typeof(TotalTaskStatusesVM), 200)]
     public async Task<IActionResult> GetTotalTaskStatuses(Guid projectId)
     {
         return Ok(await queryService.GetTotalTaskStatuses(projectId));
+    }
+
+    /// <summary>
+    /// Get total count of each status for each day in the project history.
+    /// </summary>
+    /// <param name="projectId"></param>
+    [HttpGet("{projectId:guid}/tasks/daily-statuses")]
+    [Authorize(Policy.ProjectMember)]
+    [ProducesResponseType(typeof(TotalTaskStatusesByDayVM), 200)]
+    public async Task<IActionResult> GetTotalTaskStatusesByDay(Guid projectId)
+    {
+        return Ok(await queryService.GetTotalTaskStatusesByDay(projectId));
     }
 }

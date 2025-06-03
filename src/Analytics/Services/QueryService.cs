@@ -6,6 +6,7 @@ namespace Analytics.Services;
 public interface IQueryService
 {
     Task<TotalTaskStatusesVM> GetTotalTaskStatuses(Guid projectId);
+    Task<TotalTaskStatusesByDayVM> GetTotalTaskStatusesByDay(Guid projectId);
 }
 
 public class QueryService(AnalyticsDbContext dbContext) : IQueryService
@@ -26,6 +27,12 @@ public class QueryService(AnalyticsDbContext dbContext) : IQueryService
             .Where(x => x is not null)
             .ToDictionary(x => x!.StatusId, x => x!.Count));
     }
-    
 
+    public async Task<TotalTaskStatusesByDayVM> GetTotalTaskStatusesByDay(Guid projectId)
+    {
+        var dailyTotals = await dbContext.DailyTotalTaskStatuses
+            .Where(x => x.ProjectId == projectId)
+            .ToListAsync();
+        return ModelBuilder.BuildTotalTaskStatusesByDay(dailyTotals);
+    }
 }
