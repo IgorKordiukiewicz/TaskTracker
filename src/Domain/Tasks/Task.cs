@@ -46,7 +46,7 @@ public class Task : Entity, IAggregateRoot
         };
 
         result._activities.Add(new(result.Id, TaskProperty.Creation, now));
-        result.AddEvent(new TaskCreated(result.Id, result.StatusId, result.AssigneeId, result.Priority, projectId));
+        result.AddEvent(new TaskCreated(result.Id, result.StatusId, result.AssigneeId, result.Priority, projectId, DateTime.UtcNow));
 
         return result;
     }
@@ -71,7 +71,7 @@ public class Task : Entity, IAggregateRoot
         }
 
         _activities.Add(new(Id, TaskProperty.Status, now, StatusId.ToString(), newStatusId.ToString()));
-        AddEvent(new TaskStatusUpdated(Id, StatusId, newStatusId, ProjectId));
+        AddEvent(new TaskStatusUpdated(Id, StatusId, newStatusId, ProjectId, DateTime.UtcNow));
         StatusId = newStatusId;
         return Result.Ok();
     }
@@ -79,40 +79,40 @@ public class Task : Entity, IAggregateRoot
     public void UpdateAssignee(Guid newAssigneeId, DateTime now)
     {
         _activities.Add(new(Id, TaskProperty.Assignee, now, AssigneeId?.ToString(), newAssigneeId.ToString()));
-        AddEvent(new TaskAssigneeUpdated(Id, AssigneeId, newAssigneeId, ProjectId));
+        AddEvent(new TaskAssigneeUpdated(Id, AssigneeId, newAssigneeId, ProjectId, DateTime.UtcNow));
         AssigneeId = newAssigneeId;
     }
 
     public void Unassign(DateTime now)
     {
         _activities.Add(new(Id, TaskProperty.Assignee, now, AssigneeId.ToString()));
-        AddEvent(new TaskAssigneeUpdated(Id, AssigneeId, null, ProjectId));
+        AddEvent(new TaskAssigneeUpdated(Id, AssigneeId, null, ProjectId, DateTime.UtcNow));
         AssigneeId = null;
     }
 
     public void UpdatePriority(TaskPriority newPriority, DateTime now)
     {
         _activities.Add(new(Id, TaskProperty.Priority, now, Priority.ToString(), newPriority.ToString()));
-        AddEvent(new TaskPriorityUpdated(Id, Priority, newPriority, ProjectId));
+        AddEvent(new TaskPriorityUpdated(Id, Priority, newPriority, ProjectId, DateTime.UtcNow));
         Priority = newPriority;
     }
 
     public void AddComment(string content, Guid authorId, DateTime now)
     {
         _comments.Add(new(Id, content, authorId, now));
-        AddEvent(new TaskCommentAdded(Id, authorId, ProjectId));
+        AddEvent(new TaskCommentAdded(Id, authorId, ProjectId, DateTime.UtcNow));
     }
 
     public void LogTime(int minutes, DateOnly day, Guid userId)
     {
         _timeLogs.Add(new (Id, minutes, day, userId));
-        AddEvent(new TaskTimeLogged(Id, minutes, day, ProjectId));
+        AddEvent(new TaskTimeLogged(Id, minutes, day, ProjectId, DateTime.UtcNow));
     }
 
     public void UpdateEstimatedTime(int minutes)
     {
         var oldValue = EstimatedTime;
         EstimatedTime = minutes <= 0 ? null : minutes;
-        AddEvent(new TaskEstimatedTimeUpdated(Id, oldValue, EstimatedTime, ProjectId));
+        AddEvent(new TaskEstimatedTimeUpdated(Id, oldValue, EstimatedTime, ProjectId, DateTime.UtcNow));
     }
 }

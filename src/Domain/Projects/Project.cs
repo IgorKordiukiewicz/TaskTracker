@@ -36,7 +36,7 @@ public class Project : Entity, IAggregateRoot
 
         var member = ProjectMember.Create(ownerId, result.RolesManager.GetOwnerRoleId()!.Value);
         result._members.Add(member);
-        result.AddEvent(new ProjectCreated(result.Id, ownerId));
+        result.AddEvent(new ProjectCreated(result.Id, ownerId, DateTime.UtcNow));
 
         return result;
     }
@@ -56,7 +56,7 @@ public class Project : Entity, IAggregateRoot
         DateTime? expirationDate = expirationDays.HasValue ? now.AddDays(expirationDays.Value) : null;
         var invitation = ProjectInvitation.Create(userId, Id, now, expirationDate);
         _invitations.Add(invitation);
-        AddEvent(new ProjectInvitationCreated(Id, userId));
+        AddEvent(new ProjectInvitationCreated(Id, userId, DateTime.UtcNow));
 
         return invitation;
     }
@@ -71,7 +71,7 @@ public class Project : Entity, IAggregateRoot
 
         var invitation = invitationResult.Value;
         invitation.Accept(now);
-        AddEvent(new ProjectInvitationAccepted(Id, invitation.UserId));
+        AddEvent(new ProjectInvitationAccepted(Id, invitation.UserId, DateTime.UtcNow));
 
         return AddMember(invitation.UserId, RolesManager.GetReadOnlyRoleId());
     }
@@ -85,7 +85,7 @@ public class Project : Entity, IAggregateRoot
         }
 
         invitationResult.Value.Decline(now);
-        AddEvent(new ProjectInvitationDeclined(Id, invitationResult.Value.UserId));
+        AddEvent(new ProjectInvitationDeclined(Id, invitationResult.Value.UserId, DateTime.UtcNow));
 
         return Result.Ok();
     }
@@ -99,7 +99,7 @@ public class Project : Entity, IAggregateRoot
         }
 
         invitationResult.Value.Cancel(now);
-        AddEvent(new ProjectInvitationCanceled(Id, invitationResult.Value.UserId));
+        AddEvent(new ProjectInvitationCanceled(Id, invitationResult.Value.UserId, DateTime.UtcNow));
 
         return Result.Ok();
     }
@@ -112,7 +112,7 @@ public class Project : Entity, IAggregateRoot
 
             if(expired)
             {
-                AddEvent(new ProjectInvitationExpired(Id, invitation.UserId));
+                AddEvent(new ProjectInvitationExpired(Id, invitation.UserId, DateTime.UtcNow));
             }
         }
     }
@@ -131,7 +131,7 @@ public class Project : Entity, IAggregateRoot
         }
 
         _members.Remove(member);
-        AddEvent(new ProjectMemberRemoved(Id, member.UserId));
+        AddEvent(new ProjectMemberRemoved(Id, member.UserId, DateTime.UtcNow));
 
         return Result.Ok();
     }
@@ -145,7 +145,7 @@ public class Project : Entity, IAggregateRoot
 
         var member = _members.First(x => x.UserId == userId);
         _members.Remove(member);
-        AddEvent(new ProjectMemberLeft(Id, userId));
+        AddEvent(new ProjectMemberLeft(Id, userId, DateTime.UtcNow));
 
         return Result.Ok();
     }
