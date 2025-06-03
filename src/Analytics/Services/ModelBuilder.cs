@@ -5,25 +5,30 @@ namespace Analytics.Services;
 
 public static class ModelBuilder
 {
-    public static TotalTaskStatusesByDayVM BuildTotalTaskStatusesByDay(IReadOnlyList<DailyTotalTaskStatus> dailyTotalTaskStatuses)
+    public static (IReadOnlyList<DateTime> Dates, IReadOnlyDictionary<TProperty, IReadOnlyList<int>> CountsByProperty) BuildTotalTaskStatusesByDay<TProjection, TProperty>(
+        IReadOnlyList<TProjection> dailyTotalProperties, 
+        Func<TProjection, TProperty> propertySelector, 
+        Func<TProjection, TProperty, bool> propertyQuery)
+        where TProjection : IDailyCountProjection
+        where TProperty : notnull
     {
-        var firstDate = dailyTotalTaskStatuses.Min(x => x.Date);
-        var lastDate = dailyTotalTaskStatuses.Max(x => x.Date);
+        var firstDate = dailyTotalProperties.Min(x => x.Date);
+        var lastDate = dailyTotalProperties.Max(x => x.Date);
         var allDates = Enumerable.Range(0, (lastDate - firstDate).Days + 1)
             .Select(x => firstDate.AddDays(x))
             .ToList();
 
-        var allStatuses = dailyTotalTaskStatuses
-            .Select(x => x.StatusId)
+        var allProperties = dailyTotalProperties
+            .Select(x => propertySelector(x))
             .Distinct()
             .ToList();
 
-        var result = new Dictionary<Guid, IReadOnlyList<int>>();
-        foreach (var status in allStatuses)
+        var result = new Dictionary<TProperty, IReadOnlyList<int>>();
+        foreach (var property in allProperties)
         {
             var counts = new List<int>();
-            var projections = dailyTotalTaskStatuses
-                .Where(x => x.StatusId == status)
+            var projections = dailyTotalProperties
+                .Where(x => propertyQuery(x, property))
                 .OrderBy(x => x.Date)
                 .ToList();
             var projectionIndex = 0;
@@ -53,7 +58,7 @@ public static class ModelBuilder
                 }
             }
 
-            result.Add(status, counts);
+            result.Add(property, counts);
         }
 
         return new(allDates, result);

@@ -27,7 +27,6 @@ public class DailyTotalTaskPriorityHandlerTests
         };
     }
 
-
     [Fact]
     public async Task Creates_Projection_For_New_Day_Based_On_Last_Day_When_Task_Is_Created()
     {
