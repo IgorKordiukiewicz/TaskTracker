@@ -51,10 +51,6 @@ public class DailyTotalTaskStatusHandler(IRepository repository)
         {
             var previousDayProjection = GetPreviousDayProjection(projectId, statusId, date);
             var updatedCount = previousDayProjection is not null ? previousDayProjection.Count - 1 : 0;
-            if(updatedCount <= 0)
-            {
-                return; // No need to add a projection with zero count
-            }
 
             Add(new DailyTotalTaskStatus
             {
@@ -67,10 +63,6 @@ public class DailyTotalTaskStatusHandler(IRepository repository)
         else
         {
             --currentDayProjection.Count;
-            if (currentDayProjection.Count <= 0)
-            {
-                Remove(currentDayProjection);
-            }
         }
     }
 

@@ -112,37 +112,12 @@ public class DailyTotalTaskStatusHandlerTests
         }
     }
 
+    // If removed, on query the last projection will be matched, e.g.
+    // day 1: 1, day 2: 1
+    // after update -> day 1: 1, day 2: 0; query: 0
+    // if removed -> day 1: 1, day 2: null, query: 1 (even though it should be 0)
     [Fact]
-    public async Task Does_Not_Add_Projection_For_Old_Status_With_Count_0_When_Status_Is_Updated_On_Different_Day()
-    {
-        var status1Id = Guid.NewGuid();
-        var status2Id = Guid.NewGuid();
-        var previousDay = _now.AddDays(-1);
-
-        var repository = new TestRepository
-        {
-            Projections =
-            [
-                CreateProjection(status1Id, previousDay, 1), // previous day projection for status1
-                CreateProjection(status2Id, previousDay, 5), // previous day projection for status2
-            ]
-        };
-        var sut = new DailyTotalTaskStatusHandler(repository);
-        await sut.InitializeState(_projectId);
-
-        sut.ApplyEvent(new TaskStatusUpdated(Guid.NewGuid(), status1Id, status2Id, _projectId, _now));
-
-        using (new AssertionScope())
-        {
-            GetProjection(repository, status1Id, previousDay)!.Count.Should().Be(1); // previous day unchanged
-            GetProjection(repository, status2Id, previousDay)!.Count.Should().Be(5); // previous day unchanged
-            GetProjection(repository, status1Id, _now).Should().BeNull(); // current day not created
-            GetProjection(repository, status2Id, _now)!.Count.Should().Be(6); // current day created, based on previous day
-        }
-    }
-
-    [Fact]
-    public async Task Removes_Projection_When_Count_Is_Zero_After_Status_Update_On_Same_Day()
+    public async Task Does_Not_Remove_Projection_When_Count_Is_Zero_After_Status_Update_On_Same_Day()
     {
         var status1Id = Guid.NewGuid();
         var status2Id = Guid.NewGuid();
@@ -162,7 +137,7 @@ public class DailyTotalTaskStatusHandlerTests
 
         using(new AssertionScope())
         {
-            GetProjection(repository, status1Id, _now).Should().BeNull(); // current day removed
+            GetProjection(repository, status1Id, _now)!.Count.Should().Be(0); // current day decremented
             GetProjection(repository, status2Id, _now)!.Count.Should().Be(6); // current day incremented
         }
     }
