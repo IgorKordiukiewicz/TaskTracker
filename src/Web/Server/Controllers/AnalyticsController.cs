@@ -14,50 +14,14 @@ public class AnalyticsController(IQueryService queryService)
     : ControllerBase
 {
     /// <summary>
-    /// Get total count of each status for current day.
+    /// Get task analytics for a given project.
     /// </summary>
     /// <param name="projectId"></param>
-    [HttpGet("{projectId:guid}/tasks/statuses")]
+    [HttpGet("{projectId:guid}/tasks")]
     [Authorize(Policy.ProjectMember)]
-    [ProducesResponseType(typeof(TotalTaskStatusesVM), 200)]
-    public async Task<IActionResult> GetTotalTaskStatuses(Guid projectId)
+    [ProducesResponseType(typeof(TaskAnalyticsVM), 200)]
+    public async Task<IActionResult> GetTaskAnalytics(Guid projectId)
     {
-        return Ok(await queryService.GetTotalTaskStatuses(projectId));
-    }
-
-    /// <summary>
-    /// Get total count of each status for each day in the project history.
-    /// </summary>
-    /// <param name="projectId"></param>
-    [HttpGet("{projectId:guid}/tasks/daily-statuses")]
-    [Authorize(Policy.ProjectMember)]
-    [ProducesResponseType(typeof(TotalTaskStatusesByDayVM), 200)]
-    public async Task<IActionResult> GetTotalTaskStatusesByDay(Guid projectId)
-    {
-        return Ok(await queryService.GetTotalTaskStatusesByDay(projectId));
-    }
-
-    /// <summary>
-    /// Get total count of each priority for current day.
-    /// </summary>
-    /// <param name="projectId"></param>
-    [HttpGet("{projectId:guid}/tasks/priorities")]
-    [Authorize(Policy.ProjectMember)]
-    [ProducesResponseType(typeof(TotalTaskPrioritiesVM), 200)]
-    public async Task<IActionResult> GetTotalTaskPriorities(Guid projectId)
-    {
-        return Ok(await queryService.GetTotalTaskPriorites(projectId));
-    }
-
-    /// <summary>
-    /// Get total count of each priority for each day in the project history.
-    /// </summary>
-    /// <param name="projectId"></param>
-    [HttpGet("{projectId:guid}/tasks/daily-priorities")]
-    [Authorize(Policy.ProjectMember)]
-    [ProducesResponseType(typeof(TotalTaskPrioritiesByDayVM), 200)]
-    public async Task<IActionResult> GetTotalTaskPrioritiesByDay(Guid projectId)
-    {
-        return Ok(await queryService.GetTotalTaskPrioritiesByDay(projectId));
+        return Ok(await queryService.GetTaskAnalytics(projectId));
     }
 }

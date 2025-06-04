@@ -1,19 +1,12 @@
+import { allTaskPriorities } from './../enums';
 import type { TaskPriority } from "../enums";
 
-export interface TotalTaskStatusesVM {
+export interface TaskAnalyticsVM {
+    dates: Date[];
+
     countByStatusId: Record<string, number>;
-}
+    countByPriority: Record<string, number>; // has to be string
 
-export interface TotalTaskStatusesByDayVM {
-    dates: Date[];
-    countsByStatusId: Record<string, number[]>;
-}
-
-export interface TotalTaskPrioritiesVM {
-    countByPriority: Record<TaskPriority, number>;
-}
-
-export interface TotalTaskPrioritiesByDayVM {
-    dates: Date[];
-    countsByPriority: Record<TaskPriority, number[]>;
+    dailyCountByStatusId: Record<string, number[]>;
+    dailyCountByPriority: Record<string, number[]>; // has to be string
 }

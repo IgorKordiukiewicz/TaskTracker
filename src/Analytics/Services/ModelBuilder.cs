@@ -1,11 +1,10 @@
 ﻿using Analytics.Infrastructure.Models;
-using Analytics.ViewModels;
 
 namespace Analytics.Services;
 
 public static class ModelBuilder
 {
-    public static (IReadOnlyList<DateTime> Dates, IReadOnlyDictionary<TProperty, IReadOnlyList<int>> CountsByProperty) BuildTotalTaskStatusesByDay<TProjection, TProperty>(
+    public static (IReadOnlyList<DateTime> Dates, IReadOnlyDictionary<TProperty, IReadOnlyList<int>> DailyCountByProperty) BuildTotalTaskPropertiesByDay<TProjection, TProperty>(
         IReadOnlyList<TProjection> dailyTotalProperties, 
         Func<TProjection, TProperty> propertySelector, 
         Func<TProjection, TProperty, bool> propertyQuery)

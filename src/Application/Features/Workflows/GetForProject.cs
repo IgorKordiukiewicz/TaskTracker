@@ -31,7 +31,9 @@ internal class GetWorkflowForProjectHandler(AppDbContext dbContext)
             .Distinct()
             .ToHashSet();
 
-        var statuses = workflow.Statuses.Select(x =>
+        var statuses = workflow.Statuses
+            .OrderBy(x => x.DisplayOrder)
+            .Select(x =>
             new WorkflowTaskStatusVM
             {
                 Id = x.Id,

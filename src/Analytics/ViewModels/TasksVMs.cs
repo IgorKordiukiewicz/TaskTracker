@@ -2,8 +2,13 @@
 
 namespace Analytics.ViewModels;
 
-public record TotalTaskStatusesVM(IReadOnlyDictionary<Guid, int> CountByStatusId);
-public record TotalTaskStatusesByDayVM(IReadOnlyList<DateTime> Dates, IReadOnlyDictionary<Guid, IReadOnlyList<int>> CountsByStatusId);
+public record TaskAnalyticsVM
+{
+    public required IReadOnlyList<DateTime> Dates { get; init; }
 
-public record TotalTaskPrioritiesVM(IReadOnlyDictionary<TaskPriority, int> CountByPriority);
-public record TotalTaskPrioritiesByDayVM(IReadOnlyList<DateTime> Dates, IReadOnlyDictionary<TaskPriority, IReadOnlyList<int>> CountsByPriority);
+    public required IReadOnlyDictionary<Guid, int> CountByStatusId { get; init; }
+    public required IReadOnlyDictionary<Guid, IReadOnlyList<int>> DailyCountByStatusId { get; init; }
+
+    public required IReadOnlyDictionary<TaskPriority, int> CountByPriority { get; init; }
+    public required IReadOnlyDictionary<TaskPriority, IReadOnlyList<int>> DailyCountByPriority { get; init; }
+}

@@ -6,9 +6,9 @@ namespace UnitTests.Analytics.Services;
 public class ModelBuilderTests
 {
     [Fact]
-    public void Builds_Total_Task_Statuses_By_Day()
+    public void Builds_Total_Task_Properties_By_Day()
     {
-        var dailyTotalTaskStatuses = new List<TestProjection>
+        var dailyTotalTaskProperties = new List<TestProjection>
         {
             CreateProjection(1, new DateTime(2025, 6, 1), 1),
             CreateProjection(1, new DateTime(2025, 6, 2), 3),
@@ -26,7 +26,7 @@ public class ModelBuilderTests
                 Count = Count
             };
 
-        var result = ModelBuilder.BuildTotalTaskStatusesByDay(dailyTotalTaskStatuses,
+        var result = ModelBuilder.BuildTotalTaskPropertiesByDay(dailyTotalTaskProperties,
             x => x.Property,
             (x, property) => x.Property == property);
 
@@ -40,10 +40,10 @@ public class ModelBuilderTests
                 new DateTime(2025, 6, 4)
             ]);
 
-            var status1Counts = result.CountsByProperty[1];
+            var status1Counts = result.DailyCountByProperty[1];
             status1Counts.Should().BeEquivalentTo([1, 3, 3, 7]);
 
-            var status2Counts = result.CountsByProperty[2];
+            var status2Counts = result.DailyCountByProperty[2];
             status2Counts.Should().BeEquivalentTo([0, 4, 4, 4]);
         }
     }
