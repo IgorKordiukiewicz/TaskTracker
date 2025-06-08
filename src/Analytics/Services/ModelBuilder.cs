@@ -11,6 +11,11 @@ public static class ModelBuilder
         where TProjection : IDailyCountProjection
         where TProperty : notnull
     {
+        if(dailyTotalProperties.Count == 0)
+        {
+            return (new List<DateTime>(), new Dictionary<TProperty, IReadOnlyList<int>>());
+        }
+
         var firstDate = dailyTotalProperties.Min(x => x.Date);
         var lastDate = dailyTotalProperties.Max(x => x.Date);
         var allDates = Enumerable.Range(0, (lastDate - firstDate).Days + 1)

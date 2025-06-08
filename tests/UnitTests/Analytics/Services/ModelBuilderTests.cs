@@ -6,6 +6,19 @@ namespace UnitTests.Analytics.Services;
 public class ModelBuilderTests
 {
     [Fact]
+    public void Returns_Empty_Values_When_No_Projections_Are_Provided()
+    {
+        var result = ModelBuilder.BuildTotalTaskPropertiesByDay(new List<TestProjection>(),
+            x => x.Property,
+            (x, property) => x.Property == property);
+        using (new AssertionScope())
+        {
+            result.Dates.Should().BeEmpty();
+            result.DailyCountByProperty.Should().BeEmpty();
+        }
+    }
+
+    [Fact]
     public void Builds_Total_Task_Properties_By_Day()
     {
         var dailyTotalTaskProperties = new List<TestProjection>

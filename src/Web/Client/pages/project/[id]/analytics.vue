@@ -1,34 +1,39 @@
 <template>
     <div class="h-full" v-if="taskAnalytics && workflow">
         <p class="text-lg">Analytics</p>
-        <div class="w-full bg-white shadow-md p-3 mt-4">
-            Status
-        </div>
-        <div class="grid grid-cols-6 gap-2 w-full mt-2">
-            <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
-                <PropertyCountChart ref="statusCountChart" />
+        <template v-if="hasData">
+            <div class="w-full bg-white shadow-md p-3 mt-4">
+                Status
             </div>
-            <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
-                <PropertyCountByDayChart ref="statusCountByDayChart" />
+            <div class="grid grid-cols-6 gap-2 w-full mt-2">
+                <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
+                    <PropertyCountChart ref="statusCountChart" />
+                </div>
+                <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
+                    <PropertyCountByDayChart ref="statusCountByDayChart" />
+                </div>
+                <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
+                    <PropertyCountByDayChart ref="cumulativeStatusCountByDayChart" />
+                </div>
             </div>
-            <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
-                <PropertyCountByDayChart ref="cumulativeStatusCountByDayChart" />
+            <div class="w-full bg-white shadow-md p-3 mt-4">
+                Priority
             </div>
-        </div>
-        <div class="w-full bg-white shadow-md p-3 mt-4">
-            Priority
-        </div>
-        <div class="grid grid-cols-6 gap-2 w-full mt-2">
-            <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
-                <PropertyCountChart ref="priorityCountChart" />
+            <div class="grid grid-cols-6 gap-2 w-full mt-2">
+                <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
+                    <PropertyCountChart ref="priorityCountChart" />
+                </div>
+                <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
+                    <PropertyCountByDayChart ref="priorityCountByDayChart" />
+                </div>
+                <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
+                    <PropertyCountByDayChart ref="cumulativePriorityCountByDayChart" />
+                </div>
             </div>
-            <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
-                <PropertyCountByDayChart ref="priorityCountByDayChart" />
-            </div>
-            <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
-                <PropertyCountByDayChart ref="cumulativePriorityCountByDayChart" />
-            </div>
-        </div>
+        </template>
+        <template v-else>
+            <p class="text-sm mt-4">No data yet.</p>
+        </template>
     </div>
 </template>
 
@@ -65,6 +70,8 @@ const projectId = ref(route.params.id as string);
 const workflow = ref(await workflowsService.getWorkflow(projectId.value));
 const taskAnalytics = ref(await analyticsService.getTaskAnalytics(projectId.value));
 
+const hasData = ref();
+
 const statusCountChart = ref();
 const priorityCountChart = ref();
 const statusCountByDayChart = ref();
@@ -83,6 +90,11 @@ function initCharts() {
 
     //const colors = [ '#22c55e', '#6366f1', '#f43f5e' ];
     //const colors = [ '#22c55e', '#06b6d4', '#6366f1' ];
+
+    hasData.value = taskAnalytics.value.dates.length > 0;
+    if(!hasData.value) {
+        return;
+    }
 
     const statusesNames = workflow.value.statuses.map(x => x.name);
     const dates = taskAnalytics.value.dates.map(x => new Date(x).toLocaleDateString());
