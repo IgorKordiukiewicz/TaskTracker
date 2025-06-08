@@ -31,15 +31,17 @@ public class DailyTotalTaskPriorityHandlerTests
     public async Task Creates_Projection_For_New_Day_Based_On_Last_Day_When_Task_Is_Created()
     {
         var (sut, repository) = await Arrange(
-            CreateProjection(_property1, _previousDay, 1)
+            CreateProjection(_property1, _twoDaysAgo, 1), 
+            CreateProjection(_property1, _previousDay, 2)
         );
 
         sut.ApplyEvent(new TaskCreated(Guid.NewGuid(), Guid.NewGuid(), null, _property1, _projectId, _currentDay));
 
         using (new AssertionScope())
         {
-            GetProjection(repository, _property1, _previousDay).ShouldHaveCount(1); // previous day unchanged
-            GetProjection(repository, _property1, _currentDay).ShouldHaveCount(2); // current day created, based on previous day
+            GetProjection(repository, _property1, _twoDaysAgo).ShouldHaveCount(1); // two days ago unchanged
+            GetProjection(repository, _property1, _previousDay).ShouldHaveCount(2); // previous day unchanged
+            GetProjection(repository, _property1, _currentDay).ShouldHaveCount(3); // current day created, based on previous day
         }
     }
 

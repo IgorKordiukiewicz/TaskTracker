@@ -32,6 +32,6 @@ public abstract class DailyTotalTaskPropertyHandler<TProjection, TProperty>(IRep
     private TProjection? GetPreviousDayProjection(Guid projectId, TProperty property, DateTime currentDate)
     {
         var previousDay = currentDate.AddDays(-1);
-        return Find(x => x.ProjectId == projectId && predicate(x, property));
+        return Find(x => x.ProjectId == projectId && x.Date == previousDay && predicate(x, property));
     }
 }
