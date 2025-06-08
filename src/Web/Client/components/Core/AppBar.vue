@@ -91,6 +91,7 @@ async function openNotificationsPopup() {
         return;
     }
 
+    await updateInvitations();
     await updateNotifications();
 
     notificationsPopup.value.show();
