@@ -65,6 +65,7 @@ export interface UserProjectInvitationsVM {
 
 export interface UserProjectInvitationVM {
     id: string;
+    projectId: string;
     projectName: string;
 }
 

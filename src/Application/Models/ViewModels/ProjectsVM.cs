@@ -14,7 +14,7 @@ public record ProjectInvitationsVM(IReadOnlyList<ProjectInvitationVM> Invitation
 public record ProjectInvitationVM(Guid Id, string UserEmail, ProjectInvitationState State, DateTime CreatedAt, DateTime? FinalizedAt, DateTime? ExpirationDate);
 
 public record UserProjectInvitationsVM(IReadOnlyList<UserProjectInvitationVM> Invitations);
-public record UserProjectInvitationVM(Guid Id, string ProjectName);
+public record UserProjectInvitationVM(Guid Id, Guid ProjectId, string ProjectName);
 
 public record ProjectSettingsVM(string Name, Guid OwnerId);
 

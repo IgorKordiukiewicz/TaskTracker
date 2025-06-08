@@ -50,6 +50,7 @@ const props = defineProps({
 })
 
 const projectsService = useProjectsService();
+const usersPresentationData = useUsersPresentationData();
 
 const visible = ref(false);
 
@@ -64,9 +65,15 @@ async function declineInvitation(id: string) {
 }
 
 async function acceptInvitation(id: string) {
+    const projectId = props.invitations.invitations.find(x => x.id === x.id)!.projectId;
+
     await projectsService.acceptInvitation(id);
     closeIfNoNotificationsLeft();
     emit('onInvitationAction');
+
+    await usersPresentationData.reset();
+
+    navigateTo(`/project/${projectId}/`);
 }
 
 function closeIfNoNotificationsLeft() {

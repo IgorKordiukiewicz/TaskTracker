@@ -24,7 +24,7 @@ internal class GetProjectInvitationsForUserHandler(AppDbContext dbContext)
             .Join(dbContext.Projects,
             invitation => invitation.ProjectId,
             project => project.Id,
-            (invitation, project) => new UserProjectInvitationVM(invitation.Id, project.Name))
+            (invitation, project) => new UserProjectInvitationVM(invitation.Id, project.Id, project.Name))
             .ToListAsync(cancellationToken);
 
         return Result.Ok(new UserProjectInvitationsVM(invitations));

@@ -7,6 +7,9 @@ export const useUsersPresentationData = () => {
     return {
         async getUser(id: string) {
             return (await getUsers()).find(x => x.userId === id);
+        },
+        async reset() {
+            await reset();
         }
     }
 
@@ -28,6 +31,19 @@ export const useUsersPresentationData = () => {
         
         const users: UserPresentationDataVM[] = JSON.parse(data);
         return users;
+    }
+
+    async function reset() {
+        if(!userId) {
+            return;
+        }
+
+        const result = await usersService.getPresentationData();
+        if(!result) {
+            return;
+        }
+
+        sessionStorage.setItem(getStorageKey(userId), JSON.stringify(result.users));
     }
 
     function getStorageKey(userId: string) {
