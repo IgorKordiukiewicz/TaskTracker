@@ -9,7 +9,7 @@
                 <TabPanel value="0">
                     <div class="flex flex-col gap-3">
                         <template v-if="notifications.notifications.length > 0">
-                            <NotificationItem v-for="notification in notifications.notifications" :notification="notification" @on-link-clicked="visible = false" @on-read="emit('onNotificationRead')"></NotificationItem>
+                            <NotificationItem v-for="notification in notifications.notifications" :notification="notification" @on-link-clicked="visible = false" @on-read="handleNotificationRead"></NotificationItem>
                         </template>
                         <template v-else>
                             <p>You don't have any unread notifications.</p>
@@ -43,7 +43,7 @@ import type { NotificationsVM } from '~/types/viewModels/notifications';
 import type { UserProjectInvitationsVM } from '~/types/viewModels/projects';
 
 defineExpose({ show });
-const emit = defineEmits([ 'onInvitationAction', 'onNotificationRead' ])
+const emit = defineEmits([ 'onInvitationAction', 'onNotificationRead', 'noUnreadLeft' ])
 const props = defineProps({
     invitations: { type: Object as PropType<UserProjectInvitationsVM>, required: true },
     notifications: { type: Object as PropType<NotificationsVM>, required: true },
@@ -58,9 +58,18 @@ function show() {
     visible.value = true;
 }
 
+function handleNotificationRead() {
+    if(!(props.notifications.notifications.length > 1 || props.invitations.invitations.length > 0)) {
+        visible.value = false;
+        emit('noUnreadLeft');
+    }
+
+    emit('onNotificationRead');
+}
+
 async function declineInvitation(id: string) {
     await projectsService.declineInvitation(id);
-    closeIfNoNotificationsLeft();
+    handleInvitationAction();
     emit('onInvitationAction');
 }
 
@@ -68,7 +77,7 @@ async function acceptInvitation(id: string) {
     const projectId = props.invitations.invitations.find(x => x.id === x.id)!.projectId;
 
     await projectsService.acceptInvitation(id);
-    closeIfNoNotificationsLeft();
+    handleInvitationAction();
     emit('onInvitationAction');
 
     await usersPresentationData.reset();
@@ -76,10 +85,10 @@ async function acceptInvitation(id: string) {
     navigateTo(`/project/${projectId}/`);
 }
 
-function closeIfNoNotificationsLeft() {
-    const anyNotificationsLeft = props.notifications.notifications.length > 0 || props.invitations.invitations.length > 1;
-    if(!anyNotificationsLeft) {
+function handleInvitationAction() {
+    if(!(props.notifications.notifications.length > 0 || props.invitations.invitations.length > 1)) {
         visible.value = false;
+        emit('noUnreadLeft');
     }
 }
 </script>

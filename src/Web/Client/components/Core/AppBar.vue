@@ -15,7 +15,8 @@
                     <i class="pi pi-bell text-xl" />
                 </template>
             </span>
-            <NotificationsPopup ref="notificationsPopup" :invitations="invitations" :notifications="notifications" @on-invitation-action="handleInvitationAction" @on-notification-read="updateNotifications" />
+            <NotificationsPopup ref="notificationsPopup" :invitations="invitations" :notifications="notifications" 
+            @on-invitation-action="handleInvitationAction" @on-notification-read="handleNotificationRead" @no-unread-left="zeroOutUnreadCount" />
             <span @click="toggle" v-if="userId">
                 <UserAvatar :user-id="userId" aria-haspopup="true" aria-controls="user_menu" class="cursor-pointer" />
             </span>
@@ -101,11 +102,19 @@ async function handleInvitationAction() {
     await updateInvitations();
 }
 
+async function handleNotificationRead() {
+    await updateNotifications();
+}
+
 async function updateInvitations() {
     invitations.value = await projectsService.getUserInvitations();
 }
 
 async function updateNotifications() {
     notifications.value = await notificationsService.getNotifications();
+}
+
+function zeroOutUnreadCount() {
+    unreadCount.value = 0;
 }
 </script>
