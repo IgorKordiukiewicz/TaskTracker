@@ -11,6 +11,7 @@ public abstract class DailyTotalTaskPropertyHandlerTestsBase<TProjection, TPrope
     protected readonly DateTime _currentDay = new(2025, 05, 31, 12, 0, 0);
     protected readonly DateTime _previousDay = new(2025, 05, 30, 12, 0, 0);
     protected readonly DateTime _twoDaysAgo = new(2025, 05, 29, 12, 0, 0);
+    protected readonly DateTime _threeDaysAgo = new(2025, 05, 28, 12, 0, 0);
     protected readonly Guid _projectId = Guid.NewGuid();
     protected readonly Func<TProjection, TProperty, bool> _predicate;
     protected readonly Func<TestRepository, THandler> _handlerCreateFunc;

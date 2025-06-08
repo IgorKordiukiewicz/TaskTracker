@@ -15,7 +15,7 @@ public abstract class ProjectionHandler<TProjection>(IRepository repository)
     : IProjectionHandler
     where TProjection : class, IProjection
 {
-    private List<TProjection> Projections { get; set; } = [];
+    protected List<TProjection> Projections { get; set; } = [];
 
     public async Task InitializeState(Guid projectId, bool rebuild = false)
     {

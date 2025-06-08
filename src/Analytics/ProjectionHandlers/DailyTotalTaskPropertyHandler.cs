@@ -14,9 +14,9 @@ public abstract class DailyTotalTaskPropertyHandler<TProjection, TProperty>(IRep
 
         if (currentDayProjection is null)
         {
-            var previousDayProjection = GetPreviousDayProjection(projectId, property, date);
-            var updatedCount = previousDayProjection is not null
-                ? previousDayProjection.Count + countChange
+            var lastProjection = GetLastProjection(projectId, property, date);
+            var updatedCount = lastProjection is not null
+                ? lastProjection.Count + countChange
                 : (increment ? 1 : 0);
 
             Add(CreateProjection(projectId, date, property, updatedCount));
@@ -29,9 +29,10 @@ public abstract class DailyTotalTaskPropertyHandler<TProjection, TProperty>(IRep
 
     protected abstract TProjection CreateProjection(Guid projectId, DateTime date, TProperty property, int count);
 
-    private TProjection? GetPreviousDayProjection(Guid projectId, TProperty property, DateTime currentDate)
+    private TProjection? GetLastProjection(Guid projectId, TProperty property, DateTime currentDate)
     {
-        var previousDay = currentDate.AddDays(-1);
-        return Find(x => x.ProjectId == projectId && x.Date == previousDay && predicate(x, property));
+        return Projections
+            .OrderByDescending(x => x.Date)
+            .FirstOrDefault(x => x.ProjectId == projectId && x.Date < currentDate && predicate(x, property));
     }
 }
