@@ -1,8 +1,8 @@
 <template>
-    <div v-if="canViewPage">
+    <div>
         <p class="text-lg">Settings</p>
         <div class="bg-white w-full shadow mt-4 p-4 flex flex-col gap-1" v-if="settings">
-            <template v-if="canEditSettings && settings">
+            <template v-if="settings">
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="font-semibold mb-1">Name</p>
@@ -10,12 +10,14 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <InputText v-model="projectName" :disabled="!nameEditActive" class="w-80" />
-                        <template v-if="nameEditActive">
-                            <Button severity="secondary" text icon="pi pi-times" @click="cancelNameEdit" />
-                            <Button severity="primary" text icon="pi pi-check" @click="updateName" :disabled="updateNameSaveDisabled" />
-                        </template>
-                        <template v-else>
-                            <Button severity="secondary" text icon="pi pi-pencil" @click="activateNameEdit" />
+                        <template v-if="canEditSettings">
+                            <template v-if="nameEditActive">
+                                <Button severity="secondary" text icon="pi pi-times" @click="cancelNameEdit" />
+                                <Button severity="primary" text icon="pi pi-check" @click="updateName" :disabled="updateNameSaveDisabled" />
+                            </template>
+                            <template v-else>
+                                <Button severity="secondary" text icon="pi pi-pencil" @click="activateNameEdit" />
+                            </template>
                         </template>
                     </div>
                 </div>
@@ -33,7 +35,7 @@
                 </template>
             </template>
             <template v-if="!isOwner">
-                <Divider v-if="canEditSettings" />
+                <Divider />
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="font-semibold mb-1">Leave Project</p>
@@ -66,10 +68,6 @@ await permissions.checkProjectPermissions(projectId.value);
 
 const projectName = ref(settings.value?.name);
 const nameEditActive = ref(false);
-
-const canViewPage = computed(() => {
-    return permissions.hasPermission(ProjectPermissions.EditProject);
-})
 
 const updateNameSaveDisabled = computed(() => {
     return !projectName.value || projectName.value === settings.value?.name;

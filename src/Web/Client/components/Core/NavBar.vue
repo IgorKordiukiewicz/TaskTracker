@@ -95,8 +95,7 @@ const projectNodes = ref([
     {
         title: 'Settings',
         icon: 'pi pi-cog',
-        link: [ '/project/', '/settings' ],
-        permission: ProjectPermissions.EditProject as number
+        link: [ '/project/', '/settings' ]
     }
 ]);
 
