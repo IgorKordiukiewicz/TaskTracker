@@ -59,12 +59,20 @@ function show() {
 
 async function declineInvitation(id: string) {
     await projectsService.declineInvitation(id);
+    closeIfNoNotificationsLeft();
     emit('onInvitationAction');
 }
 
 async function acceptInvitation(id: string) {
     await projectsService.acceptInvitation(id);
+    closeIfNoNotificationsLeft();
     emit('onInvitationAction');
-    // TODO: update organizations if on index page? (or always redirect to org page)
+}
+
+function closeIfNoNotificationsLeft() {
+    const anyNotificationsLeft = props.notifications.notifications.length > 0 || props.invitations.invitations.length > 1;
+    if(!anyNotificationsLeft) {
+        visible.value = false;
+    }
 }
 </script>
