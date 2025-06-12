@@ -11,4 +11,7 @@ public record TaskAnalyticsVM
 
     public required IReadOnlyDictionary<TaskPriority, int> CountByPriority { get; init; }
     public required IReadOnlyDictionary<TaskPriority, IReadOnlyList<int>> DailyCountByPriority { get; init; }
+
+    public required IReadOnlyDictionary<Guid, int> CountByAssigneeId { get; init; }
+    public required IReadOnlyDictionary<Guid, IReadOnlyList<int>> DailyCountByAssigneeId { get; init; }
 }

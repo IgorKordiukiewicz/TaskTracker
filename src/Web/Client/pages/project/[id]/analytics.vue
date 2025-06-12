@@ -30,6 +30,20 @@
                     <PropertyCountByDayChart ref="cumulativePriorityCountByDayChart" />
                 </div>
             </div>
+            <div class="w-full bg-white shadow-md p-3 mt-4">
+                Assignee
+            </div>
+            <div class="grid grid-cols-6 gap-2 w-full mt-2">
+                <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
+                    <PropertyCountChart ref="assigneeCountChart" />
+                </div>
+                <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
+                    <PropertyCountByDayChart ref="assigneeCountByDayChart" />
+                </div>
+                <div class="col-span-2 bg-white w-full shadow-md h-96 p-4">
+                    <PropertyCountByDayChart ref="cumulativeAssigneeCountByDayChart" />
+                </div>
+            </div>
         </template>
         <template v-else>
             <p class="text-sm mt-4">No data yet.</p>
@@ -64,18 +78,27 @@ use([
 const route = useRoute();
 const analyticsService = useAnalyticsService();
 const workflowsService = useWorkflowsService();
+const projectsService = useProjectsService();
+const usersPresentationData = useUsersPresentationData();
 
 const projectId = ref(route.params.id as string);
 
 const workflow = ref(await workflowsService.getWorkflow(projectId.value));
 const taskAnalytics = ref(await analyticsService.getTaskAnalytics(projectId.value));
+const members = ref(await projectsService.getMembers(projectId.value));
+const presentationData = ref(await usersPresentationData.getUsers());
 
 const statusCountChart = ref();
 const priorityCountChart = ref();
+const assigneeCountChart = ref();
+
 const statusCountByDayChart = ref();
 const priorityCountByDayChart = ref();
+const assigneeCountByDayChart = ref();
+
 const cumulativeStatusCountByDayChart = ref();
 const cumulativePriorityCountByDayChart = ref();
+const cumulativeAssigneeCountByDayChart = ref();
 
 onMounted(() => {
     initCharts();
@@ -85,14 +108,28 @@ const hasData = computed(() => {
     return workflow.value && taskAnalytics.value && taskAnalytics.value.dates.length > 0;
 })
 
+const membersList = computed(() => {
+    if(!members.value) {
+        return [];
+    }
+
+    const unassignedMember = {
+        userId: '00000000-0000-0000-0000-000000000000',
+        name: 'Unassigned',
+    };
+
+    return [ unassignedMember, ... members.value.members ];
+})
+
 function initCharts() {
-    if(!workflow.value || !taskAnalytics.value || !hasData.value) {  
+    if(!workflow.value || !taskAnalytics.value || !members.value || !hasData.value) {  
         return;
     }
 
     const statusesNames = workflow.value.statuses.map(x => x.name);
     const dates = taskAnalytics.value.dates.map(x => new Date(x).toLocaleDateString());
     const prioritiesNames = allTaskPriorities.map(x => x.name);
+    const membersNames = membersList.value.map(x => x.name);
 
     const statusCountData = [];
     for(const status of workflow.value.statuses) {
@@ -125,6 +162,23 @@ function initCharts() {
         priorityCountData
     );
 
+
+    const assigneeCountData = [];
+    console.log(membersList.value);
+    for(const member of membersList.value) {
+        const count = taskAnalytics.value.countByAssigneeId[member.userId] ?? 0;
+        assigneeCountData.push({
+            value: count,
+            name: member.name
+        });
+    }
+
+    assigneeCountChart.value.initChart(
+        membersList.value.map(x => getAssigneeColor(x.userId)),
+        membersNames,
+        assigneeCountData
+    );
+
     //const colors = [ '#22c55e', '#6366f1', '#f43f5e' ];
     //const colors2 = [ '#0ea5e9', '#6366f1', '#f43f5e' ];
     //const colors = [ '#f43f5e', '#a855f7', '#0ea5e9' ];
@@ -134,6 +188,9 @@ function initCharts() {
 
     initPriorityCountByDayChart(priorityCountByDayChart.value, prioritiesNames, dates, false);
     initPriorityCountByDayChart(cumulativePriorityCountByDayChart.value, prioritiesNames, dates, true);
+
+    initAssigneeCountByDayChart(assigneeCountByDayChart.value, membersNames, dates, false);
+    initAssigneeCountByDayChart(cumulativeAssigneeCountByDayChart.value, membersNames, dates, true);
 }
 
 function initStatusCountByDayChart(chart: any, statusesNames: string[], dates: string[], cumulative: boolean) {
@@ -174,6 +231,25 @@ function initPriorityCountByDayChart(chart: any, prioritiesNames: string[], date
     );
 }
 
+function initAssigneeCountByDayChart(chart: any, assigneesNames: string[], dates: string[], cumulative: boolean) {
+    const data = [];
+    for(const member of membersList.value) {
+        const counts = taskAnalytics.value!.dailyCountByAssigneeId[member.userId] ?? [];
+        data.push({
+            name: member.name,
+            values: counts
+        });
+    }
+
+    chart.initChart(
+        membersList.value.map(x => getAssigneeColor(x.userId)),
+        assigneesNames,
+        dates,
+        data,
+        cumulative
+    );
+}
+
 function getPriorityColor(priority: TaskPriority) {
     switch (+priority) {
         case TaskPriority.Urgent: 
@@ -187,5 +263,9 @@ function getPriorityColor(priority: TaskPriority) {
         default: 
             return "#ffffff";
     }
+}
+
+function getAssigneeColor(assigneeId: string) {
+    return presentationData.value.find(x => x.userId == assigneeId)?.avatarColor ?? '#94a3b8';
 }
 </script>

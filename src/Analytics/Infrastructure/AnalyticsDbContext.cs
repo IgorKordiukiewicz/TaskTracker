@@ -9,6 +9,7 @@ public class AnalyticsDbContext(DbContextOptions<AnalyticsDbContext> options)
 
     public DbSet<DailyTotalTaskStatus> DailyTotalTaskStatuses { get; set; }
     public DbSet<DailyTotalTaskPriority> DailyTotalTaskPriorities { get; set; }
+    public DbSet<DailyTotalTaskAssignee> DailyTotalTaskAssignees { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

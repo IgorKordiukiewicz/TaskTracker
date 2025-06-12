@@ -6,7 +6,9 @@ export interface TaskAnalyticsVM {
 
     countByStatusId: Record<string, number>;
     countByPriority: Record<string, number>; // has to be string
+    countByAssigneeId: Record<string, number>;
 
     dailyCountByStatusId: Record<string, number[]>;
     dailyCountByPriority: Record<string, number[]>; // has to be string
+    dailyCountByAssigneeId: Record<string, number[]>;
 }

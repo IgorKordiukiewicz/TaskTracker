@@ -19,6 +19,7 @@ public static class Analytics
 
         services.AddScoped<IProjectionHandler, DailyTotalTaskStatusHandler>();
         services.AddScoped<IProjectionHandler, DailyTotalTaskPriorityHandler>();
+        services.AddScoped<IProjectionHandler, DailyTotalTaskAssigneeHandler>();
 
         return services;
     }

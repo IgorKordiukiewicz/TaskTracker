@@ -8,6 +8,9 @@ export const useUsersPresentationData = () => {
         async getUser(id: string) {
             return (await getUsers()).find(x => x.userId === id);
         },
+        async getUsers() {
+            return (await getUsers());
+        },
         async reset() {
             await reset();
         }
