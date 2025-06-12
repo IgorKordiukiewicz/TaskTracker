@@ -15,6 +15,11 @@ public class TaskRelationshipManager : Entity, IAggregateRoot
 
     public Result AddHierarchicalRelationship(Guid parentId, Guid childId, IEnumerable<Guid> projectTasksIds)
     {
+        if(parentId == childId)
+        {
+            return Result.Fail(new DomainError("Parent task can't be the same as child task."));
+        }
+
         if (!projectTasksIds.Contains(parentId))
         {
             return Result.Fail(new DomainError("Parent task does not belong to the project."));

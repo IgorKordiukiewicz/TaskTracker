@@ -22,6 +22,17 @@ public class TaskRelationshipManagerTests
     }
 
     [Fact]
+    public void AddHierarchicalRelationship_ShouldFail_WhenParentIsTheSameAsChild()
+    {
+        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
+        var taskId = Guid.NewGuid();
+
+        var result = relationshipManager.AddHierarchicalRelationship(taskId, taskId, [taskId]);
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
     public void AddHierarchicalRelationship_ShouldFail_WhenParentTaskDoesNotBelongToProject()
     {
         var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());

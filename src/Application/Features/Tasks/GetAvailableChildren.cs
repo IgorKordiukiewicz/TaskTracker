@@ -45,6 +45,7 @@ internal class GetTaskAvailableChildrenHandler(AppDbContext dbContext)
 
         var excludeTaskIds = currentRelationshipsTaskIds
             .Concat(tasksWithParentsIds)
+            .Concat([task.Id]) // exclude self
             .ToHashSet();
 
         var availableChildrenIds = projectsTaskIds
