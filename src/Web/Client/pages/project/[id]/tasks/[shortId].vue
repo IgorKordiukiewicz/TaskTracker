@@ -191,12 +191,17 @@ const updateTitleDialog = ref();
 const actionsMenu = ref();
 const addChildDialog = ref();
 
-const statuses = ref(details.value?.possibleNextStatuses.map(x => ({
-    id: x.id, name: x.name }))
-    .concat([
+const statuses = computed(() => {
+    if(!details.value) {
+        return [];
+    }
+
+    return details.value.possibleNextStatuses.map(x => ({
+        id: x.id, name: x.name }))
+        .concat([
         { id: details.value.status.id, name: details.value.status.name }
-    ]
-))
+    ]);
+});
 
 const actionsMenuItems = ref([
     { 
