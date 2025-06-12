@@ -70,8 +70,6 @@ const projectId = ref(route.params.id as string);
 const workflow = ref(await workflowsService.getWorkflow(projectId.value));
 const taskAnalytics = ref(await analyticsService.getTaskAnalytics(projectId.value));
 
-const hasData = ref();
-
 const statusCountChart = ref();
 const priorityCountChart = ref();
 const statusCountByDayChart = ref();
@@ -83,16 +81,12 @@ onMounted(() => {
     initCharts();
 })
 
+const hasData = computed(() => {
+    return workflow.value && taskAnalytics.value && taskAnalytics.value.dates.length > 0;
+})
+
 function initCharts() {
-    if(!workflow.value || !taskAnalytics.value) {  
-        return;
-    }
-
-    //const colors = [ '#22c55e', '#6366f1', '#f43f5e' ];
-    //const colors = [ '#22c55e', '#06b6d4', '#6366f1' ];
-
-    hasData.value = taskAnalytics.value.dates.length > 0;
-    if(!hasData.value) {
+    if(!workflow.value || !taskAnalytics.value || !hasData.value) {  
         return;
     }
 
