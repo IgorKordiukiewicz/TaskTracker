@@ -21,8 +21,7 @@ public class TestDateTimeProvider : IDateTimeProvider
 public class IntegrationTestsFixture : IDisposable
 {
     private readonly IServiceProvider _services;
-    //private readonly string _connectionString = "Server=(localdb)\\mssqllocaldb;Database=TaskTrackerDbTests;Trusted_Connection=True"; // TODO: Store it somewhere else?
-    private readonly string _connectionString = "Host=localhost;Port=5432;Database=TaskTrackerDbTests;Username=postgres;Password=qwerty123"; // TODO: Store it somewhere else?
+    private readonly string _connectionString = "Host=localhost;Port=5432;Database=TaskTrackerDbTests;Username=postgres;Password=qwerty123"; // TODO: Store it somewhere else
 
     public IBackgroundJobClient BackgroundJobClientMock { get; } = Substitute.For<IBackgroundJobClient>();
 
