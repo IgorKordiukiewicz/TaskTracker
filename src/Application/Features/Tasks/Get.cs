@@ -19,14 +19,7 @@ internal class GetTasksHandler(AppDbContext context)
 {
     public async Task<Result<TasksVM>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
     {
-        // TODO: refactor (extract methods)
-        var workflow = await context.Workflows
-            .AsNoTracking()
-            .Include(x => x.Statuses)
-            .Include(x => x.Transitions)
-            .Where(x => x.ProjectId == request.ProjectId)
-            .SingleOrDefaultAsync(cancellationToken);
-
+        var workflow = await GetWorkflow(request.ProjectId, cancellationToken);
         if(workflow is null)
         {
             return Result.Fail<TasksVM>(new NotFoundError<Workflow>($"Project ID: {request.ProjectId}"));
@@ -34,16 +27,7 @@ internal class GetTasksHandler(AppDbContext context)
 
         var statusesById = workflow.Statuses.ToDictionary(x => x.Id, x => x);
 
-        IQueryable<Domain.Tasks.Task> query = context.Tasks
-            .Include(x => x.TimeLogs)
-            .Include(x => x.Comments)
-            .Where(x => x.ProjectId == request.ProjectId);
-
-        query = request.Ids.Match(
-            shortId => query.Where(x => x.ShortId == shortId),
-            ids => query.Where(x => !ids.Any() || ids.Contains(x.Id)));
-
-        var tasks = await query
+        var tasks = await BuildTasksQuery(request.ProjectId, request.Ids)
             .Join(context.TaskStatuses, 
             x => x.StatusId,
             x => x.Id, 
@@ -63,25 +47,10 @@ internal class GetTasksHandler(AppDbContext context)
             .OrderByDescending(x => x.ShortId)
             .ToListAsync(cancellationToken);
 
-        var boardLayout = await context.TasksBoardLayouts
-            .AsNoTracking()
-            .Where(x => x.ProjectId == request.ProjectId)
-            .SingleAsync(cancellationToken);
+        var possibleNextStatusesByStatus = GetPossibleNextStatusesByStatus(workflow);
+        var allTaskStatuses = GetAllStatuses(workflow);
 
-        var possibleNextStatusesByStatus = workflow.Statuses.ToDictionary(k => k.Id, _ => new List<Guid>());
-        foreach(var (statusId, possibleNextStatuses) in possibleNextStatusesByStatus)
-        {
-            possibleNextStatuses.AddRange(workflow.Transitions.Where(x => x.FromStatusId == statusId).Select(x => x.ToStatusId));
-        }
-
-        var allTaskStatuses = workflow.Statuses
-            .Select(x => new TaskStatusDetailedVM(x.Id, x.Name, x.DisplayOrder))
-            .OrderBy(x => x.DisplayOrder)
-            .ToList();
-
-        var boardColumns = boardLayout.Columns
-            .Select(x => new TaskBoardColumnVM(x.StatusId, statusesById[x.StatusId].Name, possibleNextStatusesByStatus[x.StatusId], x.TasksIds))
-            .ToList();
+        var boardColumns = await GetBoardColumns(request.ProjectId, statusesById, possibleNextStatusesByStatus, cancellationToken);
 
         return new TasksVM(tasks.Select(x => new TaskVM
         {
@@ -97,5 +66,58 @@ internal class GetTasksHandler(AppDbContext context)
             EstimatedTime = x.EstimatedTime,
             CommentsCount = x.CommentsCount
         }).ToList(), allTaskStatuses, boardColumns);
+    }
+
+    private async Task<Workflow?> GetWorkflow(Guid projectId, CancellationToken cancellationToken)
+        => await context.Workflows
+            .AsNoTracking()
+            .Include(x => x.Statuses)
+            .Include(x => x.Transitions)
+            .Where(x => x.ProjectId == projectId)
+            .SingleOrDefaultAsync(cancellationToken);
+
+    private static Dictionary<Guid, List<Guid>> GetPossibleNextStatusesByStatus(Workflow workflow)
+    {
+        var result = workflow.Statuses.ToDictionary(k => k.Id, _ => new List<Guid>());
+
+        foreach (var (statusId, possibleNextStatuses) in result)
+        {
+            possibleNextStatuses.AddRange(workflow.Transitions.Where(x => x.FromStatusId == statusId).Select(x => x.ToStatusId));
+        }
+
+        return result;
+    }
+
+    private static List<TaskStatusDetailedVM> GetAllStatuses(Workflow workflow)
+        => workflow.Statuses
+            .Select(x => new TaskStatusDetailedVM(x.Id, x.Name, x.DisplayOrder))
+            .OrderBy(x => x.DisplayOrder)
+            .ToList();
+
+    private async Task<List<TaskBoardColumnVM>> GetBoardColumns(Guid projectId, Dictionary<Guid, Domain.Workflows.TaskStatus> statusesById,
+        Dictionary<Guid, List<Guid>> possibleNextStatusesByStatus, CancellationToken cancellationToken)
+    {
+        var boardLayout = await context.TasksBoardLayouts
+            .AsNoTracking()
+            .Where(x => x.ProjectId == projectId)
+            .SingleAsync(cancellationToken);
+
+        return boardLayout.Columns
+            .Select(x => new TaskBoardColumnVM(x.StatusId, statusesById[x.StatusId].Name, possibleNextStatusesByStatus[x.StatusId], x.TasksIds))
+            .ToList();
+    }
+
+    private IQueryable<Domain.Tasks.Task> BuildTasksQuery(Guid projectId, OneOf<int, IEnumerable<Guid>> ids)
+    {
+        var query = context.Tasks
+            .Include(x => x.TimeLogs)
+            .Include(x => x.Comments)
+            .Where(x => x.ProjectId == projectId);
+
+        query = ids.Match(
+            shortId => query.Where(x => x.ShortId == shortId),
+            ids => query.Where(x => !ids.Any() || ids.Contains(x.Id)));
+
+        return query;
     }
 }
