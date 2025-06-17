@@ -23,6 +23,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IDomainEventDi
     public DbSet<TaskComment> TaskComments { get; set; }
     public DbSet<TaskActivity> TaskActivities { get; set; }
     public DbSet<TaskTimeLog> TaskTimeLogs { get; set; }
+    public DbSet<TaskAttachment> TaskAttachments { get; set; }
     public DbSet<TaskRelationshipManager> TaskRelationshipManagers { get; set; }
     public DbSet<TaskHierarchicalRelationship> TaskHierarchicalRelationships { get; set; }
 

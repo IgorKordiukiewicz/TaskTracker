@@ -61,6 +61,12 @@ export const useTasksService = () => {
         },
         async removeTaskRelationship(projectId: string, model: RemoveTaskRelationshipDto) {
             await api.sendPostRequest('tasks/relationships/hierarchical/remove', model, { 'ProjectId': projectId });
+        },
+        async addAttachment(id: string, projectId: string, file: File) { 
+            const formData = new FormData();
+            formData.append('file', file);
+
+            await api.sendFormDataPostRequest(`tasks/${id}/attachments`, formData, { 'ProjectId': projectId });
         }
     }
 }

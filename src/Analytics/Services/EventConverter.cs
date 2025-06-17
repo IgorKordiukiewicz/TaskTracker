@@ -18,6 +18,7 @@ public static class EventConverter
            EventType.TaskPriorityUpdated => DeserializeDomainEvent<TaskPriorityUpdated>(@event),
            EventType.TaskStatusUpdated => DeserializeDomainEvent<TaskStatusUpdated>(@event),
            EventType.TaskTimeLogged => DeserializeDomainEvent<TaskTimeLogged>(@event),
+           EventType.TaskAttachmentAdded => DeserializeDomainEvent<TaskAttachmentAdded>(@event),
 
            EventType.ProjectCreated => DeserializeDomainEvent<ProjectCreated>(@event),
            EventType.ProjectMemberLeft => DeserializeDomainEvent<ProjectMemberLeft>(@event),
@@ -42,6 +43,7 @@ public static class EventConverter
             TaskPriorityUpdated taskPriorityUpdated => JsonSerializer.Serialize(taskPriorityUpdated),
             TaskStatusUpdated taskStatusUpdated => JsonSerializer.Serialize(taskStatusUpdated),
             TaskTimeLogged taskTimeLogged => JsonSerializer.Serialize(taskTimeLogged),
+            TaskAttachmentAdded taskAttachmentAdded => JsonSerializer.Serialize(taskAttachmentAdded),
 
             ProjectCreated projectCreated => JsonSerializer.Serialize(projectCreated),
             ProjectMemberLeft projectMemberLeft => JsonSerializer.Serialize(projectMemberLeft),

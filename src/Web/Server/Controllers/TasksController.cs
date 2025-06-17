@@ -325,4 +325,20 @@ public class TasksController(IMediator mediator)
         var result = await mediator.Send(new UpdateTaskBoardCommand(model));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Add a new attachment to the given task.
+    /// </summary>
+    /// <param name="taskId"></param>
+    /// <param name="file"></param>
+    /// <response code="200">Task attachment added.</response>
+    /// <response code="404">Task not found.</response>
+    [HttpPost("{taskId:guid}/attachments")]
+    [Authorize(Policy.ProjectEditTasks)]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> AddAttachment(Guid taskId, [FromForm] IFormFile file)
+    {
+        return Ok();
+    }
 }

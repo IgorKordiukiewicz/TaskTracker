@@ -36,6 +36,11 @@ internal class TaskConfiguration : DomainEntityTypeConfiguration<Domain.Tasks.Ta
             .HasForeignKey(x => x.TaskId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasMany(x => x.Attachments)
+            .WithOne()
+            .HasForeignKey(x => x.TaskId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasOne<User>()
             .WithMany()
             .HasForeignKey(x => x.AssigneeId)

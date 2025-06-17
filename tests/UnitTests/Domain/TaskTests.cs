@@ -227,6 +227,54 @@ public class TaskTests
             task.HasDomainEvents<TaskEstimatedTimeUpdated>().Should().BeTrue();
         }
     }
+
+    [Fact]
+    public void AddAttachment_ShouldAddNewAttachment_WhenValidationSucceeds()
+    {
+        var task = CreateDefaultTask();
+
+        var result = task.AddAttachment("abc", 1, "application/pdf");
+
+        using(new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            task.Attachments.Count.Should().Be(1);
+            task.HasDomainEvents<TaskAttachmentAdded>().Should().BeTrue();
+        }
+    }
+
+    [Fact]
+    public void AddAttachment_ShouldFail_WhenMaxAttachmentsCountExceeded()
+    {
+        var task = CreateDefaultTask();
+        for (int i = 1; i <= 10; ++i) // TODO: don't use magic numbers
+        {
+            _ = task.AddAttachment($"file{i}.pdf", 1, "application/pdf");
+        }
+
+        var result = task.AddAttachment("file11.pdf", 1, "application/pdf");
+
+        using (new AssertionScope())
+        {
+            result.IsFailed.Should().BeTrue();
+            task.Attachments.Should().HaveCount(10);
+        }
+    }
+
+    [Fact]
+    public void AddAttachment_ShouldFail_WhenAttachmentWithSameNameAlreadyExists()
+    {
+        var task = CreateDefaultTask();
+        _ = task.AddAttachment("abc", 1, "application/pdf");
+
+        var result = task.AddAttachment("abc", 2, "application/pdf");
+
+        using (new AssertionScope())
+        {
+            result.IsFailed.Should().BeTrue();
+            task.Attachments.Should().HaveCount(1);
+        }
+    }
     
     private static Task CreateDefaultTask()
         => Task.Create(1, Guid.NewGuid(), DateTime.Now, "title", "desc", Guid.NewGuid());

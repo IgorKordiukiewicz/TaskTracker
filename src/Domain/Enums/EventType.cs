@@ -16,5 +16,6 @@ public enum EventType
     ProjectInvitationAccepted,
     ProjectInvitationExpired,
     ProjectInvitationCanceled,
-    ProjectInvitationDeclined
+    ProjectInvitationDeclined,
+    TaskAttachmentAdded,
 }

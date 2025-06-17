@@ -8,3 +8,4 @@ global using Infrastructure;
 global using Infrastructure.Repositories;
 global using MediatR;
 global using Microsoft.EntityFrameworkCore;
+global using Application.Common;

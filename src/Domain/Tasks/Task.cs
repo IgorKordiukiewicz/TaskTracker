@@ -23,8 +23,13 @@ public class Task : Entity, IAggregateRoot
     private readonly List<TaskTimeLog> _timeLogs = [];
     public IReadOnlyList<TaskTimeLog> TimeLogs => _timeLogs.AsReadOnly();
 
+    private readonly List<TaskAttachment> _attachments = [];
+    public IReadOnlyList<TaskAttachment> Attachments => _attachments.AsReadOnly();
+
     public int? EstimatedTime { get; private set; }
     public int TotalTimeLogged => TimeLogs.Sum(x => x.Minutes);
+
+    private const int MaxAttachmentsCount = 10;
 
     private Task(Guid id)
         : base(id)
@@ -114,5 +119,23 @@ public class Task : Entity, IAggregateRoot
         var oldValue = EstimatedTime;
         EstimatedTime = minutes <= 0 ? null : minutes;
         AddEvent(new TaskEstimatedTimeUpdated(Id, oldValue, EstimatedTime, ProjectId, DateTime.UtcNow));
+    }
+
+    public Result AddAttachment(string fileName, long bytesLength, string contentType)
+    {
+        if (_attachments.Count >= MaxAttachmentsCount)
+        {
+            return Result.Fail(new DomainError($"Cannot add more than {MaxAttachmentsCount} attachments to a task."));
+        }
+
+        if(_attachments.Any(x => x.Name.Equals(fileName, StringComparison.CurrentCultureIgnoreCase)))
+        {
+            return Result.Fail(new DomainError($"Attachment with name '{fileName}' already exists."));
+        }
+
+        _attachments.Add(new TaskAttachment(Id, fileName, bytesLength, TaskAttachment.GetAttachmentType(contentType)));
+        AddEvent(new TaskAttachmentAdded(Id, fileName, ProjectId, DateTime.UtcNow));
+
+        return Result.Ok();
     }
 }

@@ -23,6 +23,25 @@ export const useApi = () => {
                 handleError(error);
             }
         },
+        async sendFormDataPostRequest(url: string, formData: FormData, customHeaders?: Record<string, string>) {
+            try {
+                const { data, error } = await useFetch(`${config.public.apiUrl}${url}`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 
+                        ...getHeaders(await getAccessToken(), true),
+                        ...customHeaders
+                    }
+                });
+    
+                if(error.value) {
+                    throw new Error(error.value.data);
+                }
+            }
+            catch(error: any) {
+                handleError(error);
+            }
+        },
         async sendGetRequest<T>(url: string, customHeaders?: Record<string, string>) {
             try {
                 const { data, error } = await useFetch<T>(`${config.public.apiUrl}${url}`, {
@@ -44,11 +63,16 @@ export const useApi = () => {
         }
     }
 
-    function getHeaders(accessToken?: string) {
-        return {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
+    function getHeaders(accessToken?: string, skipContentType = false) {
+        const headers: Record<string, string> = {
+        Authorization: `Bearer ${accessToken}`,
         };
+
+        if (!skipContentType) {
+            headers['Content-Type'] = 'application/json';
+        }
+
+        return headers;
     }
 
     async function getAccessToken() {

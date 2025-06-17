@@ -20,3 +20,6 @@ public record TaskStatusUpdated(Guid TaskId, Guid OldStatusId, Guid NewStatusId,
 
 public record TaskTimeLogged(Guid TaskId, int Minutes, DateOnly Day, Guid ProjectId, DateTime OccurredAt)
    : DomainEvent(ProjectId, EventType.TaskTimeLogged, OccurredAt);
+
+public record TaskAttachmentAdded(Guid TaskId, string FileName, Guid ProjectId, DateTime OccurredAt)
+    : DomainEvent(ProjectId, EventType.TaskAttachmentAdded, OccurredAt);

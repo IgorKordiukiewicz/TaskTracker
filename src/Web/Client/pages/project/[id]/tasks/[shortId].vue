@@ -34,6 +34,19 @@
                     </div>
 
                 </div>
+                <div class="bg-white w-full shadow p-4 flex flex-col gap-3">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3 font-semibold">
+                            <i class="pi pi-link" />
+                            <p class="font-semibold">
+                                Attachments
+                            </p>
+                        </div>
+                        <div class="flex gap-3" v-if="canEditTasks">
+                            <FileInput icon="pi pi-plus" file-types=".pdf,.txt,.csv,.jpg,.jpeg,.png,.gif,.json,.docx,.xlsx,.pptx" @upload="addAttachment" />
+                        </div>
+                    </div>
+                </div>
                 <div class="bg-white w-full shadow p-4 flex flex-col gap-3" v-if="comments">
                     <TogglableSection title="Comments" icon="pi pi-comments">
                         <div class="flex gap-2 items-center mt-1" v-if="canEditTasks">
@@ -408,6 +421,10 @@ async function removeChild(childId: string) {
     model.childId = childId;
     await tasksService.removeTaskRelationship(projectId.value, model);
     await updateRelationships();
+}
+
+async function addAttachment(file: File) {
+    await tasksService.addAttachment(details.value!.id, projectId.value, file);
 }
 </script>
 

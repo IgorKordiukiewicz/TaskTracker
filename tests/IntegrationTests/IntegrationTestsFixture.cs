@@ -10,6 +10,7 @@ using NSubstitute;
 using System.Linq.Expressions;
 using Analytics.Infrastructure;
 using Microsoft.AspNetCore.TestHost;
+using Infrastructure.Services;
 
 namespace IntegrationTests;
 
@@ -24,6 +25,7 @@ public class IntegrationTestsFixture : IDisposable
     private readonly string _connectionString = "Host=localhost;Port=5432;Database=TaskTrackerDbTests;Username=postgres;Password=qwerty123"; // TODO: Store it somewhere else
 
     public IBackgroundJobClient BackgroundJobClientMock { get; } = Substitute.For<IBackgroundJobClient>();
+    public IBlobStorageService BlobStorageServiceMock { get; } = Substitute.For<IBlobStorageService>();
 
     public IntegrationTestsFixture()
     {
@@ -43,6 +45,7 @@ public class IntegrationTestsFixture : IDisposable
 
                 services.AddScoped<IDateTimeProvider, TestDateTimeProvider>();
                 services.AddScoped(serviceProvider => BackgroundJobClientMock);
+                services.AddScoped(serviceProvider => BlobStorageServiceMock);
             });
 
             builder.UseEnvironment("Development");

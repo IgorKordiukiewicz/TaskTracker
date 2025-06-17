@@ -8,6 +8,7 @@ using Web.Server.Configuration;
 using Microsoft.Extensions.Logging.ApplicationInsights;
 using HangfireBasicAuthenticationFilter;
 using Analytics;
+using Application.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,11 @@ var configurationSettingsSection = builder.Configuration.GetSection("Configurati
 builder.Services.Configure<ConfigurationSettings>(configurationSettingsSection);
 var configurationSettings = configurationSettingsSection.Get<ConfigurationSettings>()
     ?? throw new InvalidOperationException("ConfigurationSettings is not correct.");
+
+var applicationSettingsSection = builder.Configuration.GetSection("ApplicationSettings");
+builder.Services.Configure<ApplicationSettings>(applicationSettingsSection);
+var applicationSettings = applicationSettingsSection.Get<ApplicationSettings>()
+    ?? throw new InvalidOperationException("ApplicationSettings is not correct.");
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => options.IncludeXmlComments(

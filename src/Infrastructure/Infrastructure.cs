@@ -4,6 +4,7 @@ using Domain.Tasks;
 using Domain.Users;
 using Domain.Workflows;
 using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,6 +22,8 @@ public static class Infrastructure
         services.AddScoped<IRepository<Workflow>, WorkflowRepository>();
         services.AddScoped<IRepository<TaskRelationshipManager>, TaskRelationshipManagerRepository>();
         services.AddScoped<IRepository<Notification>, NotificationRepository>();
+
+        services.AddScoped<IBlobStorageService, BlobStorageService>();
 
         return services;
     }

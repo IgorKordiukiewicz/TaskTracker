@@ -6,6 +6,8 @@ using Domain.Tasks;
 using Domain.Users;
 using Domain.Workflows;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Http;
+using NSubstitute;
 using Task = Domain.Tasks.Task;
 using TaskStatus = Domain.Workflows.TaskStatus;
 
@@ -148,7 +150,7 @@ public class TasksTests
 
         var result = await _fixture.SendRequest(new UpdateTaskStatusCommand(task.Id, new(newStatusId)));
 
-        using(new AssertionScope())
+        using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
 
@@ -174,7 +176,7 @@ public class TasksTests
 
         var result = await _fixture.SendRequest(new AddTaskCommentCommand(task.Id, user.Id, new("abc")));
 
-        using(new AssertionScope())
+        using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<TaskComment>()).Should().Be(taskCommentsCountBefore + 1);
@@ -213,7 +215,7 @@ public class TasksTests
 
             var updatedTask = await _fixture.FirstAsync<Task>();
             updatedTask.AssigneeId.Should().Be(member.UserId);
-        }   
+        }
     }
 
     [Fact]
@@ -248,7 +250,7 @@ public class TasksTests
 
         var result = await _fixture.SendRequest(new UpdateTaskPriorityCommand(task.Id, new(newPriority)));
 
-        using(new AssertionScope())
+        using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.FirstAsync<Task>(x => x.Id == task.Id)).Priority.Should().Be(newPriority);
@@ -316,7 +318,7 @@ public class TasksTests
 
         var result = await _fixture.SendRequest(new DeleteTaskCommand(task.Id));
 
-        using(new AssertionScope())
+        using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
             (await _fixture.CountAsync<Task>()).Should().Be(0);
@@ -345,7 +347,7 @@ public class TasksTests
 
         var result = await _fixture.SendRequest(new GetTaskActivitiesQuery(task.Id));
 
-        using(new AssertionScope())
+        using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
 
@@ -355,7 +357,7 @@ public class TasksTests
             AssertActivities(activities[1], TaskProperty.Assignee, user.FullName, null);
             AssertActivities(activities[2], TaskProperty.Assignee, null, user.FullName);
             AssertActivities(activities[3], TaskProperty.Creation, null, null);
-            
+
             static void AssertActivities(TaskActivityVM activity, TaskProperty expectedProperty, string? expectedOldValue, string? expectedNewValue)
             {
                 activity.Property.Should().Be(expectedProperty);
@@ -370,7 +372,7 @@ public class TasksTests
     {
         var user = (await _factory.CreateUsers())[0];
 
-        var result = await _fixture.SendRequest(new LogTaskTimeCommand(user.Id, Guid.NewGuid(), 
+        var result = await _fixture.SendRequest(new LogTaskTimeCommand(user.Id, Guid.NewGuid(),
             new(1, DateTime.Now)));
 
         result.IsFailed.Should().BeTrue();
@@ -383,7 +385,7 @@ public class TasksTests
         var user = await _fixture.FirstAsync<User>();
         var timeLogsBefore = await _fixture.CountAsync<TaskTimeLog>();
 
-        var result = await _fixture.SendRequest(new LogTaskTimeCommand(user.Id, task.Id, 
+        var result = await _fixture.SendRequest(new LogTaskTimeCommand(user.Id, task.Id,
             new(1, DateTime.Now)));
 
         using (new AssertionScope())
@@ -431,7 +433,7 @@ public class TasksTests
 
         var result = await _fixture.SendRequest(new AddHierarchicalTaskRelationshipCommand(tasks[0].ProjectId, new(tasks[0].Id, tasks[1].Id)));
 
-        using(new AssertionScope())
+        using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
             var expectedRelationship = new TaskHierarchicalRelationship(tasks[0].Id, tasks[1].Id);
@@ -493,21 +495,21 @@ public class TasksTests
         _ = relationshipManager.AddHierarchicalRelationship(tasks[0].Id, tasks[1].Id, tasksIds);
         _ = relationshipManager.AddHierarchicalRelationship(tasks[1].Id, tasks[2].Id, tasksIds);
         // a -> b -> c
-    
+
         await _fixture.SeedDb(db =>
         {
             db.Add(relationshipManager);
             db.AddRange(tasks);
         });
-    
+
         var result = await _fixture.SendRequest(new GetTaskRelationshipsQuery(tasks[1].Id));
-    
-        using(new AssertionScope())
+
+        using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
             result.Value.Parent.Should().NotBeNull();
             result.Value.Parent!.Id.Should().Be(tasks[0].Id);
-    
+
             var childrenHierarchy = result.Value.ChildrenHierarchy;
             childrenHierarchy.Should().NotBeNull();
             childrenHierarchy!.TaskId.Should().Be(tasks[1].Id);
@@ -572,5 +574,38 @@ public class TasksTests
         var result = await _fixture.SendRequest(new UpdateTaskBoardCommand(model));
 
         result.IsSuccess.Should().BeTrue();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task AddTaskAttachment_ShouldSucceed_WhenTaskExists()
+    {
+        var task = (await _factory.CreateTasks())[0];
+        var user = await _fixture.FirstAsync<User>();
+
+        var result = await _fixture.SendRequest(new AddTaskAttachmentCommand(task.Id, CreateFormFileMock()));
+
+        using (new AssertionScope())
+        {
+            result.IsSuccess.Should().BeTrue();
+            (await _fixture.CountAsync<TaskAttachment>(x => x.TaskId == task.Id)).Should().Be(1);
+            await _fixture.BlobStorageServiceMock.Received().UploadFile(Arg.Any<IFormFile>(), Arg.Any<string>());
+        }
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task AddTaskAttachment_ShouldFail_WhenTaskDoesNotExist()
+    {
+        var result = await _fixture.SendRequest(new AddTaskAttachmentCommand(Guid.NewGuid(), CreateFormFileMock()));
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    private static IFormFile CreateFormFileMock()
+    {
+        var mock = Substitute.For<IFormFile>();
+
+        mock.ContentType.Returns("application/pdf");
+
+        return mock;
     }
 }
