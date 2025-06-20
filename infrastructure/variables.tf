@@ -32,3 +32,8 @@ variable "supabase_organization" {
   type = string
   description = "Id of the Supabase organization (slug)."
 }
+
+variable "storage_container_name" {
+  type = string
+  description = "Name of the main storage container."
+}

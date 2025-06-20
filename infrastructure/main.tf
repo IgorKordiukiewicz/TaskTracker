@@ -71,6 +71,8 @@ resource "azurerm_windows_web_app" "api" {
     "ConnectionStrings__DefaultConnection" = format("User Id=postgres.%s;Password=%s;Server=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;", supabase_project.supabase.id, random_password.db_password.result)
     "ConnectionStrings__AnalyticsConnection" = format("User Id=postgres.%s;Password=%s;Server=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;", supabase_project.supabase.id, random_password.db_password.result)
     "ConnectionStrings__AppInsightsConnection" = azurerm_application_insights.appinsights.connection_string
+    "ConnectionStrings__BlobStorageConnection" = azurerm_storage_account.storage_account.primary_connection_string
+    "ConfigurationSettings__Blob__Container" = var.storage_container_name
     "Authentication__Issuer" = format("https://%s.supabase.co/auth/v1", supabase_project.supabase.id)
     "Authentication__HangfirePassword" = random_password.hangfire_password.result
   }
@@ -96,4 +98,18 @@ resource "azurerm_application_insights" "appinsights" {
   resource_group_name = azurerm_resource_group.rg.name
   application_type = "web"
   workspace_id = azurerm_log_analytics_workspace.law.id
+}
+
+resource "azurerm_storage_account" "storage_account" {
+  name = "${var.baseName}storageacc"
+  resource_group_name = azurerm_resource_group.rg.name
+  location = var.azure_location
+  account_replication_type = "LRS"
+  account_tier = "Standard"
+}
+
+resource "azurerm_storage_container" "storage_container" {
+  name = var.storage_container_name
+  storage_account_id = azurerm_storage_account.storage_account.id
+  container_access_type = "private"
 }

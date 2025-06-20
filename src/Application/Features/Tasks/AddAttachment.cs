@@ -34,7 +34,7 @@ internal class AddTaskAttachmentHandler(IRepository<Task> taskRepository, IBlobS
         }
 
         await blobStorageService.UploadFile(request.File, string.Format(
-            applicationSettings.Value.BlobPaths.TaskAttachments, task.ProjectId, task.Id, request.File.Name)); // TODO: Move to infra?
+            applicationSettings.Value.Blob.Paths.TaskAttachments, task.ProjectId, task.Id, request.File.Name)); // TODO: Move to infra?
 
         await taskRepository.Update(task, cancellationToken);
         return Result.Ok();
