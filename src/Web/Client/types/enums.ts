@@ -52,3 +52,9 @@ export enum TaskStatusDeletionEligibility
     InUse,
     Initial
 }
+
+export enum AttachmentType
+{
+    Document,
+    Image
+}

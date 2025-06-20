@@ -1,4 +1,4 @@
-import type { TaskPriority, TaskProperty } from "../enums";
+import type { AttachmentType, TaskPriority, TaskProperty } from "../enums";
 
 export interface TasksVM {
     tasks: TaskVM[];
@@ -86,4 +86,15 @@ export interface TaskAvailableChildVM {
     id: string;
     shortId: number;
     title: string;
+}
+
+export interface TaskAttachmentsVM {
+    attachments: TaskAttachmentVM[];
+}
+
+export interface TaskAttachmentVM {
+    name: string;
+    bytesLength: number;
+    type: AttachmentType;
+    downloadUrl: string;
 }

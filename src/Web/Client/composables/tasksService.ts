@@ -1,5 +1,5 @@
 import type { AddTaskLoggedTimeDto, AddTaskCommentDto, CreateTaskDto, UpdateTaskEstimatedTimeDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskPriorityDto, UpdateTaskStatusDto, UpdateTaskTitleDto, UpdateTaskBoardDto, AddTaskRelationshipDto, RemoveTaskRelationshipDto } from "~/types/dtos/tasks";
-import type { TaskRelationshipsVM, TaskActivitiesVM, TaskCommentsVM, TasksVM, TaskAvailableChildrenVM } from "~/types/viewModels/tasks";
+import type { TaskRelationshipsVM, TaskActivitiesVM, TaskCommentsVM, TasksVM, TaskAvailableChildrenVM, TaskAttachmentsVM } from "~/types/viewModels/tasks";
 
 export const useTasksService = () => {
     const api = useApi();
@@ -67,6 +67,9 @@ export const useTasksService = () => {
             formData.append('file', file);
 
             await api.sendFormDataPostRequest(`tasks/${id}/attachments`, formData, { 'ProjectId': projectId });
+        },
+        async getAttachments(id: string, projectId: string) {
+            return await api.sendGetRequest<TaskAttachmentsVM>(`tasks/${id}/attachments`, { 'ProjectId': projectId });
         }
     }
 }

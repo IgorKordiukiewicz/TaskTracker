@@ -342,4 +342,20 @@ public class TasksController(IMediator mediator)
         var result = await mediator.Send(new AddTaskAttachmentCommand(taskId, file));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Get a list of attachments for the given task.
+    /// </summary>
+    /// <param name="taskId"></param>
+    /// <response code="200">List of task attachments.</response>
+    /// <response code="404">Task not found.</response>
+    [HttpGet("{taskId:guid}/attachments")]
+    [Authorize(Policy.ProjectMember)]
+    [ProducesResponseType(typeof(TaskAttachmentsVM), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetTaskAttachments(Guid taskId)
+    {
+        var result = await mediator.Send(new GetTaskAttachmentsQuery(taskId));
+        return result.ToHttpResult();
+    }
 }

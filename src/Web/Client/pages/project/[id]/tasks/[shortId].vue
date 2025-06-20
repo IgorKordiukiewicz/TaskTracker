@@ -34,8 +34,8 @@
                     </div>
 
                 </div>
-                <div class="bg-white w-full shadow p-4 flex flex-col gap-3">
-                    <div class="flex justify-between items-center">
+                <div class="bg-white w-full shadow p-4 flex flex-col gap-3" v-if="attachments">
+                    <div class="flex justify-between items-center mb-2">
                         <div class="flex items-center gap-3 font-semibold">
                             <i class="pi pi-link" />
                             <p class="font-semibold">
@@ -44,6 +44,18 @@
                         </div>
                         <div class="flex gap-3" v-if="canEditTasks">
                             <FileInput icon="pi pi-plus" file-types=".pdf,.txt,.csv,.jpg,.jpeg,.png,.gif,.json,.docx,.xlsx,.pptx" @upload="addAttachment" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col w-full" v-for="attachment in attachments.attachments">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i :class="getAttachmentIcon(attachment.type)" />
+                                <p>{{ attachment.name }}</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="text-sm">{{ filesize(attachment.bytesLength) }}</div>
+                                <Button icon="pi pi-cloud-download" style="height: 24px; width: 24px;" text />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -175,8 +187,9 @@ import { $dt } from '@primevue/themes';
 import type { TreeNode } from 'primevue/treenode';
 import UpdateEstimatedTimeDialog from '~/components/Task/UpdateEstimatedTimeDialog.vue';
 import { AddTaskCommentDto, AddTaskLoggedTimeDto, AddTaskRelationshipDto, RemoveTaskRelationshipDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
-import { allTaskPriorities, ProjectPermissions, TaskPriority } from '~/types/enums';
+import { allTaskPriorities, AttachmentType, ProjectPermissions, TaskPriority } from '~/types/enums';
 import type { TaskHierarchyVM, TaskVM } from '~/types/viewModels/tasks';
+import { filesize } from 'filesize';
 
 const route = useRoute();
 const tasksService = useTasksService();
@@ -192,9 +205,11 @@ const members = ref(await projectsService.getMembers(projectId.value)); // TODO:
 const comments = ref();
 const activities = ref();
 const relationships = ref();
+const attachments = ref();
 await updateDetails();
 await updateComments();
 await updateRelationships();
+await updateAttachments();
 
 await permissions.checkProjectPermissions(projectId.value);
 
@@ -326,6 +341,12 @@ async function updateRelationships() {
         : null;
 }
 
+async function updateAttachments() {
+    attachments.value = details.value
+        ? await tasksService.getAttachments(details.value.id, projectId.value)
+        : null;
+}
+
 function cancelDescriptionEdit() {
     descriptionEditValue.value = details.value!.description;
 }
@@ -425,6 +446,18 @@ async function removeChild(childId: string) {
 
 async function addAttachment(file: File) {
     await tasksService.addAttachment(details.value!.id, projectId.value, file);
+    await updateAttachments();
+}
+
+function getAttachmentIcon(type: AttachmentType) {
+    switch(+type) {
+        case AttachmentType.Document:
+            return "pi pi-file";
+        case AttachmentType.Image:
+            return "pi pi-image";
+        default:
+            return "pi pi-file";   
+    }
 }
 </script>
 

@@ -34,3 +34,6 @@ public record TaskHierarchyVM(Guid TaskId, string TaskTitle, int TaskShortId, IR
 
 public record TaskAvailableChildrenVM(IReadOnlyList<TaskAvailableChildVM> Tasks);
 public record TaskAvailableChildVM(Guid Id, int ShortId, string Title);
+
+public record TaskAttachmentsVM(IReadOnlyList<TaskAttachmentVM> Attachments);
+public record TaskAttachmentVM(string Name, long BytesLength, AttachmentType Type, string DownloadUrl);
