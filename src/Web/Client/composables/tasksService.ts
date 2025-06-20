@@ -70,6 +70,9 @@ export const useTasksService = () => {
         },
         async getAttachments(id: string, projectId: string) {
             return await api.sendGetRequest<TaskAttachmentsVM>(`tasks/${id}/attachments`, { 'ProjectId': projectId });
+        },
+        async downloadAttachment(id: string, projectId: string, attachmentName: string) {
+            return await api.sendGetRequest<string>(`tasks/${id}/attachments/download?attachmentName=${attachmentName}`, { 'ProjectId': projectId });
         }
     }
 }

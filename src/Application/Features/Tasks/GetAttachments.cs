@@ -15,25 +15,19 @@ internal class GetTaskAttachmentsHandler(AppDbContext dbContext)
 {
     public async Task<Result<TaskAttachmentsVM>> Handle(GetTaskAttachmentsQuery request, CancellationToken cancellationToken)
     {
-        if (!await dbContext.Tasks.AnyAsync(x => x.Id == request.TaskId, cancellationToken))
+        var task = await dbContext.Tasks
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == request.TaskId, cancellationToken);
+        if (task is null)
         {
             return Result.Fail<TaskAttachmentsVM>(new NotFoundError<Domain.Tasks.Task>(request.TaskId));
         }
 
         var attachments = await dbContext.TaskAttachments
             .Where(x => x.TaskId == request.TaskId)
-            .Select(x => new
-            {
-                x.Name,
-                x.BytesLength,
-                x.Type
-            })
+            .Select(x => new TaskAttachmentVM(x.Name,x.BytesLength,x.Type))
             .ToListAsync();
 
-        return Result.Ok(new TaskAttachmentsVM(attachments.Select(x => new TaskAttachmentVM(
-            Name: x.Name, 
-            BytesLength: x.BytesLength, 
-            Type: x.Type, 
-            DownloadUrl: string.Empty)).ToList()));
+        return Result.Ok(new TaskAttachmentsVM(attachments));
     }
 }

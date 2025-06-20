@@ -358,4 +358,23 @@ public class TasksController(IMediator mediator)
         var result = await mediator.Send(new GetTaskAttachmentsQuery(taskId));
         return result.ToHttpResult();
     }
+
+    /// <summary>
+    /// Get a download url for the given attachment.
+    /// </summary>
+    /// <param name="taskId"></param>
+    /// <param name="attachmentName"></param>
+    /// <response code="200">Download url for the given attachment.</response>
+    /// <response code="400">Failure getting the download url.</response>
+    /// <response code="404">Task not found.</response>
+    [HttpGet("{taskId:guid}/attachments/download")]
+    [Authorize(Policy.ProjectMember)]
+    [ProducesResponseType(typeof(string), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetTaskAttachmentDownloadUrl(Guid taskId, [FromQuery] string attachmentName)
+    {
+        var result = await mediator.Send(new DownloadTaskAttachmentQuery(taskId, attachmentName));
+        return result.ToHttpResult();
+    }
 }

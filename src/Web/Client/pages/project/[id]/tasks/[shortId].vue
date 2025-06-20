@@ -54,7 +54,7 @@
                             </div>
                             <div class="flex items-center gap-3">
                                 <div class="text-sm">{{ filesize(attachment.bytesLength) }}</div>
-                                <Button icon="pi pi-cloud-download" style="height: 24px; width: 24px;" text />
+                                <Button icon="pi pi-cloud-download" style="height: 24px; width: 24px;" text @click="downloadAttachment(attachment.name)" />
                             </div>
                         </div>
                     </div>
@@ -447,6 +447,11 @@ async function removeChild(childId: string) {
 async function addAttachment(file: File) {
     await tasksService.addAttachment(details.value!.id, projectId.value, file);
     await updateAttachments();
+}
+
+async function downloadAttachment(attachmentName: string) {
+    const downloadUrl = await tasksService.downloadAttachment(details.value!.id, projectId.value, attachmentName);
+    window.open(downloadUrl!, "_blank");
 }
 
 function getAttachmentIcon(type: AttachmentType) {

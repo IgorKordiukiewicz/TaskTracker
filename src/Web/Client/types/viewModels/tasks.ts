@@ -96,5 +96,4 @@ export interface TaskAttachmentVM {
     name: string;
     bytesLength: number;
     type: AttachmentType;
-    downloadUrl: string;
 }
