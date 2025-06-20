@@ -16,7 +16,7 @@ internal class AddTaskAttachmentCommandValidator : AbstractValidator<AddTaskAtta
     }
 }
 
-internal class AddTaskAttachmentHandler(IRepository<Task> taskRepository, IBlobStorageService blobStorageService, IOptions<ApplicationSettings> applicationSettings)
+internal class AddTaskAttachmentHandler(IRepository<Task> taskRepository, IBlobStorageService blobStorageService, IOptions<InfrastructureSettings> infrastructureSettings)
     : IRequestHandler<AddTaskAttachmentCommand, Result>
 {
     public async Task<Result> Handle(AddTaskAttachmentCommand request, CancellationToken cancellationToken)
@@ -27,14 +27,14 @@ internal class AddTaskAttachmentHandler(IRepository<Task> taskRepository, IBlobS
             return Result.Fail(new NotFoundError<Task>(request.TaskId));
         }
 
-        var result = task.AddAttachment(request.File.Name, request.File.Length, request.File.ContentType);
+        var result = task.AddAttachment(request.File.FileName, request.File.Length, request.File.ContentType);
         if(result.IsFailed)
         {
             return Result.Fail(result.Errors);
         }
 
         await blobStorageService.UploadFile(request.File, string.Format(
-            applicationSettings.Value.Blob.Paths.TaskAttachments, task.ProjectId, task.Id, request.File.Name)); // TODO: Move to infra?
+            infrastructureSettings.Value.Blob.Paths.TaskAttachments, task.ProjectId, task.Id, request.File.FileName)); // TODO: Move to infra?
 
         await taskRepository.Update(task, cancellationToken);
         return Result.Ok();

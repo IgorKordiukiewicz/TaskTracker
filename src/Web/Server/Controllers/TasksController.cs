@@ -339,6 +339,7 @@ public class TasksController(IMediator mediator)
     [ProducesResponseType(404)]
     public async Task<IActionResult> AddAttachment(Guid taskId, [FromForm] IFormFile file)
     {
-        return Ok();
+        var result = await mediator.Send(new AddTaskAttachmentCommand(taskId, file));
+        return result.ToHttpResult();
     }
 }

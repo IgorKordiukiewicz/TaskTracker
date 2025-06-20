@@ -15,12 +15,12 @@ var builder = WebApplication.CreateBuilder(args);
 var configurationSettingsSection = builder.Configuration.GetSection("ConfigurationSettings");
 builder.Services.Configure<ConfigurationSettings>(configurationSettingsSection);
 var configurationSettings = configurationSettingsSection.Get<ConfigurationSettings>()
-    ?? throw new InvalidOperationException("ConfigurationSettings is not correct.");
+    ?? throw new InvalidOperationException($"{nameof(ConfigurationSettings)} is not correct.");
 
-var applicationSettingsSection = builder.Configuration.GetSection("ApplicationSettings");
-builder.Services.Configure<ApplicationSettings>(applicationSettingsSection);
-var applicationSettings = applicationSettingsSection.Get<ApplicationSettings>()
-    ?? throw new InvalidOperationException("ApplicationSettings is not correct.");
+var infrastructureSettingsSection = builder.Configuration.GetSection("InfrastructureSettings");
+builder.Services.Configure<InfrastructureSettings>(infrastructureSettingsSection);
+var infrastructureSettings = infrastructureSettingsSection.Get<InfrastructureSettings>()
+    ?? throw new InvalidOperationException($"{nameof(InfrastructureSettings)} is not correct.");
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => options.IncludeXmlComments(

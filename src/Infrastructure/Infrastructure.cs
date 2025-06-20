@@ -7,6 +7,7 @@ using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Azure;
 
 namespace Infrastructure;
 
@@ -24,6 +25,11 @@ public static class Infrastructure
         services.AddScoped<IRepository<Notification>, NotificationRepository>();
 
         services.AddScoped<IBlobStorageService, BlobStorageService>();
+
+        services.AddAzureClients(clientBuilder =>
+        {
+            clientBuilder.AddBlobServiceClient(configuration.GetConnectionString("BlobStorageConnection"));
+        });
 
         return services;
     }

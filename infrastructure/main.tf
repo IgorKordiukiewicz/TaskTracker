@@ -72,7 +72,7 @@ resource "azurerm_windows_web_app" "api" {
     "ConnectionStrings__AnalyticsConnection" = format("User Id=postgres.%s;Password=%s;Server=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;", supabase_project.supabase.id, random_password.db_password.result)
     "ConnectionStrings__AppInsightsConnection" = azurerm_application_insights.appinsights.connection_string
     "ConnectionStrings__BlobStorageConnection" = azurerm_storage_account.storage_account.primary_connection_string
-    "ConfigurationSettings__Blob__Container" = var.storage_container_name
+    "InfrastructureSettings__Blob__Container" = var.storage_container_name
     "Authentication__Issuer" = format("https://%s.supabase.co/auth/v1", supabase_project.supabase.id)
     "Authentication__HangfirePassword" = random_password.hangfire_password.result
   }

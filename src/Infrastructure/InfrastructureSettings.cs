@@ -1,6 +1,6 @@
-﻿namespace Application.Common;
+﻿namespace Infrastructure;
 
-public record ApplicationSettings
+public record InfrastructureSettings
 {
     public required BlobSettings Blob { get; init; }
 }
