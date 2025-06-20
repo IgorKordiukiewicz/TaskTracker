@@ -30,93 +30,45 @@ provider "supabase" {
   access_token = var.supabase_token
 }
 
-resource "random_password" "db_password" {
-  length = 16
-  special = true
-}
-
-resource "random_password" "hangfire_password" {
-  length = 16
-  special = true
-}
-
-resource "supabase_project" "supabase" {
-  organization_id = var.supabase_organization
-  name = var.supabase_name
-  database_password = random_password.db_password.result
-  region = var.supabase_location
-
-  lifecycle {
-    ignore_changes = [database_password]
-  }
-}
-
 resource "azurerm_resource_group" "rg" {
   name     = "${var.base_name}-rg"
   location = var.azure_location
 }
 
-resource "azurerm_service_plan" "serviceplan" {
-  name = "${var.base_name}-serviceplan"
-  location = var.azure_location
-  resource_group_name = azurerm_resource_group.rg.name
-  sku_name = "F1"
-  os_type = "Windows"
+module "database" {
+  source = "./modules/database"
+
+  supabase_organization = var.supabase_organization
+  supabase_name = var.supabase_name
+  supabase_location = var.supabase_location
 }
 
-resource "azurerm_windows_web_app" "api" {
-  name = "${var.base_name}-api"
-  location = var.azure_location
+module "storage" {
+  source = "./modules/storage"
+
+  base_name = var.base_name
   resource_group_name = azurerm_resource_group.rg.name
-  service_plan_id = azurerm_service_plan.serviceplan.id
-
-  site_config {
-      always_on = false
-  }
-
-  app_settings = {
-    "ConnectionStrings__DefaultConnection" = format("User Id=postgres.%s;Password=%s;Server=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;", supabase_project.supabase.id, random_password.db_password.result)
-    "ConnectionStrings__AnalyticsConnection" = format("User Id=postgres.%s;Password=%s;Server=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;", supabase_project.supabase.id, random_password.db_password.result)
-    "ConnectionStrings__AppInsightsConnection" = azurerm_application_insights.appinsights.connection_string
-    "ConnectionStrings__BlobStorageConnection" = azurerm_storage_account.storage_account.primary_connection_string
-    "InfrastructureSettings__Blob__Container" = var.storage_container_name
-    "Authentication__Issuer" = format("https://%s.supabase.co/auth/v1", supabase_project.supabase.id)
-    "Authentication__HangfirePassword" = random_password.hangfire_password.result
-  }
-
-  lifecycle {
-    ignore_changes = [ 
-      app_settings["Authentication__JwtSecret"],
-      app_settings["ConfigurationSettings__Domain"]
-     ]
-  }
+  azure_location = var.azure_location
+  storage_container_name = var.storage_container_name
 }
 
-resource "azurerm_log_analytics_workspace" "law" {
-  name = "${var.base_name}-law"
-  location = var.azure_location
+module "monitoring" {
+  source = "./modules/monitoring"
+
+  base_name = var.base_name
   resource_group_name = azurerm_resource_group.rg.name
-  sku = "PerGB2018"
+  azure_location = var.azure_location
 }
 
-resource "azurerm_application_insights" "appinsights" {
-  name = "${var.base_name}-appinsights"
-  location = var.azure_location
-  resource_group_name = azurerm_resource_group.rg.name
-  application_type = "web"
-  workspace_id = azurerm_log_analytics_workspace.law.id
-}
+module "compute" {
+  source = "./modules/compute"
 
-resource "azurerm_storage_account" "storage_account" {
-  name = "${var.base_name}storageacc"
+  base_name = var.base_name
   resource_group_name = azurerm_resource_group.rg.name
-  location = var.azure_location
-  account_replication_type = "LRS"
-  account_tier = "Standard"
-}
-
-resource "azurerm_storage_container" "storage_container" {
-  name = var.storage_container_name
-  storage_account_id = azurerm_storage_account.storage_account.id
-  container_access_type = "private"
+  azure_location = var.azure_location
+  storage_container_name = var.storage_container_name
+  db_password = module.database.db_password
+  supabase_project_id = module.database.supabase_project_id
+  insights_connection_string = module.monitoring.insights_connection_string
+  storage_connection_string = module.storage.storage_account_connection-string
 }

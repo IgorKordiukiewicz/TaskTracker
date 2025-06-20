@@ -1,39 +1,42 @@
 variable "azure_subscription_id" {
-  type = string
+  type        = string
   description = "Azure subscription id."
 }
 
 variable "base_name" {
-  default     = "tasktracker"
+  type        = string
   description = "Base name for the resources names."
 }
 
 variable "azure_location" {
+  type        = string
   default     = "westeurope"
   description = "Location of the Azure resources."
 }
 
 variable "supabase_location" {
-  default = "eu-central-1"
+  type        = string
+  default     = "eu-central-1"
   description = "Location of the Supabase project."
 }
 
 variable "supabase_name" {
-  default = "TaskTracker"
+  type        = string
   description = "Name of the supabase project."
 }
 
 variable "supabase_token" {
-  type = string
+  type        = string
+  sensitive   = true
   description = "Supabase access token."
 }
 
 variable "supabase_organization" {
-  type = string
+  type        = string
   description = "Id of the Supabase organization (slug)."
 }
 
 variable "storage_container_name" {
-  type = string
+  type        = string
   description = "Name of the main storage container."
 }
