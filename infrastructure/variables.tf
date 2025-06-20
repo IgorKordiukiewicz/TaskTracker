@@ -3,7 +3,7 @@ variable "azure_subscription_id" {
   description = "Azure subscription id."
 }
 
-variable "baseName" {
+variable "base_name" {
   default     = "tasktracker"
   description = "Base name for the resources names."
 }

@@ -1,4 +1,11 @@
 terraform {
+  cloud {
+    organization = "IgorKordiukiewicz"
+    workspaces {
+      name = "tasktracker"
+    }
+  }
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -45,12 +52,12 @@ resource "supabase_project" "supabase" {
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = "${var.baseName}-rg"
+  name     = "${var.base_name}-rg"
   location = var.azure_location
 }
 
 resource "azurerm_service_plan" "serviceplan" {
-  name = "${var.baseName}-serviceplan"
+  name = "${var.base_name}-serviceplan"
   location = var.azure_location
   resource_group_name = azurerm_resource_group.rg.name
   sku_name = "F1"
@@ -58,7 +65,7 @@ resource "azurerm_service_plan" "serviceplan" {
 }
 
 resource "azurerm_windows_web_app" "api" {
-  name = "${var.baseName}-api"
+  name = "${var.base_name}-api"
   location = var.azure_location
   resource_group_name = azurerm_resource_group.rg.name
   service_plan_id = azurerm_service_plan.serviceplan.id
@@ -86,14 +93,14 @@ resource "azurerm_windows_web_app" "api" {
 }
 
 resource "azurerm_log_analytics_workspace" "law" {
-  name = "${var.baseName}-law"
+  name = "${var.base_name}-law"
   location = var.azure_location
   resource_group_name = azurerm_resource_group.rg.name
   sku = "PerGB2018"
 }
 
 resource "azurerm_application_insights" "appinsights" {
-  name = "${var.baseName}-appinsights"
+  name = "${var.base_name}-appinsights"
   location = var.azure_location
   resource_group_name = azurerm_resource_group.rg.name
   application_type = "web"
@@ -101,7 +108,7 @@ resource "azurerm_application_insights" "appinsights" {
 }
 
 resource "azurerm_storage_account" "storage_account" {
-  name = "${var.baseName}storageacc"
+  name = "${var.base_name}storageacc"
   resource_group_name = azurerm_resource_group.rg.name
   location = var.azure_location
   account_replication_type = "LRS"
