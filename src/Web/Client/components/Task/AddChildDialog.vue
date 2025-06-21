@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { AddTaskRelationshipDto } from '~/types/dtos/tasks';
+import { AddTaskRelationDto } from '~/types/dtos/tasks';
 
 defineExpose({ show });
 const emit = defineEmits([ 'onSubmit' ]);
@@ -39,7 +39,7 @@ async function show() {
 }
 
 async function submit() {
-    const model = new AddTaskRelationshipDto();
+    const model = new AddTaskRelationDto();
     model.parentId = props.taskId;
     model.childId = selectedChild.value.id;
     emit('onSubmit', model);

@@ -21,7 +21,7 @@ public static class Infrastructure
         services.AddScoped<IRepository<Project>, ProjectRepository>();
         services.AddScoped<IRepository<Domain.Tasks.Task>, TaskRepository>();
         services.AddScoped<IRepository<Workflow>, WorkflowRepository>();
-        services.AddScoped<IRepository<TaskRelationshipManager>, TaskRelationshipManagerRepository>();
+        services.AddScoped<IRepository<TaskRelationManager>, TaskRelationManagerRepository>();
         services.AddScoped<IRepository<Notification>, NotificationRepository>();
 
         services.AddScoped<IBlobStorageService, BlobStorageService>();

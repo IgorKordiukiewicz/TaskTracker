@@ -419,90 +419,90 @@ public class TasksTests
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task AddHierarchicalTaskRelationship_ShouldFail_WhenRelationshipManagerDoesNotExist()
+    public async System.Threading.Tasks.Task AddHierarchicalTaskRelation_ShouldFail_WhenRelationManagerDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new AddHierarchicalTaskRelationshipCommand(Guid.NewGuid(), new(Guid.NewGuid(), Guid.NewGuid())));
+        var result = await _fixture.SendRequest(new AddHierarchicalTaskRelationCommand(Guid.NewGuid(), new(Guid.NewGuid(), Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task AddHierarchicalTaskRelationship_ShouldAddNewHierarchicalRelationship_WhenRelationshipManagerExists()
+    public async System.Threading.Tasks.Task AddHierarchicalTaskRelation_ShouldAddNewHierarchicalRelation_WhenRelationManagerExists()
     {
         var tasks = await _factory.CreateTasks(2);
 
-        var result = await _fixture.SendRequest(new AddHierarchicalTaskRelationshipCommand(tasks[0].ProjectId, new(tasks[0].Id, tasks[1].Id)));
+        var result = await _fixture.SendRequest(new AddHierarchicalTaskRelationCommand(tasks[0].ProjectId, new(tasks[0].Id, tasks[1].Id)));
 
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            var expectedRelationship = new TaskHierarchicalRelationship(tasks[0].Id, tasks[1].Id);
-            var relationship = await _fixture.FirstAsync<TaskHierarchicalRelationship>();
-            relationship.Should().Be(expectedRelationship);
+            var expectedRelation = new TaskHierarchicalRelation(tasks[0].Id, tasks[1].Id);
+            var relation = await _fixture.FirstAsync<TaskHierarchicalRelation>();
+            relation.Should().Be(expectedRelation);
         }
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task RemoveHierarchicalTaskRelationship_ShouldFail_WhenRelationshipManagerDoesNotExist()
+    public async System.Threading.Tasks.Task RemoveHierarchicalTaskRelation_ShouldFail_WhenRelationManagerDoesNotExist()
     {
-        var result = await _fixture.SendRequest(new RemoveHierarchicalTaskRelationshipCommand(Guid.NewGuid(), new(Guid.NewGuid(), Guid.NewGuid())));
+        var result = await _fixture.SendRequest(new RemoveHierarchicalTaskRelationCommand(Guid.NewGuid(), new(Guid.NewGuid(), Guid.NewGuid())));
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task RemoveHierarchicalTaskRelationship_ShouldRemoveHierarchicalRelationship_WhenRelationshipManagerExists()
+    public async System.Threading.Tasks.Task RemoveHierarchicalTaskRelation_ShouldRemoveHierarchicalRelation_WhenRelationManagerExists()
     {
         var workflow = (await _factory.CreateWorkflows())[0];
-        var relationshipManager = new TaskRelationshipManager(workflow.ProjectId);
+        var relationManager = new TaskRelationManager(workflow.ProjectId);
         var initialStatus = workflow.Statuses.First(x => x.Initial);
         var tasks = new Task[]
         {
-            Task.Create(1, relationshipManager.ProjectId, DateTime.Now, "a", "desc", initialStatus.Id),
-            Task.Create(2, relationshipManager.ProjectId, DateTime.Now, "b", "desc", initialStatus.Id),
+            Task.Create(1, relationManager.ProjectId, DateTime.Now, "a", "desc", initialStatus.Id),
+            Task.Create(2, relationManager.ProjectId, DateTime.Now, "b", "desc", initialStatus.Id),
         };
         var tasksIds = tasks.Select(x => x.Id);
-        _ = relationshipManager.AddHierarchicalRelationship(tasks[0].Id, tasks[1].Id, tasksIds);
+        _ = relationManager.AddHierarchicalRelation(tasks[0].Id, tasks[1].Id, tasksIds);
 
         await _fixture.SeedDb(db =>
         {
-            db.Add(relationshipManager);
+            db.Add(relationManager);
             db.AddRange(tasks);
         });
 
-        var result = await _fixture.SendRequest(new RemoveHierarchicalTaskRelationshipCommand(tasks[0].ProjectId, new(tasks[0].Id, tasks[1].Id)));
+        var result = await _fixture.SendRequest(new RemoveHierarchicalTaskRelationCommand(tasks[0].ProjectId, new(tasks[0].Id, tasks[1].Id)));
 
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            (await _fixture.CountAsync<TaskHierarchicalRelationship>()).Should().Be(0);
+            (await _fixture.CountAsync<TaskHierarchicalRelation>()).Should().Be(0);
         }
     }
 
     [Fact]
-    public async System.Threading.Tasks.Task GetTaskRelationships_ShouldReturnTaskRelationships_WhenTaskExists()
+    public async System.Threading.Tasks.Task GetTaskRelations_ShouldReturnTaskRelations_WhenTaskExists()
     {
         var workflow = (await _factory.CreateWorkflows())[0];
-        var relationshipManager = new TaskRelationshipManager(workflow.ProjectId);
+        var relationManager = new TaskRelationManager(workflow.ProjectId);
         var initialStatus = workflow.Statuses.First(x => x.Initial);
         var tasks = new Task[]
         {
-            Task.Create(1, relationshipManager.ProjectId, DateTime.Now, "a", "desc", initialStatus.Id),
-            Task.Create(2, relationshipManager.ProjectId, DateTime.Now, "b", "desc", initialStatus.Id),
-            Task.Create(3, relationshipManager.ProjectId, DateTime.Now, "c", "desc", initialStatus.Id),
+            Task.Create(1, relationManager.ProjectId, DateTime.Now, "a", "desc", initialStatus.Id),
+            Task.Create(2, relationManager.ProjectId, DateTime.Now, "b", "desc", initialStatus.Id),
+            Task.Create(3, relationManager.ProjectId, DateTime.Now, "c", "desc", initialStatus.Id),
         };
         var tasksIds = tasks.Select(x => x.Id);
-        _ = relationshipManager.AddHierarchicalRelationship(tasks[0].Id, tasks[1].Id, tasksIds);
-        _ = relationshipManager.AddHierarchicalRelationship(tasks[1].Id, tasks[2].Id, tasksIds);
+        _ = relationManager.AddHierarchicalRelation(tasks[0].Id, tasks[1].Id, tasksIds);
+        _ = relationManager.AddHierarchicalRelation(tasks[1].Id, tasks[2].Id, tasksIds);
         // a -> b -> c
 
         await _fixture.SeedDb(db =>
         {
-            db.Add(relationshipManager);
+            db.Add(relationManager);
             db.AddRange(tasks);
         });
 
-        var result = await _fixture.SendRequest(new GetTaskRelationshipsQuery(tasks[1].Id));
+        var result = await _fixture.SendRequest(new GetTaskRelationsQuery(tasks[1].Id));
 
         using (new AssertionScope())
         {

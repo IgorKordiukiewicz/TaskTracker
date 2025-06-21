@@ -28,7 +28,7 @@ internal class DeleteProjectHandler(AppDbContext dbContext)
             await dbContext.Projects.DeleteAll(x => x.Id == request.ProjectId, cancellationToken);
             await dbContext.Workflows.DeleteAll(x => x.ProjectId == request.ProjectId, cancellationToken);
             await dbContext.Tasks.DeleteAll(x => x.ProjectId == request.ProjectId, cancellationToken);
-            await dbContext.TaskRelationshipManagers.DeleteAll(x => x.ProjectId == request.ProjectId, cancellationToken);
+            await dbContext.TaskRelationManagers.DeleteAll(x => x.ProjectId == request.ProjectId, cancellationToken);
             await dbContext.TasksBoardLayouts.DeleteAll(x => x.ProjectId == request.ProjectId, cancellationToken);
         });
     }

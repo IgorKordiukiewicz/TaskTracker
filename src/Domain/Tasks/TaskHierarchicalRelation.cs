@@ -1,11 +1,11 @@
 ﻿namespace Domain.Tasks;
 
-public class TaskHierarchicalRelationship : ValueObject
+public class TaskHierarchicalRelation : ValueObject
 {
     public Guid ParentId { get; private init; }
     public Guid ChildId { get; private init; }
 
-    public TaskHierarchicalRelationship(Guid parentId, Guid childId)
+    public TaskHierarchicalRelation(Guid parentId, Guid childId)
     {
         ParentId = parentId;
         ChildId = childId;

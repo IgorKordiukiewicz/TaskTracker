@@ -56,32 +56,32 @@ public class EntitiesFactory(IntegrationTestsFixture fixture)
         return workflows;
     }
 
-    public async Task<List<TaskRelationshipManager>> CreateTaskRelationshipManagers(int count = 1)
+    public async Task<List<TaskRelationManager>> CreateTaskRelationManagers(int count = 1)
     {
         var workflows = await CreateWorkflows(count);
 
-        var relationshipManagers = CreateEntities(count, i => new TaskRelationshipManager(workflows[i].ProjectId));
+        var relationManagers = CreateEntities(count, i => new TaskRelationManager(workflows[i].ProjectId));
 
         await fixture.SeedDb(db =>
         {
-            db.AddRange(relationshipManagers);
+            db.AddRange(relationManagers);
         });
 
-        return relationshipManagers;
+        return relationManagers;
     }
 
     public async Task<List<Task>> CreateTasks(int count = 1)
     {
-        var relationshipManager = (await CreateTaskRelationshipManagers())[0];
+        var relationManager = (await CreateTaskRelationManagers())[0];
 
         var statuses = await fixture.GetAsync<Domain.Workflows.TaskStatus>();
 
         var initialStatus = await fixture.FirstAsync<Domain.Workflows.TaskStatus>(x => x.Initial);
-        var tasks = CreateEntities(count, i => Task.Create(1, relationshipManager.ProjectId, DateTime.Now, $"title{i}", $"desc{i}", initialStatus.Id));
+        var tasks = CreateEntities(count, i => Task.Create(1, relationManager.ProjectId, DateTime.Now, $"title{i}", $"desc{i}", initialStatus.Id));
 
         var tasksBoardLayout = new TasksBoardLayout()
         {
-            ProjectId = relationshipManager.ProjectId,
+            ProjectId = relationManager.ProjectId,
             Columns = statuses.Select(x => new TasksBoardColumn()
             {
                 StatusId = x.Id,

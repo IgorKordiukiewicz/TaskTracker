@@ -60,12 +60,12 @@ export interface TaskActivityVM {
     occurredAt: Date;
 }
 
-export interface TaskRelationshipsVM {
-    parent?: TaskRelationshipsParentVM;
+export interface TaskRelationsVM {
+    parent?: TaskRelationsParentVM;
     childrenHierarchy: TaskHierarchyVM[];
 }
 
-export interface TaskRelationshipsParentVM {
+export interface TaskRelationsParentVM {
     id: string;
     title: string;
     shortId: number;

@@ -247,51 +247,51 @@ public class TasksController(IMediator mediator)
     }
 
     /// <summary>
-    /// Add a new hierarchical task relationship for given tasks.
+    /// Add a new hierarchical task relation for given tasks.
     /// </summary>
     /// <param name="projectId"></param>
     /// <param name="model"></param>
-    /// <response code="404">Task relationship manager not found.</response>
-    [HttpPost("relationships/hierarchical")]
+    /// <response code="404">Task relation manager not found.</response>
+    [HttpPost("relations/hierarchical")]
     [Authorize(Policy.ProjectEditTasks)]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> AddHierarchicalTaskRelationship([FromHeader] Guid projectId, AddHierarchicalTaskRelationshipDto model)
+    public async Task<IActionResult> AddHierarchicalTaskRelation([FromHeader] Guid projectId, AddHierarchicalTaskRelationDto model)
     {
-        var result = await mediator.Send(new AddHierarchicalTaskRelationshipCommand(projectId, model));
+        var result = await mediator.Send(new AddHierarchicalTaskRelationCommand(projectId, model));
         return result.ToHttpResult();
     }
 
     /// <summary>
-    /// Remove the given task hierarchical relationship.
+    /// Remove the given task hierarchical relation.
     /// </summary>
     /// <param name="projectId"></param>
     /// <param name="model"></param>
-    /// <response code="404">Task relationship manager not found.</response>
-    [HttpPost("relationships/hierarchical/remove")]
+    /// <response code="404">Task relation manager not found.</response>
+    [HttpPost("relations/hierarchical/remove")]
     [Authorize(Policy.ProjectEditTasks)]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> RemoveHierarchicalTaskRelationship([FromHeader] Guid projectId, RemoveHierarchicalTaskRelationshipDto model)
+    public async Task<IActionResult> RemoveHierarchicalTaskRelation([FromHeader] Guid projectId, RemoveHierarchicalTaskRelationDto model)
     {
-        var result = await mediator.Send(new RemoveHierarchicalTaskRelationshipCommand(projectId, model));
+        var result = await mediator.Send(new RemoveHierarchicalTaskRelationCommand(projectId, model));
         return result.ToHttpResult();
     }
 
     /// <summary>
-    /// Get a task's relationships.
+    /// Get a task's relations.
     /// </summary>
     /// <param name="taskId"></param>
     /// <response code="404">Task not found.</response>
-    [HttpGet("{taskId:guid}/relationships")]
+    [HttpGet("{taskId:guid}/relations")]
     [Authorize(Policy.ProjectMember)]
-    [ProducesResponseType(typeof(TaskRelationshipsVM), 200)]
+    [ProducesResponseType(typeof(TaskRelationsVM), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetTaskRelationships(Guid taskId)
+    public async Task<IActionResult> GetTaskRelations(Guid taskId)
     {
-        var result = await mediator.Send(new GetTaskRelationshipsQuery(taskId));
+        var result = await mediator.Send(new GetTaskRelationsQuery(taskId));
         return result.ToHttpResult();
     }
 

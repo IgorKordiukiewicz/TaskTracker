@@ -2,9 +2,9 @@
 
 namespace Infrastructure.Configurations;
 
-internal class TaskHierarchicalRelationshipConfiguration : BaseEntityTypeConfiguration<TaskHierarchicalRelationship>
+internal class TaskHierarchicalRelationConfiguration : BaseEntityTypeConfiguration<TaskHierarchicalRelation>
 {
-    public override void Configure(EntityTypeBuilder<TaskHierarchicalRelationship> builder)
+    public override void Configure(EntityTypeBuilder<TaskHierarchicalRelation> builder)
     {
         builder.HasKey(x => new { x.ParentId, x.ChildId });
 

@@ -28,22 +28,22 @@ internal class GetTaskAvailableChildrenHandler(AppDbContext dbContext)
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);
 
-        var currentRelationships = await dbContext.TaskHierarchicalRelationships
+        var currentRelations = await dbContext.TaskHierarchicalRelations
             .Where(x => x.ParentId == task.Id || x.ChildId == task.Id)
             .ToListAsync(cancellationToken);
 
-        var currentRelationshipsTaskIds = currentRelationships
+        var currentRelationsTaskIds = currentRelations
             .Select(x => x.ParentId)
-            .Concat(currentRelationships.Select(x => x.ChildId))
+            .Concat(currentRelations.Select(x => x.ChildId))
             .Distinct()
             .ToList();
 
-        var tasksWithParentsIds = await dbContext.TaskHierarchicalRelationships
+        var tasksWithParentsIds = await dbContext.TaskHierarchicalRelations
             .Where(x => projectsTaskIds.Contains(x.ParentId))
             .Select(x => x.ChildId)
             .ToListAsync(cancellationToken);
 
-        var excludeTaskIds = currentRelationshipsTaskIds
+        var excludeTaskIds = currentRelationsTaskIds
             .Concat(tasksWithParentsIds)
             .Concat([task.Id]) // exclude self
             .ToHashSet();

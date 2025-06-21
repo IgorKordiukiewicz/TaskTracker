@@ -148,12 +148,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-white w-full shadow p-4 flex flex-col gap-3" v-if="relationships">
+                <div class="bg-white w-full shadow p-4 flex flex-col gap-3" v-if="relations">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-3 font-semibold">
                             <i class="pi pi-sitemap" />
                             <p class="font-semibold">
-                                Relationships
+                                Relations
                             </p>
                         </div>
                         <div class="flex gap-3" v-if="canEditTasks">
@@ -161,18 +161,18 @@
                         </div>
                         <AddChildDialog ref="addChildDialog" @on-submit="addChild" :task-id="details.id" :project-id="projectId" />
                     </div>
-                    <div class="flex flex-col gap-1" v-if="relationships.parent">
+                    <div class="flex flex-col gap-1" v-if="relations.parent">
                         <label class="text-sm">Parent</label>
                         <div class="p-2 rounded-md select-border flex items-center">
-                            <p class="cursor-pointer hover:font-medium text-sm" @click="navigateTo(`/project/${projectId}/tasks/${relationships.parent.shortId}`)">
-                                [#{{ relationships.parent.shortId }}] {{ relationships.parent.title }}
+                            <p class="cursor-pointer hover:font-medium text-sm" @click="navigateTo(`/project/${projectId}/tasks/${relations.parent.shortId}`)">
+                                [#{{ relations.parent.shortId }}] {{ relations.parent.title }}
                             </p>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-1"  v-if="relationships.childrenHierarchy">
+                    <div class="flex flex-col gap-1"  v-if="relations.childrenHierarchy">
                         <label class="text-sm">Children</label>
                         <ul class="rounded-md select-border text-sm">
-                            <ChildTask  v-for="task in relationships.childrenHierarchy.children" 
+                            <ChildTask  v-for="task in relations.childrenHierarchy.children" 
                             :task="task" :project-id="projectId" :can-edit-tasks="canEditTasks" @on-remove="removeChild" />
                         </ul>
                     </div>
@@ -186,7 +186,7 @@
 import { $dt } from '@primevue/themes';
 import type { TreeNode } from 'primevue/treenode';
 import UpdateEstimatedTimeDialog from '~/components/Task/UpdateEstimatedTimeDialog.vue';
-import { AddTaskCommentDto, AddTaskLoggedTimeDto, AddTaskRelationshipDto, RemoveTaskRelationshipDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
+import { AddTaskCommentDto, AddTaskLoggedTimeDto, AddTaskRelationDto, RemoveTaskRelationDto, UpdateTaskAssigneeDto, UpdateTaskDescriptionDto, UpdateTaskEstimatedTimeDto, UpdateTaskPriorityDto, UpdateTaskStatusDto } from '~/types/dtos/tasks';
 import { allTaskPriorities, AttachmentType, ProjectPermissions, TaskPriority } from '~/types/enums';
 import type { TaskHierarchyVM, TaskVM } from '~/types/viewModels/tasks';
 import { filesize } from 'filesize';
@@ -204,11 +204,11 @@ const details = ref<TaskVM | undefined>();
 const members = ref(await projectsService.getMembers(projectId.value)); // TODO: pass from tasks list page?
 const comments = ref();
 const activities = ref();
-const relationships = ref();
+const relations = ref();
 const attachments = ref();
 await updateDetails();
 await updateComments();
-await updateRelationships();
+await updateRelations();
 await updateAttachments();
 
 await permissions.checkProjectPermissions(projectId.value);
@@ -335,9 +335,9 @@ async function updateComments() {
         : null;
 }
 
-async function updateRelationships() {
-    relationships.value = details.value 
-        ? await tasksService.getRelationships(details.value.id, projectId.value)
+async function updateRelations() {
+    relations.value = details.value 
+        ? await tasksService.getRelations(details.value.id, projectId.value)
         : null;
 }
 
@@ -431,17 +431,17 @@ async function deleteTask() {
     navigateTo(`/project/${projectId.value}`);
 }
 
-async function addChild(model: AddTaskRelationshipDto) {
-    await tasksService.addTaskRelationship(projectId.value, model);
-    await updateRelationships();
+async function addChild(model: AddTaskRelationDto) {
+    await tasksService.addTaskRelation(projectId.value, model);
+    await updateRelations();
 }
 
 async function removeChild(childId: string) {
-    const model = new RemoveTaskRelationshipDto();
+    const model = new RemoveTaskRelationDto();
     model.parentId = details.value!.id;
     model.childId = childId;
-    await tasksService.removeTaskRelationship(projectId.value, model);
-    await updateRelationships();
+    await tasksService.removeTaskRelation(projectId.value, model);
+    await updateRelations();
 }
 
 async function addAttachment(file: File) {

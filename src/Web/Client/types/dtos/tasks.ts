@@ -55,12 +55,12 @@ export class UpdateTaskBoardColumnDto {
     }
 }
 
-export class AddTaskRelationshipDto {
+export class AddTaskRelationDto {
     parentId: string = '';
     childId: string = '';
 }
 
-export class RemoveTaskRelationshipDto {
+export class RemoveTaskRelationDto {
     parentId: string = '';
     childId: string = '';
 }

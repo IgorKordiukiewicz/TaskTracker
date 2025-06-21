@@ -18,7 +18,7 @@ internal class CreateProjectCommandValidator : AbstractValidator<CreateProjectCo
 }
 
 internal class CreateProjectHandler(AppDbContext dbContext, IRepository<Project> projectRepository, IRepository<Workflow> workflowRepository, 
-    IRepository<TaskRelationshipManager> taskRelationshipManagerRepository, ITasksBoardLayoutService tasksBoardLayoutService) 
+    IRepository<TaskRelationManager> taskRelationManagerRepository, ITasksBoardLayoutService tasksBoardLayoutService) 
     : IRequestHandler<CreateProjectCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(CreateProjectCommand request, CancellationToken cancellationToken)
@@ -31,13 +31,13 @@ internal class CreateProjectHandler(AppDbContext dbContext, IRepository<Project>
 
         var project = Project.Create(request.Model.Name, request.UserId);
         var workflow = Workflow.Create(project.Id);
-        var taskRelationshipManager = new TaskRelationshipManager(project.Id);
+        var relationManager = new TaskRelationManager(project.Id);
 
         var result = await dbContext.ExecuteTransaction(async () =>
         {           
             await projectRepository.Add(project, cancellationToken);
             await workflowRepository.Add(workflow, cancellationToken);
-            await taskRelationshipManagerRepository.Add(taskRelationshipManager, cancellationToken);
+            await taskRelationManagerRepository.Add(relationManager, cancellationToken);
             await tasksBoardLayoutService.HandleChanges(project.Id, 
                 layout => layout.Initialize(workflow.Statuses.Select(x => x.Id)), cancellationToken);
         });

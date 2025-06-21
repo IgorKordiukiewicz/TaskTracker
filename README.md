@@ -15,7 +15,8 @@ Task/issue tracker made with ASP.NET Core & Vue.
   * Statuses, Priorities, Assignees
   * Comments
   * Time logging & estimates
-  * Relationships
+  * Relations
+  * Attachments
   * Activity History
 * Custom task status workflows
 * Analytics charts

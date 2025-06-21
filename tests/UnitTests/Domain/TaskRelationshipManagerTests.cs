@@ -2,134 +2,134 @@
 
 namespace UnitTests.Domain;
 
-public class TaskRelationshipManagerTests
+public class TaskRelationManagerTests
 {
     [Fact]
-    public void AddHierarchicalRelationship_ShouldAddNewRelationship_WhenValidationSucceeds()
+    public void AddHierarchicalRelation_ShouldAddNewRelation_WhenValidationSucceeds()
     {
-        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
+        var relationManager = new TaskRelationManager(Guid.NewGuid());
 
         var parentId = Guid.NewGuid();
         var childId = Guid.NewGuid();
 
-        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, [parentId, childId]);
+        var result = relationManager.AddHierarchicalRelation(parentId, childId, [parentId, childId]);
 
         using(new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            relationshipManager.HierarchicalRelationships.Should().HaveCount(1);
+            relationManager.HierarchicalRelations.Should().HaveCount(1);
         }
     }
 
     [Fact]
-    public void AddHierarchicalRelationship_ShouldFail_WhenParentIsTheSameAsChild()
+    public void AddHierarchicalRelation_ShouldFail_WhenParentIsTheSameAsChild()
     {
-        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
+        var relationManager = new TaskRelationManager(Guid.NewGuid());
         var taskId = Guid.NewGuid();
 
-        var result = relationshipManager.AddHierarchicalRelationship(taskId, taskId, [taskId]);
+        var result = relationManager.AddHierarchicalRelation(taskId, taskId, [taskId]);
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public void AddHierarchicalRelationship_ShouldFail_WhenParentTaskDoesNotBelongToProject()
+    public void AddHierarchicalRelation_ShouldFail_WhenParentTaskDoesNotBelongToProject()
     {
-        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
+        var relationManager = new TaskRelationManager(Guid.NewGuid());
 
         var parentId = Guid.NewGuid();
         var childId = Guid.NewGuid();
 
-        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, [childId]);
+        var result = relationManager.AddHierarchicalRelation(parentId, childId, [childId]);
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public void AddHierarchicalRelationship_ShouldFail_WhenChildTaskDoesNotBelongToProject()
+    public void AddHierarchicalRelation_ShouldFail_WhenChildTaskDoesNotBelongToProject()
     {
-        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
+        var relationManager = new TaskRelationManager(Guid.NewGuid());
 
         var parentId = Guid.NewGuid();
         var childId = Guid.NewGuid();
 
-        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, [parentId]);
+        var result = relationManager.AddHierarchicalRelation(parentId, childId, [parentId]);
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public void AddHierarchicalRelationship_ShouldFail_WhenChildAlreadyHasParent()
+    public void AddHierarchicalRelation_ShouldFail_WhenChildAlreadyHasParent()
     {
-        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
+        var relationManager = new TaskRelationManager(Guid.NewGuid());
 
         var existingParentId = Guid.NewGuid();
         var childId = Guid.NewGuid();
         var newParentId = Guid.NewGuid();
         var projectTasksIds = new[] { existingParentId, childId, newParentId };
-        _ = relationshipManager.AddHierarchicalRelationship(existingParentId, childId, projectTasksIds);
+        _ = relationManager.AddHierarchicalRelation(existingParentId, childId, projectTasksIds);
 
-        var result = relationshipManager.AddHierarchicalRelationship(newParentId, childId, projectTasksIds);
+        var result = relationManager.AddHierarchicalRelation(newParentId, childId, projectTasksIds);
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public void AddHierarchicalRelationship_ShouldFail_WhenReverseRelationshipAlreadyExists()
+    public void AddHierarchicalRelation_ShouldFail_WhenReverseRelationAlreadyExists()
     {
-        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
+        var relationManager = new TaskRelationManager(Guid.NewGuid());
 
         var parentId = Guid.NewGuid();
         var childId = Guid.NewGuid();
         var projectTasksIds = new[] { parentId, childId };
-        _ = relationshipManager.AddHierarchicalRelationship(parentId, childId, projectTasksIds);
+        _ = relationManager.AddHierarchicalRelation(parentId, childId, projectTasksIds);
 
-        var result = relationshipManager.AddHierarchicalRelationship(childId, parentId, projectTasksIds);
+        var result = relationManager.AddHierarchicalRelation(childId, parentId, projectTasksIds);
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public void AddHierarchicalRelationship_ShouldFail_WhenRelationshipAlreadyExists()
+    public void AddHierarchicalRelation_ShouldFail_WhenRelationAlreadyExists()
     {
-        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
+        var relationManager = new TaskRelationManager(Guid.NewGuid());
 
         var parentId = Guid.NewGuid();
         var childId = Guid.NewGuid();
         var projectTasksIds = new[] { parentId, childId };
-        _ = relationshipManager.AddHierarchicalRelationship(parentId, childId, projectTasksIds);
+        _ = relationManager.AddHierarchicalRelation(parentId, childId, projectTasksIds);
 
-        var result = relationshipManager.AddHierarchicalRelationship(parentId, childId, projectTasksIds);
-
-        result.IsFailed.Should().BeTrue();
-    }
-
-    [Fact]
-    public void RemoveHierarchicalRelationship_ShouldFail_WhenRelationshipDoesNotExist()
-    {
-        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
-
-        var result = relationshipManager.RemoveHierarchicalRelationship(Guid.NewGuid(), Guid.NewGuid());
+        var result = relationManager.AddHierarchicalRelation(parentId, childId, projectTasksIds);
 
         result.IsFailed.Should().BeTrue();
     }
 
     [Fact]
-    public void RemoveHierarchicalRelationship_ShouldRemoveRelationship_WhenRelationshipExists()
+    public void RemoveHierarchicalRelation_ShouldFail_WhenRelationDoesNotExist()
     {
-        var relationshipManager = new TaskRelationshipManager(Guid.NewGuid());
+        var relationManager = new TaskRelationManager(Guid.NewGuid());
+
+        var result = relationManager.RemoveHierarchicalRelation(Guid.NewGuid(), Guid.NewGuid());
+
+        result.IsFailed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RemoveHierarchicalRelation_ShouldRemoveRelation_WhenRelationExists()
+    {
+        var relationManager = new TaskRelationManager(Guid.NewGuid());
 
         var parentId = Guid.NewGuid();
         var childId = Guid.NewGuid();
         var projectTasksIds = new[] { parentId, childId };
-        _ = relationshipManager.AddHierarchicalRelationship(parentId, childId, projectTasksIds);
+        _ = relationManager.AddHierarchicalRelation(parentId, childId, projectTasksIds);
 
-        var result = relationshipManager.RemoveHierarchicalRelationship(parentId, childId);
+        var result = relationManager.RemoveHierarchicalRelation(parentId, childId);
 
         using (new AssertionScope())
         {
             result.IsSuccess.Should().BeTrue();
-            relationshipManager.HierarchicalRelationships.Should().BeEmpty();
+            relationManager.HierarchicalRelations.Should().BeEmpty();
         }
     }
 }
