@@ -1,13 +1,13 @@
-name: Azure Static Web Apps CI/CD
+name: Publish Front-End Client
 
 on:
   push:
     branches:
       - master
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - master
+    paths:
+    - 'src/Web/Client/**'
+    - '.github/workflows/azure-static-web-apps-thankful-smoke-0aec26803.yml'
+  workflow_dispatch:
 
 jobs:
   build_and_deploy_job:
@@ -38,21 +38,13 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_THANKFUL_SMOKE_0AEC26803 }}
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "/src/Web/Client" # App source code path
-          api_location: "" # Api source code path - optional
-          output_location: "dist/" # Built app content directory - optional
+          app_location: "/src/Web/Client"
+          api_location: ""
+          output_location: "dist/" 
           github_id_token: ${{ steps.idtoken.outputs.result }}
-          ###### End of Repository/Build Configurations ######
-
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          action: "close"
+          app_build_command: "npm run generate"
+        env:
+          SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3Z3VtYW5kcXppd2diZndwc29oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NjAwNTUsImV4cCI6MjA2NjAzNjA1NX0.muJhTC5hjLlHbhuGHU_OjXASXaut7HnXUlc_XtnAnsg"
+          SUPABASE_URL: "https://uwgumandqziwgbfwpsoh.supabase.co"
+          NUXT_PUBLIC_API_URL: "https://tasktracker-api.azurewebsites.net/"
+          NUXT_PUBLIC_URL: "https://thankful-smoke-0aec26803.6.azurestaticapps.net"
